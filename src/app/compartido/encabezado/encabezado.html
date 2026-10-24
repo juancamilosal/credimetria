@@ -1,0 +1,16 @@
+<a class="visualmente-oculto saltar" href="#contenido">Ir al contenido</a>
+<header>
+  <div class="contenedor barra">
+    <a routerLink="/" class="marca" aria-label="Credimetría, inicio"
+      ><app-logo
+    /></a>
+    <nav aria-label="Principal">
+      @for (enlace of enlaces; track enlace.fragmento) {
+        <a routerLink="/" [fragment]="enlace.fragmento">{{ enlace.texto }}</a>
+      }
+    </nav>
+    <a routerLink="/" fragment="simulador" class="boton boton-principal"
+      >Calcular mi cuota</a
+    >
+  </div>
+</header>

@@ -1,1 +1,244 @@
-/* You can add global styles to this file, and also import other style files */
+/* Sistema de diseño de Credimetría: los mismos colores y fuentes del documento de la idea. */
+:root {
+  --fondo: #f3f5f4;
+  --superficie: #ffffff;
+  --hundido: #e8eeeb;
+  --tinta: #13201c;
+  --tenue: #5a6a65;
+  --linea: #d7dfdc;
+  --acento: #0a6b58;
+  --acento-tinta: #ffffff;
+  --acento-suave: #daeee8;
+  --ambar: #a85c08;
+  --ambar-suave: #f6e8d4;
+  --f-titulo: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-texto: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --radio: 10px;
+  --sombra: 0 1px 2px rgb(19 32 28 / 0.05), 0 8px 24px rgb(19 32 28 / 0.06);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fondo: #0d1412;
+    --superficie: #141e1b;
+    --hundido: #101917;
+    --tinta: #e4edea;
+    --tenue: #94a49f;
+    --linea: #26342f;
+    --acento: #3cc2a2;
+    --acento-tinta: #06201a;
+    --acento-suave: #143a32;
+    --ambar: #e9a04f;
+    --ambar-suave: #3a2a16;
+    --sombra: none;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --fondo: #0d1412;
+  --superficie: #141e1b;
+  --hundido: #101917;
+  --tinta: #e4edea;
+  --tenue: #94a49f;
+  --linea: #26342f;
+  --acento: #3cc2a2;
+  --acento-tinta: #06201a;
+  --acento-suave: #143a32;
+  --ambar: #e9a04f;
+  --ambar-suave: #3a2a16;
+  --sombra: none;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-family: var(--f-texto);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--f-titulo);
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  text-wrap: balance;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--acento);
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+/* Piezas comunes */
+.contenedor {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-inline: 16px;
+}
+
+@media (min-width: 640px) {
+  .contenedor {
+    padding-inline: 24px;
+  }
+}
+
+.seccion {
+  padding-block: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.seccion-cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 64ch;
+}
+
+.seccion-cabecera h2 {
+  font-size: clamp(26px, 3.6vw, 36px);
+  font-weight: 700;
+}
+
+.seccion-cabecera p {
+  color: var(--tenue);
+  font-size: 17px;
+}
+
+.kicker {
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  color: var(--acento);
+  letter-spacing: 0.02em;
+}
+
+.mono {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.pequeno {
+  font-size: 13px;
+  color: var(--tenue);
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 11px 18px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.boton-principal {
+  background: var(--acento);
+  color: var(--acento-tinta);
+}
+
+.boton-principal:hover {
+  filter: brightness(1.08);
+}
+
+.boton-secundario {
+  background: transparent;
+  color: var(--tinta);
+  border-color: var(--linea);
+}
+
+.boton-secundario:hover {
+  border-color: var(--acento);
+}
+
+.etiqueta {
+  align-self: flex-start;
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  padding: 2px 9px;
+  border-radius: 20px;
+  background: var(--hundido);
+  color: var(--tenue);
+}
+
+.etiqueta-acento {
+  background: var(--acento-suave);
+  color: var(--acento);
+}
+
+.etiqueta-ambar {
+  background: var(--ambar-suave);
+  color: var(--ambar);
+}
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    transition: none !important;
+  }
+}

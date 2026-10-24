@@ -1,0 +1,221 @@
+/* Portada */
+.portada {
+  padding-block: 56px 40px;
+  border-bottom: 1px solid var(--linea);
+}
+
+.portada-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: center;
+}
+
+.portada-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+h1 {
+  font-size: clamp(34px, 5.4vw, 58px);
+  font-weight: 800;
+  max-width: 16ch;
+}
+
+h1 em {
+  font-style: normal;
+  color: var(--acento);
+}
+
+.entrada {
+  font-size: 18px;
+  color: var(--tenue);
+  max-width: 54ch;
+}
+
+.acciones {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sellos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  font-size: 14px;
+  color: var(--tenue);
+}
+
+.sellos li::before {
+  content: "✓ ";
+  color: var(--acento);
+  font-weight: 600;
+}
+
+/* Tarjeta de la brecha */
+.brecha {
+  margin: 0;
+  gap: 18px;
+  box-shadow: var(--sombra);
+}
+
+.brecha figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.brecha h2 {
+  font-size: 22px;
+}
+
+.barra-fila {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.barra-texto {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--tenue);
+}
+
+.barra-texto b {
+  color: var(--tinta);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.barra {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--hundido);
+  overflow: hidden;
+}
+
+.barra span {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+}
+
+.anunciada {
+  background: var(--tenue);
+}
+
+.real {
+  background: var(--acento);
+}
+
+.diferencia {
+  font-size: 15px;
+  background: var(--acento-suave);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+
+.diferencia b {
+  color: var(--acento);
+}
+
+/* Secciones */
+.bloque-claro {
+  background: var(--superficie);
+  border-block: 1px solid var(--linea);
+}
+
+.bloque-claro .tarjeta {
+  background: var(--fondo);
+}
+
+.servicios {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.servicios h3,
+.pasos h3 {
+  font-size: 18px;
+}
+
+.servicios p,
+.pasos p {
+  color: var(--tenue);
+  font-size: 15px;
+}
+
+.pasos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.numero {
+  font-size: 12.5px;
+  color: var(--acento);
+}
+
+.regla {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  background: var(--acento-suave);
+  border-radius: var(--radio);
+  padding: 32px;
+}
+
+.regla > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 60ch;
+}
+
+.regla h2 {
+  font-size: clamp(22px, 3vw, 28px);
+}
+
+.regla p {
+  color: var(--tenue);
+}
+
+@media (max-width: 960px) {
+  .servicios {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .portada-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .pasos {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .servicios {
+    grid-template-columns: 1fr;
+  }
+
+  .regla {
+    padding: 22px;
+  }
+}

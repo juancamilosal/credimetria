@@ -1,0 +1,67 @@
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--fondo) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--linea);
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 64px;
+}
+
+.marca {
+  text-decoration: none;
+}
+
+nav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+nav a {
+  color: var(--tenue);
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+nav a:hover {
+  color: var(--tinta);
+  background: var(--hundido);
+}
+
+.boton {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.saltar:focus {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  width: auto;
+  height: auto;
+  clip: auto;
+  z-index: 20;
+  padding: 8px 12px;
+  background: var(--superficie);
+  border-radius: 8px;
+}
+
+@media (max-width: 860px) {
+  nav {
+    display: none;
+  }
+
+  .boton {
+    margin-left: auto;
+  }
+}

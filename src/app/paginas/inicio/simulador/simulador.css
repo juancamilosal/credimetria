@@ -1,0 +1,112 @@
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.campos {
+  gap: 18px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+small {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--tenue);
+}
+
+.entrada {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  background: var(--fondo);
+}
+
+.entrada:focus-within {
+  border-color: var(--acento);
+}
+
+.prefijo,
+.sufijo {
+  padding-inline: 12px;
+  color: var(--tenue);
+  font-family: var(--f-mono);
+}
+
+input,
+select {
+  font: inherit;
+  font-family: var(--f-mono);
+  font-size: 17px;
+  color: var(--tinta);
+  background: transparent;
+  border: 0;
+  padding: 10px 12px;
+  width: 100%;
+  min-width: 0;
+}
+
+.prefijo + input {
+  padding-left: 0;
+}
+
+input:focus {
+  outline: none;
+}
+
+select {
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  background: var(--fondo);
+  cursor: pointer;
+}
+
+.resultado {
+  background: var(--acento-suave);
+  border-color: transparent;
+  justify-content: center;
+}
+
+.cuota {
+  font-size: clamp(34px, 5vw, 46px);
+  font-weight: 500;
+  color: var(--acento);
+  line-height: 1.1;
+}
+
+dl {
+  margin: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+dt {
+  color: var(--tenue);
+  font-size: 14px;
+}
+
+dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+@media (max-width: 760px) {
+  :host {
+    grid-template-columns: 1fr;
+  }
+}

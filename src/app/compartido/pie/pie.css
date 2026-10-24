@@ -1,0 +1,51 @@
+footer {
+  border-top: 1px solid var(--linea);
+  background: var(--superficie);
+  padding-block: 36px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.columnas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 32px;
+}
+
+.marca {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.marca p,
+.aviso {
+  color: var(--tenue);
+  font-size: 14px;
+}
+
+.aviso {
+  max-width: 70ch;
+}
+
+.legal {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--tenue);
+  border-top: 1px solid var(--linea);
+  padding-top: 16px;
+}
+
+@media (max-width: 700px) {
+  .columnas {
+    grid-template-columns: 1fr;
+  }
+}
+
+footer > .contenedor {
+  width: 100%;
+}
