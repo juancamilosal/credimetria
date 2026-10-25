@@ -66,6 +66,14 @@ morada y oro del diseño (ver abajo).
   valores por defecto: $11.108.167 en intereses y $31.108.167 en total. En
   celular se quita la columna de cuota (es fija y está arriba). El cálculo
   es `amortizacion()` en `core/utilidades/credito.ts`.
+- **Tipo de cuota** (simulador): casillas "Cuota fija" (sistema francés,
+  por defecto) y "Cuota decreciente" (abono constante a capital), cada una
+  con un botón "?" que abre un globo (`role="tooltip"`) explicando cómo
+  funciona; se abre al pasar el mouse, con el teclado o tocándolo en el
+  celular. Con cuota decreciente el resultado muestra la primera y la última
+  cuota, y el ahorro frente a la mejor entidad se calcula con el mismo
+  sistema ($20.000.000 a 48 meses con 26,38 %: de $810.703 a $424.876 y
+  $9.653.893 en intereses, frente a $11.108.167 con cuota fija).
 - **Montos con puntos al escribir** (`compartido/entrada-moneda/`): la
   directiva `appMoneda` pone los puntos de miles mientras la persona teclea
   (1000000 → 1.000.000) y usa la coma para los centavos, con máximo dos

@@ -20,11 +20,36 @@ import { USURA_CONSUMO } from '../../../core/datos/tasas';
 import { Producto } from '../../../core/modelos/tasa';
 import { TasasService } from '../../../core/servicios/tasas.service';
 import {
-  ahorro,
   amortizacion,
-  cuotaMensual,
+  CuotaAmortizacion,
   leerNumero,
+  SistemaAmortizacion,
 } from '../../../core/utilidades/credito';
+
+/** Opciones de cuota, con la explicación que sale en el globo de ayuda. */
+const SISTEMAS: {
+  id: SistemaAmortizacion;
+  texto: string;
+  ayuda: string;
+}[] = [
+  {
+    id: 'fija',
+    texto: 'Cuota fija',
+    ayuda:
+      'Pagas lo mismo todos los meses. Al principio casi toda la cuota se va en intereses y al final en capital. Es la que usan casi todos los bancos en libre inversión, libranza y vehículo.',
+  },
+  {
+    id: 'decreciente',
+    texto: 'Cuota decreciente',
+    ayuda:
+      'Abonas lo mismo a capital cada mes y los intereses se calculan sobre lo que aún debes, así que la cuota baja mes a mes. Empiezas pagando más, pero pagas menos intereses en total. Es común en vivienda y en las compras con tarjeta de crédito.',
+  },
+];
+
+/** Suma de las cuotas de una tabla. */
+function totalPagado(tabla: CuotaAmortizacion[]): number {
+  return tabla.reduce((suma, fila) => suma + fila.cuota, 0);
+}
 
 /** Productos que se pueden simular (vivienda tiene su propio cálculo). */
 const PRODUCTOS_SIMULADOR: Producto[] = [
@@ -68,20 +93,46 @@ export class Simulador {
     () => this.monto() > 0 && this.tasa() > 0,
   );
 
-  protected readonly cuota = computed(() =>
-    this.listo() ? cuotaMensual(this.monto(), this.tasa(), this.plazo()) : 0,
+  protected readonly sistemas = SISTEMAS;
+  protected readonly sistema = signal<SistemaAmortizacion>('fija');
+  /** Globo de ayuda abierto (para tocarlo en el celular). */
+  protected readonly ayudaAbierta = signal<SistemaAmortizacion | null>(null);
+  protected readonly fija = computed(() => this.sistema() === 'fija');
+
+  protected readonly tabla = computed(() =>
+    this.listo()
+      ? amortizacion(this.monto(), this.tasa(), this.plazo(), this.sistema())
+      : [],
   );
+  /** Con cuota fija, la cuota; con decreciente, la primera (la más alta). */
+  protected readonly cuota = computed(() => this.tabla()[0]?.cuota ?? 0);
+  protected readonly ultimaCuota = computed(
+    () => this.tabla().at(-1)?.cuota ?? 0,
+  );
+  protected readonly total = computed(() => totalPagado(this.tabla()));
+  protected readonly totalIntereses = computed(
+    () => this.total() - this.monto(),
+  );
+
   protected readonly mejor = computed(() => this.tasas.mejor(this.producto()));
-  protected readonly cuotaMejor = computed(() => {
+  private readonly tablaMejor = computed(() => {
     const mejor = this.mejor();
-    return mejor ? cuotaMensual(this.monto(), mejor.tasaReal, this.plazo()) : 0;
+    return mejor
+      ? amortizacion(this.monto(), mejor.tasaReal, this.plazo(), this.sistema())
+      : [];
   });
-  protected readonly ahorro = computed(() => {
-    const mejor = this.mejor();
-    return mejor && this.listo()
-      ? ahorro(this.monto(), this.tasa(), mejor.tasaReal, this.plazo())
-      : null;
-  });
+  protected readonly cuotaMejor = computed(
+    () => this.tablaMejor()[0]?.cuota ?? 0,
+  );
+  /** Ahorro con la mejor entidad, en la (primera) cuota y en todo el crédito. */
+  protected readonly ahorro = computed(() =>
+    this.mejor() && this.listo()
+      ? {
+          mes: this.cuota() - this.cuotaMejor(),
+          total: this.total() - totalPagado(this.tablaMejor()),
+        }
+      : null,
+  );
   /** La tasa escrita es igual o menor que la mejor del ranking. */
   protected readonly buenaTasa = computed(() => {
     const valor = this.ahorro();
@@ -89,12 +140,6 @@ export class Simulador {
   });
   /** La tabla aparece al tocar "Simular" y luego sigue los cambios. */
   protected readonly simulado = signal(false);
-  protected readonly tabla = computed(() =>
-    this.listo() ? amortizacion(this.monto(), this.tasa(), this.plazo()) : [],
-  );
-  protected readonly totalIntereses = computed(() =>
-    this.tabla().reduce((suma, fila) => suma + fila.interes, 0),
-  );
   private readonly tablaCaja = viewChild<ElementRef<HTMLElement>>('tablaCaja');
   private readonly injector = inject(Injector);
 
@@ -118,6 +163,10 @@ export class Simulador {
         }),
       { injector: this.injector },
     );
+  }
+
+  protected alternarAyuda(id: SistemaAmortizacion): void {
+    this.ayudaAbierta.update((abierta) => (abierta === id ? null : id));
   }
 
   protected cambiarMonto(texto: string): void {

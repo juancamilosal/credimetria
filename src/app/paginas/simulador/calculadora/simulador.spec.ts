@@ -76,4 +76,31 @@ describe('Simulador', () => {
     fixture.detectChanges();
     expect(filas().length).toBe(12);
   });
+
+  it('con cuota decreciente muestra la primera y la última cuota', () => {
+    const { fixture, html } = crear();
+    html.querySelector<HTMLInputElement>('input[value="decreciente"]')!.click();
+    fixture.detectChanges();
+    expect(html.querySelector('.grande')?.textContent).toContain('$810.703');
+    expect(html.querySelector('.resultado')?.textContent).toContain(
+      'Baja cada mes hasta $424.876',
+    );
+    expect(html.querySelector('.resultado')?.textContent).toContain(
+      'Pagarías en total $29.653.893',
+    );
+  });
+
+  it('explica cada tipo de cuota en un globo de ayuda', () => {
+    const { fixture, html } = crear();
+    const boton = html.querySelector<HTMLButtonElement>(
+      '[aria-describedby="tip-fija"]',
+    )!;
+    const globo = html.querySelector('#tip-fija')!;
+    expect(globo.getAttribute('role')).toBe('tooltip');
+    expect(globo.textContent).toContain('Pagas lo mismo todos los meses');
+    expect(globo.classList).not.toContain('abierto');
+    boton.click();
+    fixture.detectChanges();
+    expect(globo.classList).toContain('abierto');
+  });
 });

@@ -91,6 +91,155 @@ h2 {
   font-weight: 700;
 }
 
+/* Tipo de cuota: casillas con globo de ayuda */
+.sistemas {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.sistemas legend {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.opciones-sistema {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sistema {
+  flex: 1 1 180px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-campo);
+  padding: 0 8px 0 0;
+  background: var(--cm-blanco);
+}
+
+.sistema.elegido {
+  border-color: var(--cm-marca-700);
+  background: var(--cm-marca-100);
+}
+
+.sistema label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0 12px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sistema input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.caja {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border: 2px solid var(--cm-gris);
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+}
+
+.sistema input:checked + .caja {
+  background: var(--cm-marca-700);
+  border-color: var(--cm-marca-700);
+}
+
+.sistema input:checked + .caja::after {
+  content: "";
+  width: 5px;
+  height: 10px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: translateY(-1px) rotate(45deg);
+}
+
+.sistema input:focus-visible + .caja {
+  outline: 3px solid var(--cm-marca-700);
+  outline-offset: 2px;
+}
+
+.tip-ancla {
+  position: relative;
+  display: inline-flex;
+}
+
+.tip-boton {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--cm-linea);
+  background: var(--cm-fondo);
+  color: var(--cm-gris);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: help;
+  /* Área táctil de 44 px sin agrandar el círculo */
+  position: relative;
+}
+
+.tip-boton::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
+}
+
+.tip-boton:hover,
+.tip-boton:focus-visible,
+.tip-boton[aria-expanded="true"] {
+  color: var(--cm-marca-700);
+  border-color: var(--cm-marca-700);
+}
+
+.tip {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  bottom: calc(100% + 10px);
+  right: -8px;
+  width: min(280px, 80vw);
+  padding: 12px 14px;
+  border-radius: var(--cm-r-boton);
+  background: var(--cm-tinta);
+  color: var(--cm-blanco);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.tip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 16px;
+  border: 7px solid transparent;
+  border-top-color: var(--cm-tinta);
+}
+
+.tip-ancla:hover .tip,
+.tip-boton:focus-visible + .tip,
+.tip.abierto {
+  display: block;
+}
+
 /* Tabla de amortización */
 .amortizacion {
   margin-top: 20px;
@@ -174,9 +323,9 @@ h3 {
 }
 
 @media (max-width: 760px) {
-  /* La cuota es fija y ya está arriba: en celular se quita la columna */
-  .amort-tabla th:nth-child(2),
-  .amort-tabla td:nth-child(2) {
+  /* Con cuota fija ya está arriba: en celular se quita la columna */
+  .amort-tabla.cuota-fija th:nth-child(2),
+  .amort-tabla.cuota-fija td:nth-child(2) {
     display: none;
   }
 

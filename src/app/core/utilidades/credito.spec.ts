@@ -72,4 +72,15 @@ describe('credito', () => {
     expect(Math.round(tabla.at(-1)!.cuota)).toBe(648_087);
     expect(amortizacion(0, 26.38, 48)).toEqual([]);
   });
+
+  it('con cuota decreciente abona igual a capital y la cuota baja', () => {
+    const tabla = amortizacion(20_000_000, 26.38, 48, 'decreciente');
+    expect(tabla.length).toBe(48);
+    expect(Math.round(tabla[0].capital)).toBe(416_667);
+    expect(Math.round(tabla[0].cuota)).toBe(810_703);
+    expect(Math.round(tabla.at(-1)!.cuota)).toBe(424_876);
+    expect(tabla.at(-1)!.saldo).toBe(0);
+    const intereses = tabla.reduce((suma, fila) => suma + fila.interes, 0);
+    expect(Math.round(intereses)).toBe(9_653_893);
+  });
 });

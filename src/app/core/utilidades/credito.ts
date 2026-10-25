@@ -26,14 +26,22 @@ export interface CuotaAmortizacion {
 }
 
 /**
- * Tabla de amortización con cuota fija (sistema francés): en cada mes el
- * interés sale del saldo y el resto de la cuota abona a capital. El último
- * mes cierra el saldo en cero.
+ * Cómo se reparte la deuda en las cuotas:
+ * - `fija` (sistema francés): la misma cuota todos los meses.
+ * - `decreciente` (abono constante a capital): el mismo abono a capital cada
+ *   mes más los intereses del saldo, así que la cuota baja mes a mes.
+ */
+export type SistemaAmortizacion = 'fija' | 'decreciente';
+
+/**
+ * Tabla de amortización: en cada mes el interés sale del saldo y el resto de
+ * la cuota abona a capital. El último mes cierra el saldo en cero.
  */
 export function amortizacion(
   monto: number,
   efectivaAnual: number,
   meses: number,
+  sistema: SistemaAmortizacion = 'fija',
 ): CuotaAmortizacion[] {
   const cuota = cuotaMensual(monto, efectivaAnual, meses);
   if (cuota <= 0) return [];
@@ -42,7 +50,8 @@ export function amortizacion(
   let saldo = monto;
   for (let mes = 1; mes <= meses; mes++) {
     const interes = saldo * i;
-    const capital = mes === meses ? saldo : cuota - interes;
+    const abono = sistema === 'fija' ? cuota - interes : monto / meses;
+    const capital = mes === meses ? saldo : abono;
     saldo = mes === meses ? 0 : saldo - capital;
     filas.push({ mes, cuota: capital + interes, interes, capital, saldo });
   }

@@ -57,6 +57,49 @@
       </div>
     </div>
 
+    <fieldset class="sistemas">
+      <legend>Tipo de cuota</legend>
+      <div class="opciones-sistema">
+        @for (s of sistemas; track s.id) {
+          <div class="sistema" [class.elegido]="sistema() === s.id">
+            <label>
+              <input
+                type="radio"
+                name="simSistema"
+                [value]="s.id"
+                [checked]="sistema() === s.id"
+                (change)="sistema.set(s.id)"
+              />
+              <span class="caja" aria-hidden="true"></span>
+              {{ s.texto }}
+            </label>
+            <span class="tip-ancla">
+              <button
+                type="button"
+                class="tip-boton"
+                [attr.aria-label]="'Qué es ' + s.texto.toLowerCase()"
+                [attr.aria-describedby]="'tip-' + s.id"
+                [attr.aria-expanded]="ayudaAbierta() === s.id"
+                (click)="alternarAyuda(s.id)"
+                (blur)="ayudaAbierta.set(null)"
+                (keydown.escape)="ayudaAbierta.set(null)"
+              >
+                ?
+              </button>
+              <span
+                class="tip"
+                role="tooltip"
+                [id]="'tip-' + s.id"
+                [class.abierto]="ayudaAbierta() === s.id"
+              >
+                {{ s.ayuda }}
+              </span>
+            </span>
+          </div>
+        }
+      </div>
+    </fieldset>
+
     @if (superaUsura()) {
       <p class="error" id="avisoUsura">
         Esa tasa supera la de usura de {{ usura.mes }} ({{ usura.tasa | tasa }}
@@ -70,14 +113,22 @@
   </form>
 
   <div class="resultado" aria-live="polite">
-    <span class="nota">Resultado · cuota fija, tasa efectiva anual</span>
+    <span class="nota"
+      >Resultado · cuota {{ fija() ? "fija" : "decreciente" }}, tasa efectiva
+      anual</span
+    >
 
     <div>
-      <span class="muted pequeno">Tu cuota mensual</span>
+      <span class="muted pequeno">{{
+        fija() ? "Tu cuota mensual" : "Tu primera cuota"
+      }}</span>
       <div class="grande cifra">{{ listo() ? (cuota() | pesos) : "—" }}</div>
       <span class="nota">
         @if (listo()) {
-          Pagarías en total {{ cuota() * plazo() | pesos }}
+          @if (!fija()) {
+            Baja cada mes hasta {{ ultimaCuota() | pesos }}.
+          }
+          Pagarías en total {{ total() | pesos }}
         } @else {
           Escribe el monto y la tasa para calcular.
         }
@@ -92,7 +143,11 @@
           promedio)
         </span>
         <div class="media cifra">
-          {{ listo() ? (cuotaMejor() | pesos) + " al mes" : "—" }}
+          {{
+            listo()
+              ? (cuotaMejor() | pesos) + (fija() ? " al mes" : " la primera")
+              : "—"
+          }}
         </div>
       </div>
 
@@ -105,7 +160,10 @@
           <div class="ahorro">
             <b>Podrías ahorrarte</b>
             <span class="cifra">{{ ahorro.total | pesos }}</span>
-            <span class="pequeno">{{ ahorro.mes | pesos }} menos al mes</span>
+            <span class="pequeno"
+              >{{ ahorro.mes | pesos }} menos
+              {{ fija() ? "al mes" : "en la primera cuota" }}</span
+            >
           </div>
         }
       }
@@ -137,7 +195,13 @@
         <h3 id="tituloAmortizacion">Tabla de amortización</h3>
         <p class="nota">
           {{ monto() | pesos }} a {{ plazo() }} meses con
-          {{ tasa() | tasa }} E.A. · cuota fija de {{ cuota() | pesos }}
+          {{ tasa() | tasa }} E.A. ·
+          @if (fija()) {
+            cuota fija de {{ cuota() | pesos }}
+          } @else {
+            cuota decreciente de {{ cuota() | pesos }} a
+            {{ ultimaCuota() | pesos }}
+          }
         </p>
       </div>
       <dl class="totales">
@@ -151,7 +215,12 @@
         </div>
       </dl>
     </div>
-    <div class="amort-tabla" tabindex="0" aria-label="Cuotas mes a mes">
+    <div
+      class="amort-tabla"
+      [class.cuota-fija]="fija()"
+      tabindex="0"
+      aria-label="Cuotas mes a mes"
+    >
       <table>
         <thead>
           <tr>
@@ -176,8 +245,8 @@
       </table>
     </div>
     <p class="nota">
-      Cálculo aproximado con cuota fija. La cuota real puede incluir seguros y
-      otros cargos que suben lo que pagas.
+      Cálculo aproximado. La cuota real puede incluir seguros y otros cargos que
+      suben lo que pagas.
     </p>
   </section>
 }
