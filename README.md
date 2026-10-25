@@ -82,14 +82,15 @@ colores a mano. La paleta es sobria a propósito:
 
 ```bash
 npm install
-npm start                      # http://localhost:4200
+npm start                      # http://localhost:4200 (sin SSR)
 npm run build                  # compila y prerenderiza las 5 rutas
 npm run serve:ssr:credimetria  # sirve la compilación con SSR
 npm test                       # pruebas con Karma
 npx prettier --write "src/**/*.{ts,html,css}"
 ```
 
-`ng serve` tiene `prebundle: false` en `angular.json`. Con el pre-empaquetado
-de Vite, la primera carga con SSR fallaba en Windows ("Cannot GET /" o "There
-is a new version of the pre-bundle") porque las rutas cargan paquetes de
-Angular que Vite aún no había visto. Si vuelve a pasar: `npx ng cache clean`.
+`npm start` (configuración `development`) corre **sin SSR**, solo en el
+navegador. Con SSR en desarrollo, la primera carga en Windows a veces
+respondía "Cannot GET /" porque el servidor de Vite aún no tenía listas las
+rutas. El SSR y el prerenderizado se prueban con `npm run build` y
+`npm run serve:ssr:credimetria` (http://localhost:4000).

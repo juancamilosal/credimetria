@@ -52,16 +52,16 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "ssr": false,
+              "prerender": false,
+              "outputMode": "static"
             }
           },
           "defaultConfiguration": "production"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
-          "options": {
-            "prebundle": false
-          },
           "configurations": {
             "production": {
               "buildTarget": "credimetria:build:production"
