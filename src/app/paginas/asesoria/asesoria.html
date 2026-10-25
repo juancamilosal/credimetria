@@ -139,23 +139,43 @@
           }
         </fieldset>
 
-        <div class="rejilla">
-          <div class="campo">
-            <label for="asNombre">Nombre</label>
-            <input
-              id="asNombre"
-              formControlName="nombre"
-              placeholder="Tu nombre"
-              autocomplete="name"
-              [attr.aria-invalid]="mostrarError('nombre')"
-              aria-describedby="errNombre"
-            />
-            @if (mostrarError("nombre")) {
-              <span class="error" id="errNombre">Escribe tu nombre.</span>
-            }
+        <section class="contacto" aria-labelledby="tituloContacto">
+          <h2 id="tituloContacto">Tus datos de contacto</h2>
+          <p class="nota">Para que el asesor sepa a quién llamar.</p>
+          <div class="rejilla">
+            <div class="campo">
+              <label for="asNombres">Nombres</label>
+              <input
+                id="asNombres"
+                formControlName="nombres"
+                placeholder="Ej. Ana María"
+                autocomplete="given-name"
+                [attr.aria-invalid]="mostrarError('nombres')"
+                aria-describedby="errNombres"
+              />
+              @if (mostrarError("nombres")) {
+                <span class="error" id="errNombres">Escribe tus nombres.</span>
+              }
+            </div>
+            <div class="campo">
+              <label for="asApellidos">Apellidos</label>
+              <input
+                id="asApellidos"
+                formControlName="apellidos"
+                placeholder="Ej. Gómez Rojas"
+                autocomplete="family-name"
+                [attr.aria-invalid]="mostrarError('apellidos')"
+                aria-describedby="errApellidos"
+              />
+              @if (mostrarError("apellidos")) {
+                <span class="error" id="errApellidos"
+                  >Escribe tus apellidos.</span
+                >
+              }
+            </div>
           </div>
           <div class="campo">
-            <label for="asCel">Celular</label>
+            <label for="asCel">Número de contacto (celular)</label>
             <input
               id="asCel"
               formControlName="celular"
@@ -172,48 +192,51 @@
               </span>
             }
           </div>
-        </div>
 
-        <fieldset formGroupName="canales" class="canales">
-          <legend>¿Por dónde te contactamos?</legend>
-          <div class="opciones">
-            <label
-              ><input
-                type="checkbox"
-                formControlName="whatsapp"
-              />WhatsApp</label
-            >
-            <label
-              ><input type="checkbox" formControlName="llamada" />Llamada</label
-            >
-            <label
-              ><input type="checkbox" formControlName="correo" />Correo</label
-            >
-          </div>
-          <span class="nota">
-            Solo por los canales que marques, de lunes a viernes de 7 a. m. a 7
-            p. m. y sábados de 8 a. m. a 3 p. m.
-          </span>
-        </fieldset>
-        @if (quiereCorreo()) {
-          <div class="campo correo">
-            <label for="asCorreo">Correo</label>
-            <input
-              id="asCorreo"
-              type="email"
-              formControlName="correo"
-              placeholder="tu@correo.com"
-              autocomplete="email"
-              [attr.aria-invalid]="errorGrupo('correo')"
-            />
-            @if (errorGrupo("correo")) {
-              <span class="error">Escribe un correo válido.</span>
-            }
-          </div>
-        }
-        @if (errorGrupo("sinCanal")) {
-          <span class="error">Marca al menos un canal.</span>
-        }
+          <fieldset formGroupName="canales" class="canales">
+            <legend>¿Por dónde te contactamos?</legend>
+            <div class="opciones">
+              <label
+                ><input
+                  type="checkbox"
+                  formControlName="whatsapp"
+                />WhatsApp</label
+              >
+              <label
+                ><input
+                  type="checkbox"
+                  formControlName="llamada"
+                />Llamada</label
+              >
+              <label
+                ><input type="checkbox" formControlName="correo" />Correo</label
+              >
+            </div>
+            <span class="nota">
+              Solo por los canales que marques, de lunes a viernes de 7 a. m. a
+              7 p. m. y sábados de 8 a. m. a 3 p. m.
+            </span>
+          </fieldset>
+          @if (quiereCorreo()) {
+            <div class="campo correo">
+              <label for="asCorreo">Correo</label>
+              <input
+                id="asCorreo"
+                type="email"
+                formControlName="correo"
+                placeholder="tu@correo.com"
+                autocomplete="email"
+                [attr.aria-invalid]="errorGrupo('correo')"
+              />
+              @if (errorGrupo("correo")) {
+                <span class="error">Escribe un correo válido.</span>
+              }
+            </div>
+          }
+          @if (errorGrupo("sinCanal")) {
+            <span class="error">Marca al menos un canal.</span>
+          }
+        </section>
 
         <label class="autoriza">
           <input type="checkbox" formControlName="autorizo" />

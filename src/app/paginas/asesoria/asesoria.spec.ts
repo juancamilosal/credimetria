@@ -77,7 +77,8 @@ describe('Asesoria', () => {
     enviar();
     expect(html.querySelector('#errProducto')).not.toBeNull();
     expect(html.querySelector('#errCiudad')).not.toBeNull();
-    expect(html.querySelector('#errNombre')).not.toBeNull();
+    expect(html.querySelector('#errNombres')).not.toBeNull();
+    expect(html.querySelector('#errApellidos')).not.toBeNull();
     expect(html.querySelector('#errCel')).not.toBeNull();
     expect(html.querySelector('#errMonto')).toBeNull();
     expect(html.querySelector('.listo')).toBeNull();
@@ -132,7 +133,8 @@ describe('Asesoria', () => {
     ).and.callThrough();
     tocar('Libre inversión');
     tocar('Medellín');
-    escribir('#asNombre', 'Ana');
+    escribir('#asNombres', 'Ana María');
+    escribir('#asApellidos', 'Gómez Rojas');
     escribir('#asCel', '300 123 4567');
     autorizar();
     enviar();
@@ -145,6 +147,8 @@ describe('Asesoria', () => {
     expect(prospecto.producto).toBe('libre-inversion');
     expect(prospecto.ciudad).toBe('Medellín');
     expect(prospecto.monto).toBeNull();
+    expect(prospecto.nombres).toBe('Ana María');
+    expect(prospecto.apellidos).toBe('Gómez Rojas');
     expect(prospecto.celular).toBe('3001234567');
     expect(prospecto.autorizacion.texto).toContain('Autorizo a Credimetría');
   });
@@ -154,7 +158,8 @@ describe('Asesoria', () => {
     tocar('Libranza');
     tocar('$10.000.000');
     tocar('Cali');
-    escribir('#asNombre', 'Luis');
+    escribir('#asNombres', 'Luis');
+    escribir('#asApellidos', 'Pérez');
     escribir('#asCel', '3109876543');
     autorizar();
     enviar();
@@ -163,6 +168,17 @@ describe('Asesoria', () => {
     expect(html.querySelector('.listo h1')?.textContent).toContain(
       'te contactará pronto',
     );
+  });
+
+  it('muestra el bloque "Tus datos de contacto"', () => {
+    crear();
+    const bloque = html.querySelector('.contacto')!;
+    expect(bloque.querySelector('h2')?.textContent).toContain(
+      'Tus datos de contacto',
+    );
+    expect(bloque.querySelector('#asNombres')).not.toBeNull();
+    expect(bloque.querySelector('#asApellidos')).not.toBeNull();
+    expect(bloque.querySelector('#asCel')).not.toBeNull();
   });
 
   it('pide el correo si marca Correo', () => {

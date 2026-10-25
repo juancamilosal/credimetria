@@ -90,6 +90,30 @@ fieldset .error {
   max-width: 360px;
 }
 
+/* Bloque de datos de contacto */
+.contacto {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--cm-fondo);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-tarjeta);
+  padding: 18px;
+}
+
+.contacto h2 {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.contacto .nota {
+  margin-top: -12px;
+}
+
+.contacto input {
+  background: var(--cm-blanco);
+}
+
 .opcional {
   font-weight: 400;
   color: var(--cm-gris);

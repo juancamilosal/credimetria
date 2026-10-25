@@ -24,7 +24,7 @@ morada y oro del diseño (ver abajo).
 | `/ranking`           | Ranking de tasas  | Lista completa por tasa real con filtros de producto y tipo de entidad (`?producto=…&tipo=…`)                                                   |
 | `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría |
 | `/simulador`         | Simulador         | Cuota, total y ahorro frente a la mejor entidad, comparador de dos entidades y las 3 que menos cobran del producto elegido                      |
-| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombre, celular y autorización de datos obligatoria                             |
+| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                 |
 | `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                        |
 | `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                        |
 
@@ -46,7 +46,8 @@ morada y oro del diseño (ver abajo).
 - **Asesoría corta** (`paginas/asesoria/`): una sola pantalla con lo mínimo
   para que el asesor contacte a la persona: qué crédito le interesa, monto
   (opcional, con botones de $5, $10, $20 y $50 millones u "Otro monto"),
-  ciudad (botones con las principales y "Otra"), nombre, celular, canal y la
+  ciudad (botones con las principales y "Otra"), el bloque "Tus datos de
+  contacto" (nombres, apellidos, número de celular y canal) y la
   autorización. Ingresos, reportes y demás los pregunta el asesor. La
   urgencia solo se guarda si llega en el enlace (inicio o Compara tu oferta).
 - El simulador y el ranking llevan a `/asesoria` con el producto, el monto,

@@ -25,7 +25,8 @@ export interface DatosProspecto {
   ciudad: string;
   /** Solo si llegó desde una pantalla que la preguntó (inicio, Compara tu oferta). */
   urgencia: Urgencia | null;
-  nombre: string;
+  nombres: string;
+  apellidos: string;
   celular: string;
   canales: Canales;
   correo: string | null;
