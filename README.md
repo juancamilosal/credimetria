@@ -250,6 +250,11 @@ en `public/imagenes/` y su entrada en `FOTOS`.
   la política y página de origen). Falta la API que lo guarde y agregue la IP.
 - Antes de publicar el formulario: la política de tratamiento de datos real
   y los aliados reales en `/aliados`.
+- **Para abrir vivienda u otra línea:** si un mismo PDF trae varios
+  productos (Banco de Bogotá, AV Villas), cambiar en `fuentes` el campo
+  `producto` por una lista `productos`, para subir el PDF una vez y sacar
+  de él una tasa por producto. Vivienda necesita además `modalidad` (pesos
+  o UVR); VIS / No VIS y plazos en las notas; la usura de consumo no aplica.
 - Sin diseñar: formulario "Quiero ser aliado" (por ahora es un correo).
 
 ## Comandos
