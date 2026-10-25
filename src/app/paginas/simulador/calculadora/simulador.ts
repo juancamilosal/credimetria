@@ -1,5 +1,6 @@
 import { Component, computed, inject, model, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { EntradaMoneda } from '../../../compartido/entrada-moneda/entrada-moneda';
 import {
   formatoPesos,
   PesosPipe,
@@ -29,7 +30,7 @@ const PRODUCTOS_SIMULADOR: Producto[] = [
  */
 @Component({
   selector: 'app-simulador',
-  imports: [RouterLink, PesosPipe, TasaPipe],
+  imports: [RouterLink, EntradaMoneda, PesosPipe, TasaPipe],
   templateUrl: './simulador.html',
   styleUrl: './simulador.css',
 })
@@ -87,12 +88,5 @@ export class Simulador {
   protected cambiarMonto(texto: string): void {
     this.montoTexto.set(texto);
     this.monto.set(leerNumero(texto));
-  }
-
-  /** Al salir del campo, el monto queda con puntos de miles. */
-  protected formatearMonto(): void {
-    if (this.monto() > 0) {
-      this.montoTexto.set(formatoPesos(this.monto()).slice(1));
-    }
   }
 }

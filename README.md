@@ -59,6 +59,13 @@ morada y oro del diseño (ver abajo).
   contacto" (nombres, apellidos, número de celular y canal) y la
   autorización. Ingresos, reportes y demás los pregunta el asesor. La
   urgencia solo se guarda si llega en el enlace (inicio o Compara tu oferta).
+- **Montos con puntos al escribir** (`compartido/entrada-moneda/`): la
+  directiva `appMoneda` pone los puntos de miles mientras la persona teclea
+  (1000000 → 1.000.000) y usa la coma para los centavos, con máximo dos
+  (1.000.000,5 → 1.000.000,50 al salir del campo). Un punto tecleado se toma
+  como la coma, porque hay teclados de celular que solo traen punto. Está en
+  los montos del ranking, el simulador, la asesoría y el chat de Compara tu
+  oferta (no en las tasas).
 - El simulador y el ranking llevan a `/asesoria` con el producto, el monto,
   la entidad o la urgencia en la dirección, y el formulario llega lleno.
 - Con los valores por defecto el simulador da $648.087, $604.529 y un ahorro

@@ -92,10 +92,10 @@
             <input
               id="asMonto"
               formControlName="monto"
-              inputmode="numeric"
+              appMoneda
+              inputmode="decimal"
               placeholder="Ej. 30.000.000"
               autocomplete="off"
-              (blur)="formatearMonto()"
               [attr.aria-invalid]="mostrarError('monto')"
               aria-describedby="errMonto"
             />

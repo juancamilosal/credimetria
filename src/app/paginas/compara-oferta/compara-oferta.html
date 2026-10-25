@@ -260,7 +260,8 @@
         <form class="entrada" (submit)="enviar($event)" novalidate>
           <input
             id="campoRespuesta"
-            [attr.inputmode]="z.modo"
+            [appMoneda]="z.moneda"
+            inputmode="decimal"
             [placeholder]="z.placeholder"
             autocomplete="off"
             [value]="valorEntrada()"

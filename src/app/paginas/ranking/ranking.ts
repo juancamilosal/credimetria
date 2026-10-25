@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { EntradaMoneda } from '../../compartido/entrada-moneda/entrada-moneda';
 import { formatoPesos, PesosPipe } from '../../compartido/pipes/formato';
 import {
   ColumnaRanking,
@@ -60,7 +61,7 @@ const COLUMNAS: ColumnaRanking[] = [
  */
 @Component({
   selector: 'app-ranking',
-  imports: [DatePipe, PesosPipe, TablaRanking],
+  imports: [DatePipe, EntradaMoneda, PesosPipe, TablaRanking],
   templateUrl: './ranking.html',
   styleUrl: './ranking.css',
 })
@@ -131,11 +132,6 @@ export class Ranking {
 
   protected cambiarProducto(valor: string): void {
     if (this.tasas.esProducto(valor)) this.producto.set(valor);
-  }
-
-  /** Al salir del campo, el monto queda con puntos de miles. */
-  protected formatearMonto(): void {
-    this.montoTexto.set(formatoPesos(this.monto()).slice(1));
   }
 
   protected elegirOrden(indice: string): void {

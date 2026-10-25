@@ -21,11 +21,11 @@
       <label for="simMonto">Monto (pesos)</label>
       <input
         id="simMonto"
-        inputmode="numeric"
+        appMoneda
+        inputmode="decimal"
         autocomplete="off"
         [value]="montoTexto()"
         (input)="cambiarMonto($any($event.target).value)"
-        (blur)="formatearMonto()"
       />
     </div>
 

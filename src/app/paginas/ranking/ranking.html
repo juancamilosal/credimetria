@@ -30,11 +30,11 @@
         <span aria-hidden="true">$</span>
         <input
           id="rkMonto"
-          inputmode="numeric"
+          appMoneda
+          inputmode="decimal"
           autocomplete="off"
           [value]="montoTexto()"
           (input)="montoTexto.set($any($event.target).value)"
-          (blur)="formatearMonto()"
         />
       </div>
     </div>

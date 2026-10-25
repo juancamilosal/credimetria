@@ -17,6 +17,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { Chips } from '../../compartido/chips/chips';
+import { EntradaMoneda } from '../../compartido/entrada-moneda/entrada-moneda';
 import { formatoPesos, PesosPipe } from '../../compartido/pipes/formato';
 import { URGENCIAS, Urgencia } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
@@ -78,7 +79,7 @@ function canalesValidos(grupo: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-asesoria',
-  imports: [ReactiveFormsModule, RouterLink, Chips, PesosPipe],
+  imports: [ReactiveFormsModule, RouterLink, Chips, EntradaMoneda, PesosPipe],
   templateUrl: './asesoria.html',
   styleUrl: './asesoria.css',
 })
@@ -162,12 +163,6 @@ export class Asesoria {
     this.otroMonto.set(true);
     this.form.controls.monto.setValue('');
     this.enfocar('#asMonto');
-  }
-
-  protected formatearMonto(): void {
-    const valor = leerNumero(this.form.controls.monto.value);
-    if (valor > 0)
-      this.form.controls.monto.setValue(formatoPesos(valor).slice(1));
   }
 
   protected elegirCiudad(ciudad: string): void {

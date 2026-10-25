@@ -1,3 +1,7 @@
+import {
+  EntradaMoneda,
+  formatoMonto,
+} from '../../compartido/entrada-moneda/entrada-moneda';
 import { isPlatformBrowser } from '@angular/common';
 import {
   afterNextRender,
@@ -76,7 +80,8 @@ type Zona =
       tipo: 'entrada';
       pregunta: string;
       placeholder: string;
-      modo: 'numeric' | 'decimal';
+      /** Monto en pesos: se escribe con puntos de miles. */
+      moneda: boolean;
       /** Mensaje de error, o '' si el valor sirve. */
       validar: (texto: string) => string;
       /** Texto de la burbuja de la persona. */
@@ -92,7 +97,7 @@ type Zona =
  */
 @Component({
   selector: 'app-compara-oferta',
-  imports: [PesosPipe, TasaPipe],
+  imports: [EntradaMoneda, PesosPipe, TasaPipe],
   templateUrl: './compara-oferta.html',
   styleUrl: './compara-oferta.css',
 })
@@ -169,12 +174,12 @@ export class ComparaOferta {
     this.entrada({
       pregunta: 'Monto en pesos',
       placeholder: 'Ej. 20.000.000',
-      modo: 'numeric',
+      moneda: true,
       validar: (t) =>
         leerNumero(t) < MONTO_MINIMO
           ? 'Escribe un monto de al menos $1.000.000.'
           : '',
-      mostrar: (t) => formatoPesos(leerNumero(t)),
+      mostrar: (t) => '$' + formatoMonto(t),
       alEnviar: (t) => {
         this.datos.monto = leerNumero(t);
         this.preguntarPlazo();
@@ -223,7 +228,7 @@ export class ComparaOferta {
     this.entrada({
       pregunta: anual ? 'Tasa en % E.A.' : 'Tasa en % mensual',
       placeholder: anual ? 'Ej. 26,38' : 'Ej. 2,1',
-      modo: 'decimal',
+      moneda: false,
       validar: (t) => {
         const tasa = leerTasa(t);
         if (!tasa)
@@ -283,7 +288,7 @@ export class ComparaOferta {
     this.entrada({
       pregunta: 'Cuota mensual en pesos',
       placeholder: 'Ej. 700.000',
-      modo: 'numeric',
+      moneda: true,
       validar: (t) => {
         const cuota = leerNumero(t);
         if (!cuota) return 'Escribe la cuota en pesos.';
@@ -291,7 +296,7 @@ export class ComparaOferta {
           return 'Con esa cuota no alcanzas a pagar el monto en ese plazo. Revisa los datos.';
         return '';
       },
-      mostrar: (t) => formatoPesos(leerNumero(t)),
+      mostrar: (t) => '$' + formatoMonto(t),
       alEnviar: (t) => {
         this.datos.cuota = leerNumero(t);
         this.mostrarResultado();
