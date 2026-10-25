@@ -1,3 +1,4 @@
+import { TASAS_DE_PRUEBA } from '../../../core/datos/tasas-prueba';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Simulador } from './simulador';
@@ -6,7 +7,7 @@ describe('Simulador', () => {
   function crear() {
     TestBed.configureTestingModule({
       imports: [Simulador],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), TASAS_DE_PRUEBA],
     });
     const fixture = TestBed.createComponent(Simulador);
     fixture.detectChanges();

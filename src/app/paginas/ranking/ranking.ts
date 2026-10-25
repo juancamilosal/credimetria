@@ -71,6 +71,7 @@ export class Ranking {
   private readonly ruta = inject(ActivatedRoute);
 
   protected readonly corte = this.tasas.corte;
+  protected readonly sinConexion = this.tasas.sinConexion;
   protected readonly productos = this.tasas.productos;
   protected readonly tipos = [TODAS, ...this.tasas.tipos];
   protected readonly plazos = PLAZOS;
@@ -91,6 +92,10 @@ export class Ranking {
       this.producto(),
       this.tipo() === TODAS ? null : (this.tipo() as TipoEntidad),
     ),
+  );
+  /** Alguna entidad no publica máxima y su "hasta" es la usura. */
+  protected readonly hayUsura = computed(() =>
+    this.filas().some((t) => t.hastaUsura),
   );
   protected readonly titulo = computed(() => {
     const n = this.filas().length;

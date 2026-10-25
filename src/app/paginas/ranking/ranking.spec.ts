@@ -1,3 +1,4 @@
+import { TASAS_DE_PRUEBA } from '../../core/datos/tasas-prueba';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Ranking } from './ranking';
@@ -9,7 +10,7 @@ describe('Ranking', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [Ranking],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), TASAS_DE_PRUEBA],
     });
     fixture = TestBed.createComponent(Ranking);
     fixture.detectChanges();

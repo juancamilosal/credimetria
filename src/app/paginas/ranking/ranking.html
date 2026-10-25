@@ -87,8 +87,8 @@
     </span>
     Cuota estimada con {{ monto() | pesos }} a {{ plazo() }} meses ·
     Actualizado:
-    {{ corte.fecha | date: "d MMM y" : "UTC" }}
-    @if (corte.ejemplo) {
+    {{ corte().fecha | date: "d MMM y" : "UTC" }}
+    @if (corte().ejemplo) {
       <span class="etq etq-aviso">Datos de ejemplo</span>
     }
   </p>
@@ -106,13 +106,23 @@
     [tipos]="tipos"
     [(tipo)]="tipo"
   />
+  @if (hayUsura()) {
+    <p class="nota pie-tabla">
+      * Tope de usura del mes: la entidad no publica una tasa máxima en su PDF.
+    </p>
+  }
+  @if (!filas().length && !sinConexion()) {
+    <p class="nota pie-tabla">
+      Todavía no tenemos tasas de este producto. Pronto las agregamos.
+    </p>
+  }
 
   <div class="explica">
     <div class="tarjeta">
       <b>Anuncia</b>
       <span class="muted">
-        La tasa "desde" que la entidad publica en su página. Es la más baja que
-        ofrece y la que te den depende de tu perfil.
+        El rango que la entidad publica en su PDF oficial de tasas: la más baja
+        (según tu perfil) y la más alta. Toca "PDF" para verlo.
       </span>
     </div>
     <div class="tarjeta">

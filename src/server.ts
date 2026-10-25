@@ -10,7 +10,16 @@ import { join } from 'node:path';
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+// Dominios desde los que se arma la página en el servidor (protección contra
+// SSRF). Otro dominio se agrega con la variable NG_ALLOWED_HOSTS.
+const angularApp = new AngularNodeAppEngine({
+  allowedHosts: [
+    'localhost',
+    'credimetria.co',
+    '*.credimetria.co',
+    '*.valkiriacode.com',
+  ],
+});
 
 /**
  * Example Express Rest API endpoints can be defined here.

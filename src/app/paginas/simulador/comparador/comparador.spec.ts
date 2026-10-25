@@ -1,3 +1,4 @@
+import { TASAS_DE_PRUEBA } from '../../../core/datos/tasas-prueba';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Comparador } from './comparador';
 
@@ -6,6 +7,7 @@ describe('Comparador', () => {
   let html: HTMLElement;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [TASAS_DE_PRUEBA] });
     fixture = TestBed.createComponent(Comparador);
     fixture.componentRef.setInput('producto', 'libre-inversion');
     fixture.componentRef.setInput('monto', 20_000_000);

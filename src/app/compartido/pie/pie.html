@@ -8,11 +8,14 @@
     </nav>
   </div>
   <p class="wrap aviso">
-    Credimetría no es una entidad financiera ni presta dinero. Las tasas son
-    promedios reportados a la Superintendencia Financiera de Colombia; la tasa
+    Credimetría no es una entidad financiera ni presta dinero. Lo que cobra cada
+    entidad es el promedio que reporta a la Superintendencia Financiera de
+    Colombia, y el rango que publica sale de su PDF oficial de tasas; la tasa
     que te ofrezcan depende de tu perfil.
-    @if (ejemplo) {
+    @if (ejemplo()) {
       En esta versión de prueba las tasas y los asesores son de ejemplo.
+    } @else {
+      En esta versión de prueba los asesores aliados son de ejemplo.
     }
   </p>
 </footer>

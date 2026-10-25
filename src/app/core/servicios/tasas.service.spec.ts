@@ -1,3 +1,4 @@
+import { TASAS_DE_PRUEBA } from '../datos/tasas-prueba';
 import { TestBed } from '@angular/core/testing';
 import { TasasService } from './tasas.service';
 
@@ -5,6 +6,7 @@ describe('TasasService', () => {
   let servicio: TasasService;
 
   beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [TASAS_DE_PRUEBA] });
     servicio = TestBed.inject(TasasService);
   });
 

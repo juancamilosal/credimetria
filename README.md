@@ -5,7 +5,8 @@ tasa que de verdad cobran bancos, cooperativas y financieras en Colombia, y
 conecta a la persona con un asesor de crédito aliado.
 
 Hecha con Angular 20 (componentes independientes, señales, formularios
-reactivos y SSR con prerenderizado).
+reactivos y SSR: cada visita se arma en el servidor con las tasas de
+Directus del momento).
 
 ## Ramas
 
@@ -206,7 +207,8 @@ src/app/
                   (pesos: $20.000.000, tasa: 21,48 %, puntos: +7,38 pts)
   core/
     modelos/      tasa, prospecto y aliado
-    datos/        tasas y aliados de ejemplo, usura del mes
+    datos/        productos, usura del mes, aliados de ejemplo y tasas
+                  solo para las pruebas
     servicios/    TasasService, AliadosService, ProspectosService
     utilidades/   cálculos de crédito (tasa mensual, cuota, ahorro, tasa
                   efectiva de una tasa mensual y tasa de una cuota)
@@ -253,10 +255,17 @@ en `public/imagenes/` y su entrada en `FOTOS`.
 
 ## Datos de ejemplo y pendientes
 
-- **Tasas y aliados son de ejemplo** (`ejemplo: true`); la página lo avisa.
-  Solo AV Villas (21,48 %) y Banco de Bogotá (26,38 %) en libre inversión son
-  las cifras del documento de la idea. En la Fase 1 los servicios leerán la
-  base de datos; los componentes no cambian.
+- **Las tasas vienen de Directus** (desde el 25 oct 2026, 5 bancos de
+  prueba en libre inversión: AV Villas, Bancolombia, BBVA, Banco de Bogotá y
+  Davivienda). `TasasService.cargar()` corre al arrancar
+  (`provideAppInitializer`) y une la tasa publicada del PDF (rango, vigencia,
+  enlace al PDF, logo) con el promedio de la Superfinanciera; la cuota y el
+  orden usan el promedio. Los productos sin tasas muestran "Pronto". Los
+  datos de ejemplo quedan solo para las pruebas (`core/datos/tasas-prueba.ts`,
+  con `TASAS_DE_PRUEBA`). **Los aliados siguen siendo de ejemplo.**
+- **Directus debe dejar leer al público** solo lo que se muestra: tasas
+  publicadas, promedios, entidades activas, la dirección de las fuentes y
+  los logos. Sin ese permiso, la página sale sin tasas.
 - **El formulario no envía datos todavía.** `ProspectosService` arma el
   prospecto con la prueba de la autorización (fecha, texto exacto, versión de
   la política y página de origen). Falta la API que lo guarde y agregue la IP.
@@ -274,7 +283,7 @@ en `public/imagenes/` y su entrada en `FOTOS`.
 ```bash
 npm install
 npm start                      # http://localhost:4200 (sin SSR)
-npm run build                  # compila y prerenderiza las 7 rutas
+npm run build                  # compila (sin prerenderizar: las tasas cambian)
 npm run serve:ssr:credimetria  # sirve la compilación con SSR
 npm test                       # pruebas con Karma
 npx prettier --write "src/**/*.{ts,html,css}"
@@ -283,5 +292,11 @@ npx prettier --write "src/**/*.{ts,html,css}"
 `npm start` (configuración `development`) corre **sin SSR**, solo en el
 navegador. Con SSR en desarrollo, la primera carga en Windows a veces
 respondía "Cannot GET /" porque el servidor de Vite aún no tenía listas las
-rutas. El SSR y el prerenderizado se prueban con `npm run build` y
+rutas. El SSR se prueba con `npm run build` y
 `npm run serve:ssr:credimetria` (http://localhost:4000).
+
+En producción, el servidor solo arma páginas para los dominios permitidos
+(`allowedHosts` en `src/server.ts`: localhost, credimetria.co y
+\*.valkiriacode.com); otro dominio se agrega con la variable
+`NG_ALLOWED_HOSTS`. `DIRECTUS_URL` cambia, en el servidor, de qué Directus se
+leen las tasas.

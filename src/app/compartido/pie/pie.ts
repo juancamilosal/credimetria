@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TasasService } from '../../core/servicios/tasas.service';
 
@@ -9,5 +9,6 @@ import { TasasService } from '../../core/servicios/tasas.service';
   styleUrl: './pie.css',
 })
 export class Pie {
-  protected readonly ejemplo = inject(TasasService).corte.ejemplo;
+  private readonly corte = inject(TasasService).corte;
+  protected readonly ejemplo = computed(() => this.corte().ejemplo);
 }

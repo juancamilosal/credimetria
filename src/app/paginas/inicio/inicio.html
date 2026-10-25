@@ -30,8 +30,9 @@
       <div>
         <h2 id="tituloTop">Las 3 tasas más bajas en libre inversión</h2>
         <p class="nota">
-          Tasa efectiva anual que cobran en promedio · {{ corte.fuente }}, corte
-          {{ corte.fecha | date: "d MMM y" : "UTC" }}
+          Tasa efectiva anual que cobran en promedio · {{ corte().fuente }},
+          corte
+          {{ corte().fecha | date: "d MMM y" : "UTC" }}
         </p>
       </div>
       <a routerLink="/ranking" [queryParams]="{ producto: 'libre-inversion' }">
@@ -40,10 +41,15 @@
     </div>
 
     <ol class="bancos">
-      @for (banco of mejores; track banco.entidad; let i = $index) {
+      @for (banco of mejores(); track banco.entidad; let i = $index) {
         <li class="banco" [class.primero]="i === 0">
           <div class="banco-cabeza">
             <span class="puesto cifra">{{ i + 1 }}</span>
+            @if (banco.logo) {
+              <span class="logo"
+                ><img [src]="banco.logo" alt="" height="24"
+              /></span>
+            }
             <div>
               <h3>{{ banco.entidad }}</h3>
               <span class="nota">{{ banco.tipo }}</span>
@@ -58,8 +64,12 @@
           </div>
           <div class="anuncia">
             <span class="nota">
-              Anuncia desde
+              Anuncia
               <b class="cifra">{{ banco.tasaAnunciada | tasa }}</b>
+              @if (banco.tasaHasta) {
+                a
+                <b class="cifra">{{ banco.tasaHasta | tasa }}</b>
+              }
             </span>
             @if (banco.diferencia !== null) {
               <span class="etq etq-aviso">{{ banco.diferencia | puntos }}</span>
@@ -69,7 +79,7 @@
       }
     </ol>
 
-    @if (corte.ejemplo) {
+    @if (corte().ejemplo) {
       <p class="etq etq-aviso ejemplo">
         Datos de ejemplo mientras conectamos los reportes de la Superfinanciera
       </p>
@@ -97,7 +107,7 @@
       <a routerLink="/ranking">Ver todos</a>
     </div>
     <ul class="productos">
-      @for (producto of productos; track producto.id) {
+      @for (producto of productos(); track producto.id) {
         <li>
           <a
             class="producto"
@@ -144,7 +154,7 @@
   <section class="seccion" aria-labelledby="tituloEntidades">
     <h2 id="tituloEntidades" class="entidades-titulo">Comparamos tasas de</h2>
     <ul class="entidades">
-      @for (entidad of entidades; track entidad) {
+      @for (entidad of entidades(); track entidad) {
         <li>{{ entidad }}</li>
       }
     </ul>

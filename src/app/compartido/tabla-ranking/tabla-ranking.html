@@ -120,13 +120,38 @@
         <tr>
           <td class="pos">{{ fila.puesto }}</td>
           <td>
-            <b>{{ fila.entidad }}</b>
+            <span class="nombre">
+              @if (fila.logo) {
+                <span class="logo-mini"
+                  ><img [src]="fila.logo" alt="" height="20" loading="lazy"
+                /></span>
+              }
+              <b>{{ fila.entidad }}</b>
+            </span>
             @if (fila.puesto === 1 && marcarMejor()) {
               <span class="etq etq-ahorro mejor">Mejor tasa</span>
             }
           </td>
           <td class="muted">{{ fila.tipo }}</td>
-          <td class="der cifra muted">{{ fila.tasaAnunciada | tasa }}</td>
+          <td class="der cifra muted">
+            {{ fila.tasaAnunciada | tasa }}
+            @if (fila.tasaHasta) {
+              <span class="hasta"
+                >a {{ fila.tasaHasta | tasa
+                }}{{ fila.hastaUsura ? "*" : "" }}</span
+              >
+            }
+            @if (fila.pdf) {
+              <a
+                class="pdf"
+                [href]="fila.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                [attr.aria-label]="'PDF de tasas de ' + fila.entidad"
+                >PDF ↗</a
+              >
+            }
+          </td>
           <td class="der cifra real">{{ fila.tasaReal | tasa }}</td>
           <td class="der">
             @if (fila.diferencia !== null) {
@@ -168,8 +193,14 @@
   @for (fila of vista(); track fila.entidad) {
     <li class="tarjeta">
       <div class="tarjeta-top">
-        <b
-          ><span class="pos">{{ fila.puesto }}</span> {{ fila.entidad }}</b
+        <b class="nombre"
+          ><span class="pos">{{ fila.puesto }}</span>
+          @if (fila.logo) {
+            <span class="logo-mini"
+              ><img [src]="fila.logo" alt="" height="20" loading="lazy"
+            /></span>
+          }
+          {{ fila.entidad }}</b
         >
         @if (fila.puesto === 1 && marcarMejor()) {
           <span class="etq etq-ahorro">Mejor tasa</span>
@@ -180,7 +211,21 @@
       <div class="tasas">
         <div>
           <span class="nota">Anuncia</span>
-          <span class="cifra muted">{{ fila.tasaAnunciada | tasa }}</span>
+          <span class="cifra muted"
+            >{{ fila.tasaAnunciada | tasa }}
+            @if (fila.tasaHasta) {
+              a {{ fila.tasaHasta | tasa }}{{ fila.hastaUsura ? "*" : "" }}
+            }
+          </span>
+          @if (fila.pdf) {
+            <a
+              class="pdf"
+              [href]="fila.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              >PDF del banco ↗</a
+            >
+          }
         </div>
         <div>
           <span class="nota">Cobra en promedio</span>

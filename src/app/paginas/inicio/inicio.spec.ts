@@ -1,3 +1,4 @@
+import { TASAS_DE_PRUEBA } from '../../core/datos/tasas-prueba';
 import { registerLocaleData } from '@angular/common';
 import localeEsCo from '@angular/common/locales/es-CO';
 import { LOCALE_ID } from '@angular/core';
@@ -11,7 +12,11 @@ describe('Inicio', () => {
     registerLocaleData(localeEsCo);
     TestBed.configureTestingModule({
       imports: [Inicio],
-      providers: [provideRouter([]), { provide: LOCALE_ID, useValue: 'es-CO' }],
+      providers: [
+        provideRouter([]),
+        { provide: LOCALE_ID, useValue: 'es-CO' },
+        TASAS_DE_PRUEBA,
+      ],
     });
     const fixture = TestBed.createComponent(Inicio);
     fixture.detectChanges();

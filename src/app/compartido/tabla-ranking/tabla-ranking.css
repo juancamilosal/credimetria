@@ -236,3 +236,41 @@ th[aria-sort="descending"] .flecha {
     display: flex;
   }
 }
+
+/* Logo pequeño junto al nombre; fondo blanco para que se vea en modo oscuro */
+.nombre {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-mini {
+  display: inline-grid;
+  place-items: center;
+  height: 28px;
+  padding: 0 6px;
+  background: #fff;
+  border: 1px solid var(--cm-linea);
+  border-radius: 6px;
+}
+
+.logo-mini img {
+  display: block;
+  height: 16px;
+  width: auto;
+  max-width: 84px;
+  object-fit: contain;
+}
+
+.hasta {
+  display: block;
+  font-size: 12px;
+}
+
+.pdf {
+  display: inline-block;
+  margin-top: 2px;
+  font-family: var(--cm-f-texto, inherit);
+  font-size: 12px;
+  font-weight: 600;
+}
