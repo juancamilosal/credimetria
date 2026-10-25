@@ -10,24 +10,118 @@
     <thead>
       <tr>
         <th scope="col">#</th>
-        <th scope="col">Entidad</th>
-        <th scope="col">Tipo</th>
-        <th scope="col" class="der">Anuncia</th>
-        <th scope="col" class="der">Cobra en promedio</th>
-        <th scope="col" class="der">Diferencia</th>
-        @if (completa()) {
-          <th scope="col" class="der">Cuota estimada</th>
-          <th scope="col"><span class="visualmente-oculto">Acción</span></th>
+        @if (ordenable()) {
+          <th scope="col" [attr.aria-sort]="ariaSort('entidad')">
+            <button type="button" class="orden" (click)="ordenar('entidad')">
+              Entidad <span class="flecha">{{ flecha("entidad") }}</span>
+            </button>
+          </th>
+          <th scope="col" [attr.aria-sort]="ariaSort('tipo')">
+            <div class="filtro-tipo">
+              <button type="button" class="orden" (click)="ordenar('tipo')">
+                Tipo <span class="flecha">{{ flecha("tipo") }}</span>
+              </button>
+              @if (tipos().length) {
+                <button
+                  type="button"
+                  class="filtro"
+                  [class.activo]="tipo() !== todas"
+                  [attr.aria-expanded]="menuTipo()"
+                  aria-haspopup="true"
+                  [attr.aria-label]="
+                    'Filtrar por tipo de entidad' +
+                    (tipo() !== todas ? ': ' + tipo() : '')
+                  "
+                  (click)="menuTipo.set(!menuTipo())"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 5h18l-7 8v6l-4 2v-8z" />
+                  </svg>
+                  @if (tipo() !== todas) {
+                    <span class="filtro-valor">{{ tipo() }}</span>
+                  }
+                </button>
+                @if (menuTipo()) {
+                  <div class="menu" role="group" aria-label="Tipo de entidad">
+                    @for (t of tipos(); track t) {
+                      <button
+                        type="button"
+                        [attr.aria-pressed]="t === tipo()"
+                        (click)="elegirTipo(t)"
+                      >
+                        <span class="marca-menu" aria-hidden="true">{{
+                          t === tipo() ? "✓" : ""
+                        }}</span>
+                        {{ t }}
+                      </button>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          </th>
+          <th
+            scope="col"
+            class="der"
+            [attr.aria-sort]="ariaSort('tasaAnunciada')"
+          >
+            <button
+              type="button"
+              class="orden"
+              (click)="ordenar('tasaAnunciada')"
+            >
+              Anuncia <span class="flecha">{{ flecha("tasaAnunciada") }}</span>
+            </button>
+          </th>
+          <th scope="col" class="der" [attr.aria-sort]="ariaSort('tasaReal')">
+            <button type="button" class="orden" (click)="ordenar('tasaReal')">
+              Cobra en promedio
+              <span class="flecha">{{ flecha("tasaReal") }}</span>
+            </button>
+          </th>
+          <th scope="col" class="der" [attr.aria-sort]="ariaSort('diferencia')">
+            <button type="button" class="orden" (click)="ordenar('diferencia')">
+              Diferencia <span class="flecha">{{ flecha("diferencia") }}</span>
+            </button>
+          </th>
+          @if (completa()) {
+            <th scope="col" class="der" [attr.aria-sort]="ariaSort('cuota')">
+              <button type="button" class="orden" (click)="ordenar('cuota')">
+                Cuota estimada <span class="flecha">{{ flecha("cuota") }}</span>
+              </button>
+            </th>
+            <th scope="col"><span class="visualmente-oculto">Acción</span></th>
+          }
+        } @else {
+          <th scope="col">Entidad</th>
+          <th scope="col">Tipo</th>
+          <th scope="col" class="der">Anuncia</th>
+          <th scope="col" class="der">Cobra en promedio</th>
+          <th scope="col" class="der">Diferencia</th>
+          @if (completa()) {
+            <th scope="col" class="der">Cuota estimada</th>
+            <th scope="col"><span class="visualmente-oculto">Acción</span></th>
+          }
         }
       </tr>
     </thead>
     <tbody>
-      @for (fila of vista(); track fila.entidad; let i = $index) {
+      @for (fila of vista(); track fila.entidad) {
         <tr>
-          <td class="pos">{{ i + 1 }}</td>
+          <td class="pos">{{ fila.puesto }}</td>
           <td>
             <b>{{ fila.entidad }}</b>
-            @if (i === 0 && marcarMejor()) {
+            @if (fila.puesto === 1 && marcarMejor()) {
               <span class="etq etq-ahorro mejor">Mejor tasa</span>
             }
           </td>
@@ -49,6 +143,7 @@
                 [queryParams]="{
                   producto: producto(),
                   entidad: fila.entidad,
+                  monto: monto(),
                   origen: 'ranking',
                 }"
                 class="quiero"
@@ -70,13 +165,13 @@
 </div>
 
 <ol class="tarjetas">
-  @for (fila of vista(); track fila.entidad; let i = $index) {
+  @for (fila of vista(); track fila.entidad) {
     <li class="tarjeta">
       <div class="tarjeta-top">
         <b
-          ><span class="pos">{{ i + 1 }}</span> {{ fila.entidad }}</b
+          ><span class="pos">{{ fila.puesto }}</span> {{ fila.entidad }}</b
         >
-        @if (i === 0 && marcarMejor()) {
+        @if (fila.puesto === 1 && marcarMejor()) {
           <span class="etq etq-ahorro">Mejor tasa</span>
         } @else {
           <span class="nota">{{ fila.tipo }}</span>
@@ -105,6 +200,7 @@
             [queryParams]="{
               producto: producto(),
               entidad: fila.entidad,
+              monto: monto(),
               origen: 'ranking',
             }"
             class="quiero"

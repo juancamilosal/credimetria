@@ -2,24 +2,46 @@
   padding-top: 32px;
 }
 
-.filtros {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
+/* Barra de arriba: producto, monto y plazo */
+.barra {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 220px));
+  gap: 12px 16px;
+  align-items: end;
 }
 
-.filtros .leyenda {
-  display: block;
-  margin-bottom: 10px;
+.con-prefijo {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-campo);
+  background: var(--cm-campo);
 }
 
-.filtros-fila {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-  flex-wrap: wrap;
+.con-prefijo:focus-within {
+  border-color: var(--cm-marca-600);
+  box-shadow: 0 0 0 3px var(--cm-marca-100);
+}
+
+.con-prefijo span {
+  padding-left: 14px;
+  color: var(--cm-gris);
+  font-family: var(--cm-f-cifra);
+}
+
+.campo .con-prefijo input {
+  border: 0;
+  box-shadow: none;
+  padding-left: 6px;
+  font-family: var(--cm-f-cifra);
+}
+
+.solo-celular {
+  display: none;
+}
+
+.ayuda {
+  margin: 14px 0 12px;
 }
 
 .explica {
@@ -36,4 +58,22 @@
 .destacada {
   background: var(--cm-marca-100);
   border-color: var(--cm-marca-100);
+}
+
+@media (max-width: 760px) {
+  .barra {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .barra .campo:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .solo-celular {
+    display: flex;
+  }
+
+  .solo-escritorio {
+    display: none;
+  }
 }

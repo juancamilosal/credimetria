@@ -8,26 +8,59 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Chips } from '../../compartido/chips/chips';
-import { formatoPesos } from '../../compartido/pipes/formato';
+import { formatoPesos, PesosPipe } from '../../compartido/pipes/formato';
 import {
+  ColumnaRanking,
   MONTO_RANKING,
+  ORDEN_REAL,
+  OrdenRanking,
   PLAZO_RANKING,
   TablaRanking,
+  TODAS,
 } from '../../compartido/tabla-ranking/tabla-ranking';
 import { Producto, TipoEntidad } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
+import { leerNumero } from '../../core/utilidades/credito';
 
-const TODAS = 'Todas';
+const PLAZOS = [12, 24, 36, 48, 60, 72, 120, 180, 240];
+
+/** Opciones de orden para el celular, donde no se ven los títulos de la tabla. */
+const ORDENES: { texto: string; orden: OrdenRanking }[] = [
+  { texto: 'Tasa real: menor a mayor', orden: ORDEN_REAL },
+  {
+    texto: 'Tasa real: mayor a menor',
+    orden: { columna: 'tasaReal', dir: 'desc' },
+  },
+  {
+    texto: 'Anuncia: menor a mayor',
+    orden: { columna: 'tasaAnunciada', dir: 'asc' },
+  },
+  {
+    texto: 'Diferencia: mayor a menor',
+    orden: { columna: 'diferencia', dir: 'desc' },
+  },
+  { texto: 'Entidad: A a Z', orden: { columna: 'entidad', dir: 'asc' } },
+];
+
+const COLUMNAS: ColumnaRanking[] = [
+  'entidad',
+  'tipo',
+  'tasaAnunciada',
+  'tasaReal',
+  'diferencia',
+  'cuota',
+];
 
 /**
- * Lista completa por tasa real con filtros de producto y tipo de entidad.
- * Los filtros quedan en la dirección (?producto=…&tipo=…) para poder
- * compartir el enlace.
+ * Lista completa por tasa real. Se ordena y se filtra por tipo desde los
+ * títulos de la tabla, como en Excel; arriba se elige el producto y se
+ * escribe el monto y el plazo para calcular la cuota de todas. Todo queda en
+ * la dirección (?producto=…&tipo=…&monto=…&plazo=…&orden=…) para compartir
+ * el enlace.
  */
 @Component({
   selector: 'app-ranking',
-  imports: [DatePipe, Chips, TablaRanking],
+  imports: [DatePipe, PesosPipe, TablaRanking],
   templateUrl: './ranking.html',
   styleUrl: './ranking.css',
 })
@@ -37,45 +70,56 @@ export class Ranking {
   private readonly ruta = inject(ActivatedRoute);
 
   protected readonly corte = this.tasas.corte;
-  protected readonly opcionesProducto = this.tasas.productos.map((p) => ({
-    valor: p.id,
-    texto: p.nombre,
-  }));
-  protected readonly opcionesTipo = [TODAS, ...this.tasas.tipos].map((t) => ({
-    valor: t,
-    texto: t,
-  }));
-  protected readonly notaCuota = `Cuota calculada para ${formatoPesos(MONTO_RANKING)} a ${PLAZO_RANKING} meses`;
+  protected readonly productos = this.tasas.productos;
+  protected readonly tipos = [TODAS, ...this.tasas.tipos];
+  protected readonly plazos = PLAZOS;
+  protected readonly ordenes = ORDENES;
 
-  protected readonly producto = signal<string>('libre-inversion');
+  protected readonly producto = signal<Producto>('libre-inversion');
   protected readonly tipo = signal<string>(TODAS);
+  protected readonly orden = signal<OrdenRanking>(ORDEN_REAL);
+  protected readonly montoTexto = signal(formatoPesos(MONTO_RANKING).slice(1));
+  protected readonly plazo = signal(PLAZO_RANKING);
 
-  protected readonly productoId = computed(() => this.producto() as Producto);
+  /** Monto para la cuota; si el campo queda vacío, el de siempre. */
+  protected readonly monto = computed(
+    () => leerNumero(this.montoTexto()) || MONTO_RANKING,
+  );
   protected readonly filas = computed(() =>
     this.tasas.ranking(
-      this.productoId(),
+      this.producto(),
       this.tipo() === TODAS ? null : (this.tipo() as TipoEntidad),
     ),
   );
   protected readonly titulo = computed(() => {
     const n = this.filas().length;
-    return `${this.tasas.nombre(this.productoId())} · ${n} ${n === 1 ? 'entidad' : 'entidades'}`;
+    const tipo = this.tipo() === TODAS ? '' : ` · ${this.tipo()}`;
+    return `${this.tasas.nombre(this.producto())}${tipo} · ${n} ${n === 1 ? 'entidad' : 'entidades'}`;
   });
+  /** Índice de la opción de orden del celular que coincide, o -1. */
+  protected readonly ordenElegido = computed(() =>
+    ORDENES.findIndex(
+      (o) =>
+        o.orden.columna === this.orden().columna &&
+        o.orden.dir === this.orden().dir,
+    ),
+  );
 
   constructor() {
-    const params = this.ruta.snapshot.queryParamMap;
-    const producto = params.get('producto');
-    const tipo = params.get('tipo');
-    if (this.tasas.esProducto(producto)) this.producto.set(producto);
-    if (tipo && this.opcionesTipo.some((t) => t.valor === tipo))
-      this.tipo.set(tipo);
-
+    this.leerDireccion();
     // Al prerenderizar no hay dirección que actualizar.
     if (!isPlatformBrowser(inject(PLATFORM_ID))) return;
     effect(() => {
+      const { columna, dir } = this.orden();
       const queryParams = {
         producto: this.producto(),
         tipo: this.tipo() === TODAS ? null : this.tipo(),
+        monto: this.monto() === MONTO_RANKING ? null : this.monto(),
+        plazo: this.plazo() === PLAZO_RANKING ? null : this.plazo(),
+        orden:
+          columna === ORDEN_REAL.columna && dir === ORDEN_REAL.dir
+            ? null
+            : `${columna}-${dir}`,
       };
       this.router.navigate([], {
         relativeTo: this.ruta,
@@ -83,5 +127,39 @@ export class Ranking {
         replaceUrl: true,
       });
     });
+  }
+
+  protected cambiarProducto(valor: string): void {
+    if (this.tasas.esProducto(valor)) this.producto.set(valor);
+  }
+
+  /** Al salir del campo, el monto queda con puntos de miles. */
+  protected formatearMonto(): void {
+    this.montoTexto.set(formatoPesos(this.monto()).slice(1));
+  }
+
+  protected elegirOrden(indice: string): void {
+    const opcion = ORDENES[Number(indice)];
+    if (opcion) this.orden.set(opcion.orden);
+  }
+
+  private leerDireccion(): void {
+    const params = this.ruta.snapshot.queryParamMap;
+    const producto = params.get('producto');
+    const tipo = params.get('tipo');
+    const monto = Number(params.get('monto'));
+    const plazo = Number(params.get('plazo'));
+    const [columna, dir] = (params.get('orden') ?? '').split('-');
+
+    if (this.tasas.esProducto(producto)) this.producto.set(producto);
+    if (tipo && this.tipos.includes(tipo)) this.tipo.set(tipo);
+    if (monto > 0) this.montoTexto.set(formatoPesos(monto).slice(1));
+    if (PLAZOS.includes(plazo)) this.plazo.set(plazo);
+    if (
+      COLUMNAS.includes(columna as ColumnaRanking) &&
+      (dir === 'asc' || dir === 'desc')
+    ) {
+      this.orden.set({ columna: columna as ColumnaRanking, dir });
+    }
   }
 }

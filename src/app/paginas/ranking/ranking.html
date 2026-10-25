@@ -9,41 +9,102 @@
 </section>
 
 <div class="wrap contenido">
-  <div class="filtros">
-    <div>
-      <span class="leyenda" id="lbProd">Producto</span>
-      <app-chips
-        etiqueta="lbProd"
-        [opciones]="opcionesProducto"
-        [(valor)]="producto"
-      />
+  <form class="barra" (submit)="$event.preventDefault()" novalidate>
+    <div class="campo">
+      <label for="rkProducto">Producto</label>
+      <select
+        id="rkProducto"
+        [value]="producto()"
+        (change)="cambiarProducto($any($event.target).value)"
+      >
+        @for (p of productos; track p.id) {
+          <option [value]="p.id" [selected]="p.id === producto()">
+            {{ p.nombre }}
+          </option>
+        }
+      </select>
     </div>
-    <div class="filtros-fila">
-      <div>
-        <span class="leyenda" id="lbTipo">Tipo de entidad</span>
-        <app-chips
-          variante="cuadrado"
-          etiqueta="lbTipo"
-          [opciones]="opcionesTipo"
-          [(valor)]="tipo"
+    <div class="campo">
+      <label for="rkMonto">Monto del crédito</label>
+      <div class="con-prefijo">
+        <span aria-hidden="true">$</span>
+        <input
+          id="rkMonto"
+          inputmode="numeric"
+          autocomplete="off"
+          [value]="montoTexto()"
+          (input)="montoTexto.set($any($event.target).value)"
+          (blur)="formatearMonto()"
         />
       </div>
-      <span class="nota">
-        {{ notaCuota }} · Actualizado:
-        {{ corte.fecha | date: "d MMM y" : "UTC" }}
-        @if (corte.ejemplo) {
-          <span class="etq etq-aviso">Datos de ejemplo</span>
-        }
-      </span>
     </div>
-  </div>
+    <div class="campo">
+      <label for="rkPlazo">Plazo</label>
+      <select
+        id="rkPlazo"
+        [value]="plazo()"
+        (change)="plazo.set(+$any($event.target).value)"
+      >
+        @for (meses of plazos; track meses) {
+          <option [value]="meses" [selected]="meses === plazo()">
+            {{ meses }} meses
+          </option>
+        }
+      </select>
+    </div>
+    <!-- En celular no se ven los títulos de la tabla: orden y tipo aquí -->
+    <div class="campo solo-celular">
+      <label for="rkOrden">Ordenar por</label>
+      <select
+        id="rkOrden"
+        [value]="ordenElegido()"
+        (change)="elegirOrden($any($event.target).value)"
+      >
+        @for (o of ordenes; track o.texto; let i = $index) {
+          <option [value]="i" [selected]="i === ordenElegido()">
+            {{ o.texto }}
+          </option>
+        }
+      </select>
+    </div>
+    <div class="campo solo-celular">
+      <label for="rkTipo">Tipo de entidad</label>
+      <select
+        id="rkTipo"
+        [value]="tipo()"
+        (change)="tipo.set($any($event.target).value)"
+      >
+        @for (t of tipos; track t) {
+          <option [value]="t" [selected]="t === tipo()">{{ t }}</option>
+        }
+      </select>
+    </div>
+  </form>
+
+  <p class="nota ayuda">
+    <span class="solo-escritorio"
+      >Toca los títulos de la tabla para ordenar; el embudo de "Tipo" filtra.
+    </span>
+    Cuota estimada con {{ monto() | pesos }} a {{ plazo() }} meses ·
+    Actualizado:
+    {{ corte.fecha | date: "d MMM y" : "UTC" }}
+    @if (corte.ejemplo) {
+      <span class="etq etq-aviso">Datos de ejemplo</span>
+    }
+  </p>
 
   <app-tabla-ranking
     [filas]="filas()"
-    [producto]="productoId()"
+    [producto]="producto()"
     [titulo]="titulo()"
     [completa]="true"
     [marcarMejor]="tipo() === 'Todas'"
+    [monto]="monto()"
+    [plazo]="plazo()"
+    [ordenable]="true"
+    [(orden)]="orden"
+    [tipos]="tipos"
+    [(tipo)]="tipo"
   />
 
   <div class="explica">
@@ -64,8 +125,8 @@
     <div class="tarjeta destacada">
       <b>El orden no se vende</b>
       <span>
-        El ranking siempre va por tasa real. Ninguna entidad puede pagar para
-        subir.
+        La tabla arranca por tasa real y el # siempre muestra ese puesto, aunque
+        la ordenes por otra columna. Ninguna entidad puede pagar para subir.
       </span>
     </div>
   </div>

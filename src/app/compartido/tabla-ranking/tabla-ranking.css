@@ -2,7 +2,14 @@
   background: var(--cm-blanco);
   border: 1px solid var(--cm-linea);
   border-radius: var(--cm-r-tarjeta);
-  overflow-x: auto;
+  /* Visible para que el menú del filtro no quede cortado */
+  overflow: visible;
+}
+
+@media (max-width: 960px) {
+  .tabla-caja {
+    overflow-x: auto;
+  }
 }
 
 table {
@@ -36,6 +43,128 @@ td {
 
 .der {
   text-align: right;
+}
+
+/* Títulos que ordenan, como en Excel */
+th:has(.orden) {
+  padding: 6px 10px;
+}
+
+.orden {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--cm-gris);
+  background: none;
+  border: 0;
+  border-radius: var(--cm-r-campo);
+  padding: 8px 10px;
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+.orden:hover {
+  background: var(--cm-fondo);
+  color: var(--cm-tinta);
+}
+
+th[aria-sort="ascending"] .orden,
+th[aria-sort="descending"] .orden {
+  color: var(--cm-enlace);
+}
+
+.flecha {
+  display: inline-block;
+  width: 1em;
+  letter-spacing: 0;
+  opacity: 0.55;
+}
+
+th[aria-sort="ascending"] .flecha,
+th[aria-sort="descending"] .flecha {
+  opacity: 1;
+}
+
+.filtro-tipo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 4px 8px;
+  border-radius: var(--cm-r-campo);
+  border: 1px solid transparent;
+  background: none;
+  color: var(--cm-gris);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.filtro:hover,
+.filtro[aria-expanded="true"] {
+  border-color: var(--cm-linea);
+  color: var(--cm-tinta);
+}
+
+.filtro.activo {
+  background: var(--cm-marca-100);
+  color: var(--cm-enlace);
+}
+
+.filtro-valor {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 5;
+  min-width: 190px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  background: var(--cm-blanco);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-boton);
+  box-shadow: 0 8px 24px rgb(15 27 42 / 0.12);
+}
+
+.menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--cm-r-campo);
+  background: none;
+  color: var(--cm-tinta);
+  font-size: 14px;
+  text-align: left;
+}
+
+.menu button:hover,
+.menu button[aria-pressed="true"] {
+  background: var(--cm-fondo);
+}
+
+.menu button[aria-pressed="true"] {
+  font-weight: 700;
+}
+
+.marca-menu {
+  width: 1em;
+  color: var(--cm-enlace);
 }
 
 .real {

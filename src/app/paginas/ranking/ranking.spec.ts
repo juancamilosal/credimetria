@@ -1,49 +1,114 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Ranking } from './ranking';
 
 describe('Ranking', () => {
-  function crear() {
+  let fixture: ComponentFixture<Ranking>;
+  let html: HTMLElement;
+
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [Ranking],
       providers: [provideRouter([])],
     });
-    const fixture = TestBed.createComponent(Ranking);
+    fixture = TestBed.createComponent(Ranking);
     fixture.detectChanges();
-    return { fixture, html: fixture.nativeElement as HTMLElement };
+    html = fixture.nativeElement;
+  });
+
+  /** Nombres de las entidades en el orden en que se ven en la tabla. */
+  function entidades(): string[] {
+    return [...html.querySelectorAll('tbody tr td:nth-child(2) b')].map((b) =>
+      b.textContent!.trim(),
+    );
   }
 
-  function boton(html: HTMLElement, texto: string): HTMLButtonElement {
-    return [
-      ...html.querySelectorAll<HTMLButtonElement>('app-chips button'),
-    ].find((b) => b.textContent?.trim() === texto)!;
+  function titulo(texto: string): HTMLButtonElement {
+    return [...html.querySelectorAll<HTMLButtonElement>('th .orden')].find(
+      (b) => b.textContent!.includes(texto),
+    )!;
   }
 
-  it('muestra libre inversión ordenada con AV Villas primero', () => {
-    const { html } = crear();
+  function tocar(boton: HTMLElement) {
+    boton.click();
+    fixture.detectChanges();
+  }
+
+  it('muestra libre inversión ordenada por tasa real, AV Villas primero', () => {
     expect(html.querySelector('caption')?.textContent).toContain(
       'Libre inversión · 7 entidades',
     );
+    expect(entidades()[0]).toBe('AV Villas');
     expect(
-      html.querySelector('tbody tr td:nth-child(2)')?.textContent,
-    ).toContain('AV Villas');
+      titulo('Cobra en promedio').closest('th')!.getAttribute('aria-sort'),
+    ).toBe('ascending');
   });
 
-  it('filtra por tipo y vuelve a numerar desde 1', () => {
-    const { fixture, html } = crear();
-    boton(html, 'Cooperativa').click();
+  it('ordena desde el título y cambia de sentido al tocarlo otra vez', () => {
+    tocar(titulo('Cobra en promedio'));
+    expect(entidades()[0]).toBe('Banco de Bogotá');
+    expect(
+      titulo('Cobra en promedio').closest('th')!.getAttribute('aria-sort'),
+    ).toBe('descending');
+
+    tocar(titulo('Entidad'));
+    expect(entidades()[0]).toBe('AV Villas');
+    expect(entidades()[1]).toBe('Banco de Bogotá');
+    // El # sigue siendo el puesto por tasa real.
+    expect(html.querySelector('tbody tr .pos')?.textContent?.trim()).toBe('1');
+    expect(html.querySelectorAll('tbody tr .pos')[1].textContent?.trim()).toBe(
+      '7',
+    );
+  });
+
+  it('deja al final las entidades sin tasa anunciada', () => {
+    tocar(titulo('Anuncia'));
+    expect(entidades().at(-1)).toBe('Banco de Bogotá');
+    tocar(titulo('Anuncia'));
+    expect(entidades().at(-1)).toBe('Banco de Bogotá');
+  });
+
+  it('filtra por tipo desde el título "Tipo"', () => {
+    tocar(html.querySelector<HTMLButtonElement>('.filtro')!);
+    const opcion = [
+      ...html.querySelectorAll<HTMLButtonElement>('.menu button'),
+    ].find((b) => b.textContent!.includes('Cooperativa'))!;
+    tocar(opcion);
+    expect(entidades()).toEqual(['Confiar']);
+    expect(html.querySelector('.menu')).toBeNull();
+    expect(html.querySelector('.filtro')?.textContent).toContain('Cooperativa');
+    expect(html.querySelector('caption')?.textContent).toContain(
+      'Libre inversión · Cooperativa · 1 entidad',
+    );
+  });
+
+  it('calcula la cuota de todas con el monto y el plazo escritos', () => {
+    const cuotaAvVillas = () =>
+      html.querySelector('tbody tr td:nth-child(7)')!.textContent!.trim();
+    expect(cuotaAvVillas()).toBe('$604.529');
+
+    const monto = html.querySelector<HTMLInputElement>('#rkMonto')!;
+    monto.value = '10.000.000';
+    monto.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    const filas = html.querySelectorAll('tbody tr');
-    expect(filas.length).toBe(1);
-    expect(filas[0].querySelector('.pos')?.textContent?.trim()).toBe('1');
-    expect(filas[0].textContent).toContain('Confiar');
+    expect(cuotaAvVillas()).toBe('$302.264');
+
+    const plazo = html.querySelector<HTMLSelectElement>('#rkPlazo')!;
+    plazo.value = '36';
+    plazo.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(cuotaAvVillas()).toBe('$369.685');
+    expect(html.querySelector('.ayuda')?.textContent).toContain(
+      'Cuota estimada con $10.000.000 a 36 meses',
+    );
   });
 
-  it('una entidad sin tasa anunciada muestra "—"', () => {
-    const { html } = crear();
-    const bogota = [...html.querySelectorAll('tbody tr')].find((f) =>
-      f.textContent?.includes('Banco de Bogotá'),
-    )!;
-    expect(bogota.querySelectorAll('td')[3].textContent?.trim()).toBe('—');
+  it('"Quiero esta" lleva el monto a la asesoría', () => {
+    const monto = html.querySelector<HTMLInputElement>('#rkMonto')!;
+    monto.value = '15.000.000';
+    monto.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    const enlace = html.querySelector<HTMLAnchorElement>('tbody .quiero')!;
+    expect(enlace.getAttribute('href')).toContain('monto=15000000');
   });
 });

@@ -21,13 +21,22 @@ morada y oro del diseño (ver abajo).
 | Ruta                 | Pantalla          | Qué hace                                                                                                                                        |
 | -------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                |
-| `/ranking`           | Ranking de tasas  | Lista completa por tasa real con filtros de producto y tipo de entidad (`?producto=…&tipo=…`)                                                   |
+| `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas  |
 | `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría |
 | `/simulador`         | Simulador         | Cuota, total y ahorro frente a la mejor entidad, comparador de dos entidades y las 3 que menos cobran del producto elegido                      |
 | `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                 |
 | `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                        |
 | `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                        |
 
+- **Ranking como en Excel** (`paginas/ranking/` y
+  `compartido/tabla-ranking/`): cada título ordena la tabla al tocarlo (↑/↓,
+  `aria-sort`) y el embudo del título "Tipo" filtra por tipo de entidad.
+  Arriba se elige el producto y se escriben el monto y el plazo, y la cuota
+  estimada de todas se recalcula al instante. El # siempre es el puesto por
+  tasa real. En celular, donde no se ven los títulos, hay listas de "Ordenar
+  por" y "Tipo de entidad". Todo queda en la dirección
+  (`?producto=…&tipo=…&monto=…&plazo=…&orden=diferencia-desc`) y "Quiero
+  esta" lleva el monto a la asesoría.
 - **Compara tu oferta** (`paginas/compara-oferta/`): preguntas fijas con
   botones (producto, monto, plazo, qué le dijeron: tasa E.A., tasa mensual o
   solo la cuota). Convierte la tasa mensual a E.A., saca la tasa real de la
