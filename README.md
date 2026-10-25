@@ -263,9 +263,17 @@ en `public/imagenes/` y su entrada en `FOTOS`.
   orden usan el promedio. Los productos sin tasas muestran "Pronto". Los
   datos de ejemplo quedan solo para las pruebas (`core/datos/tasas-prueba.ts`,
   con `TASAS_DE_PRUEBA`). **Los aliados siguen siendo de ejemplo.**
-- **Directus debe dejar leer al público** solo lo que se muestra: tasas
-  publicadas, promedios, entidades activas, la dirección de las fuentes y
-  los logos. Sin ese permiso, la página sale sin tasas.
+- **Directus no es público.** Las tasas pasan por el servidor de la página
+  (`servidor/tasas.mjs`): `/api/tasas` (JSON solo con lo que se muestra) y
+  `/api/logos/<entidad>`, con el token del usuario **"Lector web"** de
+  Directus (política de solo lectura: tasas publicadas, promedios,
+  entidades activas, dirección del PDF y logos). Guarda la respuesta 10
+  minutos y, si Directus falla, sigue con la última. Al armar la página en
+  el servidor, las tasas van dentro de ella (`TransferState`): el navegador
+  no las vuelve a pedir y nunca ve Directus ni el token.
+- **Variables del servidor** (Coolify): `DIRECTUS_TOKEN` (token del "Lector
+  web", obligatorio) y `DIRECTUS_URL` (opcional). Sin el token, la página
+  sale sin tasas.
 - **El formulario no envía datos todavía.** `ProspectosService` arma el
   prospecto con la prueba de la autorización (fecha, texto exacto, versión de
   la política y página de origen). Falta la API que lo guarde y agregue la IP.
@@ -282,12 +290,17 @@ en `public/imagenes/` y su entrada en `FOTOS`.
 
 ```bash
 npm install
-npm start                      # http://localhost:4200 (sin SSR)
+npm start                      # http://localhost:4200 (sin SSR) + API de tasas
 npm run build                  # compila (sin prerenderizar: las tasas cambian)
 npm run serve:ssr:credimetria  # sirve la compilación con SSR
 npm test                       # pruebas con Karma
 npx prettier --write "src/**/*.{ts,html,css}"
 ```
+
+`npm start` levanta la API de tasas (`servidor/dev-api.mjs`, puerto 4300)
+y el servidor de Angular, que le reenvía `/api` (`proxy.conf.json`). El
+token va en un archivo `.env` (copia `.env.example`; no se sube al
+repositorio).
 
 `npm start` (configuración `development`) corre **sin SSR**, solo en el
 navegador. Con SSR en desarrollo, la primera carga en Windows a veces

@@ -6,6 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { rutasTasas } from '../servidor/tasas.mjs';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -22,16 +23,11 @@ const angularApp = new AngularNodeAppEngine({
 });
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * /api/tasas y /api/logos/<entidad>: las tasas de Directus pasan por este
+ * servidor (con el token del usuario "Lector web"), así el navegador nunca
+ * ve Directus ni el token.
  */
+rutasTasas(app);
 
 /**
  * Serve static files from /browser

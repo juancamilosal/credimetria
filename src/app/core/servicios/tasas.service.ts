@@ -4,10 +4,11 @@ import {
   inject,
   Injectable,
   InjectionToken,
+  makeStateKey,
   signal,
+  TransferState,
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { DIRECTUS_URL } from '../config/directus';
 import { PRODUCTOS } from '../datos/tasas';
 import {
   CorteTasas,
@@ -23,42 +24,35 @@ export const TASAS_INICIALES = new InjectionToken<{
   corte: CorteTasas;
 }>('TASAS_INICIALES');
 
-interface PublicadaDirectus {
-  producto: Producto;
-  ea_desde: string | null;
-  ea_hasta: string | null;
-  hasta_origen: 'entidad' | 'usura' | null;
-  vigente_desde: string | null;
-  entidad: {
-    codigo: string;
-    nombre: string;
-    tipo: TipoEntidad;
-    logo: string | null;
-  };
-  fuente: { url: string } | null;
+/** Lo que devuelve /api/tasas (ver servidor/tasas.mjs). */
+export interface DatosTasas {
+  corte: CorteTasas;
+  tasas: TasaEntidad[];
 }
-
-interface PromedioDirectus {
-  entidad: string;
-  producto: Producto;
-  tasa_ea: string | null;
-  corte: string | null;
-}
-
-const numero = (valor: string | null) =>
-  valor === null ? null : Number(valor);
 
 /**
- * Punto único de acceso a las tasas. Al arrancar la página lee de Directus
- * las tasas publicadas (rango del PDF de cada entidad, ya aprobado) y lo que
- * cobra cada una en promedio según la Superfinanciera. La cuota y el orden
- * se calculan con el promedio.
+ * En el servidor, función que lee las tasas de Directus directamente; en el
+ * navegador no existe y se piden a /api/tasas.
+ */
+export const CARGADOR_TASAS = new InjectionToken<() => Promise<DatosTasas>>(
+  'CARGADOR_TASAS',
+);
+
+const CLAVE_TASAS = makeStateKey<DatosTasas>('credimetria-tasas');
+
+/**
+ * Punto único de acceso a las tasas: las publicadas (rango del PDF de cada
+ * entidad, ya aprobado) y lo que cobra cada una en promedio según la
+ * Superfinanciera. La cuota y el orden se calculan con el promedio. Las lee
+ * el servidor de la página (Directus nunca se llama desde el navegador) y
+ * pasan al navegador dentro de la página ya armada.
  */
 @Injectable({ providedIn: 'root' })
 export class TasasService {
   // Opcional: en las pruebas las tasas llegan por TASAS_INICIALES.
   private readonly http = inject(HttpClient, { optional: true });
-  private readonly base = inject(DIRECTUS_URL);
+  private readonly cargador = inject(CARGADOR_TASAS, { optional: true });
+  private readonly estado = inject(TransferState);
   private readonly iniciales = inject(TASAS_INICIALES, { optional: true });
 
   private readonly todas = signal<TasaEntidad[]>(this.iniciales?.tasas ?? []);
@@ -82,49 +76,26 @@ export class TasasService {
     ),
   );
 
-  /** Lee las tasas de Directus; si falla, la página queda sin tasas. */
+  /**
+   * Trae las tasas: en el servidor, de Directus (con su caché); en el
+   * navegador, de la página ya armada o, si no vienen, de /api/tasas. Si
+   * fallan, la página queda sin tasas y `sinConexion` lo dice.
+   */
   async cargar(): Promise<void> {
     if (this.iniciales) return;
     try {
-      const [publicadas, promedios] = await Promise.all([
-        this.leer<PublicadaDirectus>(
-          '/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1' +
-            '&fields=producto,ea_desde,ea_hasta,hasta_origen,vigente_desde,' +
-            'entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,fuente.url',
-        ),
-        this.leer<PromedioDirectus>(
-          '/items/tasas_promedio?limit=-1&fields=entidad,producto,tasa_ea,corte',
-        ),
-      ]);
-      const tasas: TasaEntidad[] = [];
-      for (const p of publicadas) {
-        const promedio = promedios.find(
-          (x) => x.entidad === p.entidad.codigo && x.producto === p.producto,
-        );
-        const desde = numero(p.ea_desde);
-        const real = numero(promedio?.tasa_ea ?? null) ?? desde;
-        if (real === null) continue;
-        tasas.push({
-          entidad: p.entidad.nombre,
-          tipo: p.entidad.tipo,
-          producto: p.producto,
-          tasaReal: real,
-          tasaAnunciada: desde,
-          tasaHasta: numero(p.ea_hasta),
-          hastaUsura: p.hasta_origen === 'usura',
-          vigencia: p.vigente_desde,
-          pdf: p.fuente?.url ?? null,
-          logo: p.entidad.logo
-            ? `${this.base}/assets/${p.entidad.logo}?height=56&fit=inside&format=webp`
-            : null,
-        });
+      let datos = this.estado.get(CLAVE_TASAS, null);
+      if (datos) {
+        this.estado.remove(CLAVE_TASAS);
+      } else if (this.cargador) {
+        datos = await this.cargador();
+        this.estado.set(CLAVE_TASAS, datos);
+      } else {
+        if (!this.http) throw new Error('Sin HttpClient');
+        datos = await firstValueFrom(this.http.get<DatosTasas>('/api/tasas'));
       }
-      const cortes = promedios
-        .map((x) => x.corte)
-        .filter((c): c is string => !!c)
-        .sort();
-      this.todas.set(tasas);
-      this.corte.update((c) => ({ ...c, fecha: cortes.at(-1) ?? null }));
+      this.todas.set(datos.tasas);
+      this.corte.set(datos.corte);
       this.sinConexion.set(false);
     } catch {
       this.sinConexion.set(true);
@@ -159,13 +130,5 @@ export class TasasService {
 
   esProducto(valor: unknown): valor is Producto {
     return this.productos.some((p) => p.id === valor);
-  }
-
-  private async leer<T>(ruta: string): Promise<T[]> {
-    if (!this.http) throw new Error('Sin HttpClient');
-    const r = await firstValueFrom(
-      this.http.get<{ data: T[] }>(`${this.base}${ruta}`),
-    );
-    return r.data;
   }
 }

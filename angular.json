@@ -67,7 +67,8 @@
               "buildTarget": "credimetria:build:production"
             },
             "development": {
-              "buildTarget": "credimetria:build:development"
+              "buildTarget": "credimetria:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"
