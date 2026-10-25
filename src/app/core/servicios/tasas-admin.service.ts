@@ -32,6 +32,8 @@ const CAMPOS_TASA = [
   'fuente.url_indice',
   'revisada_por.first_name',
   'revisada_por.last_name',
+  'captura.id',
+  'captura.type',
 ].join(',');
 
 const DECIMALES = [
@@ -83,6 +85,21 @@ export class TasasAdminService {
 
   guardar(id: number, cambios: CambiosTasa): Promise<TasaAdmin> {
     return this.escribir('PATCH', `/items/tasas_publicadas/${id}`, cambios);
+  }
+
+  /** Guarda en Directus la copia del PDF (o una imagen) y la une a la tasa. */
+  async subirCaptura(id: number, archivo: File): Promise<TasaAdmin> {
+    const datos = new FormData();
+    datos.append('title', archivo.name);
+    datos.append('file', archivo, archivo.name);
+    const subido = await this.sesion.pedir<{ id: string }>(
+      'POST',
+      '/files',
+      datos,
+    );
+    return this.escribir('PATCH', `/items/tasas_publicadas/${id}`, {
+      captura: subido.id,
+    });
   }
 
   /** Tasa escrita a mano; queda por revisar como las del robot. */

@@ -36,6 +36,8 @@ export interface TasaAdmin {
   entidad: { codigo: string; nombre: string; logo: string | null };
   fuente: Omit<FuenteTasa, 'entidad' | 'producto'> | null;
   revisada_por: { first_name: string | null; last_name: string | null } | null;
+  /** Copia guardada del PDF o de la página, como prueba. */
+  captura: { id: string; type: string | null } | null;
 }
 
 /** Lo que se puede escribir de una tasa desde la configuración. */

@@ -133,6 +133,12 @@ export class SesionAdmin {
     return `${this.base}/assets/${id}?${params}`;
   }
 
+  /** Dirección de un archivo de Directus para abrirlo (PDF o imagen). */
+  urlArchivo(id: string): string | null {
+    if (!this.acceso) return null;
+    return `${this.base}/assets/${id}?access_token=${encodeURIComponent(this.acceso)}`;
+  }
+
   /** Llama a Directus con el token; si venció, lo renueva una vez y reintenta. */
   async pedir<T>(
     metodo: 'GET' | 'POST' | 'PATCH',

@@ -33,6 +33,7 @@ function tasa(cambios: Partial<TasaAdmin>): TasaAdmin {
       url_indice: null,
     },
     revisada_por: null,
+    captura: null,
     ...cambios,
   };
 }
@@ -49,6 +50,7 @@ describe('TasasAdmin', () => {
       'cambiarEstado',
       'guardar',
       'crear',
+      'subirCaptura',
     ]);
     servicio.listar.and.resolveTo([
       tasa({}),
@@ -69,6 +71,7 @@ describe('TasasAdmin', () => {
           provide: SesionAdmin,
           useValue: {
             usuario: signal({ id: 'u1', email: 'a@b.co', nombre: 'Juan' }),
+            urlArchivo: (id: string) => `https://directus.prueba/assets/${id}`,
             urlImagen: (id: string | null) =>
               id ? `https://directus.prueba/assets/${id}` : null,
           },
@@ -162,5 +165,27 @@ describe('TasasAdmin', () => {
     fixture.detectChanges();
     expect(html.querySelector('.tasa .logo')).toBeNull();
     expect(html.querySelector('.tasa h2')?.textContent).toContain('AV Villas');
+  });
+
+  it('sube la copia del PDF y deja el enlace para verla', async () => {
+    const { fixture, html } = await crear();
+    servicio.subirCaptura.and.resolveTo(
+      tasa({ captura: { id: 'pdf-1', type: 'application/pdf' } }),
+    );
+    const campo = html.querySelector<HTMLInputElement>('.subir input')!;
+    const pdf = new File(['%PDF'], 'tasas.pdf', { type: 'application/pdf' });
+    Object.defineProperty(campo, 'files', { value: [pdf] });
+    campo.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(servicio.subirCaptura).toHaveBeenCalledWith(1, pdf);
+    const enlace = [
+      ...html.querySelectorAll<HTMLAnchorElement>('.fuente a'),
+    ].find((a) => a.textContent!.includes('Copia guardada'))!;
+    expect(enlace.textContent).toContain('(PDF)');
+    expect(enlace.href).toBe('https://directus.prueba/assets/pdf-1');
+    expect(html.querySelector('.subir')?.textContent).toContain(
+      'Cambiar copia',
+    );
   });
 });

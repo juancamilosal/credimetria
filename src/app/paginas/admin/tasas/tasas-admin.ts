@@ -153,6 +153,21 @@ export class TasasAdmin implements OnInit {
     return this.sesion.urlImagen(t.entidad.logo, 56);
   }
 
+  /** Enlace a la copia guardada en Directus. */
+  protected copia(t: TasaAdmin): string | null {
+    return t.captura ? this.sesion.urlArchivo(t.captura.id) : null;
+  }
+
+  protected async subirCopia(t: TasaAdmin, evento: Event): Promise<void> {
+    const campo = evento.target as HTMLInputElement;
+    const archivo = campo.files?.[0];
+    campo.value = '';
+    if (!archivo) return;
+    await this.trabajar(t.id, async () => {
+      this.reemplazar(await this.admin.subirCaptura(t.id, archivo));
+    });
+  }
+
   /** "bbva.com.co" para mostrar de dónde es el enlace. */
   protected sitio(url: string): string {
     try {

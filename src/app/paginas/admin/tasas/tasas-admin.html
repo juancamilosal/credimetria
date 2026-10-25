@@ -146,6 +146,14 @@
                 <a [href]="f.url" target="_blank" rel="noopener noreferrer"
                   >Abrir fuente en {{ sitio(f.url) }} ↗</a
                 >
+                @if (copia(t); as url) {
+                  <a [href]="url" target="_blank" rel="noopener noreferrer"
+                    >Copia guardada{{
+                      t.captura?.type === "application/pdf" ? " (PDF)" : ""
+                    }}
+                    ↗</a
+                  >
+                }
                 @if (f.url_indice) {
                   <a
                     [href]="f.url_indice"
@@ -210,6 +218,16 @@
               >
                 Editar
               </button>
+              <label class="btn btn-claro subir">
+                {{ t.captura ? "Cambiar copia" : "Subir copia del PDF" }}
+                <input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  class="visualmente-oculto"
+                  [disabled]="ocupado() === t.id"
+                  (change)="subirCopia(t, $event)"
+                />
+              </label>
             </div>
           }
         </li>

@@ -221,3 +221,12 @@ blockquote {
     gap: 8px;
   }
 }
+
+.subir {
+  cursor: pointer;
+}
+
+.subir:focus-within {
+  outline: 3px solid var(--cm-marca-600);
+  outline-offset: 2px;
+}

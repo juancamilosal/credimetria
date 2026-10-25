@@ -111,7 +111,9 @@ Directus. No está en el menú: se entra por `/admin`.
   fuente (página o PDF, y la página de tasas y tarifas si la hay), la frase
   y las notas, con el logo de la entidad (de `entidades.logo`, pedido a
   Directus con el token en la dirección porque los archivos no son
-  públicos). Se puede publicar, rechazar, volver a revisar, editar
+  públicos), y el enlace a la copia guardada del PDF o la página
+  (`captura`). "Subir copia del PDF" sube el archivo a Directus y lo une a
+  la tasa. Se puede publicar, rechazar, volver a revisar, editar
   (con "Calcular E.A." desde la tasa mensual) y crear una tasa nueva desde
   una fuente. Al publicar o rechazar se guardan `revisada_por` y
   `revisada_en`.
