@@ -478,17 +478,25 @@
     <p class="nota sin-pdf">Sin PDF: edítala y elige de cuál salió.</p>
   }
 
-  @if (t.frase) {
-    <blockquote>“{{ t.frase }}”</blockquote>
-  }
-  @if (t.notas) {
-    <p class="nota notas">{{ t.notas }}</p>
-  }
-  @if (t.estado === "publicada" && t.revisada_en) {
-    <p class="nota">
-      Aprobada por {{ revisor(t) || "—" }} el
-      {{ t.revisada_en | date: "d MMM y, h:mm a" }}
-    </p>
+  @if (t.frase || t.notas || (t.estado === "publicada" && t.revisada_en)) {
+    <!-- La frase, las notas y quién aprobó quedan ocultas hasta pedirlas -->
+    <details class="detalle">
+      <summary>Ver más detalle</summary>
+      <div class="detalle-cuerpo">
+        @if (t.frase) {
+          <blockquote>“{{ t.frase }}”</blockquote>
+        }
+        @if (t.notas) {
+          <p class="nota notas">{{ t.notas }}</p>
+        }
+        @if (t.estado === "publicada" && t.revisada_en) {
+          <p class="nota">
+            Aprobada por {{ revisor(t) || "—" }} el
+            {{ t.revisada_en | date: "d MMM y, h:mm a" }}
+          </p>
+        }
+      </div>
+    </details>
   }
 </ng-template>
 

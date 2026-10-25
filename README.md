@@ -126,6 +126,8 @@ Directus. No está en el menú: se entra por `/admin`.
     tasa y PDF** (con un segundo toque) borra las dos; si había una tasa
     anterior, vuelve a quedar publicada con su PDF como actual. Por aprobar
     se corrige con Editar o se rechaza.
+  - La frase del PDF, las notas y quién aprobó van ocultas en **"Ver más
+    detalle"**, para que la tarjeta muestre solo lo principal.
   - **Aprobar** deja la tasa publicada y su PDF como actual; la tasa que
     estaba publicada y el PDF anterior pasan a `anterior`. Nada se borra:
     "Ver anteriores" muestra las anteriores y rechazadas con su PDF.

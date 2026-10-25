@@ -499,4 +499,21 @@ describe('TasasAdmin', () => {
     expect(nueva.querySelector('.eliminar')).toBeNull();
     expect(nueva.querySelector('.cambiar')).toBeNull();
   });
+
+  it('oculta la frase, las notas y quién aprobó hasta tocar "Ver más detalle"', async () => {
+    await crear();
+    const nueva = html.querySelector('.banco [aria-label="Por aprobar"]')!;
+    const detalle = nueva.querySelector<HTMLDetailsElement>('.detalle')!;
+    expect(detalle.open).toBeFalse();
+    expect(detalle.querySelector('summary')?.textContent).toContain(
+      'Ver más detalle',
+    );
+    expect(detalle.querySelector('blockquote')?.textContent).toContain(
+      'Tasa Mínima 23,47 %',
+    );
+    const hoy = html.querySelector('.banco [aria-label="Publicada hoy"]')!;
+    expect(hoy.querySelector('.detalle')?.textContent).toContain(
+      'Aprobada por Juan Salazar',
+    );
+  });
 });

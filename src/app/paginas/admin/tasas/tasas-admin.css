@@ -292,6 +292,23 @@ blockquote {
   font-size: 14px;
 }
 
+.detalle summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--cm-enlace);
+}
+
+.detalle[open] summary {
+  margin-bottom: 10px;
+}
+
+.detalle-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .notas {
   white-space: pre-line;
 }
