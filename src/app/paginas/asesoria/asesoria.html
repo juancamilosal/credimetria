@@ -39,213 +39,308 @@
       <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
         <div class="intro">
           <h1>Asesoría gratis para conseguir la mejor tasa</h1>
-          <p class="muted">
-            Menos de un minuto. Un asesor aliado verificado te contacta por el
-            canal que elijas.
-          </p>
-          @if (vieneDe(); as texto) {
-            <p class="etq etq-marca viene">{{ texto }}</p>
+          @if (paso() === 0) {
+            <p class="muted">
+              Tres pasos cortos, casi todo con botones. Un asesor aliado
+              verificado te contacta por el canal que elijas.
+            </p>
+            @if (vieneDe(); as texto) {
+              <p class="etq etq-marca viene">{{ texto }}</p>
+            }
           }
         </div>
 
-        <fieldset>
-          <legend id="lbProducto">¿Qué crédito buscas?</legend>
-          <app-chips
-            variante="marca"
-            etiqueta="lbProducto"
-            [opciones]="opcionesProducto"
-            [valor]="form.controls.producto.value"
-            (valorChange)="form.controls.producto.setValue($event)"
-          />
-        </fieldset>
+        <ol class="progreso" aria-label="Pasos">
+          @for (p of pasos; track p.titulo; let i = $index) {
+            <li
+              [class.hecho]="i < paso()"
+              [class.actual]="i === paso()"
+              [attr.aria-current]="i === paso() ? 'step' : null"
+            >
+              <span class="barra"></span>
+              <span class="paso-nombre">{{ i + 1 }}. {{ p.titulo }}</span>
+            </li>
+          }
+        </ol>
 
-        <div class="rejilla">
-          <div class="campo">
-            <label for="asMonto">¿Cuánto necesitas?</label>
-            <input
-              id="asMonto"
-              formControlName="monto"
-              inputmode="numeric"
-              placeholder="30.000.000"
-              autocomplete="off"
-              (blur)="formatearMonto()"
-              [attr.aria-invalid]="mostrarError('monto')"
-              aria-describedby="errMonto"
-            />
-            @if (mostrarError("monto")) {
-              <span class="error" id="errMonto">
-                Escribe un monto de al menos $1.000.000.
-              </span>
-            }
-          </div>
-          <div class="campo">
-            <label for="asIngreso">¿De dónde vienen tus ingresos?</label>
-            <select id="asIngreso" formControlName="ingreso">
-              @for (opcion of ingresos; track opcion) {
-                <option [value]="opcion">{{ opcion }}</option>
-              }
-            </select>
-          </div>
-          <div class="campo">
-            <label for="asSalario">Ingreso mensual aproximado</label>
-            <select id="asSalario" formControlName="salario">
-              @for (opcion of salarios; track opcion) {
-                <option [value]="opcion">{{ opcion }}</option>
-              }
-            </select>
-          </div>
-          <div class="campo">
-            <label for="asCiudad">Ciudad</label>
-            <input
-              id="asCiudad"
-              formControlName="ciudad"
-              placeholder="Ej. Bogotá"
-              autocomplete="address-level2"
-              [attr.aria-invalid]="mostrarError('ciudad')"
-              aria-describedby="errCiudad"
-            />
-            @if (mostrarError("ciudad")) {
-              <span class="error" id="errCiudad">Escribe tu ciudad.</span>
-            }
-          </div>
-        </div>
+        <h2 id="tituloPaso" tabindex="-1">
+          Paso {{ paso() + 1 }} de 3 · {{ pasos[paso()].titulo }}
+        </h2>
 
-        <fieldset>
-          <legend>¿Tienes reportes negativos en centrales de riesgo?</legend>
-          <div class="opciones">
-            <label
-              ><input
-                type="radio"
-                formControlName="reporte"
-                value="no"
-              />No</label
-            >
-            <label
-              ><input
-                type="radio"
-                formControlName="reporte"
-                value="si"
-              />Sí</label
-            >
-            <label
-              ><input type="radio" formControlName="reporte" value="no-se" />No
-              sé</label
-            >
-          </div>
-        </fieldset>
-
-        <fieldset>
-          <legend id="lbUrgencia">¿Cuándo necesitas el crédito?</legend>
-          <app-chips
-            variante="urgencia"
-            etiqueta="lbUrgencia"
-            [opciones]="opcionesUrgencia"
-            [valor]="form.controls.urgencia.value"
-            (valorChange)="form.controls.urgencia.setValue($event)"
-          />
-        </fieldset>
-
-        <div class="rejilla">
-          <div class="campo">
-            <label for="asNombre">Nombre</label>
-            <input
-              id="asNombre"
-              formControlName="nombre"
-              placeholder="Tu nombre"
-              autocomplete="name"
-              [attr.aria-invalid]="mostrarError('nombre')"
-              aria-describedby="errNombre"
-            />
-            @if (mostrarError("nombre")) {
-              <span class="error" id="errNombre">Escribe tu nombre.</span>
-            }
-          </div>
-          <div class="campo">
-            <label for="asCel">Celular</label>
-            <input
-              id="asCel"
-              formControlName="celular"
-              type="tel"
-              inputmode="tel"
-              placeholder="300 000 0000"
-              autocomplete="tel-national"
-              [attr.aria-invalid]="mostrarError('celular')"
-              aria-describedby="errCel"
-            />
-            @if (mostrarError("celular")) {
-              <span class="error" id="errCel">
-                Escribe un celular de 10 dígitos que empiece por 3.
-              </span>
-            }
-          </div>
-        </div>
-
-        <fieldset formGroupName="canales">
-          <legend>¿Por dónde te pueden contactar?</legend>
-          <div class="opciones">
-            <label
-              ><input
-                type="checkbox"
-                formControlName="whatsapp"
-              />WhatsApp</label
-            >
-            <label
-              ><input type="checkbox" formControlName="llamada" />Llamada</label
-            >
-            <label
-              ><input type="checkbox" formControlName="correo" />Correo</label
-            >
-          </div>
-        </fieldset>
-        @if (quiereCorreo()) {
-          <div class="campo correo">
-            <label for="asCorreo">Correo</label>
-            <input
-              id="asCorreo"
-              type="email"
-              formControlName="correo"
-              placeholder="tu@correo.com"
-              autocomplete="email"
-              [attr.aria-invalid]="errorGrupo('correo')"
-            />
-            @if (errorGrupo("correo")) {
-              <span class="error">Escribe un correo válido.</span>
-            }
-          </div>
+        @if (paso() > 0) {
+          <p class="resumen">
+            <span>{{ resumen() }}</span>
+            <button type="button" class="cambiar" (click)="irAPaso(0)">
+              Cambiar
+            </button>
+          </p>
         }
-        @if (errorGrupo("sinCanal")) {
-          <span class="error">Marca al menos un canal.</span>
+
+        @switch (paso()) {
+          @case (0) {
+            <fieldset>
+              <legend id="lbProducto">¿Qué crédito buscas?</legend>
+              <app-chips
+                variante="marca"
+                etiqueta="lbProducto"
+                [opciones]="opcionesProducto"
+                [valor]="form.controls.producto.value"
+                (valorChange)="form.controls.producto.setValue($event)"
+              />
+            </fieldset>
+
+            <div class="campo">
+              <label for="asMonto">¿Cuánto necesitas?</label>
+              <div class="rapidos" role="group" aria-label="Montos frecuentes">
+                @for (m of montosRapidos; track m) {
+                  <button
+                    type="button"
+                    class="rapido"
+                    [attr.aria-pressed]="
+                      form.controls.monto.value === (m | pesos).slice(1)
+                    "
+                    (click)="elegirMonto(m)"
+                  >
+                    {{ m | pesos }}
+                  </button>
+                }
+              </div>
+              <input
+                id="asMonto"
+                formControlName="monto"
+                inputmode="numeric"
+                placeholder="U otro monto, ej. 30.000.000"
+                autocomplete="off"
+                (blur)="formatearMonto()"
+                [attr.aria-invalid]="mostrarError('monto')"
+                aria-describedby="errMonto"
+              />
+              @if (mostrarError("monto")) {
+                <span class="error" id="errMonto">
+                  Elige o escribe un monto de al menos $1.000.000.
+                </span>
+              }
+            </div>
+
+            <fieldset>
+              <legend id="lbUrgencia">¿Cuándo necesitas el crédito?</legend>
+              <app-chips
+                variante="urgencia"
+                etiqueta="lbUrgencia"
+                [opciones]="opcionesUrgencia"
+                [valor]="form.controls.urgencia.value"
+                (valorChange)="form.controls.urgencia.setValue($event)"
+              />
+            </fieldset>
+          }
+          @case (1) {
+            <fieldset>
+              <legend id="lbIngreso">¿De dónde vienen tus ingresos?</legend>
+              <app-chips
+                variante="cuadrado"
+                etiqueta="lbIngreso"
+                [opciones]="opcionesIngreso"
+                [valor]="form.controls.ingreso.value"
+                (valorChange)="form.controls.ingreso.setValue($event)"
+              />
+              @if (mostrarError("ingreso")) {
+                <span class="error">Elige una opción.</span>
+              }
+            </fieldset>
+
+            <fieldset>
+              <legend id="lbSalario">¿Cuánto ganas al mes, más o menos?</legend>
+              <app-chips
+                variante="cuadrado"
+                etiqueta="lbSalario"
+                [opciones]="opcionesSalario"
+                [valor]="form.controls.salario.value"
+                (valorChange)="form.controls.salario.setValue($event)"
+              />
+              @if (mostrarError("salario")) {
+                <span class="error">Elige una opción.</span>
+              }
+            </fieldset>
+
+            <fieldset>
+              <legend id="lbReporte">
+                ¿Tienes reportes negativos en centrales de riesgo?
+              </legend>
+              <app-chips
+                variante="cuadrado"
+                etiqueta="lbReporte"
+                [opciones]="opcionesReporte"
+                [valor]="form.controls.reporte.value"
+                (valorChange)="form.controls.reporte.setValue($any($event))"
+              />
+              @if (mostrarError("reporte")) {
+                <span class="error">Elige una opción.</span>
+              }
+            </fieldset>
+
+            <fieldset>
+              <legend id="lbCiudad">¿En qué ciudad vives?</legend>
+              <app-chips
+                variante="cuadrado"
+                etiqueta="lbCiudad"
+                [opciones]="opcionesCiudad"
+                [valor]="ciudadElegida()"
+                (valorChange)="elegirCiudad($event)"
+              />
+              @if (ciudadElegida() === "Otra") {
+                <div class="campo otra">
+                  <label for="asCiudad">Escribe tu ciudad</label>
+                  <input
+                    id="asCiudad"
+                    formControlName="ciudad"
+                    placeholder="Ej. Pereira"
+                    autocomplete="address-level2"
+                    [attr.aria-invalid]="mostrarError('ciudad')"
+                  />
+                </div>
+              }
+              @if (mostrarError("ciudad")) {
+                <span class="error">
+                  {{
+                    ciudadElegida() === "Otra"
+                      ? "Escribe tu ciudad."
+                      : "Elige tu ciudad."
+                  }}
+                </span>
+              }
+            </fieldset>
+          }
+          @case (2) {
+            <div class="rejilla">
+              <div class="campo">
+                <label for="asNombre">Nombre</label>
+                <input
+                  id="asNombre"
+                  formControlName="nombre"
+                  placeholder="Tu nombre"
+                  autocomplete="name"
+                  [attr.aria-invalid]="mostrarError('nombre')"
+                  aria-describedby="errNombre"
+                />
+                @if (mostrarError("nombre")) {
+                  <span class="error" id="errNombre">Escribe tu nombre.</span>
+                }
+              </div>
+              <div class="campo">
+                <label for="asCel">Celular</label>
+                <input
+                  id="asCel"
+                  formControlName="celular"
+                  type="tel"
+                  inputmode="tel"
+                  placeholder="300 000 0000"
+                  autocomplete="tel-national"
+                  [attr.aria-invalid]="mostrarError('celular')"
+                  aria-describedby="errCel"
+                />
+                @if (mostrarError("celular")) {
+                  <span class="error" id="errCel">
+                    Escribe un celular de 10 dígitos que empiece por 3.
+                  </span>
+                }
+              </div>
+            </div>
+
+            <fieldset formGroupName="canales">
+              <legend>¿Por dónde te pueden contactar?</legend>
+              <div class="opciones">
+                <label
+                  ><input
+                    type="checkbox"
+                    formControlName="whatsapp"
+                  />WhatsApp</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    formControlName="llamada"
+                  />Llamada</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    formControlName="correo"
+                  />Correo</label
+                >
+              </div>
+            </fieldset>
+            @if (quiereCorreo()) {
+              <div class="campo correo">
+                <label for="asCorreo">Correo</label>
+                <input
+                  id="asCorreo"
+                  type="email"
+                  formControlName="correo"
+                  placeholder="tu@correo.com"
+                  autocomplete="email"
+                  [attr.aria-invalid]="errorGrupo('correo')"
+                />
+                @if (errorGrupo("correo")) {
+                  <span class="error">Escribe un correo válido.</span>
+                }
+              </div>
+            }
+            @if (errorGrupo("sinCanal")) {
+              <span class="error">Marca al menos un canal.</span>
+            }
+            <span class="nota canales-nota">
+              Solo te contactan por los canales que marques, de lunes a viernes
+              de 7 a. m. a 7 p. m. y sábados de 8 a. m. a 3 p. m.
+            </span>
+
+            <label class="autoriza">
+              <input type="checkbox" formControlName="autorizo" />
+              <span>
+                Autorizo a Credimetría a compartir mis datos con los asesores de
+                crédito aliados publicados en
+                <a routerLink="/aliados">credimetria.co/aliados</a>, para que me
+                contacten y me ofrezcan créditos. Me contactarán máximo 2
+                asesores. Acepto la
+                <a routerLink="/politica-de-datos"
+                  >política de tratamiento de datos</a
+                >.
+              </span>
+            </label>
+          }
         }
-        <span class="nota canales-nota">
-          Solo te contactan por los canales que marques, de lunes a viernes de 7
-          a. m. a 7 p. m. y sábados de 8 a. m. a 3 p. m.
-        </span>
 
-        <label class="autoriza">
-          <input type="checkbox" formControlName="autorizo" />
-          <span>
-            Autorizo a Credimetría a compartir mis datos con los asesores de
-            crédito aliados publicados en
-            <a routerLink="/aliados">credimetria.co/aliados</a>, para que me
-            contacten y me ofrezcan créditos. Me contactarán máximo 2 asesores.
-            Acepto la
-            <a routerLink="/politica-de-datos"
-              >política de tratamiento de datos</a
-            >.
-          </span>
-        </label>
-
-        <button
-          class="btn btn-principal enviar"
-          type="submit"
-          [disabled]="!autorizo()"
-        >
-          {{
-            autorizo()
-              ? "Quiero que me asesoren"
-              : "Marca la autorización para continuar"
-          }}
-        </button>
+        <div class="navegar">
+          @if (paso() > 0) {
+            <button
+              class="btn btn-borde"
+              type="button"
+              (click)="irAPaso(paso() - 1)"
+            >
+              Atrás
+            </button>
+          }
+          @if (paso() < 2) {
+            <button
+              class="btn btn-principal siguiente"
+              type="button"
+              (click)="continuar()"
+            >
+              Continuar
+            </button>
+          } @else {
+            <button
+              class="btn btn-principal enviar siguiente"
+              type="submit"
+              [disabled]="!autorizo()"
+            >
+              {{
+                autorizo()
+                  ? "Quiero que me asesoren"
+                  : "Marca la autorización para continuar"
+              }}
+            </button>
+          }
+        </div>
       </form>
     }
   </div>

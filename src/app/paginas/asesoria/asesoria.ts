@@ -1,7 +1,9 @@
 import {
+  afterNextRender,
   Component,
   ElementRef,
   inject,
+  Injector,
   signal,
   viewChild,
 } from '@angular/core';
@@ -15,7 +17,7 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { Chips } from '../../compartido/chips/chips';
-import { formatoPesos } from '../../compartido/pipes/formato';
+import { formatoPesos, PesosPipe } from '../../compartido/pipes/formato';
 import {
   INGRESOS,
   Reporte,
@@ -29,6 +31,26 @@ import { TasasService } from '../../core/servicios/tasas.service';
 import { leerNumero } from '../../core/utilidades/credito';
 
 const MONTO_MINIMO = 1_000_000;
+
+/** Montos de un toque para no tener que escribir. */
+const MONTOS_RAPIDOS = [5_000_000, 10_000_000, 20_000_000, 50_000_000];
+
+/** Ciudades con más solicitudes; "Otra" deja escribirla. */
+const CIUDADES = ['Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Bucaramanga'];
+const OTRA = 'Otra';
+
+/** Los 3 pasos y los campos que revisa cada uno antes de seguir. */
+const PASOS = [
+  { titulo: 'Qué necesitas', campos: ['producto', 'monto', 'urgencia'] },
+  {
+    titulo: 'Tu perfil',
+    campos: ['ingreso', 'salario', 'reporte', 'ciudad'],
+  },
+  {
+    titulo: 'Cómo te contactamos',
+    campos: ['nombre', 'celular', 'canales', 'correo', 'autorizo'],
+  },
+] as const;
 
 /** Productos en el orden del formulario: compra de cartera primero. */
 const ORDEN_PRODUCTOS: Producto[] = [
@@ -66,12 +88,13 @@ function canalesValidos(grupo: AbstractControl): ValidationErrors | null {
 }
 
 /**
- * Formulario de prospecto. Solo se envía con la autorización de datos
- * marcada (Ley 1581) y guarda la prueba de esa autorización.
+ * Formulario de prospecto en 3 pasos cortos, casi todo con botones. Solo se
+ * envía con la autorización de datos marcada (Ley 1581) y guarda la prueba
+ * de esa autorización.
  */
 @Component({
   selector: 'app-asesoria',
-  imports: [ReactiveFormsModule, RouterLink, Chips],
+  imports: [ReactiveFormsModule, RouterLink, Chips, PesosPipe],
   templateUrl: './asesoria.html',
   styleUrl: './asesoria.css',
 })
@@ -80,6 +103,7 @@ export class Asesoria {
   private readonly prospectos = inject(ProspectosService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder).nonNullable;
+  private readonly injector = inject(Injector);
   /** Entidad elegida en el ranking, si llegó desde allí. */
   private entidad: string | null = null;
   private readonly formulario =
@@ -93,18 +117,39 @@ export class Asesoria {
     valor: u.id,
     texto: u.texto,
   }));
-  protected readonly ingresos = INGRESOS;
-  protected readonly salarios = SALARIOS;
+  protected readonly opcionesIngreso = INGRESOS.map((i) => ({
+    valor: i,
+    texto: i,
+  }));
+  protected readonly opcionesSalario = SALARIOS.map((s) => ({
+    valor: s,
+    texto: s,
+  }));
+  protected readonly opcionesReporte = [
+    { valor: 'no', texto: 'No' },
+    { valor: 'si', texto: 'Sí' },
+    { valor: 'no-se', texto: 'No sé' },
+  ];
+  protected readonly opcionesCiudad = [...CIUDADES, OTRA].map((c) => ({
+    valor: c,
+    texto: c,
+  }));
+  protected readonly montosRapidos = MONTOS_RAPIDOS;
+  protected readonly pasos = PASOS;
+  /** Paso actual: 0, 1 o 2. */
+  protected readonly paso = signal(0);
+  /** Ciudad elegida en los botones ('Otra' muestra el campo para escribirla). */
+  protected readonly ciudadElegida = signal('');
   protected readonly conectado = this.prospectos.conectado;
 
   protected readonly form = this.fb.group(
     {
       producto: ['compra-cartera' as string, Validators.required],
       monto: ['', montoMinimo],
-      ingreso: [INGRESOS[0] as string],
-      salario: [SALARIOS[0] as string],
+      ingreso: ['', Validators.required],
+      salario: ['', Validators.required],
       ciudad: ['', Validators.required],
-      reporte: ['no' as Reporte],
+      reporte: ['' as Reporte | '', Validators.required],
       urgencia: ['ya' as string],
       nombre: ['', Validators.required],
       celular: ['', celularColombiano],
@@ -126,6 +171,19 @@ export class Asesoria {
     { initialValue: false },
   );
 
+  /** Resumen del paso 1 que se ve en los pasos siguientes. */
+  protected resumen(): string {
+    const v = this.form.getRawValue();
+    const urgencia = URGENCIAS.find((u) => u.id === v.urgencia);
+    return [
+      this.tasas.nombre(v.producto as Producto),
+      formatoPesos(leerNumero(v.monto)),
+      urgencia?.texto,
+    ].join(' · ');
+  }
+  /** Intentó seguir en este paso: muestra los errores aunque no haya tocado. */
+  protected readonly intentoPaso = signal(false);
+
   /** Texto que explica de dónde viene la persona (simulador o ranking). */
   protected readonly vieneDe = signal<string | null>(null);
   protected readonly intentoEnviar = signal(false);
@@ -138,7 +196,42 @@ export class Asesoria {
   /** Muestra el error de un campo solo después de tocarlo o de intentar enviar. */
   protected mostrarError(nombre: keyof typeof this.form.controls): boolean {
     const control = this.form.controls[nombre];
-    return control.invalid && (control.touched || this.intentoEnviar());
+    return (
+      control.invalid &&
+      (control.touched || this.intentoEnviar() || this.intentoPaso())
+    );
+  }
+
+  protected elegirMonto(monto: number): void {
+    this.form.controls.monto.setValue(formatoPesos(monto).slice(1));
+    this.form.controls.monto.markAsTouched();
+  }
+
+  protected elegirCiudad(ciudad: string): void {
+    this.ciudadElegida.set(ciudad);
+    this.form.controls.ciudad.setValue(ciudad === OTRA ? '' : ciudad);
+    if (ciudad === OTRA) {
+      this.form.controls.ciudad.markAsUntouched();
+      this.enfocar('#asCiudad');
+    }
+  }
+
+  /** Revisa los campos del paso actual y, si están bien, pasa al siguiente. */
+  protected continuar(): void {
+    const campos = PASOS[this.paso()].campos;
+    campos.forEach((c) => this.form.controls[c].markAsTouched());
+    if (campos.some((c) => this.form.controls[c].invalid)) {
+      this.intentoPaso.set(true);
+      this.enfocarPrimerError();
+      return;
+    }
+    this.irAPaso(this.paso() + 1);
+  }
+
+  protected irAPaso(paso: number): void {
+    this.intentoPaso.set(false);
+    this.paso.set(paso);
+    this.enfocar('#tituloPaso', true);
   }
 
   protected errorGrupo(error: 'sinCanal' | 'correo'): boolean {
@@ -167,7 +260,7 @@ export class Asesoria {
         ingreso: v.ingreso,
         salario: v.salario,
         ciudad: v.ciudad.trim(),
-        reporte: v.reporte,
+        reporte: v.reporte as Reporte,
         urgencia: v.urgencia as Urgencia,
         nombre: v.nombre.trim(),
         celular: v.celular.replace(/\D/g, ''),
@@ -185,6 +278,7 @@ export class Asesoria {
 
   protected volver(): void {
     this.enviado.set(null);
+    this.paso.set(0);
   }
 
   private llenarDesdeEnlace(params: ParamMap): void {
@@ -218,6 +312,24 @@ export class Asesoria {
     } else if (origen === 'ranking' && this.entidad && nombre) {
       this.vieneDe.set(`Desde el ranking: ${this.entidad}, ${nombre}.`);
     }
+  }
+
+  /** Pone el foco en un elemento cuando ya está en pantalla. */
+  private enfocar(selector: string, subir = false): void {
+    afterNextRender(
+      () => {
+        const el =
+          this.formulario().nativeElement.querySelector<HTMLElement>(selector);
+        if (subir) {
+          this.formulario().nativeElement.scrollIntoView?.({
+            behavior: 'smooth',
+            block: 'start',
+          });
+        }
+        el?.focus({ preventScroll: subir });
+      },
+      { injector: this.injector },
+    );
   }
 
   private enfocarPrimerError(): void {

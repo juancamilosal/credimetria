@@ -52,6 +52,116 @@ legend {
   margin-bottom: 10px;
 }
 
+/* Pasos */
+.progreso {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.progreso li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--cm-gris);
+}
+
+.progreso .barra {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--cm-linea);
+}
+
+.progreso .hecho .barra,
+.progreso .actual .barra {
+  background: var(--cm-marca-700);
+}
+
+.progreso .actual {
+  color: var(--cm-tinta);
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+h2:focus {
+  outline: none;
+}
+
+.resumen {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: var(--cm-fondo);
+  border-radius: var(--cm-r-boton);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cambiar {
+  background: none;
+  border: 0;
+  color: var(--cm-enlace);
+  font-weight: 700;
+  text-decoration: underline;
+  min-height: 44px;
+  padding: 0 4px;
+}
+
+.rapidos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rapido {
+  min-height: 44px;
+  padding: 9px 14px;
+  border-radius: var(--cm-r-campo);
+  border: 1px solid var(--cm-linea);
+  background: var(--cm-blanco);
+  color: var(--cm-tinta);
+  font-family: var(--cm-f-cifra);
+  font-size: 14px;
+}
+
+.rapido[aria-pressed="true"] {
+  background: var(--cm-marca-100);
+  border-color: var(--cm-marca-600);
+  color: var(--cm-enlace);
+  font-weight: 700;
+}
+
+fieldset .error {
+  display: block;
+  margin-top: 8px;
+}
+
+.otra {
+  margin-top: 12px;
+  max-width: 360px;
+}
+
+.navegar {
+  display: flex;
+  gap: 12px;
+  border-top: 1px solid var(--cm-linea-suave);
+  padding-top: 18px;
+}
+
+.siguiente {
+  flex: 1;
+}
+
 .rejilla {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
