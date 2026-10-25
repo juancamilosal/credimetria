@@ -144,6 +144,13 @@ M.V. en el PDF vigente desde el 5 oct 2026). Cada tasa guarda la copia del
 PDF en `captura`. Algunas entidades bloquean la descarga automática, así
 que el robot debe bajar los PDF con un navegador real.
 
+**Se guarda la tasa tal como la publica la entidad** (regla del 25 oct
+2026): si publica desde y hasta, van las dos; si publica una sola, va esa,
+sin "hasta". No se completa con la usura ni con supuestos. Si publica por
+segmentos (Personas, Preferente, Premium…), "desde" es la más baja y los
+segmentos van en las notas. Ejemplo: Banco de Bogotá, libre inversión,
+"desde 1,13 %" (Premium e Insigne; Personas desde 1,85 %).
+
 ### Colecciones en Directus
 
 `credimetria-api.valkiriacode.com` (Directus 11):
