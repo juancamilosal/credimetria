@@ -1,22 +1,36 @@
 .hero {
-  padding-block: 56px 120px;
-  text-align: center;
+  padding-block: 48px 120px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: center;
+}
+
+.hero-texto {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 18px;
 }
 
 .hero h1 {
-  font-size: clamp(34px, 6vw, 56px);
+  font-size: clamp(34px, 5.2vw, 56px);
   font-weight: 800;
-  max-width: 18ch;
+  max-width: 16ch;
 }
 
 .hero p {
-  font-size: clamp(16px, 2.2vw, 19px);
+  font-size: clamp(16px, 2vw, 19px);
   color: var(--cm-gris);
-  max-width: 60ch;
+  max-width: 54ch;
+}
+
+.hero-foto {
+  aspect-ratio: 4 / 4.4;
+  max-height: 460px;
+  width: 100%;
+  justify-self: end;
+  border-radius: var(--cm-r-bloque);
 }
 
 .sello {
@@ -32,7 +46,6 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  justify-content: center;
 }
 
 /* Tarjeta de las 3 mejores: se monta sobre el borde de la portada */
@@ -133,6 +146,64 @@
   white-space: normal;
 }
 
+/* Tarjetas con foto por tipo de crédito */
+.productos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.producto {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--cm-blanco);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-tarjeta);
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s;
+}
+
+.producto:hover {
+  border-color: var(--cm-marca-600);
+}
+
+.producto-foto {
+  aspect-ratio: 16 / 10;
+}
+
+.producto-texto {
+  flex: 1;
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.producto-texto h3 {
+  font-size: 18px;
+}
+
+.producto-texto .muted {
+  font-size: 14px;
+}
+
+.desde {
+  font-size: 14px;
+  margin-top: auto;
+}
+
+.ver {
+  font-weight: 700;
+  color: var(--cm-enlace);
+  font-size: 15px;
+}
+
 /* Entidades que comparamos */
 .entidades-titulo {
   font-size: 15px;
@@ -185,24 +256,31 @@
   font-weight: 700;
 }
 
-/* Bloque oscuro de asesoría */
+/* Bloque oscuro de asesoría, con foto */
 .oscuro {
   background: var(--cm-bloque);
   color: #ffffff;
   border-radius: var(--cm-r-bloque);
-  padding: 36px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 32px;
-  align-items: center;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  align-items: stretch;
 }
 
-.oscuro > div {
-  flex: 1 1 340px;
-  min-width: 0;
+.oscuro-foto {
+  min-height: 100%;
+}
+
+.oscuro-texto {
+  padding: 36px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  justify-content: center;
+}
+
+.oscuro-texto .leyenda {
+  margin-top: 8px;
 }
 
 .oscuro h2 {
@@ -229,9 +307,54 @@
   align-self: flex-start;
 }
 
+@media (max-width: 960px) {
+  .productos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .hero-foto {
+    aspect-ratio: 16 / 10;
+    max-height: 300px;
+  }
+
+  .oscuro {
+    grid-template-columns: 1fr;
+  }
+
+  .oscuro-foto {
+    aspect-ratio: 16 / 9;
+  }
+}
+
 @media (max-width: 760px) {
   .hero {
-    padding-block: 32px 104px;
+    padding-block: 28px 104px;
+  }
+
+  .productos {
+    grid-template-columns: 1fr;
+  }
+
+  /* En celular, foto a la izquierda para que las tarjetas no sean tan altas */
+  .producto {
+    flex-direction: row;
+  }
+
+  .producto-foto {
+    flex: 0 0 36%;
+    aspect-ratio: auto;
+  }
+
+  .producto-texto {
+    padding: 12px 14px;
+    gap: 4px;
   }
 
   .top {
@@ -253,7 +376,7 @@
     padding: 18px;
   }
 
-  .oscuro {
+  .oscuro-texto {
     padding: 22px;
   }
 }

@@ -1,18 +1,26 @@
 <section class="cabecera">
   <div class="wrap hero">
-    <span class="sello">Con datos de la Superintendencia Financiera</span>
-    <h1>Compara con datos, no con promesas</h1>
-    <p>
-      Los bancos anuncian tasas "desde" que casi nadie recibe. Credimetría te
-      muestra la tasa que de verdad cobra cada banco, cooperativa y financiera,
-      para que elijas tu crédito sabiendo cuánto vas a pagar.
-    </p>
-    <div class="acciones">
-      <a class="btn btn-principal" routerLink="/ranking"
-        >Ver ranking de tasas</a
-      >
-      <a class="btn btn-borde" routerLink="/simulador">Calcula tu cuota</a>
+    <div class="hero-texto">
+      <span class="sello">Con datos de la Superintendencia Financiera</span>
+      <h1>Compara con datos, no con promesas</h1>
+      <p>
+        Los bancos anuncian tasas "desde" que casi nadie recibe. Credimetría te
+        muestra la tasa que de verdad cobra cada banco, cooperativa y
+        financiera, para que elijas tu crédito sabiendo cuánto vas a pagar.
+      </p>
+      <div class="acciones">
+        <a class="btn btn-principal" routerLink="/ranking"
+          >Ver ranking de tasas</a
+        >
+        <a class="btn btn-borde" routerLink="/simulador">Calcula tu cuota</a>
+      </div>
     </div>
+    <app-foto
+      class="hero-foto"
+      [foto]="fotos.celularGrafica"
+      tamanos="(max-width: 860px) 100vw, 480px"
+      [prioritaria]="true"
+    />
   </div>
 </section>
 
@@ -68,6 +76,41 @@
     }
   </section>
 
+  <section class="seccion" aria-labelledby="tituloProductos">
+    <div class="titulo-sec">
+      <h2 id="tituloProductos">Compara el crédito que necesitas</h2>
+      <a routerLink="/ranking">Ver todos</a>
+    </div>
+    <ul class="productos">
+      @for (producto of productos; track producto.id) {
+        <li>
+          <a
+            class="producto"
+            routerLink="/ranking"
+            [queryParams]="{ producto: producto.id }"
+          >
+            <app-foto
+              class="producto-foto"
+              [foto]="producto.foto"
+              tamanos="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 300px"
+            />
+            <div class="producto-texto">
+              <h3>{{ producto.titulo }}</h3>
+              <p class="muted">{{ producto.texto }}</p>
+              @if (producto.mejor; as mejor) {
+                <p class="desde">
+                  Desde <b class="cifra">{{ mejor.tasaReal | tasa }}</b> E.A.
+                  con {{ mejor.entidad }}
+                </p>
+              }
+              <span class="ver">Ver tasas →</span>
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+
   <section id="como-funciona" class="seccion" aria-labelledby="tituloComo">
     <div class="titulo-sec"><h2 id="tituloComo">Cómo funciona</h2></div>
     <ol class="pasos">
@@ -94,14 +137,17 @@
 
   <section class="seccion">
     <div class="oscuro">
-      <div>
+      <app-foto
+        class="oscuro-foto"
+        [foto]="fotos.parejaPensionados"
+        tamanos="(max-width: 860px) 100vw, 480px"
+      />
+      <div class="oscuro-texto">
         <h2>Recibe asesoría gratis para conseguir la mejor tasa</h2>
         <p>
           Un asesor aliado revisa tu caso y te busca la mejor opción entre los
           bancos con los que trabaja.
         </p>
-      </div>
-      <div>
         <span class="leyenda" id="lbUrgInicio"
           >¿Cuándo necesitas el crédito?</span
         >

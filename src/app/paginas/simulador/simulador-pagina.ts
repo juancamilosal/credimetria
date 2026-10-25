@@ -1,6 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Foto } from '../../compartido/foto/foto';
 import { TablaRanking } from '../../compartido/tabla-ranking/tabla-ranking';
+import { FOTOS } from '../../core/datos/fotos';
 import { Producto } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { Simulador } from './calculadora/simulador';
@@ -8,15 +10,23 @@ import { Simulador } from './calculadora/simulador';
 /** Página del simulador: la calculadora y las 3 tasas más bajas del producto elegido. */
 @Component({
   selector: 'app-simulador-pagina',
-  imports: [RouterLink, Simulador, TablaRanking],
+  imports: [RouterLink, Foto, Simulador, TablaRanking],
   template: `
     <section class="cabecera">
-      <div class="wrap cabecera-texto">
-        <h1>Simulador de crédito</h1>
-        <p>
-          Escribe la tasa que te ofrecieron y te mostramos si es buena, cuánto
-          pagarías en total y quién te cobra menos.
-        </p>
+      <div class="wrap cabeza">
+        <div class="cabecera-texto">
+          <h1>Simulador de crédito</h1>
+          <p>
+            Escribe la tasa que te ofrecieron y te mostramos si es buena, cuánto
+            pagarías en total y quién te cobra menos.
+          </p>
+        </div>
+        <app-foto
+          class="cabeza-foto"
+          [foto]="foto"
+          tamanos="(max-width: 760px) 100vw, 420px"
+          [prioritaria]="true"
+        />
       </div>
     </section>
 
@@ -41,6 +51,24 @@ import { Simulador } from './calculadora/simulador';
     </div>
   `,
   styles: `
+    .cabeza {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 32px;
+      align-items: center;
+      padding-block: 8px;
+    }
+    .cabeza-foto {
+      aspect-ratio: 16 / 9;
+      border-radius: var(--cm-r-tarjeta);
+    }
+    @media (max-width: 760px) {
+      .cabeza {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding-bottom: 20px;
+      }
+    }
     .sim {
       padding-top: 32px;
     }
@@ -48,6 +76,7 @@ import { Simulador } from './calculadora/simulador';
 })
 export class SimuladorPagina {
   private readonly tasas = inject(TasasService);
+  protected readonly foto = FOTOS.mujerOferta;
 
   protected readonly producto = signal<Producto>('libre-inversion');
   protected readonly top = computed(() =>

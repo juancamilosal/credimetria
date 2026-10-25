@@ -2,8 +2,11 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Chips } from '../../compartido/chips/chips';
+import { Foto } from '../../compartido/foto/foto';
 import { PuntosPipe, TasaPipe } from '../../compartido/pipes/formato';
+import { FOTOS } from '../../core/datos/fotos';
 import { URGENCIAS } from '../../core/modelos/prospecto';
+import { Producto } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
 
 /**
@@ -12,7 +15,7 @@ import { TasasService } from '../../core/servicios/tasas.service';
  */
 @Component({
   selector: 'app-inicio',
-  imports: [DatePipe, RouterLink, Chips, PuntosPipe, TasaPipe],
+  imports: [DatePipe, RouterLink, Chips, Foto, PuntosPipe, TasaPipe],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',
 })
@@ -29,6 +32,39 @@ export class Inicio {
         t.tasaAnunciada === null ? null : t.tasaReal - t.tasaAnunciada,
     }));
   protected readonly entidades = this.tasas.entidades();
+  protected readonly fotos = FOTOS;
+
+  /** Tarjetas con foto por tipo de crédito; cada una lleva a su ranking. */
+  protected readonly productos = (
+    [
+      {
+        id: 'libre-inversion',
+        texto: 'Para lo que necesites, sin explicar en qué lo vas a usar.',
+        foto: FOTOS.hombreCuentas,
+      },
+      {
+        id: 'libranza',
+        texto:
+          'Para empleados, docentes y pensionados: la cuota se descuenta de la nómina.',
+        foto: FOTOS.docente,
+      },
+      {
+        id: 'vehiculo',
+        texto: 'Para estrenar carro, nuevo o usado.',
+        foto: FOTOS.jovenCarro,
+      },
+      {
+        id: 'vivienda',
+        texto: 'Para comprar casa o apartamento a largo plazo.',
+        foto: FOTOS.familiaVivienda,
+      },
+    ] as const
+  ).map((p) => ({
+    ...p,
+    id: p.id as Producto,
+    titulo: this.tasas.nombre(p.id),
+    mejor: this.tasas.mejor(p.id),
+  }));
 
   protected readonly urgencias = URGENCIAS.map((u) => ({
     valor: u.id,

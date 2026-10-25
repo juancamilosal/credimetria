@@ -67,6 +67,26 @@ colores a mano. La paleta es sobria a propósito:
   entre la tasa anunciada y la cobrada.
 - Fuentes: Plus Jakarta Sans para el texto e IBM Plex Mono para las cifras.
 
+## Fotos
+
+Las fotos de la marca (generadas con Gemini) tienen los originales en
+`src/assets/`, con nombres que dicen qué muestran. La página usa versiones en
+WebP de 640 y 1280 px en `public/imagenes/` (de 13 a 100 KB cada una),
+mostradas con el componente `app-foto` y descritas en `core/datos/fotos.ts`.
+
+| Foto                          | Dónde                               |
+| ----------------------------- | ----------------------------------- |
+| `celular-grafica-tasas`       | Portada del inicio                  |
+| `hombre-revisa-cuentas`       | Tarjeta de libre inversión (inicio) |
+| `docente-celular-salon`       | Tarjeta de libranza (inicio)        |
+| `joven-carro-nuevo`           | Tarjeta de vehículo (inicio)        |
+| `familia-vivienda-nueva`      | Tarjeta de vivienda (inicio)        |
+| `pareja-pensionados-tablet`   | Bloque de asesoría gratis (inicio)  |
+| `mujer-revisa-oferta-credito` | Cabecera del simulador              |
+
+Para agregar una foto: el original en `src/assets/`, las dos versiones WebP
+en `public/imagenes/` y su entrada en `FOTOS`.
+
 ## Datos de ejemplo y pendientes
 
 - **Tasas y aliados son de ejemplo** (`ejemplo: true`); la página lo avisa.
