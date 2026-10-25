@@ -88,7 +88,8 @@ nav {
   border-radius: 8px;
 }
 
-@media (max-width: 860px) {
+/* Con 5 enlaces el menú ya no cabe en una línea por debajo de ~1120 px */
+@media (max-width: 1120px) {
   /* En celular: marca, tema y menú arriba; los enlaces debajo */
   .tema {
     order: 1;

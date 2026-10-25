@@ -146,6 +146,30 @@
   white-space: normal;
 }
 
+/* Entrada a Compara tu oferta */
+.oferta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  flex-wrap: wrap;
+  background: var(--cm-marca-100);
+  border-radius: var(--cm-r-bloque);
+  padding: 28px 32px;
+}
+
+.oferta div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 380px;
+}
+
+.oferta h2 {
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 800;
+}
+
 /* Tarjetas con foto por tipo de crédito */
 .productos {
   list-style: none;

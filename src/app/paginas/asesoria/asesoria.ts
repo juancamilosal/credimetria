@@ -211,6 +211,10 @@ export class Asesoria {
       this.vieneDe.set(
         `Desde el simulador: ${nombre}${monto > 0 ? ', ' + formatoPesos(monto) : ''}.`,
       );
+    } else if (origen === 'oferta' && nombre) {
+      this.vieneDe.set(
+        `Desde Compara tu oferta: ${nombre}${monto > 0 ? ', ' + formatoPesos(monto) : ''}.`,
+      );
     } else if (origen === 'ranking' && this.entidad && nombre) {
       this.vieneDe.set(`Desde el ranking: ${this.entidad}, ${nombre}.`);
     }

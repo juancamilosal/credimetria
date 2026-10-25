@@ -26,6 +26,7 @@
   --cm-fondo: #f5f7fa;
   --cm-blanco: #ffffff;
   --cm-error: #b42318;
+  --cm-error-100: #fdecea;
 
   --cm-enlace: var(--cm-marca-600);
   --cm-campo: var(--cm-blanco);
@@ -62,6 +63,7 @@
   --cm-fondo: #0d131a;
   --cm-blanco: #151d27;
   --cm-error: #ff8a80;
+  --cm-error-100: #3a1714;
   --cm-campo: #0f161f;
   --cm-bloque: #0f2440;
   color-scheme: dark;
@@ -245,6 +247,11 @@ button {
 .etq-ahorro {
   background: var(--cm-ahorro-100);
   color: var(--cm-ahorro-700);
+}
+
+.etq-error {
+  background: var(--cm-error-100);
+  color: var(--cm-error);
 }
 
 .etq-marca {

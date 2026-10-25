@@ -1,0 +1,377 @@
+/* Explicación a la izquierda y el chat a la derecha; en celular, el chat ocupa todo el ancho. */
+.pagina {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  align-items: flex-start;
+  padding-block: 40px 0;
+}
+
+.intro {
+  flex: 1 1 340px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 8px;
+  /* Acompaña al chat mientras la conversación crece */
+  position: sticky;
+  top: 24px;
+}
+
+.intro h1 {
+  font-size: clamp(30px, 4.6vw, 46px);
+  font-weight: 800;
+}
+
+.lead {
+  font-size: 18px;
+  color: var(--cm-gris);
+  max-width: 46ch;
+}
+
+ul,
+ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.revisa {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.revisa li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.revisa svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--cm-marca-600);
+}
+
+/* Chat */
+.chat {
+  flex: 1 1 420px;
+  min-width: 0;
+  max-width: 580px;
+  background: var(--cm-blanco);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-bloque);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--cm-linea);
+}
+
+.quien {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.quien div {
+  display: flex;
+  flex-direction: column;
+}
+
+.quien-nombre {
+  font-size: 15px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--cm-r-campo);
+  background: var(--cm-marca-700);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+
+.reiniciar {
+  flex: none;
+  white-space: nowrap;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: var(--cm-r-campo);
+  border: 1px solid var(--cm-linea);
+  background: none;
+  color: var(--cm-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.mensajes {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 420px;
+}
+
+.bot,
+.yo {
+  max-width: 86%;
+  padding: 11px 14px;
+  border-radius: 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  animation: aparece 0.25s ease-out;
+}
+
+.bot {
+  background: var(--cm-linea-suave);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.resaltado {
+  font-weight: 700;
+}
+
+.yo {
+  background: var(--cm-marca-700);
+  color: #ffffff;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  font-weight: 600;
+}
+
+.cartel {
+  background: var(--cm-aviso-100);
+  color: var(--cm-aviso-800);
+  border-radius: var(--cm-r-boton);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+@keyframes aparece {
+  from {
+    transform: translateY(6px);
+    opacity: 0.4;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* Resultado */
+.resultado {
+  border: 1px solid var(--cm-linea);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.veredicto {
+  align-self: flex-start;
+  font-size: 14px;
+  padding: 5px 12px;
+}
+
+.filas {
+  margin: 0;
+  border-top: 1px solid var(--cm-linea-suave);
+}
+
+.fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--cm-linea-suave);
+  font-size: 14px;
+}
+
+.fila dt {
+  display: flex;
+  flex-direction: column;
+}
+
+.fila dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.fila dd.cifra {
+  font-size: 16px;
+}
+
+.fuerte dd.cifra {
+  font-size: 19px;
+}
+
+.caja {
+  border-radius: var(--cm-r-boton);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.caja b {
+  font-size: 14px;
+}
+
+.caja-aviso {
+  background: var(--cm-aviso-100);
+  color: var(--cm-aviso-800);
+}
+
+.caja-ahorro {
+  background: var(--cm-ahorro-100);
+  color: var(--cm-ahorro-700);
+}
+
+.grande {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.pequeno {
+  font-size: 13px;
+}
+
+.usura {
+  color: var(--cm-error);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Zona de respuesta */
+.respuesta {
+  border-top: 1px solid var(--cm-linea);
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pregunta {
+  font-size: 13px;
+  color: var(--cm-gris);
+  font-weight: 600;
+}
+
+.opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.op {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: var(--cm-r-boton);
+  border: 1px solid var(--cm-linea);
+  background: var(--cm-blanco);
+  color: var(--cm-tinta);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.op:hover {
+  border-color: var(--cm-marca-600);
+}
+
+.op.principal {
+  background: var(--cm-marca-700);
+  border-color: var(--cm-marca-700);
+  color: #ffffff;
+}
+
+.entrada {
+  display: flex;
+  gap: 8px;
+}
+
+.entrada input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--cm-tinta);
+  background: var(--cm-campo);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-boton);
+  padding: 12px 14px;
+  min-height: 48px;
+}
+
+.entrada input:focus {
+  border-color: var(--cm-marca-600);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--cm-marca-100);
+}
+
+.entrada input[aria-invalid="true"] {
+  border-color: var(--cm-error);
+}
+
+.enviar {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: var(--cm-r-boton);
+  border: 0;
+  background: var(--cm-marca-700);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+@media (max-width: 860px) {
+  .pagina {
+    padding-top: 20px;
+    gap: 24px;
+  }
+
+  .chat {
+    max-width: none;
+  }
+
+  .revisa {
+    display: none;
+  }
+
+  .intro {
+    position: static;
+  }
+
+  .mensajes {
+    min-height: 0;
+    padding: 14px;
+  }
+
+  .bot,
+  .yo {
+    max-width: 92%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bot,
+  .yo {
+    animation: none;
+  }
+}

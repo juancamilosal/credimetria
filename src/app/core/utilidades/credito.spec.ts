@@ -1,4 +1,11 @@
-import { ahorro, cuotaMensual, leerNumero, tasaMensual } from './credito';
+import {
+  ahorro,
+  cuotaMensual,
+  efectivaAnualDeMensual,
+  leerNumero,
+  tasaDeCuota,
+  tasaMensual,
+} from './credito';
 
 describe('credito', () => {
   it('convierte la tasa E.A. a mensual', () => {
@@ -32,5 +39,23 @@ describe('credito', () => {
     expect(leerNumero('$ 1.500.000')).toBe(1_500_000);
     expect(leerNumero('26,38')).toBe(26.38);
     expect(leerNumero('')).toBe(0);
+  });
+
+  it('convierte una tasa mensual a efectiva anual', () => {
+    expect(efectivaAnualDeMensual(2.1)).toBeCloseTo(28.32, 2);
+    expect(efectivaAnualDeMensual(1.6)).toBeCloseTo(20.98, 2);
+  });
+
+  it('encuentra la tasa que corresponde a una cuota', () => {
+    // $20.000.000 a 48 meses con cuota de $700.000 → 32,22 % E.A.
+    expect(tasaDeCuota(20_000_000, 700_000, 48)).toBeCloseTo(32.22, 2);
+    // Ida y vuelta con la cuota del documento.
+    const cuota = cuotaMensual(20_000_000, 26.38, 48);
+    expect(tasaDeCuota(20_000_000, cuota, 48)).toBeCloseTo(26.38, 6);
+  });
+
+  it('devuelve null si la cuota no alcanza a pagar el monto', () => {
+    expect(tasaDeCuota(20_000_000, 20_000_000 / 48, 48)).toBeNull();
+    expect(tasaDeCuota(20_000_000, 300_000, 48)).toBeNull();
   });
 });

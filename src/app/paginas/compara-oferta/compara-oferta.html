@@ -1,0 +1,281 @@
+<div class="wrap pagina">
+  <section class="intro" aria-labelledby="titulo">
+    <h1 id="titulo">¿Te ofrecieron un crédito? Compáralo aquí</h1>
+    <p class="lead">
+      Escribe lo que te dijo el asesor, aunque sea solo la cuota. Te mostramos
+      la tasa que de verdad pagarías y si hay costos escondidos.
+    </p>
+    <ul class="revisa">
+      <li>
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 6L9 17l-5-5" />
+        </svg>
+        <span
+          ><b>Convertimos la tasa.</b>&nbsp;<span class="muted"
+            >"2,1 % mensual" es 28,32 % efectivo anual.</span
+          ></span
+        >
+      </li>
+      <li>
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 6L9 17l-5-5" />
+        </svg>
+        <span
+          ><b>Buscamos costos en la cuota.</b>&nbsp;<span class="muted"
+            >Seguros y comisiones que suben lo que pagas cada mes.</span
+          ></span
+        >
+      </li>
+      <li>
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M20 6L9 17l-5-5" />
+        </svg>
+        <span
+          ><b>La comparamos con el mercado.</b>&nbsp;<span class="muted"
+            >Contra la entidad que menos cobra en promedio y contra la tasa de
+            usura.</span
+          ></span
+        >
+      </li>
+    </ul>
+    <p class="nota">
+      Tus respuestas no se guardan ni se envían: todo se calcula en tu
+      navegador. Cálculo con cuota fija. Credimetría no presta dinero ni da
+      asesoría financiera.
+    </p>
+  </section>
+
+  <section class="chat" aria-label="Chat para comparar tu oferta">
+    <div class="chat-top">
+      <div class="quien">
+        <span class="avatar" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 34 34">
+            <path
+              d="M7 24h20M9 24v-4M13 24v-7M17 24v-10M21 24v-6M25 24v-3"
+              stroke="currentColor"
+              stroke-width="2.6"
+              stroke-linecap="round"
+              fill="none"
+            />
+          </svg>
+        </span>
+        <div>
+          <b class="quien-nombre">Compara tu oferta</b>
+          <span class="nota">Toma menos de un minuto</span>
+        </div>
+      </div>
+      <button class="reiniciar" type="button" (click)="iniciar()">
+        Empezar de nuevo
+      </button>
+    </div>
+
+    <ol class="mensajes" aria-live="polite" aria-label="Conversación">
+      @for (mensaje of mensajes(); track mensaje.id) {
+        @switch (mensaje.tipo) {
+          @case ("cartel") {
+            <li class="cartel">{{ mensaje.texto }}</li>
+          }
+          @case ("bot") {
+            <li class="bot">
+              @for (parte of mensaje.partes; track $index) {
+                <span [class.resaltado]="parte.cifra">{{ parte.texto }}</span>
+              }
+            </li>
+          }
+          @case ("yo") {
+            <li class="yo">{{ mensaje.texto }}</li>
+          }
+          @case ("resultado") {
+            @let r = mensaje.resultado;
+            @let d = mensaje.datos;
+            <li class="resultado">
+              @switch (r.veredicto) {
+                @case ("usura") {
+                  <span class="etq etq-error veredicto"
+                    >Supera la tasa de usura</span
+                  >
+                }
+                @case ("alto") {
+                  <span class="etq etq-aviso veredicto"
+                    >Por encima del mejor promedio</span
+                  >
+                }
+                @default {
+                  <span class="etq etq-ahorro veredicto">Buena tasa</span>
+                }
+              }
+              <dl class="filas">
+                <div class="fila">
+                  <dt>{{ nombreProducto(d.producto) }}</dt>
+                  <dd>{{ d.monto | pesos }} a {{ d.plazo }} meses</dd>
+                </div>
+                @if (d.tasaDicha !== null) {
+                  <div class="fila">
+                    <dt>Tasa que te dijeron</dt>
+                    <dd class="cifra">
+                      @if (d.tasaMensualDicha !== null) {
+                        {{ d.tasaMensualDicha | tasa }} mensual
+                        <span class="nota"
+                          >({{ d.tasaDicha | tasa }} E.A.)</span
+                        >
+                      } @else {
+                        {{ d.tasaDicha | tasa }} E.A.
+                      }
+                    </dd>
+                  </div>
+                }
+                <div class="fila fuerte">
+                  <dt>
+                    <b>Tasa que de verdad pagas</b>
+                    <span class="nota">
+                      @if (r.conCuota) {
+                        calculada con tu cuota de {{ d.cuota! | pesos }}
+                      } @else {
+                        sin la cuota no podemos ver costos dentro de ella
+                      }
+                    </span>
+                  </dt>
+                  <dd class="cifra">{{ r.tasaReal | tasa }} E.A.</dd>
+                </div>
+                @if (!r.conCuota) {
+                  <div class="fila">
+                    <dt>Cuota con esa tasa</dt>
+                    <dd class="cifra">{{ r.cuota | pesos }}</dd>
+                  </div>
+                }
+                <div class="fila">
+                  <dt>Total que pagarías</dt>
+                  <dd class="cifra">{{ r.total | pesos }}</dd>
+                </div>
+                @if (r.mejor; as mejor) {
+                  <div class="fila">
+                    <dt>{{ mejor.entidad }} cobra en promedio</dt>
+                    <dd class="cifra">{{ mejor.tasaReal | tasa }} E.A.</dd>
+                  </div>
+                }
+                @if (mensaje.usura !== null) {
+                  <div class="fila">
+                    <dt>Tasa de usura de {{ mesUsura }}</dt>
+                    <dd class="cifra">{{ mensaje.usura | tasa }} E.A.</dd>
+                  </div>
+                }
+              </dl>
+
+              @if (r.costosMes > 0) {
+                <div class="caja caja-aviso">
+                  <b>Costos dentro de la cuota</b>
+                  <span class="cifra grande"
+                    >{{ r.costosMes | pesos }} al mes</span
+                  >
+                  <span class="pequeno">
+                    Con {{ d.tasaDicha | tasa }} la cuota sería
+                    {{ r.cuotaTeorica! | pesos }}. La diferencia suele ser
+                    seguros y comisiones: pregunta cuáles son.
+                  </span>
+                </div>
+              }
+              @if (r.ahorro && r.ahorro.mes > 1 && r.mejor) {
+                <div class="caja caja-ahorro">
+                  <b>Con la tasa de {{ r.mejor.entidad }} podrías ahorrarte</b>
+                  <span class="cifra grande">{{ r.ahorro.total | pesos }}</span>
+                  <span class="pequeno"
+                    >{{ r.ahorro.mes | pesos }} menos al mes</span
+                  >
+                </div>
+              }
+              @if (r.veredicto === "usura") {
+                <p class="usura">
+                  Una tasa por encima de la usura es ilegal en Colombia. No
+                  firmes sin revisarla.
+                </p>
+              }
+              <p class="nota">
+                Cálculo con cuota fija. Credimetría no presta dinero ni da
+                asesoría financiera.
+                @if (corte.ejemplo) {
+                  Las tasas del mercado son datos de prueba.
+                }
+              </p>
+            </li>
+          }
+        }
+      }
+    </ol>
+
+    <div class="respuesta" #respuesta [hidden]="zona().tipo === 'nada'">
+      @let z = zona();
+      @if (z.tipo === "empezar") {
+        <span class="pregunta">¿Te ofrecieron un crédito?</span>
+        <div class="opciones">
+          <button type="button" class="op principal" (click)="iniciar()">
+            Comparar mi oferta
+          </button>
+        </div>
+      } @else if (z.tipo === "opciones") {
+        <span class="pregunta" id="preguntaActual">{{ z.pregunta }}</span>
+        <div class="opciones" role="group" aria-labelledby="preguntaActual">
+          @for (opcion of z.opciones; track opcion.valor) {
+            <button
+              type="button"
+              class="op"
+              [class.principal]="opcion.principal"
+              (click)="elegir(opcion)"
+            >
+              {{ opcion.texto }}
+            </button>
+          }
+        </div>
+      } @else if (z.tipo === "entrada") {
+        <label class="pregunta" for="campoRespuesta">{{ z.pregunta }}</label>
+        <form class="entrada" (submit)="enviar($event)" novalidate>
+          <input
+            id="campoRespuesta"
+            [attr.inputmode]="z.modo"
+            [placeholder]="z.placeholder"
+            autocomplete="off"
+            [value]="valorEntrada()"
+            (input)="valorEntrada.set($any($event.target).value)"
+            [attr.aria-invalid]="error() ? true : null"
+            [attr.aria-describedby]="error() ? 'errorRespuesta' : null"
+          />
+          <button class="enviar" type="submit">Enviar</button>
+        </form>
+        @if (error()) {
+          <span class="error" id="errorRespuesta" role="alert">{{
+            error()
+          }}</span>
+        }
+      }
+    </div>
+  </section>
+</div>

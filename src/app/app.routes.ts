@@ -22,6 +22,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'compara-tu-oferta',
+    title: 'Compara tu oferta · Credimetría',
+    loadComponent: () =>
+      import('./paginas/compara-oferta/compara-oferta').then(
+        (m) => m.ComparaOferta,
+      ),
+  },
+  {
     path: 'asesoria',
     title: 'Asesoría gratis · Credimetría',
     loadComponent: () =>
