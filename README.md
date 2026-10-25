@@ -18,16 +18,17 @@ Siguen el documento "Credimetría · Pantallas a desarrollar en Angular" y el
 diseño "Credimetría · Marca y página web", con una paleta más sobria que la
 morada y oro del diseño (ver abajo).
 
-| Ruta                 | Pantalla          | Qué hace                                                                                                                                        |
-| -------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                |
-| `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas  |
-| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría |
-| `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                         |
-| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                 |
-| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                        |
-| `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                        |
-| `/admin/tasas`       | Configuración     | Solo administradores de Directus: revisar, publicar, rechazar, corregir y agregar tasas con su fecha y el enlace de la fuente                   |
+| Ruta                 | Pantalla          | Qué hace                                                                                                                                                            |
+| -------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                                    |
+| `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas                      |
+| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                     |
+| `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                             |
+| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                                     |
+| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                                            |
+| `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                                            |
+| `/admin/tasas`       | Configuración     | Solo administradores de Directus: revisar, publicar, rechazar, corregir y agregar tasas con su fecha y el enlace de la fuente                                       |
+| `/admin/pdf`         | PDF de tasas      | Por banco y producto: el PDF actual, el nuevo por aceptar (manual o del robot) y los anteriores; cargar, usar como actual, descartar y agregar la dirección del PDF |
 
 - **Ranking como en Excel** (`paginas/ranking/` y
   `compartido/tabla-ranking/`): cada título ordena la tabla al tocarlo (↑/↓,
@@ -117,6 +118,16 @@ Directus. No está en el menú: se entra por `/admin`.
   (con "Calcular E.A." desde la tasa mensual) y crear una tasa nueva desde
   una fuente. Al publicar o rechazar se guardan `revisada_por` y
   `revisada_en`.
+- **PDF de tasas** (`/admin/pdf`): una tarjeta por banco y producto con el
+  logo, los enlaces al PDF en el banco, la página de tasas y tarifas y la
+  página del producto. A la izquierda el **PDF actual** y a la derecha el
+  **PDF nuevo** (vigencia, cuándo y quién lo cargó, tamaño y "Abrir").
+  "Cargar PDF" sube el archivo con su fecha de vigencia y lo deja como
+  nuevo; si su huella SHA-256 ya existe, avisa y no lo sube. "Usar como
+  actual" pasa el actual a anterior (nunca se borra) y "Descartar" quita un
+  nuevo que no sirve. Si el banco no tiene fuente PDF, pide la dirección y
+  la crea en `fuentes`. Las dos pestañas comparten la cabecera
+  `paginas/admin/cabecera/`.
 - Estas rutas no se prerenderizan (`RenderMode.Client`) y llevan
   `noindex`. La dirección de Directus está en `core/config/directus.ts`.
 - **Directus debe permitir CORS** para el dominio de la página. En las
@@ -145,6 +156,9 @@ que el robot debe bajar los PDF con un navegador real.
 - `fuentes`: entidad, producto, tipo (página o PDF), dirección, página
   índice de tasas y tarifas, cómo extraer, patrón, estado, última revisión,
   huella y notas.
+- `documentos`: los PDF de tasas de cada fuente, con archivo, estado
+  (nuevo, actual, anterior), vigencia, origen (manual o robot), huella
+  SHA-256, notas, y quién y cuándo lo cargó.
 - `tasas_publicadas`: historial (no se sobrescribe) con fuente, entidad,
   producto, valor desde y hasta, unidad (M.V., N.M.V., E.A.), E.A. desde y
   hasta, tipo de tasa, sistema de amortización, frase de la fuente,

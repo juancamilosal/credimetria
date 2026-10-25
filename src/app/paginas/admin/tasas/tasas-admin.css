@@ -1,17 +1,3 @@
-.cabeza {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.cuenta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .contenido {
   padding-block: 28px 64px;
   display: flex;

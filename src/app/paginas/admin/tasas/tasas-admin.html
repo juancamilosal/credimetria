@@ -1,22 +1,7 @@
-<section class="cabecera">
-  <div class="wrap cabeza">
-    <div class="cabecera-texto">
-      <h1>Configuración de tasas</h1>
-      <p>
-        Revisa lo que publican las entidades, con la fecha y el enlace de la
-        fuente. Solo las tasas publicadas salen en la página.
-      </p>
-    </div>
-    @if (usuario(); as u) {
-      <div class="cuenta">
-        <span class="nota">{{ u.nombre }}</span>
-        <button type="button" class="btn btn-borde" (click)="salir()">
-          Salir
-        </button>
-      </div>
-    }
-  </div>
-</section>
+<app-cabecera-admin
+  titulo="Configuración de tasas"
+  texto="Revisa lo que publican las entidades, con la fecha y el enlace de la fuente. Solo las tasas publicadas salen en la página."
+/>
 
 <div class="wrap contenido">
   <div class="barra">

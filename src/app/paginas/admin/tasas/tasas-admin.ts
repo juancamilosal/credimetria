@@ -2,7 +2,6 @@ import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Meta } from '@angular/platform-browser';
-import { Router } from '@angular/router';
 import { formatoTasa, TasaPipe } from '../../../compartido/pipes/formato';
 import {
   CambiosTasa,
@@ -22,6 +21,7 @@ import {
 import { TasasAdminService } from '../../../core/servicios/tasas-admin.service';
 import { TasasService } from '../../../core/servicios/tasas.service';
 import { efectivaAnualDeMensual } from '../../../core/utilidades/credito';
+import { CabeceraAdmin } from '../cabecera/cabecera-admin';
 
 type Filtro = EstadoTasa | 'todas';
 
@@ -51,7 +51,13 @@ function escribirDecimal(valor: number | null): string {
  */
 @Component({
   selector: 'app-tasas-admin',
-  imports: [DatePipe, NgTemplateOutlet, ReactiveFormsModule, TasaPipe],
+  imports: [
+    DatePipe,
+    NgTemplateOutlet,
+    ReactiveFormsModule,
+    TasaPipe,
+    CabeceraAdmin,
+  ],
   templateUrl: './tasas-admin.html',
   styleUrl: './tasas-admin.css',
 })
@@ -59,9 +65,7 @@ export class TasasAdmin implements OnInit {
   private readonly admin = inject(TasasAdminService);
   private readonly sesion = inject(SesionAdmin);
   private readonly tasasPublicas = inject(TasasService);
-  private readonly router = inject(Router);
 
-  protected readonly usuario = this.sesion.usuario;
   protected readonly estados = ESTADOS_TASA;
   protected readonly unidades = UNIDADES_TASA;
   protected readonly productos = this.tasasPublicas.productos;
@@ -261,11 +265,6 @@ export class TasasAdmin implements OnInit {
       }
       this.editando.set(null);
     });
-  }
-
-  protected async salir(): Promise<void> {
-    await this.sesion.salir();
-    this.router.navigateByUrl('/admin/entrar');
   }
 
   private reemplazar(tasa: TasaAdmin): void {

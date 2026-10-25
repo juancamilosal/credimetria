@@ -141,7 +141,7 @@ export class SesionAdmin {
 
   /** Llama a Directus con el token; si venció, lo renueva una vez y reintenta. */
   async pedir<T>(
-    metodo: 'GET' | 'POST' | 'PATCH',
+    metodo: 'GET' | 'POST' | 'PATCH' | 'DELETE',
     ruta: string,
     cuerpo?: unknown,
   ): Promise<T> {
@@ -167,7 +167,8 @@ export class SesionAdmin {
         headers: this.acceso ? { Authorization: `Bearer ${this.acceso}` } : {},
       }),
     );
-    return r.data;
+    // DELETE responde sin cuerpo.
+    return r?.data as T;
   }
 
   private renovar(): Promise<void> {
