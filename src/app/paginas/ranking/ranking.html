@@ -1,0 +1,71 @@
+<section class="banda">
+  <div class="wrap banda-cabeza">
+    <h1>Ranking de tasas por lo que de verdad cobran</h1>
+    <p>
+      Bancos, cooperativas y financieras ordenados por la tasa promedio que
+      reportan a la Superintendencia Financiera.
+    </p>
+  </div>
+</section>
+
+<div class="wrap contenido">
+  <div class="filtros">
+    <div>
+      <span class="leyenda" id="lbProd">Producto</span>
+      <app-chips
+        etiqueta="lbProd"
+        [opciones]="opcionesProducto"
+        [(valor)]="producto"
+      />
+    </div>
+    <div class="filtros-fila">
+      <div>
+        <span class="leyenda" id="lbTipo">Tipo de entidad</span>
+        <app-chips
+          variante="cuadrado"
+          etiqueta="lbTipo"
+          [opciones]="opcionesTipo"
+          [(valor)]="tipo"
+        />
+      </div>
+      <span class="nota">
+        {{ notaCuota }} · Actualizado:
+        {{ corte.fecha | date: "d MMM y" : "UTC" }}
+        @if (corte.ejemplo) {
+          <span class="etq etq-oro">Datos de ejemplo</span>
+        }
+      </span>
+    </div>
+  </div>
+
+  <app-tabla-ranking
+    [filas]="filas()"
+    [producto]="productoId()"
+    [titulo]="titulo()"
+    [completa]="true"
+  />
+
+  <div class="explica">
+    <div class="tarjeta">
+      <b>Anuncia</b>
+      <span class="muted">
+        La tasa "desde" que la entidad publica. Normalmente solo la recibe el
+        cliente con el mejor perfil.
+      </span>
+    </div>
+    <div class="tarjeta">
+      <b>Cobra en promedio</b>
+      <span class="muted">
+        El promedio de los créditos que la entidad desembolsó, según su reporte
+        a la Superfinanciera.
+      </span>
+    </div>
+    <div class="tarjeta destacada">
+      <b>El orden no se vende</b>
+      <span>
+        El ranking siempre va por tasa real. Ninguna entidad puede pagar para
+        subir.
+      </span>
+    </div>
+  </div>
+</div>

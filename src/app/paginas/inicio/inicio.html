@@ -1,166 +1,91 @@
-<!-- Portada -->
-<section class="portada">
-  <div class="contenedor portada-grid">
-    <div class="portada-texto">
-      <span class="kicker">Mide antes de prestar</span>
-      <h1>Compara la tasa <em>real</em> de cada crédito en Colombia</h1>
-      <p class="entrada">
-        Credimetría reúne las tasas de bancos, cooperativas y financieras, y te
-        muestra lado a lado la que anuncian y la que de verdad cobran. Así
-        eliges tu crédito con datos, no con publicidad.
-      </p>
-      <div class="acciones">
-        <a routerLink="/" fragment="mejores-tasas" class="boton boton-principal"
-          >Ver las mejores tasas</a
-        >
-        <a
-          routerLink="/"
-          fragment="como-funciona"
-          class="boton boton-secundario"
-          >Cómo funciona</a
-        >
-      </div>
-      <ul class="sellos">
-        <li>Datos de la Superintendencia Financiera</li>
-        <li>Ranking sin pauta</li>
-        <li>Gratis, sin registrarte</li>
-      </ul>
-    </div>
-
-    @if (brecha) {
-      <figure
-        class="tarjeta brecha"
-        aria-label="Ejemplo de la diferencia entre tasa anunciada y tasa cobrada"
-      >
-        <figcaption>
-          <span class="etiqueta etiqueta-ambar">Ejemplo · libre inversión</span>
-          <h2>{{ brecha.entidad }}</h2>
-        </figcaption>
-        <div class="barra-fila">
-          <div class="barra-texto">
-            <span>Tasa que anuncia</span>
-            <b class="mono">{{ brecha.tasaAnunciada | number: "1.2-2" }} %</b>
-          </div>
-          <div class="barra">
-            <span
-              class="anunciada"
-              [style.width.%]="((brecha.tasaAnunciada ?? 0) / escala) * 100"
-            ></span>
-          </div>
-        </div>
-        <div class="barra-fila">
-          <div class="barra-texto">
-            <span>Tasa promedio que cobra</span>
-            <b class="mono">{{ brecha.tasaReal | number: "1.2-2" }} %</b>
-          </div>
-          <div class="barra">
-            <span
-              class="real"
-              [style.width.%]="(brecha.tasaReal / escala) * 100"
-            ></span>
-          </div>
-        </div>
-        <p class="diferencia">
-          <b class="mono"
-            >{{
-              brecha.tasaReal - (brecha.tasaAnunciada ?? 0) | number: "1.2-2"
-            }}
-            puntos</b
-          >
-          de diferencia. Esa brecha es lo que Credimetría hace visible.
-        </p>
-      </figure>
-    }
-  </div>
-</section>
-
-<!-- Las 3 mejores tasas -->
-<section id="mejores-tasas" class="contenedor seccion">
-  <div class="seccion-cabecera">
-    <span class="kicker">01 · Mejores tasas de hoy</span>
-    <h2>Los 3 créditos más baratos del momento</h2>
+<section class="banda">
+  <div class="wrap hero">
+    <span class="sello">Con datos de la Superintendencia Financiera</span>
+    <h1>Mide tu crédito antes de firmarlo</h1>
     <p>
-      Ordenados por la tasa promedio que cada entidad cobra de verdad. Elige el
-      tipo de crédito.
+      Escribe la tasa que te ofrecieron y te mostramos si es buena, cuánto
+      pagarías en total y quién te cobra menos.
     </p>
   </div>
-  <app-mejores-tasas />
 </section>
 
-<!-- Qué hacemos -->
-<section id="que-hacemos" class="bloque-claro">
-  <div class="contenedor seccion">
-    <div class="seccion-cabecera">
-      <span class="kicker">02 · Qué es Credimetría</span>
-      <h2>Somos un comparador de créditos que mide la tasa real</h2>
-      <p>
-        Los bancos anuncian tasas "desde" que solo recibe el cliente con el
-        mejor perfil. Nosotros te mostramos cuánto cobran en promedio, para que
-        sepas qué esperar y cuánto puedes ahorrar.
-      </p>
+<div class="wrap">
+  <section id="simulador" class="sim" aria-label="Simulador">
+    <app-simulador [(producto)]="producto" />
+  </section>
+
+  <section class="seccion" aria-labelledby="tituloRanking">
+    <div class="titulo-sec">
+      <div>
+        <h2 id="tituloRanking">Ranking por tasa real</h2>
+        <p class="muted sub">
+          Ordenado por lo que cobran en promedio, no por quién paga publicidad.
+        </p>
+      </div>
+      <a routerLink="/ranking" [queryParams]="{ producto: producto() }">
+        Ver ranking completo
+      </a>
     </div>
-    <div class="servicios">
-      @for (servicio of servicios; track servicio.titulo) {
-        <article class="tarjeta">
-          <span
-            class="etiqueta"
-            [class.etiqueta-acento]="servicio.etiqueta === 'Disponible'"
-            >{{ servicio.etiqueta }}</span
-          >
-          <h3>{{ servicio.titulo }}</h3>
-          <p>{{ servicio.texto }}</p>
-        </article>
+    <app-tabla-ranking
+      [filas]="top()"
+      [producto]="producto()"
+      [titulo]="nombreProducto() + ' · las 3 que menos cobran'"
+    />
+    <p class="nota fuente">
+      Tasas efectivas anuales reportadas a la {{ corte.fuente }}. Tu tasa final
+      depende de tu perfil.
+      @if (corte.ejemplo) {
+        Por ahora son datos de ejemplo.
       }
-    </div>
-  </div>
-</section>
+    </p>
+  </section>
 
-<!-- Cómo funciona -->
-<section id="como-funciona" class="contenedor seccion">
-  <div class="seccion-cabecera">
-    <span class="kicker">03 · Cómo funciona</span>
-    <h2>De los reportes oficiales a tu decisión</h2>
-  </div>
-  <ol class="pasos">
-    @for (paso of pasos; track paso.titulo; let i = $index) {
-      <li class="tarjeta">
-        <span class="numero mono">Paso {{ i + 1 }}</span>
-        <h3>{{ paso.titulo }}</h3>
-        <p>{{ paso.texto }}</p>
-      </li>
-    }
-  </ol>
-</section>
+  <section id="como-funciona" class="seccion" aria-labelledby="tituloComo">
+    <div class="titulo-sec"><h2 id="tituloComo">Cómo funciona</h2></div>
+    <ol class="pasos">
+      @for (paso of pasos; track paso.titulo; let i = $index) {
+        <li class="tarjeta paso">
+          <span class="pos">{{ i + 1 }}</span>
+          <div>
+            <h3>{{ paso.titulo }}</h3>
+            <p class="muted">{{ paso.texto }}</p>
+          </div>
+        </li>
+      }
+    </ol>
+  </section>
 
-<!-- Simulador -->
-<section id="simulador" class="bloque-claro">
-  <div class="contenedor seccion">
-    <div class="seccion-cabecera">
-      <span class="kicker">04 · Simulador</span>
-      <h2>Calcula tu cuota antes de ir al banco</h2>
-      <p>
-        Escribe la tasa que te ofrecieron y compárala con las mejores del
-        mercado.
-      </p>
+  <section class="seccion">
+    <div class="oscuro">
+      <div>
+        <h2>Recibe asesoría gratis para conseguir la mejor tasa</h2>
+        <p>
+          Un asesor aliado revisa tu caso y te busca la mejor opción entre los
+          bancos con los que trabaja.
+        </p>
+      </div>
+      <div>
+        <span class="leyenda" id="lbUrgInicio"
+          >¿Cuándo necesitas el crédito?</span
+        >
+        <app-chips
+          variante="urgencia"
+          etiqueta="lbUrgInicio"
+          [opciones]="urgencias"
+          [(valor)]="urgencia"
+        />
+        <a
+          class="btn btn-oro continuar"
+          routerLink="/asesoria"
+          [queryParams]="{
+            urgencia: urgencia(),
+            producto: producto(),
+            origen: 'inicio',
+          }"
+        >
+          Continuar
+        </a>
+      </div>
     </div>
-    <app-simulador />
-  </div>
-</section>
-
-<!-- Nuestra regla -->
-<section class="contenedor seccion">
-  <div class="regla">
-    <div>
-      <span class="kicker">Nuestra regla</span>
-      <h2>El ranking siempre se ordena por tasa real</h2>
-      <p>
-        Aunque una entidad pague por aparecer, nunca sube en el ranking. Los
-        espacios pagos se marcan como publicidad. Esa es la confianza que nos
-        diferencia.
-      </p>
-    </div>
-    <a routerLink="/" fragment="mejores-tasas" class="boton boton-principal"
-      >Comparar tasas</a
-    >
-  </div>
-</section>
+  </section>
+</div>

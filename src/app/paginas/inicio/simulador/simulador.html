@@ -1,73 +1,135 @@
-<form class="tarjeta campos" (submit)="$event.preventDefault()">
-  <label>
-    <span>Monto del crédito</span>
-    <div class="entrada">
-      <span class="prefijo">$</span>
+<div class="sim-caja">
+  <form (submit)="$event.preventDefault()" novalidate>
+    <h2>Simulador</h2>
+
+    <div class="campo">
+      <label for="simProducto">Producto</label>
+      <select
+        id="simProducto"
+        [value]="producto()"
+        (change)="cambiarProducto($any($event.target).value)"
+      >
+        @for (p of productos; track p.id) {
+          <option [value]="p.id" [selected]="p.id === producto()">
+            {{ p.nombre }}
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="simMonto">Monto (pesos)</label>
       <input
-        type="text"
+        id="simMonto"
         inputmode="numeric"
-        [value]="monto() | number: '1.0-0'"
-        (change)="cambiarMonto($any($event.target).value)"
+        autocomplete="off"
+        [value]="montoTexto()"
+        (input)="montoTexto.set($any($event.target).value)"
+        (blur)="formatearMonto()"
       />
     </div>
-  </label>
 
-  <label>
-    <span>Plazo</span>
-    <select
-      [value]="plazo()"
-      (change)="cambiarPlazo($any($event.target).value)"
+    <div class="fila">
+      <div class="campo">
+        <label for="simPlazo">Plazo (meses)</label>
+        <select
+          id="simPlazo"
+          [value]="plazo()"
+          (change)="plazo.set(+$any($event.target).value)"
+        >
+          @for (meses of plazos; track meses) {
+            <option [value]="meses" [selected]="meses === plazo()">
+              {{ meses }}
+            </option>
+          }
+        </select>
+      </div>
+      <div class="campo">
+        <label for="simTasa">Tasa que te ofrecieron (% E.A.)</label>
+        <input
+          id="simTasa"
+          inputmode="decimal"
+          autocomplete="off"
+          [value]="tasaTexto()"
+          (input)="tasaTexto.set($any($event.target).value)"
+          [attr.aria-describedby]="superaUsura() ? 'avisoUsura' : null"
+        />
+      </div>
+    </div>
+
+    @if (superaUsura()) {
+      <p class="error" id="avisoUsura">
+        Esa tasa supera la de usura de {{ usura.mes }} ({{ usura.tasa | tasa }}
+        E.A.). Ninguna entidad puede cobrarla: revisa el dato.
+      </p>
+    }
+
+    <a
+      class="btn btn-uva"
+      routerLink="/ranking"
+      [queryParams]="{ producto: producto() }"
     >
-      @for (meses of plazos; track meses) {
-        <option [value]="meses" [selected]="meses === plazo()">
-          {{ meses }} meses
-        </option>
+      Ver todas las tasas
+    </a>
+  </form>
+
+  <div class="resultado" aria-live="polite">
+    <span class="nota">Resultado · cuota fija, tasa efectiva anual</span>
+
+    <div>
+      <span class="muted pequeno">Tu cuota mensual</span>
+      <div class="grande cifra">{{ listo() ? (cuota() | pesos) : "—" }}</div>
+      <span class="nota">
+        @if (listo()) {
+          Pagarías en total {{ cuota() * plazo() | pesos }}
+        } @else {
+          Escribe el monto y la tasa para calcular.
+        }
+      </span>
+    </div>
+
+    @if (mejor(); as mejor) {
+      <div class="sep"></div>
+      <div>
+        <span class="muted pequeno">
+          Con {{ mejor.entidad }} ({{ mejor.tasaReal | tasa }} que cobra en
+          promedio)
+        </span>
+        <div class="media cifra">
+          {{ listo() ? (cuotaMejor() | pesos) + " al mes" : "—" }}
+        </div>
+      </div>
+
+      @if (ahorro(); as ahorro) {
+        @if (buenaTasa()) {
+          <div class="aviso">
+            ¡Buena tasa! Está por debajo del promedio de la mejor entidad.
+          </div>
+        } @else {
+          <div class="ahorro">
+            <b>Podrías ahorrarte</b>
+            <span class="cifra">{{ ahorro.total | pesos }}</span>
+            <span class="pequeno">{{ ahorro.mes | pesos }} menos al mes</span>
+          </div>
+        }
       }
-    </select>
-  </label>
+    } @else {
+      <div class="aviso">
+        Todavía no tenemos tasas de este producto. Un asesor puede ayudarte a
+        compararlo.
+      </div>
+    }
 
-  <label>
-    <span>Tasa que te ofrecen (E.A.)</span>
-    <div class="entrada">
-      <input
-        type="text"
-        inputmode="decimal"
-        [value]="tasa() | number: '1.0-2'"
-        (change)="cambiarTasa($any($event.target).value)"
-      />
-      <span class="sufijo">%</span>
-    </div>
-    <small
-      >Equivale a {{ tasaMes() | number: "1.3-3" }} % mensual vencido.</small
+    <a
+      class="quiero"
+      routerLink="/asesoria"
+      [queryParams]="{
+        producto: producto(),
+        monto: monto() || null,
+        origen: 'simulador',
+      }"
     >
-  </label>
-</form>
-
-<div class="tarjeta resultado" aria-live="polite">
-  <span class="pequeno">Tu cuota mensual</span>
-  <strong class="mono cuota">{{
-    resumen().cuota | currency: "COP" : "symbol-narrow" : "1.0-0"
-  }}</strong>
-  <dl>
-    <div>
-      <dt>Total de intereses</dt>
-      <dd class="mono">
-        {{
-          resumen().totalIntereses | currency: "COP" : "symbol-narrow" : "1.0-0"
-        }}
-      </dd>
-    </div>
-    <div>
-      <dt>Total a pagar</dt>
-      <dd class="mono">
-        {{
-          resumen().totalPagado | currency: "COP" : "symbol-narrow" : "1.0-0"
-        }}
-      </dd>
-    </div>
-  </dl>
-  <p class="pequeno">
-    Cuota fija (sistema francés), sin seguros ni comisiones. Pronto verás el
-    costo total con todo incluido y la tabla de pagos mes a mes.
-  </p>
+      Quiero esa tasa: que me contacte un asesor
+    </a>
+  </div>
 </div>

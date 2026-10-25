@@ -1,66 +1,51 @@
-import { DecimalPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Chips } from '../../compartido/chips/chips';
+import { TablaRanking } from '../../compartido/tabla-ranking/tabla-ranking';
+import { URGENCIAS } from '../../core/modelos/prospecto';
+import { Producto } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
-import { MejoresTasas } from './mejores-tasas/mejores-tasas';
 import { Simulador } from './simulador/simulador';
 
 @Component({
   selector: 'app-inicio',
-  imports: [DecimalPipe, RouterLink, MejoresTasas, Simulador],
+  imports: [RouterLink, Chips, TablaRanking, Simulador],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',
 })
 export class Inicio {
   private readonly tasas = inject(TasasService);
 
-  /** Ejemplo de la portada: la mayor brecha entre tasa anunciada y tasa cobrada. */
-  protected readonly brecha = this.tasas.mayorBrecha('libre-inversion');
-  /** Escala de las barras de la portada, en puntos de tasa E.A. */
-  protected readonly escala = 30;
+  protected readonly corte = this.tasas.corte;
+  /** Producto elegido en el simulador; el ranking resumido lo sigue. */
+  protected readonly producto = signal<Producto>('libre-inversion');
+  protected readonly top = computed(() =>
+    this.tasas.ranking(this.producto()).slice(0, 3),
+  );
+  protected readonly nombreProducto = computed(() =>
+    this.tasas.nombre(this.producto()),
+  );
 
-  protected readonly servicios = [
-    {
-      etiqueta: 'Disponible',
-      titulo: 'Ranking por tasa real',
-      texto:
-        'Bancos, cooperativas y financieras ordenados por la tasa que de verdad cobran, no por la que anuncian.',
-    },
-    {
-      etiqueta: 'Disponible',
-      titulo: 'Simulador de cuota',
-      texto:
-        'Escribe el monto, el plazo y la tasa que te ofrecieron, y mira tu cuota y cuánto pagas en intereses.',
-    },
-    {
-      etiqueta: 'Pronto',
-      titulo: 'Comparador entre entidades',
-      texto:
-        'Elige dos entidades y te decimos cuánto te ahorras al mes y en todo el crédito si te cambias.',
-    },
-    {
-      etiqueta: 'Pronto',
-      titulo: 'Alertas de tasa',
-      texto:
-        'Te avisamos cuando baje la tasa del crédito que te interesa, para que pidas en el mejor momento.',
-    },
-  ];
+  protected readonly urgencias = URGENCIAS.map((u) => ({
+    valor: u.id,
+    texto: u.texto,
+  }));
+  protected readonly urgencia = signal<string>('ya');
 
   protected readonly pasos = [
     {
-      titulo: 'Recogemos las tasas reales',
+      titulo: 'Compara',
       texto:
-        'Cada semana leemos lo que las entidades reportan a la Superintendencia Financiera sobre los créditos que desembolsan.',
+        'Mira la tasa que anuncia cada entidad al lado de la que cobra en promedio.',
     },
     {
-      titulo: 'Las ponemos al lado de las anunciadas',
-      texto:
-        'Junto a cada tasa real ves la tasa "desde" que la entidad publica, para que veas la diferencia.',
+      titulo: 'Cuéntanos qué necesitas',
+      texto: 'Producto, monto y cuándo lo necesitas. Toma menos de un minuto.',
     },
     {
-      titulo: 'Calculas y decides',
+      titulo: 'Un asesor aliado te contacta',
       texto:
-        'Comparas cuotas en pesos y llegas al banco sabiendo cuánto deberías pagar.',
+        'Máximo 2 asesores verificados. Nunca te cobran nada por adelantado.',
     },
   ];
 }

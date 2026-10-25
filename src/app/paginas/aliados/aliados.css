@@ -1,0 +1,151 @@
+.contenido {
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.aviso-ejemplo {
+  align-self: flex-start;
+  white-space: normal;
+  margin-bottom: -12px;
+}
+
+ul,
+ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.aliados {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.aliado {
+  gap: 12px;
+}
+
+.aliado-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.quien {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.iniciales {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--cm-r-boton);
+  background: var(--cm-uva-100);
+  color: var(--cm-enlace);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex: none;
+}
+
+dl {
+  margin: 0;
+  font-size: 14px;
+}
+
+dl div {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+dt {
+  color: var(--cm-gris);
+}
+
+dd {
+  margin: 0;
+}
+
+.vacio {
+  border-style: dashed;
+  justify-content: center;
+}
+
+.vacio span {
+  font-size: 15px;
+}
+
+.vacio a {
+  font-weight: 700;
+}
+
+.panel {
+  background: var(--cm-blanco);
+  border: 1px solid var(--cm-linea);
+  border-radius: 18px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel h2 {
+  font-size: clamp(22px, 3vw, 26px);
+  font-weight: 800;
+}
+
+.reglas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.reglas li {
+  display: flex;
+  gap: 12px;
+}
+
+.reporte {
+  background: var(--cm-oro-100);
+  color: var(--cm-oro-800);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.reporte > div {
+  flex: 1 1 380px;
+  min-width: 0;
+}
+
+.reporte-titulo {
+  font-size: 18px;
+}
+
+.btn-tinta {
+  background: var(--cm-tinta);
+  color: var(--cm-fondo);
+}
+
+@media (max-width: 760px) {
+  .aliados {
+    grid-template-columns: 1fr;
+  }
+
+  .panel,
+  .reporte {
+    padding: 20px;
+  }
+}

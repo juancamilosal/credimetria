@@ -8,25 +8,29 @@ describe('TasasService', () => {
     servicio = TestBed.inject(TasasService);
   });
 
-  it('devuelve las 3 mejores tasas ordenadas de menor a mayor', () => {
+  it('ordena cada producto de menor a mayor tasa real', () => {
     for (const { id } of servicio.productos) {
-      const mejores = servicio.mejores(id);
-      expect(mejores.length).toBe(3);
-      expect(mejores.every((t) => t.producto === id)).toBeTrue();
-      expect(mejores.map((t) => t.tasaReal)).toEqual(
-        [...mejores.map((t) => t.tasaReal)].sort((a, b) => a - b),
-      );
+      const tasas = servicio.ranking(id).map((t) => t.tasaReal);
+      expect(tasas.length).toBeGreaterThan(0);
+      expect(tasas).toEqual([...tasas].sort((a, b) => a - b));
     }
   });
 
-  it('la mejor tasa no supera el promedio del producto', () => {
-    expect(servicio.mejores('libre-inversion')[0].tasaReal).toBeLessThanOrEqual(
-      servicio.promedio('libre-inversion'),
-    );
+  it('filtra por tipo de entidad', () => {
+    const cooperativas = servicio.ranking('libre-inversion', 'Cooperativa');
+    expect(cooperativas.length).toBeGreaterThan(0);
+    expect(cooperativas.every((t) => t.tipo === 'Cooperativa')).toBeTrue();
   });
 
-  it('encuentra la mayor brecha entre tasa anunciada y real', () => {
-    const brecha = servicio.mayorBrecha('libre-inversion');
-    expect(brecha?.entidad).toBe('AV Villas');
+  it('la mejor de libre inversión es AV Villas con 21,48 %', () => {
+    const mejor = servicio.mejor('libre-inversion');
+    expect(mejor?.entidad).toBe('AV Villas');
+    expect(mejor?.tasaReal).toBe(21.48);
+  });
+
+  it('reconoce los productos válidos', () => {
+    expect(servicio.esProducto('libranza')).toBeTrue();
+    expect(servicio.esProducto('hipoteca')).toBeFalse();
+    expect(servicio.esProducto(null)).toBeFalse();
   });
 });

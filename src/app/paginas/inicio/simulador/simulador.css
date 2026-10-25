@@ -1,112 +1,103 @@
-:host {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+.sim-caja {
+  background: var(--cm-blanco);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-bloque);
+  padding: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+
+form,
+.resultado {
+  flex: 1 1 320px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
 
-.campos {
-  gap: 18px;
+h2 {
+  font-size: 21px;
+  font-weight: 800;
 }
 
-label {
+.fila {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-weight: 500;
-  font-size: 15px;
+  gap: 12px;
+  /* Plazo y Tasa alineados aunque una etiqueta ocupe dos líneas */
+  align-items: flex-end;
 }
 
-small {
-  font-weight: 400;
-  font-size: 13px;
-  color: var(--tenue);
-}
-
-.entrada {
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--linea);
-  border-radius: 8px;
-  background: var(--fondo);
-}
-
-.entrada:focus-within {
-  border-color: var(--acento);
-}
-
-.prefijo,
-.sufijo {
-  padding-inline: 12px;
-  color: var(--tenue);
-  font-family: var(--f-mono);
-}
-
-input,
-select {
-  font: inherit;
-  font-family: var(--f-mono);
-  font-size: 17px;
-  color: var(--tinta);
-  background: transparent;
-  border: 0;
-  padding: 10px 12px;
-  width: 100%;
+.fila > .campo {
+  flex: 1 1 0;
   min-width: 0;
 }
 
-.prefijo + input {
-  padding-left: 0;
-}
-
-input:focus {
-  outline: none;
-}
-
-select {
-  border: 1px solid var(--linea);
-  border-radius: 8px;
-  background: var(--fondo);
-  cursor: pointer;
-}
-
 .resultado {
-  background: var(--acento-suave);
-  border-color: transparent;
-  justify-content: center;
-}
-
-.cuota {
-  font-size: clamp(34px, 5vw, 46px);
-  font-weight: 500;
-  color: var(--acento);
-  line-height: 1.1;
-}
-
-dl {
-  margin: 4px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-dl div {
-  display: flex;
-  justify-content: space-between;
+  background: var(--cm-fondo);
+  border-radius: 16px;
+  padding: 22px;
   gap: 12px;
 }
 
-dt {
-  color: var(--tenue);
+.pequeno {
   font-size: 14px;
 }
 
-dd {
-  margin: 0;
+.grande {
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.media {
+  font-size: 22px;
   font-weight: 500;
 }
 
+.sep {
+  height: 1px;
+  background: var(--cm-linea);
+}
+
+.ahorro {
+  background: var(--cm-oro-100);
+  color: var(--cm-oro-800);
+  border-radius: var(--cm-r-boton);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ahorro b {
+  font-size: 14px;
+}
+
+.ahorro .cifra {
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.aviso {
+  background: var(--cm-uva-100);
+  color: var(--cm-enlace);
+  border-radius: var(--cm-r-boton);
+  padding: 16px;
+  font-weight: 700;
+}
+
+.quiero {
+  font-weight: 700;
+}
+
 @media (max-width: 760px) {
-  :host {
-    grid-template-columns: 1fr;
+  .sim-caja {
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .resultado {
+    padding: 18px;
   }
 }

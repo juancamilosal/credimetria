@@ -1,0 +1,39 @@
+.contenido {
+  padding-top: 32px;
+}
+
+.filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.filtros .leyenda {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.filtros-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.explica {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.explica span {
+  font-size: 15px;
+}
+
+.destacada {
+  background: var(--cm-uva-100);
+  border-color: var(--cm-uva-100);
+}

@@ -1,16 +1,54 @@
 <a class="visualmente-oculto saltar" href="#contenido">Ir al contenido</a>
-<header>
-  <div class="contenedor barra">
-    <a routerLink="/" class="marca" aria-label="Credimetría, inicio"
-      ><app-logo
-    /></a>
-    <nav aria-label="Principal">
-      @for (enlace of enlaces; track enlace.fragmento) {
-        <a routerLink="/" [fragment]="enlace.fragmento">{{ enlace.texto }}</a>
-      }
-    </nav>
-    <a routerLink="/" fragment="simulador" class="boton boton-principal"
-      >Calcular mi cuota</a
+<header class="banda">
+  <div class="wrap barra">
+    <a routerLink="/" class="marca" aria-label="Credimetría, inicio">
+      <app-logo />
+    </a>
+
+    <button
+      class="btn-menu"
+      type="button"
+      [attr.aria-label]="menuAbierto() ? 'Cerrar menú' : 'Abrir menú'"
+      [attr.aria-expanded]="menuAbierto()"
+      aria-controls="menu"
+      (click)="alternarMenu()"
     >
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        @if (menuAbierto()) {
+          <path d="M6 6l12 12M18 6L6 18" />
+        } @else {
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        }
+      </svg>
+    </button>
+
+    <nav id="menu" aria-label="Principal" [class.abierto]="menuAbierto()">
+      <a
+        routerLink="/ranking"
+        routerLinkActive="activo"
+        ariaCurrentWhenActive="page"
+      >
+        Ranking de tasas
+      </a>
+      <a routerLink="/" fragment="simulador">Simulador</a>
+      <a routerLink="/" fragment="como-funciona">Cómo funciona</a>
+      <a
+        routerLink="/aliados"
+        routerLinkActive="activo"
+        ariaCurrentWhenActive="page"
+      >
+        Aliados
+      </a>
+      <a routerLink="/asesoria" class="btn btn-oro asesoria">Asesoría gratis</a>
+    </nav>
   </div>
 </header>

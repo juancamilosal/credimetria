@@ -1,0 +1,78 @@
+:host {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+button {
+  min-height: 44px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--cm-linea);
+  background: var(--cm-blanco);
+  color: var(--cm-tinta);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+button:hover {
+  border-color: var(--cm-uva-600);
+}
+
+/* Productos: el elegido en tinta */
+:host(.redondo) button[aria-pressed="true"] {
+  background: var(--cm-tinta);
+  color: var(--cm-fondo);
+  border-color: var(--cm-tinta);
+  font-weight: 700;
+}
+
+/* En celular los productos se desplazan de lado */
+@media (max-width: 760px) {
+  :host(.redondo) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+}
+
+:host(.cuadrado) button {
+  border-radius: var(--cm-r-campo);
+}
+
+:host(.cuadrado) button[aria-pressed="true"] {
+  background: var(--cm-uva-100);
+  color: var(--cm-enlace);
+  border-color: var(--cm-uva-100);
+  font-weight: 700;
+}
+
+:host(.uva) button[aria-pressed="true"] {
+  background: var(--cm-uva-700);
+  color: #ffffff;
+  border-color: var(--cm-uva-700);
+  font-weight: 700;
+}
+
+/* Urgencia: 3 botones del mismo ancho, "Ya" y la elegida en oro */
+:host(.urgencia) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 480px;
+}
+
+:host(.urgencia) button {
+  min-height: 48px;
+  border-radius: var(--cm-r-boton);
+  padding: 10px 6px;
+  font-size: 15px;
+}
+
+:host(.urgencia) button[aria-pressed="true"] {
+  background: var(--cm-oro-500);
+  border-color: var(--cm-oro-500);
+  color: #1c1033;
+  font-weight: 800;
+}

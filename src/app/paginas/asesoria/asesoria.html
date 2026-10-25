@@ -1,0 +1,340 @@
+<div class="wrap ases">
+  <div class="ases-form" #formulario>
+    @if (enviado(); as cuando) {
+      <div class="listo" role="status">
+        <svg
+          width="56"
+          height="56"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--cm-enlace)"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <path d="M8 12l3 3 5-6" />
+        </svg>
+        <h1>¡Listo! Un asesor te contactará {{ cuando }}</h1>
+        <p class="muted">
+          Te escribirá por el canal que elegiste. Recuerda: los asesores aliados
+          nunca te cobran nada por adelantado. Si alguno lo hace, repórtalo.
+        </p>
+        @if (!conectado) {
+          <p class="nota">
+            Versión de prueba: tus datos todavía no se envían a ningún asesor.
+          </p>
+        }
+        <div class="acciones">
+          <a class="btn btn-uva" routerLink="/ranking"
+            >Seguir comparando tasas</a
+          >
+          <button class="btn btn-borde" type="button" (click)="volver()">
+            Volver al formulario
+          </button>
+        </div>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+        <div class="intro">
+          <h1>Asesoría gratis para conseguir la mejor tasa</h1>
+          <p class="muted">
+            Menos de un minuto. Un asesor aliado verificado te contacta por el
+            canal que elijas.
+          </p>
+          @if (vieneDe(); as texto) {
+            <p class="etq etq-uva viene">{{ texto }}</p>
+          }
+        </div>
+
+        <fieldset>
+          <legend id="lbProducto">¿Qué crédito buscas?</legend>
+          <app-chips
+            variante="uva"
+            etiqueta="lbProducto"
+            [opciones]="opcionesProducto"
+            [valor]="form.controls.producto.value"
+            (valorChange)="form.controls.producto.setValue($event)"
+          />
+        </fieldset>
+
+        <div class="rejilla">
+          <div class="campo">
+            <label for="asMonto">¿Cuánto necesitas?</label>
+            <input
+              id="asMonto"
+              formControlName="monto"
+              inputmode="numeric"
+              placeholder="30.000.000"
+              autocomplete="off"
+              (blur)="formatearMonto()"
+              [attr.aria-invalid]="mostrarError('monto')"
+              aria-describedby="errMonto"
+            />
+            @if (mostrarError("monto")) {
+              <span class="error" id="errMonto">
+                Escribe un monto de al menos $1.000.000.
+              </span>
+            }
+          </div>
+          <div class="campo">
+            <label for="asIngreso">¿De dónde vienen tus ingresos?</label>
+            <select id="asIngreso" formControlName="ingreso">
+              @for (opcion of ingresos; track opcion) {
+                <option [value]="opcion">{{ opcion }}</option>
+              }
+            </select>
+          </div>
+          <div class="campo">
+            <label for="asSalario">Ingreso mensual aproximado</label>
+            <select id="asSalario" formControlName="salario">
+              @for (opcion of salarios; track opcion) {
+                <option [value]="opcion">{{ opcion }}</option>
+              }
+            </select>
+          </div>
+          <div class="campo">
+            <label for="asCiudad">Ciudad</label>
+            <input
+              id="asCiudad"
+              formControlName="ciudad"
+              placeholder="Ej. Bogotá"
+              autocomplete="address-level2"
+              [attr.aria-invalid]="mostrarError('ciudad')"
+              aria-describedby="errCiudad"
+            />
+            @if (mostrarError("ciudad")) {
+              <span class="error" id="errCiudad">Escribe tu ciudad.</span>
+            }
+          </div>
+        </div>
+
+        <fieldset>
+          <legend>¿Tienes reportes negativos en centrales de riesgo?</legend>
+          <div class="opciones">
+            <label
+              ><input
+                type="radio"
+                formControlName="reporte"
+                value="no"
+              />No</label
+            >
+            <label
+              ><input
+                type="radio"
+                formControlName="reporte"
+                value="si"
+              />Sí</label
+            >
+            <label
+              ><input type="radio" formControlName="reporte" value="no-se" />No
+              sé</label
+            >
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend id="lbUrgencia">¿Cuándo necesitas el crédito?</legend>
+          <app-chips
+            variante="urgencia"
+            etiqueta="lbUrgencia"
+            [opciones]="opcionesUrgencia"
+            [valor]="form.controls.urgencia.value"
+            (valorChange)="form.controls.urgencia.setValue($event)"
+          />
+        </fieldset>
+
+        <div class="rejilla">
+          <div class="campo">
+            <label for="asNombre">Nombre</label>
+            <input
+              id="asNombre"
+              formControlName="nombre"
+              placeholder="Tu nombre"
+              autocomplete="name"
+              [attr.aria-invalid]="mostrarError('nombre')"
+              aria-describedby="errNombre"
+            />
+            @if (mostrarError("nombre")) {
+              <span class="error" id="errNombre">Escribe tu nombre.</span>
+            }
+          </div>
+          <div class="campo">
+            <label for="asCel">Celular</label>
+            <input
+              id="asCel"
+              formControlName="celular"
+              type="tel"
+              inputmode="tel"
+              placeholder="300 000 0000"
+              autocomplete="tel-national"
+              [attr.aria-invalid]="mostrarError('celular')"
+              aria-describedby="errCel"
+            />
+            @if (mostrarError("celular")) {
+              <span class="error" id="errCel">
+                Escribe un celular de 10 dígitos que empiece por 3.
+              </span>
+            }
+          </div>
+        </div>
+
+        <fieldset formGroupName="canales">
+          <legend>¿Por dónde te pueden contactar?</legend>
+          <div class="opciones">
+            <label
+              ><input
+                type="checkbox"
+                formControlName="whatsapp"
+              />WhatsApp</label
+            >
+            <label
+              ><input type="checkbox" formControlName="llamada" />Llamada</label
+            >
+            <label
+              ><input type="checkbox" formControlName="correo" />Correo</label
+            >
+          </div>
+        </fieldset>
+        @if (quiereCorreo()) {
+          <div class="campo correo">
+            <label for="asCorreo">Correo</label>
+            <input
+              id="asCorreo"
+              type="email"
+              formControlName="correo"
+              placeholder="tu@correo.com"
+              autocomplete="email"
+              [attr.aria-invalid]="errorGrupo('correo')"
+            />
+            @if (errorGrupo("correo")) {
+              <span class="error">Escribe un correo válido.</span>
+            }
+          </div>
+        }
+        @if (errorGrupo("sinCanal")) {
+          <span class="error">Marca al menos un canal.</span>
+        }
+        <span class="nota canales-nota">
+          Solo te contactan por los canales que marques, de lunes a viernes de 7
+          a. m. a 7 p. m. y sábados de 8 a. m. a 3 p. m.
+        </span>
+
+        <label class="autoriza">
+          <input type="checkbox" formControlName="autorizo" />
+          <span>
+            Autorizo a Credimetría a compartir mis datos con los asesores de
+            crédito aliados publicados en
+            <a routerLink="/aliados">credimetria.co/aliados</a>, para que me
+            contacten y me ofrezcan créditos. Me contactarán máximo 2 asesores.
+            Acepto la
+            <a routerLink="/politica-de-datos"
+              >política de tratamiento de datos</a
+            >.
+          </span>
+        </label>
+
+        <button
+          class="btn btn-uva enviar"
+          type="submit"
+          [disabled]="!autorizo()"
+        >
+          {{
+            autorizo()
+              ? "Quiero que me asesoren"
+              : "Marca la autorización para continuar"
+          }}
+        </button>
+      </form>
+    }
+  </div>
+
+  <aside class="ases-lado" aria-label="Qué pasa después">
+    <div class="lado-uva">
+      <b class="lado-titulo">Qué pasa después</b>
+      <ol>
+        <li>
+          <span class="n">1</span
+          ><span
+            >Revisamos tu solicitud y la enviamos a máximo 2 asesores
+            aliados.</span
+          >
+        </li>
+        <li>
+          <span class="n">2</span
+          ><span>El asesor te contacta por el canal que elegiste.</span>
+        </li>
+        <li>
+          <span class="n">3</span
+          ><span
+            >Te presenta las opciones de los bancos con los que trabaja.</span
+          >
+        </li>
+      </ol>
+    </div>
+    <ul class="lado-blanco">
+      <li>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--cm-enlace)"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+        <span
+          ><b>Asesores verificados.</b>&nbsp;<span class="muted"
+            >Cada uno demuestra su vínculo con la entidad.</span
+          ></span
+        >
+      </li>
+      <li>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--cm-enlace)"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="9" />
+          <path d="M8 8l8 8" />
+        </svg>
+        <span
+          ><b>Nunca cobran por adelantado.</b>&nbsp;<span class="muted"
+            >Si te piden plata para "aprobar", es estafa.</span
+          ></span
+        >
+      </li>
+      <li>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--cm-enlace)"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <rect x="4" y="10" width="16" height="11" rx="2" />
+          <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+        </svg>
+        <span
+          ><b>Tus datos, con tu permiso.</b>&nbsp;<span class="muted"
+            >Puedes pedir que los borremos cuando quieras.</span
+          ></span
+        >
+      </li>
+    </ul>
+  </aside>
+</div>

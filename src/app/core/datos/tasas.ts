@@ -1,10 +1,11 @@
 import { CorteTasas, InfoProducto, TasaEntidad } from '../modelos/tasa';
 
 /*
- * Tasas de ejemplo para armar la página mientras se construye la Fase 1
- * (recolector de datos.gov.co con historial en la base de datos).
- * Cuando llegue la actualización automática, este archivo se reemplaza por
- * la consulta a la base de datos y `ejemplo` pasa a `false`.
+ * Tasas de ejemplo mientras se construye la Fase 1 (recolector de
+ * datos.gov.co con historial en la base de datos). AV Villas y Banco de
+ * Bogotá en libre inversión son las cifras del documento de la idea; el
+ * resto son ilustrativas. Cuando llegue la base de datos, este archivo se
+ * reemplaza y `ejemplo` pasa a `false`.
  */
 
 export const CORTE_TASAS: CorteTasas = {
@@ -14,30 +15,11 @@ export const CORTE_TASAS: CorteTasas = {
 };
 
 export const PRODUCTOS: InfoProducto[] = [
-  {
-    id: 'libre-inversion',
-    nombre: 'Libre inversión',
-    montoEjemplo: 20_000_000,
-    plazoEjemplo: 48,
-  },
-  {
-    id: 'libranza',
-    nombre: 'Libranza',
-    montoEjemplo: 20_000_000,
-    plazoEjemplo: 60,
-  },
-  {
-    id: 'vehiculo',
-    nombre: 'Vehículo',
-    montoEjemplo: 60_000_000,
-    plazoEjemplo: 60,
-  },
-  {
-    id: 'vivienda',
-    nombre: 'Vivienda',
-    montoEjemplo: 200_000_000,
-    plazoEjemplo: 180,
-  },
+  { id: 'libre-inversion', nombre: 'Libre inversión' },
+  { id: 'libranza', nombre: 'Libranza' },
+  { id: 'compra-cartera', nombre: 'Compra de cartera' },
+  { id: 'vehiculo', nombre: 'Vehículo' },
+  { id: 'vivienda', nombre: 'Vivienda' },
 ];
 
 export const TASAS: TasaEntidad[] = [
@@ -50,11 +32,11 @@ export const TASAS: TasaEntidad[] = [
     tasaAnunciada: 14.1,
   },
   {
-    entidad: 'Banco de Bogotá',
-    tipo: 'Banco',
+    entidad: 'Confiar',
+    tipo: 'Cooperativa',
     producto: 'libre-inversion',
-    tasaReal: 23.38,
-    tasaAnunciada: 16.8,
+    tasaReal: 21.9,
+    tasaAnunciada: 17.9,
   },
   {
     entidad: 'Bancolombia',
@@ -68,14 +50,7 @@ export const TASAS: TasaEntidad[] = [
     tipo: 'Banco',
     producto: 'libre-inversion',
     tasaReal: 22.9,
-    tasaAnunciada: 19.0,
-  },
-  {
-    entidad: 'Banco Popular',
-    tipo: 'Banco',
-    producto: 'libre-inversion',
-    tasaReal: 20.95,
-    tasaAnunciada: 15.9,
+    tasaAnunciada: 19,
   },
   {
     entidad: 'BBVA',
@@ -85,18 +60,18 @@ export const TASAS: TasaEntidad[] = [
     tasaAnunciada: 17.2,
   },
   {
-    entidad: 'Confiar',
-    tipo: 'Cooperativa',
-    producto: 'libre-inversion',
-    tasaReal: 21.9,
-    tasaAnunciada: 17.9,
-  },
-  {
     entidad: 'Serfinanza',
     tipo: 'Financiera',
     producto: 'libre-inversion',
     tasaReal: 25.6,
     tasaAnunciada: 19.5,
+  },
+  {
+    entidad: 'Banco de Bogotá',
+    tipo: 'Banco',
+    producto: 'libre-inversion',
+    tasaReal: 26.38,
+    tasaAnunciada: null,
   },
 
   // Libranza
@@ -115,20 +90,6 @@ export const TASAS: TasaEntidad[] = [
     tasaAnunciada: 14.5,
   },
   {
-    entidad: 'Bancolombia',
-    tipo: 'Banco',
-    producto: 'libranza',
-    tasaReal: 18.3,
-    tasaAnunciada: 15.1,
-  },
-  {
-    entidad: 'Davivienda',
-    tipo: 'Banco',
-    producto: 'libranza',
-    tasaReal: 18.9,
-    tasaAnunciada: 15.6,
-  },
-  {
     entidad: 'Banco de Bogotá',
     tipo: 'Banco',
     producto: 'libranza',
@@ -136,11 +97,55 @@ export const TASAS: TasaEntidad[] = [
     tasaAnunciada: 14.2,
   },
   {
+    entidad: 'Bancolombia',
+    tipo: 'Banco',
+    producto: 'libranza',
+    tasaReal: 18.3,
+    tasaAnunciada: 15.1,
+  },
+  {
     entidad: 'Coopcentral',
     tipo: 'Cooperativa',
     producto: 'libranza',
     tasaReal: 19.4,
-    tasaAnunciada: 16.0,
+    tasaAnunciada: 16,
+  },
+  {
+    entidad: 'Giros y Finanzas',
+    tipo: 'Financiera',
+    producto: 'libranza',
+    tasaReal: 21.2,
+    tasaAnunciada: null,
+  },
+
+  // Compra de cartera
+  {
+    entidad: 'AV Villas',
+    tipo: 'Banco',
+    producto: 'compra-cartera',
+    tasaReal: 19.8,
+    tasaAnunciada: 14.1,
+  },
+  {
+    entidad: 'Davivienda',
+    tipo: 'Banco',
+    producto: 'compra-cartera',
+    tasaReal: 20.6,
+    tasaAnunciada: 16.9,
+  },
+  {
+    entidad: 'Confiar',
+    tipo: 'Cooperativa',
+    producto: 'compra-cartera',
+    tasaReal: 21.1,
+    tasaAnunciada: 17.5,
+  },
+  {
+    entidad: 'Bancolombia',
+    tipo: 'Banco',
+    producto: 'compra-cartera',
+    tasaReal: 21.7,
+    tasaAnunciada: 17.8,
   },
 
   // Vehículo
@@ -203,17 +208,24 @@ export const TASAS: TasaEntidad[] = [
     tasaAnunciada: 11.5,
   },
   {
-    entidad: 'BBVA',
-    tipo: 'Banco',
-    producto: 'vivienda',
-    tasaReal: 13.4,
-    tasaAnunciada: 11.9,
-  },
-  {
     entidad: 'Caja Social',
     tipo: 'Banco',
     producto: 'vivienda',
     tasaReal: 13.1,
     tasaAnunciada: 11.8,
   },
+  {
+    entidad: 'BBVA',
+    tipo: 'Banco',
+    producto: 'vivienda',
+    tasaReal: 13.4,
+    tasaAnunciada: 11.9,
+  },
 ];
+
+/**
+ * Tasa de usura de octubre de 2026 para crédito de consumo ordinario
+ * (certificada por la Superfinanciera). Ninguna entidad puede cobrar más.
+ * Se actualiza cada mes.
+ */
+export const USURA_CONSUMO = { tasa: 28.59, mes: 'octubre de 2026' };

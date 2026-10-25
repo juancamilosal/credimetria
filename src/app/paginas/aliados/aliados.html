@@ -1,0 +1,96 @@
+<section class="banda">
+  <div class="wrap banda-cabeza">
+    <h1>Asesores aliados</h1>
+    <p>
+      Estas son las únicas personas y empresas que pueden recibir tus datos
+      cuando pides asesoría en Credimetría. Si alguien no está en esta lista, no
+      viene de nosotros.
+    </p>
+  </div>
+</section>
+
+<div class="wrap contenido">
+  @if (ejemplo) {
+    <p class="etq etq-oro aviso-ejemplo">
+      Versión de prueba: estos asesores son de ejemplo.
+    </p>
+  }
+
+  <ul class="aliados">
+    @for (aliado of aliados; track aliado.id) {
+      <li class="tarjeta aliado">
+        <div class="aliado-top">
+          <div class="quien">
+            <span class="iniciales" aria-hidden="true">{{
+              iniciales(aliado.nombre)
+            }}</span>
+            <div>
+              <b>{{ aliado.nombre }}</b>
+              <div class="nota">{{ aliado.empresa }}</div>
+            </div>
+          </div>
+          @if (aliado.verificado) {
+            <span class="etq etq-ok">Verificado</span>
+          }
+        </div>
+        <dl>
+          <div>
+            <dt>Trabaja con:</dt>
+            <dd>{{ aliado.entidades.join(", ") }}</dd>
+          </div>
+          <div>
+            <dt>Productos:</dt>
+            <dd>{{ aliado.productos.join(", ") }}</dd>
+          </div>
+          <div>
+            <dt>Ciudades:</dt>
+            <dd>{{ aliado.ciudades.join(", ") }}</dd>
+          </div>
+        </dl>
+      </li>
+    }
+    <li class="tarjeta aliado vacio">
+      <b>¿Eres asesor de crédito?</b>
+      <span class="muted">
+        Recibe prospectos calificados que ya compararon tasas y saben cuándo
+        necesitan el crédito.
+      </span>
+      <a href="mailto:aliados@credimetria.co?subject=Quiero%20ser%20aliado"
+        >Quiero ser aliado</a
+      >
+    </li>
+  </ul>
+
+  <section class="panel" aria-labelledby="tituloReglas">
+    <h2 id="tituloReglas">Lo que todo aliado se compromete a cumplir</h2>
+    <ol class="reglas">
+      @for (regla of reglas; track regla.titulo; let i = $index) {
+        <li>
+          <span class="pos">{{ i + 1 }}</span>
+          <span
+            ><b>{{ regla.titulo }}</b
+            >&nbsp;<span class="muted">{{ regla.texto }}</span></span
+          >
+        </li>
+      }
+    </ol>
+  </section>
+
+  <section class="reporte">
+    <div>
+      <b class="reporte-titulo"
+        >¿Un asesor te pidió dinero o no respetó estas reglas?</b
+      >
+      <p>
+        Cuéntanos. Revisamos cada reporte y retiramos de la lista a quien
+        incumpla.
+      </p>
+    </div>
+    <a
+      class="btn btn-tinta"
+      href="mailto:reportes@credimetria.co?subject=Reportar%20un%20asesor"
+    >
+      Reportar un asesor
+    </a>
+  </section>
+</div>

@@ -1,5 +1,10 @@
 /** Tipos de crédito que compara Credimetría. */
-export type Producto = 'libre-inversion' | 'libranza' | 'vehiculo' | 'vivienda';
+export type Producto =
+  | 'libre-inversion'
+  | 'libranza'
+  | 'compra-cartera'
+  | 'vehiculo'
+  | 'vivienda';
 
 export type TipoEntidad = 'Banco' | 'Cooperativa' | 'Financiera';
 
@@ -17,9 +22,6 @@ export interface TasaEntidad {
 export interface InfoProducto {
   id: Producto;
   nombre: string;
-  /** Monto y plazo con los que se muestra la cuota de ejemplo. */
-  montoEjemplo: number;
-  plazoEjemplo: number;
 }
 
 /** De dónde salen las tasas y hasta qué fecha van. */
@@ -27,6 +29,6 @@ export interface CorteTasas {
   fuente: string;
   /** Fecha de corte en formato ISO (AAAA-MM-DD). */
   fecha: string;
-  /** `true` mientras las tasas sean de ejemplo y no vengan de la actualización automática. */
+  /** `true` mientras los datos sean de ejemplo y no vengan de la base de datos. */
   ejemplo: boolean;
 }

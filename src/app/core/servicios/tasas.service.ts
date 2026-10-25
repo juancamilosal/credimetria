@@ -5,6 +5,7 @@ import {
   InfoProducto,
   Producto,
   TasaEntidad,
+  TipoEntidad,
 } from '../modelos/tasa';
 
 /**
@@ -15,31 +16,28 @@ import {
 export class TasasService {
   readonly corte: CorteTasas = CORTE_TASAS;
   readonly productos: InfoProducto[] = PRODUCTOS;
+  readonly tipos: TipoEntidad[] = ['Banco', 'Cooperativa', 'Financiera'];
 
-  /** Las `cantidad` entidades con la tasa real más baja para un producto. */
-  mejores(producto: Producto, cantidad = 3): TasaEntidad[] {
-    return TASAS.filter((t) => t.producto === producto)
-      .sort((a, b) => a.tasaReal - b.tasaReal)
-      .slice(0, cantidad);
-  }
-
-  /** Promedio simple de la tasa real de un producto. */
-  promedio(producto: Producto): number {
-    const tasas = TASAS.filter((t) => t.producto === producto);
-    if (!tasas.length) return 0;
-    return tasas.reduce((suma, t) => suma + t.tasaReal, 0) / tasas.length;
-  }
-
-  /** La entidad con más distancia entre la tasa que anuncia y la que cobra. */
-  mayorBrecha(producto: Producto): TasaEntidad | undefined {
-    const brecha = (t: TasaEntidad) =>
-      t.tasaAnunciada === null ? -1 : t.tasaReal - t.tasaAnunciada;
+  /**
+   * Entidades de un producto ordenadas por la tasa que cobran, de menor a
+   * mayor. El orden nunca depende de quién paga publicidad.
+   */
+  ranking(producto: Producto, tipo: TipoEntidad | null = null): TasaEntidad[] {
     return TASAS.filter(
-      (t) => t.producto === producto && t.tasaAnunciada !== null,
-    ).sort((a, b) => brecha(b) - brecha(a))[0];
+      (t) => t.producto === producto && (tipo === null || t.tipo === tipo),
+    ).sort((a, b) => a.tasaReal - b.tasaReal);
   }
 
-  producto(id: Producto): InfoProducto {
-    return this.productos.find((p) => p.id === id) ?? this.productos[0];
+  /** La entidad que menos cobra para un producto. */
+  mejor(producto: Producto): TasaEntidad | undefined {
+    return this.ranking(producto)[0];
+  }
+
+  nombre(producto: Producto): string {
+    return this.productos.find((p) => p.id === producto)?.nombre ?? producto;
+  }
+
+  esProducto(valor: unknown): valor is Producto {
+    return this.productos.some((p) => p.id === valor);
   }
 }

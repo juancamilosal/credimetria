@@ -1,18 +1,34 @@
-import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+} from '@angular/router';
+import { filter } from 'rxjs';
 import { Logo } from '../logo/logo';
 
 @Component({
   selector: 'app-encabezado',
-  imports: [RouterLink, Logo],
+  imports: [RouterLink, RouterLinkActive, Logo],
   templateUrl: './encabezado.html',
   styleUrl: './encabezado.css',
 })
 export class Encabezado {
-  protected readonly enlaces = [
-    { texto: 'Mejores tasas', fragmento: 'mejores-tasas' },
-    { texto: 'Qué hacemos', fragmento: 'que-hacemos' },
-    { texto: 'Cómo funciona', fragmento: 'como-funciona' },
-    { texto: 'Simulador', fragmento: 'simulador' },
-  ];
+  protected readonly menuAbierto = signal(false);
+
+  constructor() {
+    // El menú del celular se cierra al cambiar de página.
+    inject(Router)
+      .events.pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.menuAbierto.set(false));
+  }
+
+  protected alternarMenu(): void {
+    this.menuAbierto.update((abierto) => !abierto);
+  }
 }
