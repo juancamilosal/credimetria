@@ -121,6 +121,7 @@ describe('TasasAdmin', () => {
       'guardar',
       'aprobar',
       'crearDesdeDocumento',
+      'eliminar',
     ]);
     docs = jasmine.createSpyObj<DocumentosAdminService>(
       'DocumentosAdminService',
@@ -131,6 +132,9 @@ describe('TasasAdmin', () => {
         'cargar',
         'agregarFuente',
         'editarFuente',
+        'reemplazarArchivo',
+        'descartar',
+        'cambiarVigencia',
       ],
     );
     admin.listar.and.resolveTo([porAprobar, publicada]);
@@ -268,7 +272,7 @@ describe('TasasAdmin', () => {
     const bbva = html.querySelector('.banco')!;
     boton(bbva, 'Cargar PDF nuevo').click();
     fixture.detectChanges();
-    const campo = bbva.querySelector<HTMLInputElement>('input[type="file"]')!;
+    const campo = bbva.querySelector<HTMLInputElement>('.carga input[type="file"]')!;
     const pdf = new File(['%PDF'], 'nov.pdf', { type: 'application/pdf' });
     Object.defineProperty(campo, 'files', { value: [pdf] });
     campo.dispatchEvent(new Event('change'));
@@ -404,5 +408,58 @@ describe('TasasAdmin', () => {
     expect(
       bbva.querySelector('[aria-label="Por aprobar"] .tope')?.textContent,
     ).toContain('tope de usura');
+  });
+
+  it('elimina un PDF cargado por error y su tasa, con un segundo toque', async () => {
+    await crear();
+    admin.eliminar.and.resolveTo();
+    docs.descartar.and.resolveTo();
+    const nueva = html.querySelector('.banco [aria-label="Por aprobar"]')!;
+    const eliminar = nueva.querySelector<HTMLButtonElement>('.eliminar')!;
+    eliminar.click();
+    fixture.detectChanges();
+    expect(admin.eliminar).not.toHaveBeenCalled();
+    expect(eliminar.textContent).toContain('Toca otra vez');
+    eliminar.click();
+    await esperar();
+    expect(admin.eliminar).toHaveBeenCalledWith(2);
+    expect(docs.descartar).toHaveBeenCalledWith(
+      jasmine.objectContaining({ id: 11 }),
+    );
+    expect(
+      html.querySelector('.banco [aria-label="Por aprobar"]')!.textContent,
+    ).toContain('Nada por aprobar');
+  });
+
+  it('cambia el archivo de un PDF por aprobar', async () => {
+    await crear();
+    docs.reemplazarArchivo.and.resolveTo({
+      ...docNuevo,
+      archivo: {
+        id: 'f20',
+        filename_download: 'tasas-oct-bien.pdf',
+        filesize: 1,
+      },
+    });
+    const nueva = html.querySelector('.banco [aria-label="Por aprobar"]')!;
+    const campo = nueva.querySelector<HTMLInputElement>('.cambiar input')!;
+    const pdf = new File(['%PDF'], 'tasas-oct-bien.pdf', {
+      type: 'application/pdf',
+    });
+    Object.defineProperty(campo, 'files', { value: [pdf] });
+    campo.dispatchEvent(new Event('change'));
+    await esperar();
+    expect(docs.reemplazarArchivo).toHaveBeenCalledWith(
+      jasmine.objectContaining({ id: 11 }),
+      pdf,
+    );
+    expect(nueva.textContent).toContain('tasas-oct-bien.pdf');
+  });
+
+  it('la tasa publicada no deja cambiar ni eliminar su PDF', async () => {
+    await crear();
+    const hoy = html.querySelector('.banco [aria-label="Publicada hoy"]')!;
+    expect(hoy.querySelector('.eliminar')).toBeNull();
+    expect(hoy.querySelector('.cambiar')).toBeNull();
   });
 });

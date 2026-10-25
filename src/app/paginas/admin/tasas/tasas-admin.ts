@@ -126,6 +126,8 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected readonly direccionesEn = signal<string | null>(null);
   protected readonly ocupado = signal<string | null>(null);
   protected readonly comparando = signal<Comparacion | null>(null);
+  /** Tasa cuyo PDF se pidió eliminar y espera el segundo toque. */
+  protected readonly confirmandoBorrar = signal<number | null>(null);
   private enlacesBlob: string[] = [];
   private archivo: File | null = null;
   private vigencia = '';
@@ -263,6 +265,24 @@ export class TasasAdmin implements OnInit, OnDestroy {
     return u ? [u.first_name, u.last_name].filter(Boolean).join(' ') : '';
   }
 
+  /** La tarjeta (banco y producto) a la que pertenece una tasa. */
+  protected tarjetaDe(t: TasaAdmin): TarjetaTasa {
+    const clave = `${t.entidad.codigo}:${t.producto}`;
+    return (
+      this.tarjetas().find((c) => c.clave === clave) ?? {
+        clave,
+        entidad: t.entidad,
+        producto: t.producto,
+        pdf: null,
+        pagina: null,
+        publicada: null,
+        porAprobar: [],
+        historial: [],
+        documentos: [],
+      }
+    );
+  }
+
   protected documentoDe(t: TasaAdmin): DocumentoPdf | undefined {
     return this.documentos().find((d) => d.id === t.documento?.id);
   }
@@ -372,9 +392,99 @@ export class TasasAdmin implements OnInit, OnDestroy {
       frase: v.frase.trim() || null,
       notas: v.notas.trim() || null,
     };
+    const tasa = this.tasas().find((x) => x.id === id);
+    const documento = tasa ? this.documentoDe(tasa) : undefined;
     await this.trabajar(c.clave, async () => {
       this.reemplazar(await this.admin.guardar(id, cambios));
+      // La vigencia del PDF por aprobar va con la de su tasa.
+      if (
+        documento?.estado === 'nuevo' &&
+        documento.id === cambios.documento &&
+        documento.vigente_desde !== (cambios.vigente_desde ?? null)
+      ) {
+        const cambiado = await this.docs.cambiarVigencia(
+          documento.id,
+          cambios.vigente_desde ?? null,
+        );
+        this.documentos.update((lista) =>
+          lista.map((d) => (d.id === cambiado.id ? cambiado : d)),
+        );
+      }
       this.editando.set(null);
+    });
+  }
+
+  // Corregir o eliminar un PDF cargado por error
+
+  /** Solo se corrige o elimina un PDF que todavía no se ha aprobado. */
+  protected pdfEditable(t: TasaAdmin): boolean {
+    return t.estado === 'por_revisar' && t.documento?.estado === 'nuevo';
+  }
+
+  protected async cambiarArchivo(
+    c: TarjetaTasa,
+    t: TasaAdmin,
+    evento: Event,
+  ): Promise<void> {
+    const campo = evento.target as HTMLInputElement;
+    const archivo = campo.files?.[0];
+    campo.value = '';
+    const documento = this.documentoDe(t);
+    if (!archivo || !documento) return;
+    await this.trabajar(c.clave, async () => {
+      try {
+        const cambiado = await this.docs.reemplazarArchivo(documento, archivo);
+        this.documentos.update((lista) =>
+          lista.map((d) => (d.id === cambiado.id ? cambiado : d)),
+        );
+        this.tasas.update((lista) =>
+          lista.map((x) =>
+            x.documento?.id === cambiado.id
+              ? {
+                  ...x,
+                  documento: {
+                    ...x.documento,
+                    archivo: {
+                      id: cambiado.archivo.id,
+                      filename_download: cambiado.archivo.filename_download,
+                    },
+                  },
+                }
+              : x,
+          ),
+        );
+        this.aviso.set(`PDF de ${c.entidad.nombre} cambiado.`);
+      } catch (error) {
+        if (!(error instanceof DocumentoRepetido)) throw error;
+        this.error.set('Ese PDF ya está guardado en otro registro.');
+      }
+    });
+  }
+
+  /**
+   * Elimina un PDF cargado por error y la tasa por aprobar que salió de él.
+   * Pide un segundo toque para confirmar.
+   */
+  protected async eliminarPdf(c: TarjetaTasa, t: TasaAdmin): Promise<void> {
+    if (this.confirmandoBorrar() !== t.id) {
+      this.confirmandoBorrar.set(t.id);
+      return;
+    }
+    const documento = this.documentoDe(t);
+    if (!documento) return;
+    const delPdf = this.tasas().filter(
+      (x) => x.documento?.id === documento.id && x.estado === 'por_revisar',
+    );
+    await this.trabajar(c.clave, async () => {
+      for (const x of delPdf) await this.admin.eliminar(x.id);
+      await this.docs.descartar(documento);
+      const borradas = new Set(delPdf.map((x) => x.id));
+      this.tasas.update((lista) => lista.filter((x) => !borradas.has(x.id)));
+      this.documentos.update((lista) =>
+        lista.filter((d) => d.id !== documento.id),
+      );
+      this.confirmandoBorrar.set(null);
+      this.aviso.set(`PDF de ${c.entidad.nombre} eliminado.`);
     });
   }
 

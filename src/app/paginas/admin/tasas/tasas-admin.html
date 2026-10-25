@@ -420,6 +420,32 @@
         >
       }
     </div>
+    @if (pdfEditable(t)) {
+      <div class="doc-acciones">
+        <label class="enlace-boton cambiar">
+          Cambiar archivo
+          <input
+            type="file"
+            accept="application/pdf,.pdf"
+            class="visualmente-oculto"
+            (change)="cambiarArchivo(tarjetaDe(t), t, $event)"
+          />
+        </label>
+        <button
+          type="button"
+          class="enlace-boton eliminar"
+          [class.confirmar]="confirmandoBorrar() === t.id"
+          (click)="eliminarPdf(tarjetaDe(t), t)"
+          (blur)="confirmandoBorrar.set(null)"
+        >
+          {{
+            confirmandoBorrar() === t.id
+              ? "¿Seguro? Toca otra vez para eliminar el PDF y esta tasa"
+              : "Eliminar PDF"
+          }}
+        </button>
+      </div>
+    }
   } @else if (t.captura) {
     @if (urlArchivo(t.captura.id); as url) {
       <p class="nota">

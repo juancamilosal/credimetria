@@ -81,4 +81,29 @@ describe('DocumentosAdminService', () => {
       ['PATCH', '/items/documentos/5', { estado: 'actual' }],
     ]);
   });
+
+  it('cambia el archivo de un PDF y borra el anterior', async () => {
+    pedir.and.callFake(async (metodo: string, ruta: string) => {
+      if (metodo === 'GET') return [];
+      if (ruta === '/files') return { id: 'nuevo' };
+      if (metodo === 'PATCH')
+        return doc({
+          id: 5,
+          archivo: { id: 'nuevo', filename_download: 'b.pdf', filesize: 1 },
+        });
+      return undefined;
+    });
+    const pdf = new File(['%PDF-2'], 'b.pdf');
+    const cambiado = await servicio.reemplazarArchivo(doc({ id: 5 }), pdf);
+    expect(cambiado.archivo.id).toBe('nuevo');
+    const llamadas = pedir.calls
+      .allArgs()
+      .map(([m, r]) => `${m} ${r.split('?')[0]}`);
+    expect(llamadas).toEqual([
+      'GET /items/documentos',
+      'POST /files',
+      'PATCH /items/documentos/5',
+      'DELETE /files/f1',
+    ]);
+  });
 });

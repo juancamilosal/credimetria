@@ -254,6 +254,30 @@ h3 {
   flex: none;
 }
 
+.doc-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 14px;
+}
+
+.cambiar {
+  cursor: pointer;
+}
+
+.cambiar:focus-within {
+  outline: 3px solid var(--cm-marca-600);
+  outline-offset: 2px;
+}
+
+.eliminar {
+  color: var(--cm-error);
+}
+
+.eliminar.confirmar {
+  font-weight: 800;
+}
+
 .sin-pdf {
   color: var(--cm-aviso-800);
   font-weight: 600;

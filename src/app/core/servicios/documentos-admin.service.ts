@@ -122,6 +122,51 @@ export class DocumentosAdminService {
     });
   }
 
+  /** Corrige la vigencia de un PDF cargado. */
+  cambiarVigencia(
+    id: number,
+    vigenteDesde: string | null,
+  ): Promise<DocumentoPdf> {
+    return this.sesion.pedir<DocumentoPdf>(
+      'PATCH',
+      `/items/documentos/${id}?fields=${CAMPOS_DOCUMENTO}`,
+      { vigente_desde: vigenteDesde },
+    );
+  }
+
+  /**
+   * Cambia el archivo de un PDF cargado por error por el correcto. Si el
+   * nuevo ya está guardado en otro registro, avisa y no cambia nada.
+   */
+  async reemplazarArchivo(
+    documento: DocumentoPdf,
+    archivo: File,
+  ): Promise<DocumentoPdf> {
+    const huella = await huellaArchivo(archivo);
+    const [repetido] = await this.sesion.pedir<DocumentoPdf[]>(
+      'GET',
+      `/items/documentos?fields=${CAMPOS_DOCUMENTO}&filter[huella][_eq]=${huella}&limit=1`,
+    );
+    if (repetido && repetido.id !== documento.id) {
+      throw new DocumentoRepetido(repetido);
+    }
+    const datos = new FormData();
+    datos.append('title', archivo.name);
+    datos.append('file', archivo, archivo.name);
+    const subido = await this.sesion.pedir<{ id: string }>(
+      'POST',
+      '/files',
+      datos,
+    );
+    const cambiado = await this.sesion.pedir<DocumentoPdf>(
+      'PATCH',
+      `/items/documentos/${documento.id}?fields=${CAMPOS_DOCUMENTO}`,
+      { archivo: subido.id, huella },
+    );
+    await this.sesion.pedir('DELETE', `/files/${documento.archivo.id}`);
+    return cambiado;
+  }
+
   /** Quita un PDF nuevo que no sirve (el registro y el archivo). */
   async descartar(documento: DocumentoPdf): Promise<void> {
     await this.sesion.pedir('DELETE', `/items/documentos/${documento.id}`);

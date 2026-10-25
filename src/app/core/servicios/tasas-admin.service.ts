@@ -77,6 +77,11 @@ export class TasasAdminService {
     });
   }
 
+  /** Borra una tasa por aprobar (por ejemplo, la de un PDF cargado por error). */
+  async eliminar(id: number): Promise<void> {
+    await this.sesion.pedir('DELETE', `/items/tasas_publicadas/${id}`);
+  }
+
   guardar(id: number, cambios: CambiosTasa): Promise<TasaAdmin> {
     return this.escribir('PATCH', `/items/tasas_publicadas/${id}`, cambios);
   }
