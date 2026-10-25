@@ -6,11 +6,15 @@ import { FOTOS } from '../../core/datos/fotos';
 import { Producto } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { Simulador } from './calculadora/simulador';
+import { Comparador } from './comparador/comparador';
 
-/** Página del simulador: la calculadora y las 3 tasas más bajas del producto elegido. */
+/**
+ * Página del simulador: la calculadora, el comparador de dos entidades y las
+ * 3 tasas más bajas del producto elegido.
+ */
 @Component({
   selector: 'app-simulador-pagina',
-  imports: [RouterLink, Foto, Simulador, TablaRanking],
+  imports: [RouterLink, Foto, Simulador, Comparador, TablaRanking],
   template: `
     <section class="cabecera">
       <div class="wrap cabeza">
@@ -32,7 +36,19 @@ import { Simulador } from './calculadora/simulador';
 
     <div class="wrap">
       <section class="sim" aria-label="Simulador">
-        <app-simulador [(producto)]="producto" />
+        <app-simulador
+          [(producto)]="producto"
+          [(monto)]="monto"
+          [(plazo)]="plazo"
+        />
+      </section>
+
+      <section class="seccion" aria-labelledby="tituloComparador">
+        <app-comparador
+          [producto]="producto()"
+          [monto]="monto()"
+          [plazo]="plazo()"
+        />
       </section>
 
       <section class="seccion" aria-labelledby="tituloTop">
@@ -79,6 +95,8 @@ export class SimuladorPagina {
   protected readonly foto = FOTOS.mujerOferta;
 
   protected readonly producto = signal<Producto>('libre-inversion');
+  protected readonly monto = signal(20_000_000);
+  protected readonly plazo = signal(48);
   protected readonly top = computed(() =>
     this.tasas.ranking(this.producto()).slice(0, 3),
   );

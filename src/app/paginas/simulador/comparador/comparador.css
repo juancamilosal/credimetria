@@ -1,0 +1,98 @@
+.comparador {
+  padding: 24px;
+  gap: 18px;
+}
+
+.cabeza {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+h2 {
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.lados {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.lado {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  background: var(--cm-fondo);
+  border-radius: var(--cm-r-tarjeta);
+  padding: 16px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+select {
+  font: inherit;
+  color: var(--cm-tinta);
+  background: var(--cm-campo);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-campo);
+  padding: 12px 14px;
+  min-height: 48px;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.cuota {
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.vs {
+  align-self: center;
+  font-weight: 700;
+  color: var(--cm-gris);
+}
+
+.resultado {
+  background: var(--cm-ahorro-100);
+  color: var(--cm-ahorro-700);
+  border-radius: var(--cm-r-boton);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.resultado b {
+  font-size: 14px;
+}
+
+.resultado span:last-child {
+  font-size: 14px;
+}
+
+.grande {
+  font-size: 30px;
+  font-weight: 500;
+}
+
+@media (max-width: 760px) {
+  .comparador {
+    padding: 18px;
+  }
+
+  .lados {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .vs {
+    justify-self: center;
+  }
+}

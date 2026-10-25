@@ -41,13 +41,16 @@ export class Simulador {
   );
   protected readonly plazos = [12, 24, 36, 48, 60, 72];
 
-  /** El producto lo comparte con el ranking resumido de la página. */
+  /**
+   * Producto, monto y plazo los comparte con la página: el ranking resumido y
+   * el comparador de dos entidades usan los mismos.
+   */
   readonly producto = model<Producto>('libre-inversion');
-  protected readonly montoTexto = signal('20.000.000');
-  protected readonly plazo = signal(48);
+  readonly monto = model(20_000_000);
+  readonly plazo = model(48);
+  protected readonly montoTexto = signal(formatoPesos(this.monto()).slice(1));
   protected readonly tasaTexto = signal('26,38');
 
-  protected readonly monto = computed(() => leerNumero(this.montoTexto()));
   protected readonly tasa = computed(() => leerNumero(this.tasaTexto()));
   protected readonly listo = computed(
     () => this.monto() > 0 && this.tasa() > 0,
@@ -79,6 +82,11 @@ export class Simulador {
 
   protected cambiarProducto(valor: string): void {
     if (this.tasas.esProducto(valor)) this.producto.set(valor);
+  }
+
+  protected cambiarMonto(texto: string): void {
+    this.montoTexto.set(texto);
+    this.monto.set(leerNumero(texto));
   }
 
   /** Al salir del campo, el monto queda con puntos de miles. */

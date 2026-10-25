@@ -1,0 +1,74 @@
+<div class="tarjeta comparador">
+  <div class="cabeza">
+    <h2 id="tituloComparador">Comparar dos entidades</h2>
+    <p class="muted">
+      {{ nombreProducto() }} · {{ monto() | pesos }} a {{ plazo() }} meses, los
+      mismos del simulador.
+    </p>
+  </div>
+
+  <div class="lados">
+    <div class="lado">
+      <label for="entidadA">Entidad A</label>
+      <select
+        id="entidadA"
+        [value]="entidadA()"
+        (change)="entidadA.set($any($event.target).value)"
+      >
+        @for (t of entidades(); track t.entidad) {
+          <option [value]="t.entidad" [selected]="t.entidad === entidadA()">
+            {{ t.entidad }}
+          </option>
+        }
+      </select>
+      @if (a(); as a) {
+        <span class="nota">Cobra en promedio {{ a.tasaReal | tasa }} E.A.</span>
+        <span class="cuota cifra" id="cuotaA">{{ a.cuota | pesos }}</span>
+        <span class="nota">cuota mensual</span>
+      }
+    </div>
+
+    <span class="vs" aria-hidden="true">vs.</span>
+
+    <div class="lado">
+      <label for="entidadB">Entidad B</label>
+      <select
+        id="entidadB"
+        [value]="entidadB()"
+        (change)="entidadB.set($any($event.target).value)"
+      >
+        @for (t of entidades(); track t.entidad) {
+          <option [value]="t.entidad" [selected]="t.entidad === entidadB()">
+            {{ t.entidad }}
+          </option>
+        }
+      </select>
+      @if (b(); as b) {
+        <span class="nota">Cobra en promedio {{ b.tasaReal | tasa }} E.A.</span>
+        <span class="cuota cifra" id="cuotaB">{{ b.cuota | pesos }}</span>
+        <span class="nota">cuota mensual</span>
+      }
+    </div>
+  </div>
+
+  @if (diferencia(); as d) {
+    <div class="resultado" aria-live="polite">
+      @if (d.mes > 0.5) {
+        <b>Con B ({{ b()!.entidad }}) te ahorras</b>
+        <span class="cifra grande">{{ d.total | pesos }}</span>
+        <span>{{ d.mes | pesos }} al mes</span>
+      } @else if (d.mes < -0.5) {
+        <b>Con A ({{ a()!.entidad }}) te ahorras</b>
+        <span class="cifra grande">{{ -d.total | pesos }}</span>
+        <span>{{ -d.mes | pesos }} al mes</span>
+      } @else {
+        <b>Las dos cobran lo mismo en promedio</b>
+      }
+    </div>
+  }
+
+  <p class="nota">
+    Usamos la tasa que cada entidad cobra en promedio, según su reporte a la
+    Superintendencia Financiera. La tasa que te ofrezcan depende de tu perfil.
+  </p>
+</div>

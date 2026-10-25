@@ -23,7 +23,7 @@ morada y oro del diseño (ver abajo).
 | `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                |
 | `/ranking`           | Ranking de tasas  | Lista completa por tasa real con filtros de producto y tipo de entidad (`?producto=…&tipo=…`)                                                   |
 | `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría |
-| `/simulador`         | Simulador         | Cuota, total y ahorro frente a la mejor entidad, con las 3 que menos cobran del producto elegido                                                |
+| `/simulador`         | Simulador         | Cuota, total y ahorro frente a la mejor entidad, comparador de dos entidades y las 3 que menos cobran del producto elegido                      |
 | `/asesoria`          | Asesoría          | Formulario de prospecto con validaciones y autorización de datos obligatoria                                                                    |
 | `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                        |
 | `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                        |
@@ -38,6 +38,11 @@ morada y oro del diseño (ver abajo).
   $51.913 al mes de costos). Nada se guarda ni se envía: si la persona quiere
   asesoría, va a `/asesoria` con `origen=oferta`, así la autorización de
   datos sigue en un solo formulario. El cálculo está en `oferta.ts`.
+- **Comparar dos entidades** (`paginas/simulador/comparador/`): en
+  `/simulador`, Entidad A y Entidad B del producto elegido con el monto y el
+  plazo del simulador; muestra la cuota de cada una y cuánto se ahorra con la
+  más barata (Banco de Bogotá contra AV Villas, $20.000.000 a 48 meses →
+  $2.090.784). Usa la tasa que cada una cobra en promedio.
 - El simulador y el ranking llevan a `/asesoria` con el producto, el monto,
   la entidad o la urgencia en la dirección, y el formulario llega lleno.
 - Con los valores por defecto el simulador da $648.087, $604.529 y un ahorro
