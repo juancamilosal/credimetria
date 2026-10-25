@@ -163,6 +163,12 @@ con `USURA_CONSUMO` (no se ofrece en vivienda).
 - `fuentes`: entidad, producto, tipo (página o PDF), dirección, página
   índice de tasas y tarifas, cómo extraer, patrón, estado, última revisión,
   huella y notas.
+- `tasas_promedio`: lo que cobra cada entidad en promedio según la
+  Superfinanciera (formato 88, datos.gov.co): una fila por entidad y
+  producto con la tasa E.A., la fecha de corte, cuándo se actualizó y si
+  está al día o sin reporte. El robot del promedio la sobrescribe cada
+  semana (sin historial, sin aprobación). Con ella se calcula la cuota, el
+  ahorro y el orden del ranking; el rango del PDF va al lado.
 - `documentos`: los PDF de tasas de cada fuente, con archivo, estado
   (nuevo, actual, anterior), vigencia, origen (manual o robot), huella
   SHA-256, notas, y quién y cuándo lo cargó.
