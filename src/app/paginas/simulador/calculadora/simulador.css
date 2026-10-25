@@ -91,29 +91,8 @@ h2 {
   font-weight: 700;
 }
 
-/* Tipo de cuota: casillas con globo de ayuda */
-.sistemas {
-  border: 0;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-}
-
-.sistemas legend {
-  font-weight: 700;
-  font-size: 14px;
-  margin-bottom: 8px;
-  padding: 0;
-}
-
-.opciones-sistema {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
+/* Casilla "Cuota fija" con globo de ayuda */
 .sistema {
-  flex: 1 1 180px;
   display: flex;
   align-items: center;
   justify-content: space-between;

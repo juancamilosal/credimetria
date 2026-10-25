@@ -66,14 +66,16 @@ morada y oro del diseño (ver abajo).
   valores por defecto: $11.108.167 en intereses y $31.108.167 en total. En
   celular se quita la columna de cuota (es fija y está arriba). El cálculo
   es `amortizacion()` en `core/utilidades/credito.ts`.
-- **Tipo de cuota** (simulador): casillas "Cuota fija" (sistema francés,
-  por defecto) y "Cuota decreciente" (abono constante a capital), cada una
-  con un botón "?" que abre un globo (`role="tooltip"`) explicando cómo
-  funciona; se abre al pasar el mouse, con el teclado o tocándolo en el
-  celular. Con cuota decreciente el resultado muestra la primera y la última
-  cuota, y el ahorro frente a la mejor entidad se calcula con el mismo
-  sistema ($20.000.000 a 48 meses con 26,38 %: de $810.703 a $424.876 y
-  $9.653.893 en intereses, frente a $11.108.167 con cuota fija).
+- **Tipo de cuota** (simulador): una sola casilla "Cuota fija", sin marcar.
+  Sin marcar, el simulador usa cuota decreciente (abono constante a
+  capital); marcada, cuota fija (sistema francés). El botón "?" abre un
+  globo (`role="tooltip"`) que lo explica; se abre al pasar el mouse, con el
+  teclado o tocándolo en el celular. Con cuota decreciente el resultado
+  muestra la primera y la última cuota, y el ahorro frente a la mejor
+  entidad se calcula con el mismo sistema ($20.000.000 a 48 meses con
+  26,38 %: de $810.703 a $424.876 y $9.653.893 en intereses, frente a
+  $11.108.167 con cuota fija). El comparador de dos entidades sigue con
+  cuota fija.
 - **Montos con puntos al escribir** (`compartido/entrada-moneda/`): la
   directiva `appMoneda` pone los puntos de miles mientras la persona teclea
   (1000000 → 1.000.000) y usa la coma para los centavos, con máximo dos
@@ -83,8 +85,10 @@ morada y oro del diseño (ver abajo).
   oferta (no en las tasas).
 - El simulador y el ranking llevan a `/asesoria` con el producto, el monto,
   la entidad o la urgencia en la dirección, y el formulario llega lleno.
-- Con los valores por defecto el simulador da $648.087, $604.529 y un ahorro
-  de $2.090.784, como pide el documento (hay pruebas que lo revisan).
+- Con "Cuota fija" marcada, el simulador da $648.087, $604.529 y un ahorro
+  de $2.090.784, como pide el documento (hay pruebas que lo revisan). Por
+  defecto, con cuota decreciente, da $810.703 la primera cuota y $1.643.800
+  de ahorro.
 - Si la tasa escrita supera la usura del mes, el simulador lo avisa
   (`USURA_CONSUMO` en `core/datos/tasas.ts`; se actualiza cada mes).
 - En celular: menú en botón de 44 px, ranking en tarjetas y chips de producto

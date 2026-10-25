@@ -13,13 +13,37 @@ describe('Simulador', () => {
     return { fixture, html: fixture.nativeElement as HTMLElement };
   }
 
+  function marcarCuotaFija(
+    fixture: { detectChanges(): void },
+    html: HTMLElement,
+  ) {
+    html.querySelector<HTMLInputElement>('#simCuotaFija')!.click();
+    fixture.detectChanges();
+  }
+
   function escribir(input: HTMLInputElement, valor: string) {
     input.value = valor;
     input.dispatchEvent(new Event('input'));
   }
 
-  it('con los valores por defecto da $648.087, $604.529 y $2.090.784', () => {
+  it('por defecto la cuota es decreciente: de $810.703 a $424.876', () => {
     const { html } = crear();
+    expect(
+      html.querySelector<HTMLInputElement>('#simCuotaFija')!.checked,
+    ).toBeFalse();
+    expect(html.querySelector('.grande')?.textContent).toContain('$810.703');
+    expect(html.querySelector('.resultado')?.textContent).toContain(
+      'Baja cada mes hasta $424.876',
+    );
+    expect(html.querySelector('.resultado')?.textContent).toContain(
+      'Pagarías en total $29.653.893',
+    );
+    expect(html.querySelector('.ahorro')?.textContent).toContain('$1.643.800');
+  });
+
+  it('con "Cuota fija" marcada da $648.087, $604.529 y $2.090.784', () => {
+    const { fixture, html } = crear();
+    marcarCuotaFija(fixture, html);
     expect(html.querySelector('.grande')?.textContent).toContain('$648.087');
     expect(html.querySelector('.media')?.textContent).toContain('$604.529');
     expect(html.querySelector('.ahorro')?.textContent).toContain('$2.090.784');
@@ -53,6 +77,7 @@ describe('Simulador', () => {
 
   it('"Simular" muestra la tabla de amortización y sigue los cambios', () => {
     const { fixture, html } = crear();
+    marcarCuotaFija(fixture, html);
     expect(html.querySelector('.amortizacion')).toBeNull();
     const boton = [...html.querySelectorAll('button')].find((b) =>
       b.textContent!.includes('Simular'),
@@ -77,27 +102,14 @@ describe('Simulador', () => {
     expect(filas().length).toBe(12);
   });
 
-  it('con cuota decreciente muestra la primera y la última cuota', () => {
-    const { fixture, html } = crear();
-    html.querySelector<HTMLInputElement>('input[value="decreciente"]')!.click();
-    fixture.detectChanges();
-    expect(html.querySelector('.grande')?.textContent).toContain('$810.703');
-    expect(html.querySelector('.resultado')?.textContent).toContain(
-      'Baja cada mes hasta $424.876',
-    );
-    expect(html.querySelector('.resultado')?.textContent).toContain(
-      'Pagarías en total $29.653.893',
-    );
-  });
-
-  it('explica cada tipo de cuota en un globo de ayuda', () => {
+  it('explica la cuota fija en un globo de ayuda', () => {
     const { fixture, html } = crear();
     const boton = html.querySelector<HTMLButtonElement>(
-      '[aria-describedby="tip-fija"]',
+      '[aria-describedby="tipCuotaFija"]',
     )!;
-    const globo = html.querySelector('#tip-fija')!;
+    const globo = html.querySelector('#tipCuotaFija')!;
     expect(globo.getAttribute('role')).toBe('tooltip');
-    expect(globo.textContent).toContain('Pagas lo mismo todos los meses');
+    expect(globo.textContent).toContain('Sin marcar, la cuota baja cada mes');
     expect(globo.classList).not.toContain('abierto');
     boton.click();
     fixture.detectChanges();

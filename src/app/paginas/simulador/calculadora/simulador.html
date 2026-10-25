@@ -57,48 +57,40 @@
       </div>
     </div>
 
-    <fieldset class="sistemas">
-      <legend>Tipo de cuota</legend>
-      <div class="opciones-sistema">
-        @for (s of sistemas; track s.id) {
-          <div class="sistema" [class.elegido]="sistema() === s.id">
-            <label>
-              <input
-                type="radio"
-                name="simSistema"
-                [value]="s.id"
-                [checked]="sistema() === s.id"
-                (change)="sistema.set(s.id)"
-              />
-              <span class="caja" aria-hidden="true"></span>
-              {{ s.texto }}
-            </label>
-            <span class="tip-ancla">
-              <button
-                type="button"
-                class="tip-boton"
-                [attr.aria-label]="'Qué es ' + s.texto.toLowerCase()"
-                [attr.aria-describedby]="'tip-' + s.id"
-                [attr.aria-expanded]="ayudaAbierta() === s.id"
-                (click)="alternarAyuda(s.id)"
-                (blur)="ayudaAbierta.set(null)"
-                (keydown.escape)="ayudaAbierta.set(null)"
-              >
-                ?
-              </button>
-              <span
-                class="tip"
-                role="tooltip"
-                [id]="'tip-' + s.id"
-                [class.abierto]="ayudaAbierta() === s.id"
-              >
-                {{ s.ayuda }}
-              </span>
-            </span>
-          </div>
-        }
-      </div>
-    </fieldset>
+    <div class="sistema" [class.elegido]="fija()">
+      <label>
+        <input
+          type="checkbox"
+          id="simCuotaFija"
+          [checked]="fija()"
+          (change)="fija.set($any($event.target).checked)"
+        />
+        <span class="caja" aria-hidden="true"></span>
+        Cuota fija
+      </label>
+      <span class="tip-ancla">
+        <button
+          type="button"
+          class="tip-boton"
+          aria-label="Qué es la cuota fija"
+          aria-describedby="tipCuotaFija"
+          [attr.aria-expanded]="ayudaAbierta()"
+          (click)="ayudaAbierta.set(!ayudaAbierta())"
+          (blur)="ayudaAbierta.set(false)"
+          (keydown.escape)="ayudaAbierta.set(false)"
+        >
+          ?
+        </button>
+        <span
+          class="tip"
+          role="tooltip"
+          id="tipCuotaFija"
+          [class.abierto]="ayudaAbierta()"
+        >
+          {{ ayudaCuotaFija }}
+        </span>
+      </span>
+    </div>
 
     @if (superaUsura()) {
       <p class="error" id="avisoUsura">

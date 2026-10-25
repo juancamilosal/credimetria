@@ -26,25 +26,9 @@ import {
   SistemaAmortizacion,
 } from '../../../core/utilidades/credito';
 
-/** Opciones de cuota, con la explicación que sale en el globo de ayuda. */
-const SISTEMAS: {
-  id: SistemaAmortizacion;
-  texto: string;
-  ayuda: string;
-}[] = [
-  {
-    id: 'fija',
-    texto: 'Cuota fija',
-    ayuda:
-      'Pagas lo mismo todos los meses. Al principio casi toda la cuota se va en intereses y al final en capital. Es la que usan casi todos los bancos en libre inversión, libranza y vehículo.',
-  },
-  {
-    id: 'decreciente',
-    texto: 'Cuota decreciente',
-    ayuda:
-      'Abonas lo mismo a capital cada mes y los intereses se calculan sobre lo que aún debes, así que la cuota baja mes a mes. Empiezas pagando más, pero pagas menos intereses en total. Es común en vivienda y en las compras con tarjeta de crédito.',
-  },
-];
+/** Explicación del globo de ayuda de la casilla "Cuota fija". */
+const AYUDA_CUOTA_FIJA =
+  'Sin marcar, la cuota baja cada mes: abonas lo mismo a capital y los intereses se calculan sobre lo que aún debes. Empiezas pagando más, pero pagas menos intereses. Márcala si tu banco te cobra la misma cuota todos los meses, como suele pasar en libre inversión, libranza y vehículo.';
 
 /** Suma de las cuotas de una tabla. */
 function totalPagado(tabla: CuotaAmortizacion[]): number {
@@ -93,11 +77,14 @@ export class Simulador {
     () => this.monto() > 0 && this.tasa() > 0,
   );
 
-  protected readonly sistemas = SISTEMAS;
-  protected readonly sistema = signal<SistemaAmortizacion>('fija');
+  protected readonly ayudaCuotaFija = AYUDA_CUOTA_FIJA;
+  /** Sin marcar, cuota decreciente; marcada, cuota fija (sistema francés). */
+  protected readonly fija = signal(false);
+  protected readonly sistema = computed<SistemaAmortizacion>(() =>
+    this.fija() ? 'fija' : 'decreciente',
+  );
   /** Globo de ayuda abierto (para tocarlo en el celular). */
-  protected readonly ayudaAbierta = signal<SistemaAmortizacion | null>(null);
-  protected readonly fija = computed(() => this.sistema() === 'fija');
+  protected readonly ayudaAbierta = signal(false);
 
   protected readonly tabla = computed(() =>
     this.listo()
@@ -163,10 +150,6 @@ export class Simulador {
         }),
       { injector: this.injector },
     );
-  }
-
-  protected alternarAyuda(id: SistemaAmortizacion): void {
-    this.ayudaAbierta.update((abierta) => (abierta === id ? null : id));
   }
 
   protected cambiarMonto(texto: string): void {
