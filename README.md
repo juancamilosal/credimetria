@@ -15,7 +15,8 @@ reactivos y SSR con prerenderizado).
 ## Pantallas
 
 Siguen el documento "Credimetría · Pantallas a desarrollar en Angular" y el
-diseño "Credimetría · Marca y página web".
+diseño "Credimetría · Marca y página web", con una paleta más sobria que la
+morada y oro del diseño (ver abajo).
 
 | Ruta                 | Pantalla         | Qué hace                                                                                               |
 | -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
@@ -49,10 +50,19 @@ src/app/
                   politica-datos
 ```
 
-Los colores, fuentes, radios y espacios del sistema de diseño (morado uva y
-oro, Plus Jakarta Sans e IBM Plex Mono) están como variables `--cm-*` en
+Los colores, fuentes, radios y espacios están como variables `--cm-*` en
 `src/styles.css`, con modo oscuro automático. Ningún componente escribe
-colores a mano.
+colores a mano. La paleta es sobria a propósito:
+
+- **Base blanca y gris neutro**, con el encabezado y las cabeceras en blanco.
+- **Azul profundo (`--cm-marca-*`)** como único color de marca: logo, botones
+  principales, enlaces y el bloque oscuro de asesoría, la única zona de color
+  fuerte de la página.
+- **Verde (`--cm-ahorro-*`)** solo para el ahorro, la mejor tasa y
+  "Verificado".
+- **Ámbar (`--cm-aviso-*`)** solo para avisos: datos de ejemplo, diferencia
+  entre la tasa anunciada y la cobrada.
+- Fuentes: Plus Jakarta Sans para el texto e IBM Plex Mono para las cifras.
 
 ## Datos de ejemplo y pendientes
 

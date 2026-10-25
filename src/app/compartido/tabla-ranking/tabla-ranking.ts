@@ -23,6 +23,8 @@ export class TablaRanking {
   readonly producto = input.required<Producto>();
   readonly titulo = input<string | null>(null);
   readonly completa = input(false);
+  /** Etiqueta verde en la primera fila; solo si la lista no está filtrada. */
+  readonly marcarMejor = input(true);
 
   protected readonly vista = computed(() =>
     this.filas().map((t) => ({

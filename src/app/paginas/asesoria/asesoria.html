@@ -27,7 +27,7 @@
           </p>
         }
         <div class="acciones">
-          <a class="btn btn-uva" routerLink="/ranking"
+          <a class="btn btn-principal" routerLink="/ranking"
             >Seguir comparando tasas</a
           >
           <button class="btn btn-borde" type="button" (click)="volver()">
@@ -44,14 +44,14 @@
             canal que elijas.
           </p>
           @if (vieneDe(); as texto) {
-            <p class="etq etq-uva viene">{{ texto }}</p>
+            <p class="etq etq-marca viene">{{ texto }}</p>
           }
         </div>
 
         <fieldset>
           <legend id="lbProducto">¿Qué crédito buscas?</legend>
           <app-chips
-            variante="uva"
+            variante="marca"
             etiqueta="lbProducto"
             [opciones]="opcionesProducto"
             [valor]="form.controls.producto.value"
@@ -236,7 +236,7 @@
         </label>
 
         <button
-          class="btn btn-uva enviar"
+          class="btn btn-principal enviar"
           type="submit"
           [disabled]="!autorizo()"
         >
@@ -251,7 +251,7 @@
   </div>
 
   <aside class="ases-lado" aria-label="Qué pasa después">
-    <div class="lado-uva">
+    <div class="lado-marca">
       <b class="lado-titulo">Qué pasa después</b>
       <ol>
         <li>

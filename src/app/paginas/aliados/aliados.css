@@ -46,7 +46,7 @@ ol {
   width: 48px;
   height: 48px;
   border-radius: var(--cm-r-boton);
-  background: var(--cm-uva-100);
+  background: var(--cm-marca-100);
   color: var(--cm-enlace);
   display: flex;
   align-items: center;
@@ -114,8 +114,8 @@ dd {
 }
 
 .reporte {
-  background: var(--cm-oro-100);
-  color: var(--cm-oro-800);
+  background: var(--cm-aviso-100);
+  color: var(--cm-aviso-800);
   border-radius: 18px;
   padding: 24px;
   display: flex;

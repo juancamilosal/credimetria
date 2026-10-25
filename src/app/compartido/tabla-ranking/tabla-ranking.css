@@ -43,6 +43,10 @@ td {
   font-weight: 500;
 }
 
+.mejor {
+  margin-left: 8px;
+}
+
 .quiero {
   font-weight: 700;
   white-space: nowrap;

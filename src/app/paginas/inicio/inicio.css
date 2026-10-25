@@ -1,5 +1,5 @@
 .hero {
-  padding-block: 44px 132px;
+  padding-block: 48px 124px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -8,26 +8,26 @@
 }
 
 .hero h1 {
-  font-size: clamp(34px, 6vw, 54px);
+  font-size: clamp(32px, 5.5vw, 50px);
   font-weight: 800;
 }
 
 .hero p {
   font-size: clamp(16px, 2.2vw, 19px);
-  color: var(--cm-banda-sub);
+  color: var(--cm-gris);
   max-width: 58ch;
 }
 
 .sello {
-  background: var(--cm-uva-700);
-  color: var(--cm-uva-100);
+  background: var(--cm-marca-100);
+  color: var(--cm-marca-700);
   padding: 6px 14px;
   border-radius: 999px;
   font-size: 13px;
   font-weight: 600;
 }
 
-/* El simulador se monta sobre la banda morada */
+/* El simulador se monta sobre el borde de la portada */
 .sim {
   max-width: 1000px;
   margin: -100px auto 0;
@@ -69,7 +69,7 @@
 /* Bloque oscuro de asesoría */
 .oscuro {
   background: var(--cm-bloque);
-  color: #eeeaf6;
+  color: #ffffff;
   border-radius: var(--cm-r-bloque);
   padding: 36px;
   display: flex;
@@ -96,10 +96,14 @@
   color: var(--cm-bloque-sub);
 }
 
+/* Sobre el azul oscuro, la opción elegida va en blanco */
 .oscuro app-chips {
   --cm-blanco: var(--cm-bloque-dentro);
   --cm-linea: var(--cm-bloque-linea);
   --cm-tinta: #ffffff;
+  --cm-gris: var(--cm-bloque-sub);
+  --cm-marca-700: #ffffff;
+  --cm-chip-elegido-texto: var(--cm-bloque);
 }
 
 .continuar {

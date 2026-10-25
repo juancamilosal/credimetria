@@ -16,14 +16,14 @@ button {
 }
 
 button:hover {
-  border-color: var(--cm-uva-600);
+  border-color: var(--cm-gris);
 }
 
-/* Productos: el elegido en tinta */
+/* Productos: el elegido en el color de marca */
 :host(.redondo) button[aria-pressed="true"] {
-  background: var(--cm-tinta);
-  color: var(--cm-fondo);
-  border-color: var(--cm-tinta);
+  background: var(--cm-marca-700);
+  color: #ffffff;
+  border-color: var(--cm-marca-700);
   font-weight: 700;
 }
 
@@ -43,20 +43,20 @@ button:hover {
 }
 
 :host(.cuadrado) button[aria-pressed="true"] {
-  background: var(--cm-uva-100);
+  background: var(--cm-marca-100);
   color: var(--cm-enlace);
-  border-color: var(--cm-uva-100);
+  border-color: var(--cm-marca-600);
   font-weight: 700;
 }
 
-:host(.uva) button[aria-pressed="true"] {
-  background: var(--cm-uva-700);
-  color: #ffffff;
-  border-color: var(--cm-uva-700);
+:host(.marca) button[aria-pressed="true"] {
+  background: var(--cm-marca-700);
+  color: var(--cm-chip-elegido-texto, #ffffff);
+  border-color: var(--cm-marca-700);
   font-weight: 700;
 }
 
-/* Urgencia: 3 botones del mismo ancho, "Ya" y la elegida en oro */
+/* Urgencia: 3 botones del mismo ancho; la elegida resaltada */
 :host(.urgencia) {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -71,8 +71,8 @@ button:hover {
 }
 
 :host(.urgencia) button[aria-pressed="true"] {
-  background: var(--cm-oro-500);
-  border-color: var(--cm-oro-500);
-  color: #1c1033;
-  font-weight: 800;
+  background: var(--cm-marca-700);
+  border-color: var(--cm-marca-700);
+  color: var(--cm-chip-elegido-texto, #ffffff);
+  font-weight: 700;
 }

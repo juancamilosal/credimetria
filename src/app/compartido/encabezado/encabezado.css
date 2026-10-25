@@ -3,12 +3,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding-block: 16px;
+  padding-block: 12px;
   flex-wrap: wrap;
 }
 
 .marca {
-  color: #ffffff;
+  color: var(--cm-tinta);
   text-decoration: none;
 }
 
@@ -19,7 +19,7 @@ nav {
 }
 
 nav a:not(.btn) {
-  color: #ffffff;
+  color: var(--cm-gris);
   text-decoration: none;
   font-weight: 600;
   font-size: 15px;
@@ -28,11 +28,12 @@ nav a:not(.btn) {
 }
 
 nav a:not(.btn):hover {
-  background: var(--cm-uva-800);
+  color: var(--cm-tinta);
+  background: var(--cm-fondo);
 }
 
 nav a.activo {
-  color: var(--cm-oro-500);
+  color: var(--cm-marca-700);
 }
 
 .asesoria {
@@ -44,9 +45,9 @@ nav a.activo {
   width: 44px;
   height: 44px;
   border-radius: var(--cm-r-boton);
-  border: 1px solid var(--cm-uva-700);
-  background: var(--cm-uva-800);
-  color: #ffffff;
+  border: 1px solid var(--cm-linea);
+  background: var(--cm-blanco);
+  color: var(--cm-tinta);
   align-items: center;
   justify-content: center;
 }

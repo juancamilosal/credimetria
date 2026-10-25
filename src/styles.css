@@ -1,67 +1,69 @@
 /*
- * Sistema de diseño de Credimetría: morado uva y oro.
- * Ningún componente escribe colores a mano; todos usan estas variables.
+ * Sistema de diseño de Credimetría: base blanca y gris neutro, un solo color
+ * de marca (azul profundo), verde solo para el ahorro y la mejor tasa, y
+ * ámbar solo para avisos. Ningún componente escribe colores a mano.
  */
 :root {
-  --cm-uva-900: #2e1065;
-  --cm-uva-800: #3b1578;
-  --cm-uva-700: #4c1d95;
-  --cm-uva-600: #5b21b6;
-  --cm-uva-100: #ede7fb;
-  --cm-oro-500: #ebb740;
-  --cm-oro-100: #fbf0d4;
-  --cm-oro-800: #6b4500;
-  --cm-tinta: #1c1033;
-  --cm-gris: #5c5670;
-  --cm-linea: #e4ddf0;
-  --cm-linea-suave: #efebf6;
-  --cm-fondo: #f8f6fb;
+  /* Marca: logo, botones principales, enlaces y la única zona de color fuerte */
+  --cm-marca-900: #0b2a4a;
+  --cm-marca-800: #0a3d6e;
+  --cm-marca-700: #0b4f8c;
+  --cm-marca-600: #1565b0;
+  --cm-marca-100: #e9f1fa;
+  /* Ahorro: caja de ahorro, mejor tasa, "Verificado" */
+  --cm-ahorro-700: #12704a;
+  --cm-ahorro-600: #168254;
+  --cm-ahorro-100: #e6f4ec;
+  /* Avisos: datos de ejemplo, diferencia entre tasas, usura */
+  --cm-aviso-800: #7a4a00;
+  --cm-aviso-100: #fdf2d9;
+  /* Neutros */
+  --cm-tinta: #0f1b2a;
+  --cm-gris: #5a6573;
+  --cm-linea: #e2e7ee;
+  --cm-linea-suave: #eef2f6;
+  --cm-fondo: #f5f7fa;
   --cm-blanco: #ffffff;
-  --cm-ok-fondo: #e6f4ea;
-  --cm-ok-texto: #1e6b34;
   --cm-error: #b42318;
 
-  /* Roles que cambian en modo oscuro */
-  --cm-banda: var(--cm-uva-900);
-  --cm-banda-sub: #d9ccf5;
-  --cm-enlace: var(--cm-uva-600);
-  --cm-campo: var(--cm-fondo);
-  --cm-bloque: var(--cm-tinta);
-  --cm-bloque-dentro: #2a1c45;
-  --cm-bloque-linea: #433562;
-  --cm-bloque-sub: #b7aecd;
+  --cm-enlace: var(--cm-marca-600);
+  --cm-campo: var(--cm-blanco);
+  /* Bloque oscuro de asesoría */
+  --cm-bloque: var(--cm-marca-900);
+  --cm-bloque-dentro: #133a60;
+  --cm-bloque-linea: #2a5280;
+  --cm-bloque-sub: #b9cce2;
 
   --cm-f-texto: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
   --cm-f-cifra: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 
   --cm-r-campo: 10px;
-  --cm-r-boton: 12px;
+  --cm-r-boton: 10px;
   --cm-r-tarjeta: 14px;
-  --cm-r-bloque: 22px;
+  --cm-r-bloque: 18px;
   --cm-ancho: 1200px;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --cm-uva-100: #2e1c52;
-    --cm-oro-100: #3a2c10;
-    --cm-oro-800: #ebb740;
-    --cm-tinta: #eeeaf6;
-    --cm-gris: #b7aecd;
-    --cm-linea: #33284a;
-    --cm-linea-suave: #271d3b;
-    --cm-fondo: #120a20;
-    --cm-blanco: #1c1233;
-    --cm-ok-fondo: #16301f;
-    --cm-ok-texto: #8fd6a3;
+    --cm-marca-700: #2f7fd0;
+    --cm-marca-600: #7db5ee;
+    --cm-marca-100: #14263b;
+    --cm-ahorro-700: #8fd6ac;
+    --cm-ahorro-600: #3fb87a;
+    --cm-ahorro-100: #15301f;
+    --cm-aviso-800: #f0c06a;
+    --cm-aviso-100: #3a2c10;
+    --cm-tinta: #e8edf3;
+    --cm-gris: #a3afbd;
+    --cm-linea: #26303c;
+    --cm-linea-suave: #1d2631;
+    --cm-fondo: #0d131a;
+    --cm-blanco: #151d27;
     --cm-error: #ff8a80;
-    --cm-banda: #22094f;
-    --cm-enlace: #c4b1f7;
-    --cm-campo: #160d29;
-    --cm-bloque: #0b0614;
-    --cm-bloque-dentro: #1c1233;
-    --cm-bloque-linea: #3a2d55;
+    --cm-campo: #0f161f;
+    --cm-bloque: #0f2440;
     color-scheme: dark;
   }
 }
@@ -91,7 +93,7 @@ h3 {
   margin: 0;
   text-wrap: balance;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 p {
@@ -108,7 +110,7 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--cm-oro-500);
+  outline: 3px solid var(--cm-marca-600);
   outline-offset: 2px;
 }
 
@@ -149,26 +151,26 @@ button {
   white-space: nowrap;
 }
 
-/* Banda morada bajo el encabezado */
-.banda {
-  background: var(--cm-banda);
-  color: #ffffff;
+/* Cabecera clara de cada página */
+.cabecera {
+  background: var(--cm-blanco);
+  border-bottom: 1px solid var(--cm-linea);
 }
 
-.banda-cabeza {
-  padding-block: 32px 40px;
+.cabecera-texto {
+  padding-block: 36px 40px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.banda-cabeza h1 {
-  font-size: clamp(30px, 5vw, 44px);
+.cabecera-texto h1 {
+  font-size: clamp(28px, 4.5vw, 40px);
   font-weight: 800;
 }
 
-.banda-cabeza p {
-  color: var(--cm-banda-sub);
+.cabecera-texto p {
+  color: var(--cm-gris);
   font-size: 18px;
   max-width: 66ch;
 }
@@ -188,25 +190,26 @@ button {
   border: 1px solid transparent;
   transition:
     background 0.15s,
-    filter 0.15s;
+    border-color 0.15s;
 }
 
-.btn-uva {
-  background: var(--cm-uva-700);
+.btn-principal {
+  background: var(--cm-marca-700);
   color: #ffffff;
 }
 
-.btn-uva:hover {
-  background: var(--cm-uva-800);
+.btn-principal:hover {
+  background: var(--cm-marca-800);
 }
 
-.btn-oro {
-  background: var(--cm-oro-500);
-  color: #1c1033;
+/* Sobre el bloque oscuro */
+.btn-claro {
+  background: #ffffff;
+  color: var(--cm-marca-900);
 }
 
-.btn-oro:hover {
-  filter: brightness(0.95);
+.btn-claro:hover {
+  background: var(--cm-marca-100);
 }
 
 .btn-borde {
@@ -216,7 +219,7 @@ button {
 }
 
 .btn-borde:hover {
-  border-color: var(--cm-uva-600);
+  border-color: var(--cm-marca-600);
 }
 
 .btn[disabled] {
@@ -228,25 +231,25 @@ button {
 /* Etiquetas */
 .etq {
   display: inline-block;
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   white-space: nowrap;
 }
 
-.etq-oro {
-  background: var(--cm-oro-100);
-  color: var(--cm-oro-800);
+.etq-aviso {
+  background: var(--cm-aviso-100);
+  color: var(--cm-aviso-800);
 }
 
-.etq-ok {
-  background: var(--cm-ok-fondo);
-  color: var(--cm-ok-texto);
+.etq-ahorro {
+  background: var(--cm-ahorro-100);
+  color: var(--cm-ahorro-700);
 }
 
-.etq-uva {
-  background: var(--cm-uva-100);
+.etq-marca {
+  background: var(--cm-marca-100);
   color: var(--cm-enlace);
 }
 
@@ -278,8 +281,9 @@ button {
 
 .campo input:focus,
 .campo select:focus {
-  border-color: var(--cm-uva-600);
+  border-color: var(--cm-marca-600);
   outline: none;
+  box-shadow: 0 0 0 3px var(--cm-marca-100);
 }
 
 .campo input[aria-invalid="true"] {
@@ -322,7 +326,7 @@ button {
 }
 
 .titulo-sec h2 {
-  font-size: clamp(24px, 4vw, 34px);
+  font-size: clamp(24px, 3.5vw, 30px);
   font-weight: 800;
 }
 

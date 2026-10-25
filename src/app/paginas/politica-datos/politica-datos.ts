@@ -10,15 +10,15 @@ import { VERSION_POLITICA } from '../../core/servicios/prospectos.service';
   selector: 'app-politica-datos',
   imports: [RouterLink],
   template: `
-    <section class="banda">
-      <div class="wrap banda-cabeza">
+    <section class="cabecera">
+      <div class="wrap cabecera-texto">
         <h1>Política de tratamiento de datos</h1>
         <p>Cómo cuidamos tus datos personales, según la Ley 1581 de 2012.</p>
       </div>
     </section>
     <div class="wrap contenido">
       <div class="tarjeta">
-        <span class="etq etq-oro">Borrador · versión {{ version }}</span>
+        <span class="etq etq-aviso">Borrador · versión {{ version }}</span>
         <p>
           Estamos terminando el texto completo de la política. Mientras tanto,
           esto es lo esencial:

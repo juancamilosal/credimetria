@@ -1,5 +1,5 @@
-<section class="banda">
-  <div class="wrap banda-cabeza">
+<section class="cabecera">
+  <div class="wrap cabecera-texto">
     <h1>Ranking de tasas por lo que de verdad cobran</h1>
     <p>
       Bancos, cooperativas y financieras ordenados por la tasa promedio que
@@ -32,7 +32,7 @@
         {{ notaCuota }} · Actualizado:
         {{ corte.fecha | date: "d MMM y" : "UTC" }}
         @if (corte.ejemplo) {
-          <span class="etq etq-oro">Datos de ejemplo</span>
+          <span class="etq etq-aviso">Datos de ejemplo</span>
         }
       </span>
     </div>
@@ -43,6 +43,7 @@
     [producto]="productoId()"
     [titulo]="titulo()"
     [completa]="true"
+    [marcarMejor]="tipo() === 'Todas'"
   />
 
   <div class="explica">

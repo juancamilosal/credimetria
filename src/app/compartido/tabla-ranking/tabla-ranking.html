@@ -27,13 +27,16 @@
           <td class="pos">{{ i + 1 }}</td>
           <td>
             <b>{{ fila.entidad }}</b>
+            @if (i === 0 && marcarMejor()) {
+              <span class="etq etq-ahorro mejor">Mejor tasa</span>
+            }
           </td>
           <td class="muted">{{ fila.tipo }}</td>
           <td class="der cifra muted">{{ fila.tasaAnunciada | tasa }}</td>
           <td class="der cifra real">{{ fila.tasaReal | tasa }}</td>
           <td class="der">
             @if (fila.diferencia !== null) {
-              <span class="etq etq-oro">{{ fila.diferencia | puntos }}</span>
+              <span class="etq etq-aviso">{{ fila.diferencia | puntos }}</span>
             } @else {
               <span class="muted">—</span>
             }
@@ -73,7 +76,11 @@
         <b
           ><span class="pos">{{ i + 1 }}</span> {{ fila.entidad }}</b
         >
-        <span class="nota">{{ fila.tipo }}</span>
+        @if (i === 0 && marcarMejor()) {
+          <span class="etq etq-ahorro">Mejor tasa</span>
+        } @else {
+          <span class="nota">{{ fila.tipo }}</span>
+        }
       </div>
       <div class="tasas">
         <div>
@@ -85,7 +92,7 @@
           <span class="cifra real">{{ fila.tasaReal | tasa }}</span>
         </div>
         @if (fila.diferencia !== null) {
-          <span class="etq etq-oro dif">{{ fila.diferencia | puntos }}</span>
+          <span class="etq etq-aviso dif">{{ fila.diferencia | puntos }}</span>
         }
       </div>
       @if (completa()) {

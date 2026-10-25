@@ -62,8 +62,8 @@ h2 {
 }
 
 .ahorro {
-  background: var(--cm-oro-100);
-  color: var(--cm-oro-800);
+  background: var(--cm-ahorro-100);
+  color: var(--cm-ahorro-700);
   border-radius: var(--cm-r-boton);
   padding: 16px;
   display: flex;
@@ -80,8 +80,8 @@ h2 {
 }
 
 .aviso {
-  background: var(--cm-uva-100);
-  color: var(--cm-enlace);
+  background: var(--cm-ahorro-100);
+  color: var(--cm-ahorro-700);
   border-radius: var(--cm-r-boton);
   padding: 16px;
   font-weight: 700;

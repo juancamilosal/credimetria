@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 
-/** Marca de Credimetría: cuadrado oro con barras uva que crecen. */
+/** Marca de Credimetría: cuadrado azul con barras blancas que crecen. */
 @Component({
   selector: 'app-logo',
   template: `
@@ -16,11 +16,11 @@ import { Component, input } from '@angular/core';
         width="32"
         height="32"
         rx="8"
-        fill="var(--cm-oro-500)"
+        fill="var(--cm-marca-700)"
       />
       <path
         d="M7 24h20M9 24v-4M13 24v-7M17 24v-10M21 24v-6M25 24v-3"
-        stroke="#2E1065"
+        stroke="#FFFFFF"
         stroke-width="2.2"
         stroke-linecap="round"
         fill="none"
@@ -34,7 +34,7 @@ import { Component, input } from '@angular/core';
       align-items: center;
       gap: 10px;
       font-weight: 800;
-      font-size: 22px;
+      font-size: 21px;
       letter-spacing: -0.02em;
     }
   `,

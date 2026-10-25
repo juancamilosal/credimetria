@@ -74,7 +74,7 @@ legend {
 .opciones input {
   width: 20px;
   height: 20px;
-  accent-color: var(--cm-uva-700);
+  accent-color: var(--cm-marca-700);
 }
 
 .correo {
@@ -101,7 +101,7 @@ legend {
   height: 20px;
   flex: none;
   margin-top: 2px;
-  accent-color: var(--cm-uva-700);
+  accent-color: var(--cm-marca-700);
 }
 
 .listo {
@@ -129,9 +129,9 @@ legend {
   gap: 16px;
 }
 
-.lado-uva {
-  background: var(--cm-uva-900);
-  color: #ffffff;
+.lado-marca {
+  background: var(--cm-marca-100);
+  color: var(--cm-tinta);
   border-radius: 18px;
   padding: 22px;
   display: flex;
@@ -150,21 +150,22 @@ ul {
   padding: 0;
 }
 
-.lado-uva ol {
+.lado-marca ol {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.lado-uva li {
+.lado-marca li {
   display: flex;
   gap: 12px;
-  color: var(--cm-banda-sub);
+  color: var(--cm-tinta);
 }
 
-.lado-uva .n {
+.lado-marca .n {
   font-family: var(--cm-f-cifra);
-  color: var(--cm-oro-500);
+  color: var(--cm-marca-700);
+  font-weight: 500;
 }
 
 .lado-blanco {

@@ -8,7 +8,7 @@ export interface OpcionChip {
 /**
  * Grupo de opciones donde solo una queda elegida (aria-pressed).
  * Variantes: `redondo` (productos), `cuadrado` (tipo de entidad),
- * `uva` (producto en la asesoría) y `urgencia` (Ya, Este mes, En 3 meses).
+ * `marca` (producto en la asesoría) y `urgencia` (Ya, Este mes, En 3 meses).
  */
 @Component({
   selector: 'app-chips',
@@ -33,7 +33,7 @@ export interface OpcionChip {
 export class Chips {
   readonly opciones = input.required<OpcionChip[]>();
   readonly valor = model.required<string>();
-  readonly variante = input<'redondo' | 'cuadrado' | 'uva' | 'urgencia'>(
+  readonly variante = input<'redondo' | 'cuadrado' | 'marca' | 'urgencia'>(
     'redondo',
   );
   /** Id del texto que nombra el grupo. */
