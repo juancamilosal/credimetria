@@ -148,6 +148,11 @@ export class TasasAdmin implements OnInit {
       : `${formatoTasa(t.valor_desde)} a ${formatoTasa(t.valor_hasta)}${unidad}`;
   }
 
+  /** Logo de la entidad al doble del alto en que se muestra (pantallas retina). */
+  protected logo(t: TasaAdmin): string | null {
+    return this.sesion.urlImagen(t.entidad.logo, 56);
+  }
+
   /** "bbva.com.co" para mostrar de dónde es el enlace. */
   protected sitio(url: string): string {
     try {

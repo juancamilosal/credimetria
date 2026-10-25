@@ -117,6 +117,22 @@ export class SesionAdmin {
     }
   }
 
+  /**
+   * Dirección de una imagen de Directus, reducida al alto pedido. Los archivos
+   * no son públicos y una `<img>` no manda encabezados: el token va en la
+   * dirección.
+   */
+  urlImagen(id: string | null, alto: number): string | null {
+    if (!id || !this.acceso) return null;
+    const params = new URLSearchParams({
+      height: String(alto),
+      fit: 'inside',
+      format: 'webp',
+      access_token: this.acceso,
+    });
+    return `${this.base}/assets/${id}?${params}`;
+  }
+
   /** Llama a Directus con el token; si venció, lo renueva una vez y reintenta. */
   async pedir<T>(
     metodo: 'GET' | 'POST' | 'PATCH',

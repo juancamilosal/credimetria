@@ -25,6 +25,7 @@ const CAMPOS_TASA = [
   'notas',
   'entidad.codigo',
   'entidad.nombre',
+  'entidad.logo',
   'fuente.id',
   'fuente.tipo',
   'fuente.url',

@@ -81,9 +81,16 @@
       @for (t of visibles(); track t.id) {
         <li class="tarjeta tasa" [attr.data-estado]="t.estado">
           <div class="tasa-cabeza">
-            <div>
-              <h2>{{ t.entidad.nombre }}</h2>
-              <span class="nota">{{ nombreProducto(t.producto) }}</span>
+            <div class="marca">
+              @if (logo(t); as url) {
+                <span class="logo">
+                  <img [src]="url" alt="" height="28" loading="lazy" />
+                </span>
+              }
+              <div>
+                <h2>{{ t.entidad.nombre }}</h2>
+                <span class="nota">{{ nombreProducto(t.producto) }}</span>
+              </div>
             </div>
             @switch (t.estado) {
               @case ("publicada") {

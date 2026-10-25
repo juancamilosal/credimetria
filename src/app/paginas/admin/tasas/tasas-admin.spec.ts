@@ -25,7 +25,7 @@ function tasa(cambios: Partial<TasaAdmin>): TasaAdmin {
     estado: 'por_revisar',
     revisada_en: null,
     notas: null,
-    entidad: { codigo: 'bancolombia', nombre: 'Bancolombia' },
+    entidad: { codigo: 'bancolombia', nombre: 'Bancolombia', logo: 'logo-1' },
     fuente: {
       id: 3,
       tipo: 'pagina',
@@ -55,7 +55,7 @@ describe('TasasAdmin', () => {
       tasa({
         id: 2,
         estado: 'publicada',
-        entidad: { codigo: 'av-villas', nombre: 'AV Villas' },
+        entidad: { codigo: 'av-villas', nombre: 'AV Villas', logo: null },
       }),
     ]);
     servicio.fuentes.and.resolveTo([]);
@@ -69,6 +69,8 @@ describe('TasasAdmin', () => {
           provide: SesionAdmin,
           useValue: {
             usuario: signal({ id: 'u1', email: 'a@b.co', nombre: 'Juan' }),
+            urlImagen: (id: string | null) =>
+              id ? `https://directus.prueba/assets/${id}` : null,
           },
         },
       ],
@@ -146,5 +148,19 @@ describe('TasasAdmin', () => {
     expect(leerDecimal('1,3')).toBe(1.3);
     expect(leerDecimal('16.77 %')).toBe(16.77);
     expect(leerDecimal('')).toBeNull();
+  });
+
+  it('muestra el logo de la entidad junto al nombre', async () => {
+    const { fixture, html } = await crear();
+    const logo = html.querySelector<HTMLImageElement>('.tasa .logo img')!;
+    expect(logo.src).toBe('https://directus.prueba/assets/logo-1');
+    expect(logo.alt).toBe('');
+    // Sin logo, solo el nombre.
+    [...html.querySelectorAll<HTMLButtonElement>('.filtro')]
+      .find((b) => b.textContent!.includes('Publicadas'))!
+      .click();
+    fixture.detectChanges();
+    expect(html.querySelector('.tasa .logo')).toBeNull();
+    expect(html.querySelector('.tasa h2')?.textContent).toContain('AV Villas');
   });
 });

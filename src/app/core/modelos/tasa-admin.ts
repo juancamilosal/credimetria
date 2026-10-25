@@ -12,7 +12,7 @@ export interface FuenteTasa {
   tipo: 'pagina' | 'pdf';
   url: string;
   url_indice: string | null;
-  entidad: { codigo: string; nombre: string };
+  entidad: { codigo: string; nombre: string; logo?: string | null };
 }
 
 /** Una tasa publicada por una entidad (colección `tasas_publicadas`). */
@@ -32,7 +32,8 @@ export interface TasaAdmin {
   estado: EstadoTasa;
   revisada_en: string | null;
   notas: string | null;
-  entidad: { codigo: string; nombre: string };
+  /** `logo` es el id del archivo en Directus. */
+  entidad: { codigo: string; nombre: string; logo: string | null };
   fuente: Omit<FuenteTasa, 'entidad' | 'producto'> | null;
   revisada_por: { first_name: string | null; last_name: string | null } | null;
 }

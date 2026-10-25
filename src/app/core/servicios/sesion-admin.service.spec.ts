@@ -67,6 +67,10 @@ describe('SesionAdmin', () => {
     responderUsuario(true);
     await entrada;
     expect(sesion.usuario()?.nombre).toBe('Juan Salazar');
+    expect(sesion.urlImagen('logo-1', 56)).toBe(
+      `${BASE}/assets/logo-1?height=56&fit=inside&format=webp&access_token=acceso-1`,
+    );
+    expect(sesion.urlImagen(null, 56)).toBeNull();
     expect(sessionStorage.getItem(CLAVE_SESION_ADMIN)).toBe('r-1');
   });
 
