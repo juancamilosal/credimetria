@@ -78,3 +78,8 @@ npm run serve:ssr:credimetria  # sirve la compilación con SSR
 npm test                       # pruebas con Karma
 npx prettier --write "src/**/*.{ts,html,css}"
 ```
+
+`ng serve` tiene `prebundle: false` en `angular.json`. Con el pre-empaquetado
+de Vite, la primera carga con SSR fallaba en Windows ("Cannot GET /" o "There
+is a new version of the pre-bundle") porque las rutas cargan paquetes de
+Angular que Vite aún no había visto. Si vuelve a pasar: `npx ng cache clean`.
