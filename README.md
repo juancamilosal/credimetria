@@ -125,8 +125,10 @@ Directus. No está en el menú: se entra por `/admin`.
   "Cargar PDF" sube el archivo con su fecha de vigencia y lo deja como
   nuevo; si su huella SHA-256 ya existe, avisa y no lo sube. "Usar como
   actual" pasa el actual a anterior (nunca se borra) y "Descartar" quita un
-  nuevo que no sirve. Si el banco no tiene fuente PDF, pide la dirección y
-  la crea en `fuentes`. Las dos pestañas comparten la cabecera
+  nuevo que no sirve. Si el banco no tiene fuente PDF, pide la dirección
+  directa del PDF y, opcional, la página de tasas y tarifas que lo enlaza, y
+  crea la fuente. "Editar direcciones" corrige las dos (la dirección del PDF
+  debe abrir el PDF, no la página índice). Las dos pestañas comparten la cabecera
   `paginas/admin/cabecera/`.
 - Estas rutas no se prerenderizan (`RenderMode.Client`) y llevan
   `noindex`. La dirección de Directus está en `core/config/directus.ts`.

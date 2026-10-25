@@ -38,6 +38,7 @@ describe('PdfTasas', () => {
         'usarComoActual',
         'descartar',
         'agregarFuente',
+        'editarFuente',
       ],
     );
     servicio.entidades.and.resolveTo([
@@ -167,10 +168,12 @@ describe('PdfTasas', () => {
     });
     const davivienda = html.querySelectorAll('.banco')[1];
     expect(davivienda.textContent).toContain('todavía no tiene la dirección');
-    const campo =
-      davivienda.querySelector<HTMLInputElement>('input[type="url"]')!;
+    const [campo, indice] =
+      davivienda.querySelectorAll<HTMLInputElement>('input[type="url"]');
     campo.value = 'https://www.davivienda.com/tasas.pdf';
     campo.dispatchEvent(new Event('input'));
+    indice.value = 'https://www.davivienda.com/tasas-y-tarifas';
+    indice.dispatchEvent(new Event('input'));
     [...davivienda.querySelectorAll<HTMLButtonElement>('button')]
       .find((b) => b.textContent!.includes('Agregar'))!
       .click();
@@ -179,7 +182,10 @@ describe('PdfTasas', () => {
     expect(servicio.agregarFuente).toHaveBeenCalledWith(
       'davivienda',
       'libre-inversion',
-      'https://www.davivienda.com/tasas.pdf',
+      {
+        url: 'https://www.davivienda.com/tasas.pdf',
+        url_indice: 'https://www.davivienda.com/tasas-y-tarifas',
+      },
     );
     expect(html.querySelectorAll('.banco')[1].textContent).toContain(
       'Cargar PDF',
@@ -211,6 +217,52 @@ describe('PdfTasas', () => {
     expect(servicio.cargar).toHaveBeenCalledWith(2, pdf, '2026-11-01');
     expect(html.querySelector('.aviso-ok')?.textContent).toContain(
       'PDF de BBVA cargado',
+    );
+  });
+
+  it('corrige la dirección del PDF y la página de tasas y tarifas', async () => {
+    const { fixture, html } = await crear();
+    servicio.editarFuente.and.callFake(async (id, d) => ({
+      id,
+      producto: 'libre-inversion',
+      tipo: 'pdf',
+      entidad: 'bbva',
+      ...d,
+    }));
+    const bbva = html.querySelectorAll('.banco')[0];
+    [...bbva.querySelectorAll<HTMLButtonElement>('button')]
+      .find((b) => b.textContent!.includes('Editar direcciones'))!
+      .click();
+    fixture.detectChanges();
+    const [campo] =
+      bbva.querySelectorAll<HTMLInputElement>('.direcciones input');
+    expect(campo.value).toBe('https://www.bbva.com.co/tasas.pdf');
+    campo.value = 'https://www.bbva.com.co/tasas-nov.pdf';
+    campo.dispatchEvent(new Event('input'));
+    [...bbva.querySelectorAll<HTMLButtonElement>('button')]
+      .find((b) => b.textContent!.includes('Guardar direcciones'))!
+      .click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(servicio.editarFuente).toHaveBeenCalledWith(2, {
+      url: 'https://www.bbva.com.co/tasas-nov.pdf',
+      url_indice: 'https://www.bbva.com.co/tasas-y-tarifas.html',
+    });
+    expect(bbva.querySelector('.enlaces a')!.getAttribute('href')).toBe(
+      'https://www.bbva.com.co/tasas-nov.pdf',
+    );
+  });
+
+  it('no acepta la página índice vacía como dirección del PDF', async () => {
+    const { fixture, html } = await crear();
+    const davivienda = html.querySelectorAll('.banco')[1];
+    [...davivienda.querySelectorAll<HTMLButtonElement>('button')]
+      .find((b) => b.textContent!.includes('Agregar'))!
+      .click();
+    fixture.detectChanges();
+    expect(servicio.agregarFuente).not.toHaveBeenCalled();
+    expect(html.querySelector('.aviso-error')?.textContent).toContain(
+      'dirección directa del PDF',
     );
   });
 });

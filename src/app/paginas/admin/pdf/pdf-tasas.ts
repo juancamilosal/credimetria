@@ -8,6 +8,7 @@ import {
 } from '../../../core/modelos/documento';
 import { Producto } from '../../../core/modelos/tasa';
 import {
+  Direcciones,
   DocumentoRepetido,
   DocumentosAdminService,
 } from '../../../core/servicios/documentos-admin.service';
@@ -56,7 +57,10 @@ export class PdfTasas implements OnInit {
   protected readonly ocupado = signal<string | null>(null);
   private archivo: File | null = null;
   private vigencia = '';
-  private urlNueva = '';
+  /** Tarjeta con el formulario de direcciones abierto. */
+  protected readonly editandoEn = signal<string | null>(null);
+  protected url = '';
+  protected urlIndice = '';
 
   protected readonly tarjetas = computed<TarjetaPdf[]>(() => {
     const fuentes = this.fuentes();
@@ -148,8 +152,32 @@ export class PdfTasas implements OnInit {
     this.vigencia = (evento.target as HTMLInputElement).value;
   }
 
-  protected escribirUrl(evento: Event): void {
-    this.urlNueva = (evento.target as HTMLInputElement).value;
+  protected escribir(campo: 'url' | 'urlIndice', evento: Event): void {
+    this[campo] = (evento.target as HTMLInputElement).value;
+  }
+
+  protected editarDirecciones(t: TarjetaPdf): void {
+    this.url = t.pdf?.url ?? '';
+    this.urlIndice = t.pdf?.url_indice ?? '';
+    this.editandoEn.set(t.clave);
+  }
+
+  /** Revisa las dos direcciones; null si alguna no sirve (y lo avisa). */
+  private direcciones(): Direcciones | null {
+    const url = this.url.trim();
+    const indice = this.urlIndice.trim();
+    const valida = (u: string) => /^https?:\/\/\S+$/.test(u);
+    if (!valida(url)) {
+      this.error.set('Escribe la dirección directa del PDF (https://…).');
+      return null;
+    }
+    if (indice && !valida(indice)) {
+      this.error.set(
+        'La página de tasas y tarifas debe ser una dirección completa (https://…).',
+      );
+      return null;
+    }
+    return { url, url_indice: indice || null };
   }
 
   protected async cargar(t: TarjetaPdf): Promise<void> {
@@ -214,20 +242,31 @@ export class PdfTasas implements OnInit {
   }
 
   protected async agregarFuente(t: TarjetaPdf): Promise<void> {
-    const url = this.urlNueva.trim();
-    if (!/^https?:\/\/\S+$/.test(url)) {
-      this.error.set('Escribe la dirección completa del PDF (https://…).');
-      return;
-    }
+    const direcciones = this.direcciones();
+    if (!direcciones) return;
     await this.trabajar(t.clave, async () => {
       const fuente = await this.servicio.agregarFuente(
         t.entidad.codigo,
         t.producto,
-        url,
+        direcciones,
       );
       this.fuentes.update((lista) => [...lista, fuente]);
-      this.urlNueva = '';
+      this.url = this.urlIndice = '';
       this.aviso.set(`Fuente PDF de ${t.entidad.nombre} agregada.`);
+    });
+  }
+
+  protected async guardarDirecciones(t: TarjetaPdf): Promise<void> {
+    const direcciones = this.direcciones();
+    if (!direcciones || !t.pdf) return;
+    const id = t.pdf.id;
+    await this.trabajar(t.clave, async () => {
+      const fuente = await this.servicio.editarFuente(id, direcciones);
+      this.fuentes.update((lista) =>
+        lista.map((f) => (f.id === fuente.id ? fuente : f)),
+      );
+      this.editandoEn.set(null);
+      this.aviso.set(`Direcciones de ${t.entidad.nombre} guardadas.`);
     });
   }
 

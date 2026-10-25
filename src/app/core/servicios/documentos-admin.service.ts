@@ -19,6 +19,14 @@ const CAMPOS_DOCUMENTO = [
   'user_created.last_name',
 ].join(',');
 
+const CAMPOS_FUENTE = 'id,producto,tipo,url,url_indice,entidad';
+
+/** Dirección directa del PDF y página de tasas y tarifas que lo enlaza. */
+export interface Direcciones {
+  url: string;
+  url_indice: string | null;
+}
+
 /** El PDF ya está guardado (misma huella). */
 export class DocumentoRepetido extends Error {
   constructor(readonly existente: DocumentoPdf) {
@@ -53,7 +61,7 @@ export class DocumentosAdminService {
   fuentes(): Promise<FuenteAdmin[]> {
     return this.sesion.pedir<FuenteAdmin[]>(
       'GET',
-      '/items/fuentes?fields=id,producto,tipo,url,url_indice,entidad&limit=-1',
+      `/items/fuentes?fields=${CAMPOS_FUENTE}&limit=-1`,
     );
   }
 
@@ -120,23 +128,34 @@ export class DocumentosAdminService {
     await this.sesion.pedir('DELETE', `/files/${documento.archivo.id}`);
   }
 
-  /** Fuente PDF para un banco que todavía no la tiene. */
+  /**
+   * Fuente PDF para un banco que todavía no la tiene: la dirección directa
+   * del PDF y, si existe, la página de tasas y tarifas que lo enlaza.
+   */
   agregarFuente(
     entidad: string,
     producto: Producto,
-    url: string,
+    direcciones: Direcciones,
   ): Promise<FuenteAdmin> {
     return this.sesion.pedir<FuenteAdmin>(
       'POST',
-      '/items/fuentes?fields=id,producto,tipo,url,url_indice,entidad',
+      `/items/fuentes?fields=${CAMPOS_FUENTE}`,
       {
         entidad,
         producto,
         tipo: 'pdf',
-        url,
+        ...direcciones,
         como_extraer: 'manual',
         estado: 'activa',
       },
+    );
+  }
+
+  editarFuente(id: number, direcciones: Direcciones): Promise<FuenteAdmin> {
+    return this.sesion.pedir<FuenteAdmin>(
+      'PATCH',
+      `/items/fuentes/${id}?fields=${CAMPOS_FUENTE}`,
+      direcciones,
     );
   }
 }

@@ -54,33 +54,59 @@
                   >Página del producto ↗</a
                 >
               }
+              @if (t.pdf) {
+                <button
+                  type="button"
+                  class="enlace-boton"
+                  (click)="editarDirecciones(t)"
+                >
+                  Editar direcciones
+                </button>
+              }
             </div>
           </div>
+
+          @if (editandoEn() === t.clave) {
+            <div class="direcciones">
+              <ng-container
+                *ngTemplateOutlet="direccionesForm; context: { $implicit: t }"
+              />
+              <div class="acciones">
+                <button
+                  type="button"
+                  class="btn btn-principal"
+                  [disabled]="ocupado() === t.clave"
+                  (click)="guardarDirecciones(t)"
+                >
+                  Guardar direcciones
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-borde"
+                  (click)="editandoEn.set(null)"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
 
           @if (!t.pdf) {
             <div class="sin-fuente">
               <p class="muted">
                 Este banco todavía no tiene la dirección de su PDF de tasas.
               </p>
-              <div class="fila">
-                <div class="campo">
-                  <label [for]="'url-' + t.clave">Dirección del PDF</label>
-                  <input
-                    [id]="'url-' + t.clave"
-                    type="url"
-                    placeholder="https://…/tasas.pdf"
-                    (input)="escribirUrl($event)"
-                  />
-                </div>
-                <button
-                  type="button"
-                  class="btn btn-principal"
-                  [disabled]="ocupado() === t.clave"
-                  (click)="agregarFuente(t)"
-                >
-                  Agregar
-                </button>
-              </div>
+              <ng-container
+                *ngTemplateOutlet="direccionesForm; context: { $implicit: t }"
+              />
+              <button
+                type="button"
+                class="btn btn-principal agregar"
+                [disabled]="ocupado() === t.clave"
+                (click)="agregarFuente(t)"
+              >
+                Agregar
+              </button>
             </div>
           } @else {
             <div class="columnas">
@@ -242,5 +268,34 @@
         >Abrir</a
       >
     }
+  </div>
+</ng-template>
+
+<ng-template #direccionesForm let-t>
+  <div class="campos-direccion">
+    <div class="campo">
+      <label [for]="'url-' + t.clave">Dirección directa del PDF</label>
+      <input
+        [id]="'url-' + t.clave"
+        type="url"
+        placeholder="https://…/tasas-octubre-2026.pdf"
+        [value]="t.pdf?.url ?? ''"
+        (input)="escribir('url', $event)"
+      />
+      <span class="nota">La que abre el PDF, no la página que lo enlaza.</span>
+    </div>
+    <div class="campo">
+      <label [for]="'indice-' + t.clave"
+        >Página de tasas y tarifas (opcional)</label
+      >
+      <input
+        [id]="'indice-' + t.clave"
+        type="url"
+        placeholder="https://…/tasas-y-tarifas"
+        [value]="t.pdf?.url_indice ?? ''"
+        (input)="escribir('urlIndice', $event)"
+      />
+      <span class="nota">Donde el banco publica el PDF de cada mes.</span>
+    </div>
   </div>
 </ng-template>
