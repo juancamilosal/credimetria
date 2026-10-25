@@ -15,6 +15,40 @@ export function cuotaMensual(
   return (monto * i) / (1 - Math.pow(1 + i, -meses));
 }
 
+export interface CuotaAmortizacion {
+  mes: number;
+  cuota: number;
+  interes: number;
+  /** Lo que la cuota baja de la deuda. */
+  capital: number;
+  /** Lo que se debe después de pagar esta cuota. */
+  saldo: number;
+}
+
+/**
+ * Tabla de amortización con cuota fija (sistema francés): en cada mes el
+ * interés sale del saldo y el resto de la cuota abona a capital. El último
+ * mes cierra el saldo en cero.
+ */
+export function amortizacion(
+  monto: number,
+  efectivaAnual: number,
+  meses: number,
+): CuotaAmortizacion[] {
+  const cuota = cuotaMensual(monto, efectivaAnual, meses);
+  if (cuota <= 0) return [];
+  const i = tasaMensual(efectivaAnual);
+  const filas: CuotaAmortizacion[] = [];
+  let saldo = monto;
+  for (let mes = 1; mes <= meses; mes++) {
+    const interes = saldo * i;
+    const capital = mes === meses ? saldo : cuota - interes;
+    saldo = mes === meses ? 0 : saldo - capital;
+    filas.push({ mes, cuota: capital + interes, interes, capital, saldo });
+  }
+  return filas;
+}
+
 export interface Ahorro {
   /** Diferencia de cuota al mes (positiva si la mejor tasa sale más barata). */
   mes: number;

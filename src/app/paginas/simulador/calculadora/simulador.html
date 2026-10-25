@@ -1,5 +1,5 @@
 <div class="sim-caja">
-  <form (submit)="$event.preventDefault()" novalidate>
+  <form (submit)="$event.preventDefault(); simular()" novalidate>
     <h2>Simulador</h2>
 
     <div class="campo">
@@ -64,13 +64,9 @@
       </p>
     }
 
-    <a
-      class="btn btn-principal"
-      routerLink="/ranking"
-      [queryParams]="{ producto: producto() }"
-    >
-      Ver todas las tasas
-    </a>
+    <button class="btn btn-principal" type="submit" [disabled]="!listo()">
+      Simular
+    </button>
   </form>
 
   <div class="resultado" aria-live="polite">
@@ -133,3 +129,55 @@
     </a>
   </div>
 </div>
+
+@if (simulado() && tabla().length) {
+  <section class="amortizacion" #tablaCaja aria-labelledby="tituloAmortizacion">
+    <div class="amort-cabeza">
+      <div>
+        <h3 id="tituloAmortizacion">Tabla de amortización</h3>
+        <p class="nota">
+          {{ monto() | pesos }} a {{ plazo() }} meses con
+          {{ tasa() | tasa }} E.A. · cuota fija de {{ cuota() | pesos }}
+        </p>
+      </div>
+      <dl class="totales">
+        <div>
+          <dt>Pagas en intereses</dt>
+          <dd class="cifra">{{ totalIntereses() | pesos }}</dd>
+        </div>
+        <div>
+          <dt>Pagas en total</dt>
+          <dd class="cifra">{{ monto() + totalIntereses() | pesos }}</dd>
+        </div>
+      </dl>
+    </div>
+    <div class="amort-tabla" tabindex="0" aria-label="Cuotas mes a mes">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Mes</th>
+            <th scope="col" class="der">Cuota</th>
+            <th scope="col" class="der">Intereses</th>
+            <th scope="col" class="der">Abono a capital</th>
+            <th scope="col" class="der">Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of tabla(); track fila.mes) {
+            <tr>
+              <td>{{ fila.mes }}</td>
+              <td class="der cifra">{{ fila.cuota | pesos }}</td>
+              <td class="der cifra muted">{{ fila.interes | pesos }}</td>
+              <td class="der cifra">{{ fila.capital | pesos }}</td>
+              <td class="der cifra">{{ fila.saldo | pesos }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="nota">
+      Cálculo aproximado con cuota fija. La cuota real puede incluir seguros y
+      otros cargos que suben lo que pagas.
+    </p>
+  </section>
+}

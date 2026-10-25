@@ -91,7 +91,113 @@ h2 {
   font-weight: 700;
 }
 
+/* Tabla de amortización */
+.amortizacion {
+  margin-top: 20px;
+  background: var(--cm-blanco);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-bloque);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-margin-top: 90px;
+}
+
+.amort-cabeza {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+h3 {
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.totales {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+}
+
+.totales dt {
+  font-size: 13px;
+  color: var(--cm-gris);
+}
+
+.totales dd {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.amort-tabla {
+  max-height: 440px;
+  overflow: auto;
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-tarjeta);
+}
+
+.amort-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.amort-tabla th {
+  position: sticky;
+  top: 0;
+  background: var(--cm-fondo);
+  text-align: left;
+  color: var(--cm-gris);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 12px 16px;
+  font-weight: 700;
+}
+
+.amort-tabla td {
+  padding: 10px 16px;
+  border-top: 1px solid var(--cm-linea-suave);
+}
+
+.amort-tabla tbody tr:nth-child(12n) td {
+  border-bottom: 2px solid var(--cm-linea);
+}
+
+.amort-tabla .der {
+  text-align: right;
+}
+
 @media (max-width: 760px) {
+  /* La cuota es fija y ya está arriba: en celular se quita la columna */
+  .amort-tabla th:nth-child(2),
+  .amort-tabla td:nth-child(2) {
+    display: none;
+  }
+
+  .amortizacion {
+    padding: 18px 16px;
+  }
+
+  .amort-tabla table {
+    font-size: 13px;
+  }
+
+  .amort-tabla th,
+  .amort-tabla td {
+    padding: 8px 8px;
+  }
+
+  .amort-tabla th {
+    font-size: 10px;
+    letter-spacing: 0.03em;
+  }
+
   .sim-caja {
     padding: 20px;
     gap: 20px;

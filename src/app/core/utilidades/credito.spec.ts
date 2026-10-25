@@ -1,5 +1,6 @@
 import {
   ahorro,
+  amortizacion,
   cuotaMensual,
   efectivaAnualDeMensual,
   leerNumero,
@@ -57,5 +58,18 @@ describe('credito', () => {
   it('devuelve null si la cuota no alcanza a pagar el monto', () => {
     expect(tasaDeCuota(20_000_000, 20_000_000 / 48, 48)).toBeNull();
     expect(tasaDeCuota(20_000_000, 300_000, 48)).toBeNull();
+  });
+
+  it('arma la tabla de amortización con cuota fija y saldo final en cero', () => {
+    const tabla = amortizacion(20_000_000, 26.38, 48);
+    expect(tabla.length).toBe(48);
+    expect(Math.round(tabla[0].cuota)).toBe(648_087);
+    expect(tabla[0].interes).toBeCloseTo(20_000_000 * tasaMensual(26.38), 6);
+    expect(tabla[0].capital + tabla[0].interes).toBeCloseTo(tabla[0].cuota, 6);
+    expect(tabla.at(-1)!.saldo).toBe(0);
+    const capital = tabla.reduce((suma, fila) => suma + fila.capital, 0);
+    expect(capital).toBeCloseTo(20_000_000, 4);
+    expect(Math.round(tabla.at(-1)!.cuota)).toBe(648_087);
+    expect(amortizacion(0, 26.38, 48)).toEqual([]);
   });
 });

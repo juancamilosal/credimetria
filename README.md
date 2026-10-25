@@ -23,7 +23,7 @@ morada y oro del diseño (ver abajo).
 | `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                |
 | `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas  |
 | `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría |
-| `/simulador`         | Simulador         | Cuota, total y ahorro frente a la mejor entidad, comparador de dos entidades y las 3 que menos cobran del producto elegido                      |
+| `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                         |
 | `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                 |
 | `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                        |
 | `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                        |
@@ -59,6 +59,13 @@ morada y oro del diseño (ver abajo).
   contacto" (nombres, apellidos, número de celular y canal) y la
   autorización. Ingresos, reportes y demás los pregunta el asesor. La
   urgencia solo se guarda si llega en el enlace (inicio o Compara tu oferta).
+- **Simular y tabla de amortización** (`paginas/simulador/calculadora/`):
+  el botón "Simular" muestra debajo la tabla mes a mes (cuota, intereses,
+  abono a capital y saldo, que cierra en $0) con el total de intereses y el
+  total a pagar; luego sigue los cambios de monto, plazo y tasa. Con los
+  valores por defecto: $11.108.167 en intereses y $31.108.167 en total. En
+  celular se quita la columna de cuota (es fija y está arriba). El cálculo
+  es `amortizacion()` en `core/utilidades/credito.ts`.
 - **Montos con puntos al escribir** (`compartido/entrada-moneda/`): la
   directiva `appMoneda` pone los puntos de miles mientras la persona teclea
   (1000000 → 1.000.000) y usa la coma para los centavos, con máximo dos
@@ -139,8 +146,7 @@ en `public/imagenes/` y su entrada en `FOTOS`.
   la política y página de origen). Falta la API que lo guarde y agregue la IP.
 - Antes de publicar el formulario: la política de tratamiento de datos real
   y los aliados reales en `/aliados`.
-- Sin diseñar: formulario "Quiero ser aliado" (por ahora es un correo) y la
-  tabla de amortización.
+- Sin diseñar: formulario "Quiero ser aliado" (por ahora es un correo).
 
 ## Comandos
 

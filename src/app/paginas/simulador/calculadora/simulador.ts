@@ -1,4 +1,14 @@
-import { Component, computed, inject, model, signal } from '@angular/core';
+import {
+  afterNextRender,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  Injector,
+  model,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { EntradaMoneda } from '../../../compartido/entrada-moneda/entrada-moneda';
 import {
@@ -11,6 +21,7 @@ import { Producto } from '../../../core/modelos/tasa';
 import { TasasService } from '../../../core/servicios/tasas.service';
 import {
   ahorro,
+  amortizacion,
   cuotaMensual,
   leerNumero,
 } from '../../../core/utilidades/credito';
@@ -76,6 +87,17 @@ export class Simulador {
     const valor = this.ahorro();
     return valor !== null && valor.mes <= 0.5;
   });
+  /** La tabla aparece al tocar "Simular" y luego sigue los cambios. */
+  protected readonly simulado = signal(false);
+  protected readonly tabla = computed(() =>
+    this.listo() ? amortizacion(this.monto(), this.tasa(), this.plazo()) : [],
+  );
+  protected readonly totalIntereses = computed(() =>
+    this.tabla().reduce((suma, fila) => suma + fila.interes, 0),
+  );
+  private readonly tablaCaja = viewChild<ElementRef<HTMLElement>>('tablaCaja');
+  private readonly injector = inject(Injector);
+
   protected readonly usura = USURA_CONSUMO;
   protected readonly superaUsura = computed(
     () => this.tasa() > USURA_CONSUMO.tasa,
@@ -83,6 +105,19 @@ export class Simulador {
 
   protected cambiarProducto(valor: string): void {
     if (this.tasas.esProducto(valor)) this.producto.set(valor);
+  }
+
+  protected simular(): void {
+    if (!this.listo()) return;
+    this.simulado.set(true);
+    afterNextRender(
+      () =>
+        this.tablaCaja()?.nativeElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        }),
+      { injector: this.injector },
+    );
   }
 
   protected cambiarMonto(texto: string): void {
