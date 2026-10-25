@@ -2,6 +2,7 @@
  * Sistema de diseño de Credimetría: base blanca y gris neutro, un solo color
  * de marca (azul profundo), verde solo para el ahorro y la mejor tasa, y
  * ámbar solo para avisos. Ningún componente escribe colores a mano.
+ * Siempre en modo claro, aunque el sistema esté en modo oscuro.
  */
 :root {
   /* Marca: logo, botones principales, enlaces y la única zona de color fuerte */
@@ -43,29 +44,6 @@
   --cm-r-bloque: 18px;
   --cm-ancho: 1200px;
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --cm-marca-700: #2f7fd0;
-    --cm-marca-600: #7db5ee;
-    --cm-marca-100: #14263b;
-    --cm-ahorro-700: #8fd6ac;
-    --cm-ahorro-600: #3fb87a;
-    --cm-ahorro-100: #15301f;
-    --cm-aviso-800: #f0c06a;
-    --cm-aviso-100: #3a2c10;
-    --cm-tinta: #e8edf3;
-    --cm-gris: #a3afbd;
-    --cm-linea: #26303c;
-    --cm-linea-suave: #1d2631;
-    --cm-fondo: #0d131a;
-    --cm-blanco: #151d27;
-    --cm-error: #ff8a80;
-    --cm-campo: #0f161f;
-    --cm-bloque: #0f2440;
-    color-scheme: dark;
-  }
 }
 
 *,

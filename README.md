@@ -51,7 +51,7 @@ src/app/
 ```
 
 Los colores, fuentes, radios y espacios están como variables `--cm-*` en
-`src/styles.css`, con modo oscuro automático. Ningún componente escribe
+`src/styles.css`. La página va siempre en modo claro. Ningún componente escribe
 colores a mano. La paleta es sobria a propósito:
 
 - **Base blanca y gris neutro**, con el encabezado y las cabeceras en blanco.
