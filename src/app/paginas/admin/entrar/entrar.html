@@ -1,0 +1,52 @@
+<div class="wrap entrar">
+  <form
+    class="caja"
+    [formGroup]="form"
+    (ngSubmit)="entrar()"
+    novalidate
+    aria-labelledby="tituloEntrar"
+  >
+    <div>
+      <h1 id="tituloEntrar">Administración</h1>
+      <p class="muted">
+        Entra con tu cuenta de Directus para configurar las tasas.
+      </p>
+    </div>
+
+    <div class="campo">
+      <label for="adEmail">Correo</label>
+      <input
+        id="adEmail"
+        type="email"
+        formControlName="email"
+        autocomplete="username"
+        [attr.aria-invalid]="invalido('email')"
+      />
+      @if (invalido("email")) {
+        <span class="error">Escribe tu correo.</span>
+      }
+    </div>
+
+    <div class="campo">
+      <label for="adClave">Contraseña</label>
+      <input
+        id="adClave"
+        type="password"
+        formControlName="clave"
+        autocomplete="current-password"
+        [attr.aria-invalid]="invalido('clave')"
+      />
+      @if (invalido("clave")) {
+        <span class="error">Escribe tu contraseña.</span>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="aviso-error" role="alert">{{ error() }}</p>
+    }
+
+    <button class="btn btn-principal" type="submit" [disabled]="enviando()">
+      {{ enviando() ? "Entrando…" : "Entrar" }}
+    </button>
+  </form>
+</div>

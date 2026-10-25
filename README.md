@@ -27,6 +27,7 @@ morada y oro del diseño (ver abajo).
 | `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                 |
 | `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                        |
 | `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                        |
+| `/admin/tasas`       | Configuración     | Solo administradores de Directus: revisar, publicar, rechazar, corregir y agregar tasas con su fecha y el enlace de la fuente                   |
 
 - **Ranking como en Excel** (`paginas/ranking/` y
   `compartido/tabla-ranking/`): cada título ordena la tabla al tocarlo (↑/↓,
@@ -93,6 +94,47 @@ morada y oro del diseño (ver abajo).
   (`USURA_CONSUMO` en `core/datos/tasas.ts`; se actualiza cada mes).
 - En celular: menú en botón de 44 px, ranking en tarjetas y chips de producto
   que se desplazan de lado. Revisado a 390 px sin desplazamiento horizontal.
+
+## Configuración de tasas (`/admin`)
+
+Pantalla para revisar las tasas que publican las entidades sin entrar a
+Directus. No está en el menú: se entra por `/admin`.
+
+- **Entrar** (`/admin/entrar`): correo y contraseña de Directus. Solo pasan
+  las cuentas con acceso de administrador (`admin_access` en sus
+  políticas). El token de acceso queda en memoria y el de renovación en
+  `sessionStorage`: recargar no cierra la sesión, cerrar la pestaña sí.
+- **Configuración** (`/admin/tasas`, con la guarda `soloAdmin`): lista de
+  `tasas_publicadas` filtrable por estado (Por revisar, Publicadas,
+  Rechazadas, Todas) y producto. Cada tasa muestra lo que publica la
+  entidad, la E.A., la fecha de vigencia, cuándo se capturó, el enlace a la
+  fuente (página o PDF, y la página de tasas y tarifas si la hay), la frase
+  y las notas. Se puede publicar, rechazar, volver a revisar, editar
+  (con "Calcular E.A." desde la tasa mensual) y crear una tasa nueva desde
+  una fuente. Al publicar o rechazar se guardan `revisada_por` y
+  `revisada_en`.
+- Estas rutas no se prerenderizan (`RenderMode.Client`) y llevan
+  `noindex`. La dirección de Directus está en `core/config/directus.ts`.
+- **Directus debe permitir CORS** para el dominio de la página. En las
+  variables del servicio (Coolify): `CORS_ENABLED=true` y
+  `CORS_ORIGIN=http://localhost:4200,https://<dominio de Credimetría>`.
+  Sin eso, el navegador no puede entrar y la pantalla dice que no pudo
+  conectar.
+
+### Colecciones en Directus
+
+`credimetria-api.valkiriacode.com` (Directus 11):
+
+- `entidades`: código (llave), nombre, razón social, NIT (único) y dígito de
+  verificación, código SFC, tipo, sitio web, logo y activa.
+- `fuentes`: entidad, producto, tipo (página o PDF), dirección, página
+  índice de tasas y tarifas, cómo extraer, patrón, estado, última revisión,
+  huella y notas.
+- `tasas_publicadas`: historial (no se sobrescribe) con fuente, entidad,
+  producto, valor desde y hasta, unidad (M.V., N.M.V., E.A.), E.A. desde y
+  hasta, tipo de tasa, sistema de amortización, frase de la fuente,
+  vigencia, captura, estado (por revisar, publicada, rechazada), quién y
+  cuándo la revisó, y notas.
 
 ## Estructura
 

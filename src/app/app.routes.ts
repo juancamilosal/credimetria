@@ -1,3 +1,4 @@
+import { soloAdmin } from './core/guardas/solo-admin';
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
@@ -49,5 +50,19 @@ export const routes: Routes = [
         (m) => m.PoliticaDatos,
       ),
   },
+  {
+    path: 'admin/entrar',
+    title: 'Administración · Credimetría',
+    loadComponent: () =>
+      import('./paginas/admin/entrar/entrar').then((m) => m.Entrar),
+  },
+  {
+    path: 'admin/tasas',
+    title: 'Configuración de tasas · Credimetría',
+    canActivate: [soloAdmin],
+    loadComponent: () =>
+      import('./paginas/admin/tasas/tasas-admin').then((m) => m.TasasAdmin),
+  },
+  { path: 'admin', redirectTo: 'admin/tasas' },
   { path: '**', redirectTo: '' },
 ];

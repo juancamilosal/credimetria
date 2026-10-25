@@ -1,0 +1,301 @@
+<section class="cabecera">
+  <div class="wrap cabeza">
+    <div class="cabecera-texto">
+      <h1>Configuración de tasas</h1>
+      <p>
+        Revisa lo que publican las entidades, con la fecha y el enlace de la
+        fuente. Solo las tasas publicadas salen en la página.
+      </p>
+    </div>
+    @if (usuario(); as u) {
+      <div class="cuenta">
+        <span class="nota">{{ u.nombre }}</span>
+        <button type="button" class="btn btn-borde" (click)="salir()">
+          Salir
+        </button>
+      </div>
+    }
+  </div>
+</section>
+
+<div class="wrap contenido">
+  <div class="barra">
+    <div class="filtros" role="group" aria-label="Estado">
+      @for (e of estados; track e.id) {
+        <button
+          type="button"
+          class="filtro"
+          [attr.aria-pressed]="filtro() === e.id"
+          (click)="filtro.set(e.id)"
+        >
+          {{ e.texto }} <span class="cuenta-num">{{ cuantas()[e.id] }}</span>
+        </button>
+      }
+      <button
+        type="button"
+        class="filtro"
+        [attr.aria-pressed]="filtro() === 'todas'"
+        (click)="filtro.set('todas')"
+      >
+        Todas <span class="cuenta-num">{{ cuantas().todas }}</span>
+      </button>
+    </div>
+    <div class="campo producto">
+      <label for="adProducto" class="visualmente-oculto">Producto</label>
+      <select
+        id="adProducto"
+        [value]="producto()"
+        (change)="producto.set($any($event.target).value)"
+      >
+        <option value="todos">Todos los productos</option>
+        @for (p of productos; track p.id) {
+          <option [value]="p.id">{{ p.nombre }}</option>
+        }
+      </select>
+    </div>
+    <button
+      type="button"
+      class="btn btn-principal"
+      (click)="nueva()"
+      [disabled]="!fuentes().length || editando() === 'nueva'"
+    >
+      Nueva tasa
+    </button>
+  </div>
+
+  @if (error()) {
+    <p class="aviso-error" role="alert">{{ error() }}</p>
+  }
+
+  @if (editando() === "nueva") {
+    <section class="tarjeta editor" aria-label="Nueva tasa">
+      <h2>Nueva tasa</h2>
+      <ng-container *ngTemplateOutlet="formulario" />
+    </section>
+  }
+
+  @if (cargando()) {
+    <p class="muted">Cargando tasas…</p>
+  } @else {
+    <ul class="lista">
+      @for (t of visibles(); track t.id) {
+        <li class="tarjeta tasa" [attr.data-estado]="t.estado">
+          <div class="tasa-cabeza">
+            <div>
+              <h2>{{ t.entidad.nombre }}</h2>
+              <span class="nota">{{ nombreProducto(t.producto) }}</span>
+            </div>
+            @switch (t.estado) {
+              @case ("publicada") {
+                <span class="etq etq-ahorro">Publicada</span>
+              }
+              @case ("rechazada") {
+                <span class="etq etq-error">Rechazada</span>
+              }
+              @default {
+                <span class="etq etq-aviso">Por revisar</span>
+              }
+            }
+          </div>
+
+          @if (editando() === t.id) {
+            <ng-container *ngTemplateOutlet="formulario" />
+          } @else {
+            <dl class="datos">
+              <div>
+                <dt>Publica</dt>
+                <dd class="cifra">{{ publica(t) }}</dd>
+              </div>
+              <div>
+                <dt>Efectiva anual</dt>
+                <dd class="cifra">
+                  {{ t.ea_desde | tasa }}
+                  @if (t.ea_hasta !== null) {
+                    a {{ t.ea_hasta | tasa }}
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>Vigente desde</dt>
+                <dd>
+                  {{
+                    t.vigente_desde
+                      ? (t.vigente_desde | date: "d MMM y" : "UTC")
+                      : "No lo dice"
+                  }}
+                </dd>
+              </div>
+              <div>
+                <dt>Capturada</dt>
+                <dd>{{ t.capturada | date: "d MMM y, h:mm a" }}</dd>
+              </div>
+            </dl>
+
+            @if (t.fuente; as f) {
+              <p class="fuente">
+                <span class="etq etq-marca">{{
+                  f.tipo === "pdf" ? "PDF" : "Página"
+                }}</span>
+                <a [href]="f.url" target="_blank" rel="noopener noreferrer"
+                  >Abrir fuente en {{ sitio(f.url) }} ↗</a
+                >
+                @if (f.url_indice) {
+                  <a
+                    [href]="f.url_indice"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >Tasas y tarifas ↗</a
+                  >
+                }
+              </p>
+            }
+
+            @if (t.frase) {
+              <blockquote>“{{ t.frase }}”</blockquote>
+            }
+            @if (t.notas) {
+              <p class="nota notas">{{ t.notas }}</p>
+            }
+            @if (t.revisada_en) {
+              <p class="nota">
+                {{ t.estado === "rechazada" ? "Rechazada" : "Revisada" }}
+                por {{ revisor(t) || "—" }} el
+                {{ t.revisada_en | date: "d MMM y, h:mm a" }}
+              </p>
+            }
+
+            <div class="acciones">
+              @if (t.estado !== "publicada") {
+                <button
+                  type="button"
+                  class="btn btn-principal"
+                  [disabled]="ocupado() === t.id"
+                  (click)="cambiarEstado(t, 'publicada')"
+                >
+                  Publicar
+                </button>
+              }
+              @if (t.estado !== "rechazada") {
+                <button
+                  type="button"
+                  class="btn btn-borde"
+                  [disabled]="ocupado() === t.id"
+                  (click)="cambiarEstado(t, 'rechazada')"
+                >
+                  Rechazar
+                </button>
+              }
+              @if (t.estado !== "por_revisar") {
+                <button
+                  type="button"
+                  class="btn btn-borde"
+                  [disabled]="ocupado() === t.id"
+                  (click)="cambiarEstado(t, 'por_revisar')"
+                >
+                  Volver a revisar
+                </button>
+              }
+              <button
+                type="button"
+                class="btn btn-claro"
+                [disabled]="ocupado() === t.id"
+                (click)="editar(t)"
+              >
+                Editar
+              </button>
+            </div>
+          }
+        </li>
+      } @empty {
+        <li class="muted vacio">No hay tasas en esta lista.</li>
+      }
+    </ul>
+  }
+</div>
+
+<ng-template #formulario>
+  <form class="formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    @if (editando() === "nueva") {
+      <div class="campo ancho">
+        <label for="tfFuente">Fuente</label>
+        <select id="tfFuente" formControlName="fuente">
+          @for (f of fuentes(); track f.id) {
+            <option [value]="f.id">
+              {{ f.entidad.nombre }} · {{ nombreProducto(f.producto) }} ·
+              {{ f.tipo === "pdf" ? "PDF" : "Página" }} ({{ sitio(f.url) }})
+            </option>
+          }
+        </select>
+      </div>
+    }
+    <div class="campo">
+      <label for="tfDesde">Publica desde (%)</label>
+      <input id="tfDesde" inputmode="decimal" formControlName="valor_desde" />
+    </div>
+    <div class="campo">
+      <label for="tfHasta">Hasta (%)</label>
+      <input id="tfHasta" inputmode="decimal" formControlName="valor_hasta" />
+    </div>
+    <div class="campo">
+      <label for="tfUnidad">Unidad</label>
+      <select id="tfUnidad" formControlName="unidad">
+        @for (u of unidades; track u.id) {
+          <option [value]="u.id">{{ u.texto }}</option>
+        }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="tfEaDesde">E.A. desde (%)</label>
+      <input id="tfEaDesde" inputmode="decimal" formControlName="ea_desde" />
+    </div>
+    <div class="campo">
+      <label for="tfEaHasta">E.A. hasta (%)</label>
+      <input id="tfEaHasta" inputmode="decimal" formControlName="ea_hasta" />
+    </div>
+    <div class="campo calcular">
+      <button type="button" class="btn btn-claro" (click)="calcularEa()">
+        Calcular E.A.
+      </button>
+    </div>
+    <div class="campo">
+      <label for="tfTipo">Tipo de tasa</label>
+      <select id="tfTipo" formControlName="tipo_tasa">
+        <option value="">No lo dice</option>
+        <option value="fija">Fija</option>
+        <option value="variable">Variable</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label for="tfSistema">Cuota</label>
+      <select id="tfSistema" formControlName="sistema_amortizacion">
+        <option value="no_dice">No lo dice</option>
+        <option value="cuota_fija">Cuota fija</option>
+        <option value="cuota_decreciente">Cuota decreciente</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label for="tfVigente">Vigente desde</label>
+      <input id="tfVigente" type="date" formControlName="vigente_desde" />
+    </div>
+    <div class="campo ancho">
+      <label for="tfFrase">Frase de la fuente</label>
+      <textarea id="tfFrase" rows="2" formControlName="frase"></textarea>
+    </div>
+    <div class="campo ancho">
+      <label for="tfNotas">Notas</label>
+      <textarea id="tfNotas" rows="2" formControlName="notas"></textarea>
+    </div>
+    <div class="acciones ancho">
+      <button
+        type="submit"
+        class="btn btn-principal"
+        [disabled]="ocupado() !== null"
+      >
+        Guardar
+      </button>
+      <button type="button" class="btn btn-borde" (click)="cancelar()">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</ng-template>
