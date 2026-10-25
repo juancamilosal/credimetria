@@ -36,7 +36,11 @@ import {
 } from '../../../core/servicios/sesion-admin.service';
 import { TasasAdminService } from '../../../core/servicios/tasas-admin.service';
 import { TasasService } from '../../../core/servicios/tasas.service';
-import { efectivaAnualDeMensual } from '../../../core/utilidades/credito';
+import { USURA_CONSUMO } from '../../../core/datos/tasas';
+import {
+  efectivaAnualDeMensual,
+  tasaMensual,
+} from '../../../core/utilidades/credito';
 import { CabeceraAdmin } from '../cabecera/cabecera-admin';
 
 const UNIDAD_TEXTO: Record<UnidadTasa, string> = {
@@ -181,6 +185,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
     unidad: ['MV' as UnidadTasa | ''],
     ea_desde: [''],
     ea_hasta: [''],
+    hasta_origen: ['entidad' as 'entidad' | 'usura'],
     tipo_tasa: ['' as TipoTasa | ''],
     sistema_amortizacion: ['no_dice' as SistemaTasa],
     vigente_desde: [''],
@@ -308,6 +313,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
       unidad: t.unidad ?? '',
       ea_desde: escribirDecimal(t.ea_desde),
       ea_hasta: escribirDecimal(t.ea_hasta),
+      hasta_origen: t.hasta_origen ?? 'entidad',
       tipo_tasa: t.tipo_tasa ?? '',
       sistema_amortizacion: t.sistema_amortizacion ?? 'no_dice',
       vigente_desde: t.vigente_desde ?? '',
@@ -332,6 +338,24 @@ export class TasasAdmin implements OnInit, OnDestroy {
     });
   }
 
+  protected readonly usura = USURA_CONSUMO;
+
+  /**
+   * La entidad no publica máxima: el "hasta" es el tope legal de usura del
+   * mes (solo consumo; vivienda tiene otra regla).
+   */
+  protected usarUsura(): void {
+    const { unidad } = this.form.getRawValue();
+    const mensual = +(tasaMensual(USURA_CONSUMO.tasa) * 100).toFixed(3);
+    this.form.patchValue({
+      valor_hasta: escribirDecimal(
+        unidad === 'EA' ? USURA_CONSUMO.tasa : mensual,
+      ),
+      ea_hasta: escribirDecimal(USURA_CONSUMO.tasa),
+      hasta_origen: 'usura',
+    });
+  }
+
   protected async guardar(c: TarjetaTasa, id: number): Promise<void> {
     const v = this.form.getRawValue();
     const cambios: CambiosTasa = {
@@ -341,6 +365,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
       unidad: v.unidad || null,
       ea_desde: leerDecimal(v.ea_desde),
       ea_hasta: leerDecimal(v.ea_hasta),
+      hasta_origen: leerDecimal(v.ea_hasta) === null ? null : v.hasta_origen,
       tipo_tasa: v.tipo_tasa || null,
       sistema_amortizacion: v.sistema_amortizacion,
       vigente_desde: v.vigente_desde || null,

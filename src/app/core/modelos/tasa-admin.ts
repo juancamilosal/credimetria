@@ -24,6 +24,8 @@ export interface TasaAdmin {
   unidad: UnidadTasa | null;
   ea_desde: number | null;
   ea_hasta: number | null;
+  /** De dónde sale el "hasta": lo publica la entidad o es el tope de usura. */
+  hasta_origen: 'entidad' | 'usura' | null;
   tipo_tasa: TipoTasa | null;
   sistema_amortizacion: SistemaTasa | null;
   frase: string | null;
@@ -56,6 +58,7 @@ export type CambiosTasa = Partial<
     | 'unidad'
     | 'ea_desde'
     | 'ea_hasta'
+    | 'hasta_origen'
     | 'tipo_tasa'
     | 'sistema_amortizacion'
     | 'frase'

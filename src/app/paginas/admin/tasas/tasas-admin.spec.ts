@@ -66,6 +66,7 @@ function tasa(cambios: Partial<TasaAdmin>): TasaAdmin {
     unidad: 'MV',
     ea_desde: 22.42,
     ea_hasta: 28.56,
+    hasta_origen: 'entidad',
     tipo_tasa: 'fija',
     sistema_amortizacion: 'cuota_fija',
     frase: null,
@@ -362,5 +363,46 @@ describe('TasasAdmin', () => {
     expect(leerDecimal('1,3')).toBe(1.3);
     expect(leerDecimal('16.77 %')).toBe(16.77);
     expect(leerDecimal('')).toBeNull();
+  });
+
+  it('si el banco no publica máxima, usa el tope de usura y lo aclara', async () => {
+    await crear();
+    admin.guardar.and.callFake(
+      async (_id, cambios) =>
+        ({
+          ...porAprobar,
+          ...cambios,
+          documento: porAprobar.documento,
+        }) as TasaAdmin,
+    );
+    const bbva = html.querySelector('.banco')!;
+    [...bbva.querySelectorAll<HTMLButtonElement>('button')]
+      .find((b) => b.textContent!.trim() === 'Editar')!
+      .click();
+    fixture.detectChanges();
+    boton(bbva, 'Usar tope de usura').click();
+    fixture.detectChanges();
+    expect(bbva.querySelector<HTMLInputElement>('#tfHasta')!.value).toBe(
+      '2,118',
+    );
+    expect(bbva.querySelector<HTMLInputElement>('#tfEaHasta')!.value).toBe(
+      '28,59',
+    );
+    expect(bbva.querySelector<HTMLSelectElement>('#tfOrigen')!.value).toBe(
+      'usura',
+    );
+    bbva.querySelector<HTMLFormElement>('.formulario')!.requestSubmit();
+    await esperar();
+    expect(admin.guardar).toHaveBeenCalledWith(
+      2,
+      jasmine.objectContaining({
+        valor_hasta: 2.118,
+        ea_hasta: 28.59,
+        hasta_origen: 'usura',
+      }),
+    );
+    expect(
+      bbva.querySelector('[aria-label="Por aprobar"] .tope')?.textContent,
+    ).toContain('tope de usura');
   });
 });

@@ -370,6 +370,9 @@
           a {{ t.ea_hasta | tasa }}
         }
       </dd>
+      @if (t.hasta_origen === "usura") {
+        <dd class="tope">Máxima: tope de usura (el banco no la publica)</dd>
+      }
       @if (base) {
         <dd class="cambios">
           @if (cambio(t.ea_desde, base.ea_desde); as d) {
@@ -497,6 +500,20 @@
         Calcular E.A.
       </button>
     </div>
+    <div class="campo">
+      <label for="tfOrigen">El "hasta"</label>
+      <select id="tfOrigen" formControlName="hasta_origen">
+        <option value="entidad">Lo publica el banco</option>
+        <option value="usura">Tope de usura</option>
+      </select>
+    </div>
+    @if (c.producto !== "vivienda") {
+      <div class="campo calcular">
+        <button type="button" class="btn btn-claro" (click)="usarUsura()">
+          Usar tope de usura ({{ usura.tasa | tasa }})
+        </button>
+      </div>
+    }
     <div class="campo">
       <label for="tfTipo">Tipo de tasa</label>
       <select id="tfTipo" formControlName="tipo_tasa">

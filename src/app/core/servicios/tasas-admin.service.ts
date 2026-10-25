@@ -11,6 +11,7 @@ const CAMPOS_TASA = [
   'unidad',
   'ea_desde',
   'ea_hasta',
+  'hasta_origen',
   'tipo_tasa',
   'sistema_amortizacion',
   'frase',

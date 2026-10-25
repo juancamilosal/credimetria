@@ -204,6 +204,12 @@ h3 {
   font-weight: 600;
 }
 
+.tope {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cm-gris);
+}
+
 .cambios {
   display: flex;
   flex-wrap: wrap;
