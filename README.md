@@ -125,6 +125,17 @@ Directus. No está en el menú: se entra por `/admin`.
   Sin eso, el navegador no puede entrar y la pantalla dice que no pudo
   conectar.
 
+### De dónde sale la tasa publicada
+
+Decisión del 25 oct 2026: la tasa que publica cada entidad se toma de su
+**PDF oficial de tasas y tarifas vigente**, con la fecha de vigencia del
+documento. La página web del producto solo sirve para encontrar el PDF: al
+compararlas, las páginas mostraban otras tasas (BBVA, libre inversión:
+desde 0,85 % M.V. en datos ocultos de la página contra 1,77 % a 2,12 %
+M.V. en el PDF vigente desde el 5 oct 2026). Cada tasa guarda la copia del
+PDF en `captura`. Algunas entidades bloquean la descarga automática, así
+que el robot debe bajar los PDF con un navegador real.
+
 ### Colecciones en Directus
 
 `credimetria-api.valkiriacode.com` (Directus 11):
