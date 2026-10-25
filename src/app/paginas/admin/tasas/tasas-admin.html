@@ -148,12 +148,31 @@
             <section class="columna" aria-label="Publicada hoy">
               <h3>Publicada hoy</h3>
               @if (c.publicada; as p) {
-                <ng-container
-                  *ngTemplateOutlet="
-                    bloque;
-                    context: { $implicit: p, base: null }
-                  "
-                />
+                @if (editando() === p.id) {
+                  <ng-container
+                    *ngTemplateOutlet="
+                      formulario;
+                      context: { $implicit: c, id: p.id }
+                    "
+                  />
+                } @else {
+                  <ng-container
+                    *ngTemplateOutlet="
+                      bloque;
+                      context: { $implicit: p, base: null }
+                    "
+                  />
+                  <div class="acciones">
+                    <button
+                      type="button"
+                      class="btn btn-claro"
+                      [disabled]="ocupado() === c.clave"
+                      (click)="editar(p)"
+                    >
+                      Editar
+                    </button>
+                  </div>
+                }
               } @else {
                 <p class="vacio">Todavía no hay una tasa publicada.</p>
               }
@@ -420,7 +439,7 @@
         >
       }
     </div>
-    @if (pdfEditable(t)) {
+    @if (corregible(t)) {
       <div class="doc-acciones">
         <label class="enlace-boton cambiar">
           Cambiar archivo
@@ -435,13 +454,13 @@
           type="button"
           class="enlace-boton eliminar"
           [class.confirmar]="confirmandoBorrar() === t.id"
-          (click)="eliminarPdf(tarjetaDe(t), t)"
+          (click)="eliminarPublicada(tarjetaDe(t), t)"
           (blur)="confirmandoBorrar.set(null)"
         >
           {{
             confirmandoBorrar() === t.id
-              ? "¿Seguro? Toca otra vez para eliminar el PDF y esta tasa"
-              : "Eliminar PDF"
+              ? "¿Seguro? Toca otra vez para eliminar esta tasa y su PDF"
+              : "Eliminar tasa y PDF"
           }}
         </button>
       </div>

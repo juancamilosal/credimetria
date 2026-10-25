@@ -77,7 +77,26 @@ export class TasasAdminService {
     });
   }
 
-  /** Borra una tasa por aprobar (por ejemplo, la de un PDF cargado por error). */
+  /**
+   * Vuelve a publicar una tasa anterior (cuando se elimina la publicada por
+   * un error) y su PDF vuelve a ser el actual.
+   */
+  async restaurar(tasa: TasaAdmin): Promise<TasaAdmin> {
+    if (tasa.documento) {
+      await this.sesion.pedir(
+        'PATCH',
+        `/items/documentos/${tasa.documento.id}`,
+        {
+          estado: 'actual',
+        },
+      );
+    }
+    return this.escribir('PATCH', `/items/tasas_publicadas/${tasa.id}`, {
+      estado: 'publicada',
+    });
+  }
+
+  /** Borra una tasa (por ejemplo, una publicada con un PDF equivocado). */
   async eliminar(id: number): Promise<void> {
     await this.sesion.pedir('DELETE', `/items/tasas_publicadas/${id}`);
   }

@@ -396,9 +396,9 @@ export class TasasAdmin implements OnInit, OnDestroy {
     const documento = tasa ? this.documentoDe(tasa) : undefined;
     await this.trabajar(c.clave, async () => {
       this.reemplazar(await this.admin.guardar(id, cambios));
-      // La vigencia del PDF por aprobar va con la de su tasa.
+      // La vigencia del PDF va con la de su tasa.
       if (
-        documento?.estado === 'nuevo' &&
+        documento &&
         documento.id === cambios.documento &&
         documento.vigente_desde !== (cambios.vigente_desde ?? null)
       ) {
@@ -416,9 +416,21 @@ export class TasasAdmin implements OnInit, OnDestroy {
 
   // Corregir o eliminar un PDF cargado por error
 
-  /** Solo se corrige o elimina un PDF que todavía no se ha aprobado. */
-  protected pdfEditable(t: TasaAdmin): boolean {
-    return t.estado === 'por_revisar' && t.documento?.estado === 'nuevo';
+  /**
+   * La tasa publicada se puede corregir: editar sus valores, cambiar el
+   * archivo de su PDF o eliminarla si se aprobó por error.
+   */
+  protected corregible(t: TasaAdmin): boolean {
+    return t.estado === 'publicada';
+  }
+
+  /** La tasa que vuelve a quedar publicada si se elimina la actual. */
+  protected anteriorDe(c: TarjetaTasa): TasaAdmin | undefined {
+    return c.historial
+      .filter((x) => x.estado === 'anterior')
+      .sort((a, b) =>
+        (b.revisada_en ?? '').localeCompare(a.revisada_en ?? ''),
+      )[0];
   }
 
   protected async cambiarArchivo(
@@ -462,29 +474,41 @@ export class TasasAdmin implements OnInit, OnDestroy {
   }
 
   /**
-   * Elimina un PDF cargado por error y la tasa por aprobar que salió de él.
-   * Pide un segundo toque para confirmar.
+   * Elimina la tasa publicada y su PDF, cuando se aprobaron por error. Si
+   * hay una anterior, vuelve a quedar publicada. Pide un segundo toque.
    */
-  protected async eliminarPdf(c: TarjetaTasa, t: TasaAdmin): Promise<void> {
+  protected async eliminarPublicada(
+    c: TarjetaTasa,
+    t: TasaAdmin,
+  ): Promise<void> {
     if (this.confirmandoBorrar() !== t.id) {
       this.confirmandoBorrar.set(t.id);
       return;
     }
     const documento = this.documentoDe(t);
-    if (!documento) return;
-    const delPdf = this.tasas().filter(
-      (x) => x.documento?.id === documento.id && x.estado === 'por_revisar',
-    );
+    const anterior = this.anteriorDe(c);
     await this.trabajar(c.clave, async () => {
-      for (const x of delPdf) await this.admin.eliminar(x.id);
-      await this.docs.descartar(documento);
-      const borradas = new Set(delPdf.map((x) => x.id));
-      this.tasas.update((lista) => lista.filter((x) => !borradas.has(x.id)));
+      await this.admin.eliminar(t.id);
+      if (documento) await this.docs.descartar(documento);
+      const vuelve = anterior ? await this.admin.restaurar(anterior) : null;
+      this.tasas.update((lista) =>
+        lista
+          .filter((x) => x.id !== t.id)
+          .map((x) => (x.id === vuelve?.id ? vuelve : x)),
+      );
       this.documentos.update((lista) =>
-        lista.filter((d) => d.id !== documento.id),
+        lista
+          .filter((d) => d.id !== documento?.id)
+          .map((d) =>
+            d.id === vuelve?.documento?.id ? { ...d, estado: 'actual' } : d,
+          ),
       );
       this.confirmandoBorrar.set(null);
-      this.aviso.set(`PDF de ${c.entidad.nombre} eliminado.`);
+      this.aviso.set(
+        vuelve
+          ? `Tasa de ${c.entidad.nombre} eliminada. Volvió a quedar publicada la anterior.`
+          : `Tasa de ${c.entidad.nombre} eliminada con su PDF.`,
+      );
     });
   }
 

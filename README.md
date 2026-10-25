@@ -119,12 +119,13 @@ Directus. No está en el menú: se entra por `/admin`.
     el token y se ven como blob dentro de la página). **Cargar PDF nuevo**
     sube el PDF con su vigencia (si su huella SHA-256 ya existe, avisa) y
     crea la tasa por aprobar unida a él, lista para escribir los valores.
-  - Un PDF **por aprobar** cargado por error se corrige o se quita debajo
-    de él: **Cambiar archivo** sube el correcto en su lugar (borra el
-    anterior; avisa si ya existe en otro registro) y **Eliminar PDF** (con
-    un segundo toque) borra el PDF y la tasa por aprobar que salió de él.
-    La vigencia se corrige editando la tasa: si cambia, también cambia la
-    del PDF. El PDF de una tasa publicada no se cambia ni se borra.
+  - La **tasa publicada** se puede corregir si se aprobó por error:
+    **Editar** sus valores (si cambia la vigencia, también cambia la de su
+    PDF), **Cambiar archivo** sube el PDF correcto en lugar del equivocado
+    (borra el anterior; avisa si ya existe en otro registro) y **Eliminar
+    tasa y PDF** (con un segundo toque) borra las dos; si había una tasa
+    anterior, vuelve a quedar publicada con su PDF como actual. Por aprobar
+    se corrige con Editar o se rechaza.
   - **Aprobar** deja la tasa publicada y su PDF como actual; la tasa que
     estaba publicada y el PDF anterior pasan a `anterior`. Nada se borra:
     "Ver anteriores" muestra las anteriores y rechazadas con su PDF.

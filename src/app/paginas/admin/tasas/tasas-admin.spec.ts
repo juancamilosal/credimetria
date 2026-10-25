@@ -115,6 +115,10 @@ describe('TasasAdmin', () => {
   let html: HTMLElement;
 
   async function crear() {
+    await crearCon([porAprobar, publicada]);
+  }
+
+  async function crearCon(lista: TasaAdmin[]) {
     admin = jasmine.createSpyObj<TasasAdminService>('TasasAdminService', [
       'listar',
       'cambiarEstado',
@@ -122,6 +126,7 @@ describe('TasasAdmin', () => {
       'aprobar',
       'crearDesdeDocumento',
       'eliminar',
+      'restaurar',
     ]);
     docs = jasmine.createSpyObj<DocumentosAdminService>(
       'DocumentosAdminService',
@@ -137,7 +142,7 @@ describe('TasasAdmin', () => {
         'cambiarVigencia',
       ],
     );
-    admin.listar.and.resolveTo([porAprobar, publicada]);
+    admin.listar.and.resolveTo(lista);
     docs.entidades.and.resolveTo([
       BBVA,
       { codigo: 'davivienda', nombre: 'Davivienda', logo: null },
@@ -272,7 +277,9 @@ describe('TasasAdmin', () => {
     const bbva = html.querySelector('.banco')!;
     boton(bbva, 'Cargar PDF nuevo').click();
     fixture.detectChanges();
-    const campo = bbva.querySelector<HTMLInputElement>('.carga input[type="file"]')!;
+    const campo = bbva.querySelector<HTMLInputElement>(
+      '.carga input[type="file"]',
+    )!;
     const pdf = new File(['%PDF'], 'nov.pdf', { type: 'application/pdf' });
     Object.defineProperty(campo, 'files', { value: [pdf] });
     campo.dispatchEvent(new Event('change'));
@@ -297,7 +304,11 @@ describe('TasasAdmin', () => {
         }) as TasaAdmin,
     );
     const bbva = html.querySelector('.banco')!;
-    [...bbva.querySelectorAll<HTMLButtonElement>('button')]
+    [
+      ...bbva
+        .querySelector('[aria-label="Por aprobar"]')!
+        .querySelectorAll<HTMLButtonElement>('button'),
+    ]
       .find((b) => b.textContent!.trim() === 'Editar')!
       .click();
     fixture.detectChanges();
@@ -380,7 +391,11 @@ describe('TasasAdmin', () => {
         }) as TasaAdmin,
     );
     const bbva = html.querySelector('.banco')!;
-    [...bbva.querySelectorAll<HTMLButtonElement>('button')]
+    [
+      ...bbva
+        .querySelector('[aria-label="Por aprobar"]')!
+        .querySelectorAll<HTMLButtonElement>('button'),
+    ]
       .find((b) => b.textContent!.trim() === 'Editar')!
       .click();
     fixture.detectChanges();
@@ -410,56 +425,78 @@ describe('TasasAdmin', () => {
     ).toContain('tope de usura');
   });
 
-  it('elimina un PDF cargado por error y su tasa, con un segundo toque', async () => {
-    await crear();
+  it('elimina la tasa publicada y su PDF con un segundo toque, y vuelve la anterior', async () => {
+    const anterior = tasa({
+      id: 0,
+      estado: 'anterior',
+      valor_desde: 1.6,
+      revisada_en: '2026-08-02T16:00:00Z',
+      documento: {
+        id: 9,
+        estado: 'anterior',
+        vigente_desde: '2026-08-01',
+        archivo: { id: 'f9', filename_download: 'tasas-ago.pdf' },
+      },
+    });
+    await crearCon([porAprobar, publicada, anterior]);
     admin.eliminar.and.resolveTo();
+    admin.restaurar.and.resolveTo({ ...anterior, estado: 'publicada' });
     docs.descartar.and.resolveTo();
-    const nueva = html.querySelector('.banco [aria-label="Por aprobar"]')!;
-    const eliminar = nueva.querySelector<HTMLButtonElement>('.eliminar')!;
+    const hoy = () =>
+      html.querySelector('.banco [aria-label="Publicada hoy"]')!;
+    const eliminar = hoy().querySelector<HTMLButtonElement>('.eliminar')!;
     eliminar.click();
     fixture.detectChanges();
     expect(admin.eliminar).not.toHaveBeenCalled();
     expect(eliminar.textContent).toContain('Toca otra vez');
     eliminar.click();
     await esperar();
-    expect(admin.eliminar).toHaveBeenCalledWith(2);
+    expect(admin.eliminar).toHaveBeenCalledWith(1);
     expect(docs.descartar).toHaveBeenCalledWith(
-      jasmine.objectContaining({ id: 11 }),
+      jasmine.objectContaining({ id: 10 }),
     );
-    expect(
-      html.querySelector('.banco [aria-label="Por aprobar"]')!.textContent,
-    ).toContain('Nada por aprobar');
+    expect(admin.restaurar).toHaveBeenCalledWith(
+      jasmine.objectContaining({ id: 0 }),
+    );
+    expect(hoy().textContent).toContain('1,60 %');
+    expect(html.querySelector('.aviso-ok')?.textContent).toContain(
+      'Volvió a quedar publicada',
+    );
   });
 
-  it('cambia el archivo de un PDF por aprobar', async () => {
+  it('cambia el archivo del PDF de la tasa publicada', async () => {
     await crear();
     docs.reemplazarArchivo.and.resolveTo({
-      ...docNuevo,
+      ...docActual,
       archivo: {
         id: 'f20',
-        filename_download: 'tasas-oct-bien.pdf',
+        filename_download: 'tasas-sep-bien.pdf',
         filesize: 1,
       },
     });
-    const nueva = html.querySelector('.banco [aria-label="Por aprobar"]')!;
-    const campo = nueva.querySelector<HTMLInputElement>('.cambiar input')!;
-    const pdf = new File(['%PDF'], 'tasas-oct-bien.pdf', {
+    const hoy = html.querySelector('.banco [aria-label="Publicada hoy"]')!;
+    const campo = hoy.querySelector<HTMLInputElement>('.cambiar input')!;
+    const pdf = new File(['%PDF'], 'tasas-sep-bien.pdf', {
       type: 'application/pdf',
     });
     Object.defineProperty(campo, 'files', { value: [pdf] });
     campo.dispatchEvent(new Event('change'));
     await esperar();
     expect(docs.reemplazarArchivo).toHaveBeenCalledWith(
-      jasmine.objectContaining({ id: 11 }),
+      jasmine.objectContaining({ id: 10 }),
       pdf,
     );
-    expect(nueva.textContent).toContain('tasas-oct-bien.pdf');
+    expect(hoy.textContent).toContain('tasas-sep-bien.pdf');
   });
 
-  it('la tasa publicada no deja cambiar ni eliminar su PDF', async () => {
+  it('la publicada se puede editar; por aprobar no muestra cambiar ni eliminar PDF', async () => {
     await crear();
     const hoy = html.querySelector('.banco [aria-label="Publicada hoy"]')!;
-    expect(hoy.querySelector('.eliminar')).toBeNull();
-    expect(hoy.querySelector('.cambiar')).toBeNull();
+    boton(hoy, 'Editar').click();
+    fixture.detectChanges();
+    expect(hoy.querySelector('#tfDesde')).not.toBeNull();
+    const nueva = html.querySelector('.banco [aria-label="Por aprobar"]')!;
+    expect(nueva.querySelector('.eliminar')).toBeNull();
+    expect(nueva.querySelector('.cambiar')).toBeNull();
   });
 });
