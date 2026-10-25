@@ -1,0 +1,188 @@
+// Robot del promedio: lo que cobra cada entidad en promedio según la
+// Superfinanciera (formato 88, datos.gov.co conjunto qzsc-9esp).
+//
+// Para cada entidad activa con `codigo_sfc` y cada producto, calcula el
+// promedio ponderado por monto de las últimas 4 semanas, sube a Directus una
+// copia (CSV) con el enlace de la consulta y actualiza su fila en
+// `tasas_promedio` (una por entidad y producto, sin historial).
+//
+// Uso:
+//   DIRECTUS_URL=https://credimetria-api.valkiriacode.com \
+//   DIRECTUS_TOKEN=<token del usuario robot> node robots/promedio-sfc.mjs
+//   node robots/promedio-sfc.mjs --sin-guardar   (solo muestra los promedios)
+
+const SFC = "https://www.datos.gov.co/resource/qzsc-9esp.json";
+const SEMANAS = 4;
+/** Producto de Credimetría → producto de crédito en el formato 88. */
+const PRODUCTOS = { "libre-inversion": "Libre inversión" };
+/** Salto (en puntos) que se avisa en las notas para revisarlo. */
+const SALTO = 2;
+
+const soloMostrar = process.argv.includes("--sin-guardar");
+const DIRECTUS =
+  process.env.DIRECTUS_URL ?? "https://credimetria-api.valkiriacode.com";
+const TOKEN = process.env.DIRECTUS_TOKEN;
+
+async function directus(metodo, ruta, cuerpo) {
+  const r = await fetch(DIRECTUS + ruta, {
+    method: metodo,
+    headers: {
+      Authorization: `Bearer ${TOKEN}`,
+      ...(cuerpo instanceof FormData
+        ? {}
+        : { "Content-Type": "application/json" }),
+    },
+    body:
+      cuerpo instanceof FormData ? cuerpo : cuerpo && JSON.stringify(cuerpo),
+  });
+  const texto = await r.text();
+  if (!r.ok)
+    throw new Error(`${metodo} ${ruta} → ${r.status} ${texto.slice(0, 300)}`);
+  return texto ? JSON.parse(texto).data : null;
+}
+
+async function sfc(params) {
+  const url = `${SFC}?${new URLSearchParams(params)}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`datos.gov.co → ${r.status}`);
+  return { url, filas: await r.json() };
+}
+
+/** "1-13" → { tipo: '1', codigo: '13' } */
+const partir = (codigoSfc) => {
+  const [tipo, codigo] = codigoSfc.split("-");
+  return { tipo, codigo };
+};
+
+async function main() {
+  if (!soloMostrar && !TOKEN)
+    throw new Error("Falta DIRECTUS_TOKEN (o usa --sin-guardar).");
+  const entidades =
+    soloMostrar && !TOKEN
+      ? [
+          { codigo: "banco-de-bogota", codigo_sfc: "1-1" },
+          { codigo: "bancolombia", codigo_sfc: "1-7" },
+          { codigo: "bbva", codigo_sfc: "1-13" },
+          { codigo: "davivienda", codigo_sfc: "1-39" },
+          { codigo: "av-villas", codigo_sfc: "1-49" },
+        ]
+      : await directus(
+          "GET",
+          "/items/entidades?fields=codigo,codigo_sfc&filter[activa][_eq]=true&filter[codigo_sfc][_nnull]=true&limit=-1",
+        );
+
+  // Las últimas semanas con datos.
+  const { filas: cortes } = await sfc({
+    $select: "fecha_corte",
+    $group: "fecha_corte",
+    $order: "fecha_corte desc",
+    $limit: String(SEMANAS),
+  });
+  const desde = cortes.at(-1).fecha_corte.slice(0, 10);
+  const corte = cortes[0].fecha_corte.slice(0, 10);
+
+  for (const [producto, nombreSfc] of Object.entries(PRODUCTOS)) {
+    const lista = entidades
+      .map((e) => `'${partir(e.codigo_sfc).codigo}'`)
+      .join(",");
+    const { url, filas } = await sfc({
+      $select:
+        "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte," +
+        "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
+        "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
+      $where:
+        `producto_de_cr_dito='${nombreSfc}' AND codigo_entidad in (${lista}) ` +
+        `AND fecha_corte >= '${desde}'`,
+      $group: "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte",
+      $order: "codigo_entidad,fecha_corte",
+      $limit: "1000",
+    });
+
+    // Respaldo: lo que respondió la Superfinanciera, con el enlace.
+    const csv = [
+      `# Fuente: Superintendencia Financiera de Colombia, formato 88, datos.gov.co qzsc-9esp`,
+      `# Consulta:,${url}`,
+      `# Promedio ponderado por monto = suma(tasa * monto) / suma(monto). Producto: ${nombreSfc}. Consultado el ${new Date().toISOString().slice(0, 10)}.`,
+      "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte,tasa_ea_ponderada,monto_desembolsado,numero_creditos",
+      ...filas.map((f) =>
+        [
+          f.tipo_entidad,
+          f.codigo_entidad,
+          `"${f.nombre_entidad}"`,
+          f.fecha_corte.slice(0, 10),
+          (Number(f.tm) / Number(f.m)).toFixed(4),
+          Math.round(Number(f.m)),
+          Math.round(Number(f.n)),
+        ].join(","),
+      ),
+    ].join("\n");
+
+    let respaldo = null;
+    if (!soloMostrar) {
+      const datos = new FormData();
+      datos.append(
+        "title",
+        `Superfinanciera · ${nombreSfc} · promedio ${SEMANAS} semanas · corte ${corte}`,
+      );
+      datos.append(
+        "file",
+        new Blob([csv], { type: "text/csv" }),
+        `sfc-${producto}-${corte}.csv`,
+      );
+      respaldo = (await directus("POST", "/files", datos)).id;
+    }
+
+    for (const e of entidades) {
+      const { tipo, codigo } = partir(e.codigo_sfc);
+      const suyas = filas.filter(
+        (f) => f.tipo_entidad === tipo && f.codigo_entidad === codigo,
+      );
+      const m = suyas.reduce((s, f) => s + Number(f.m), 0);
+      const tasa = m
+        ? +(suyas.reduce((s, f) => s + Number(f.tm), 0) / m).toFixed(2)
+        : null;
+      console.log(
+        `${e.codigo.padEnd(16)} ${producto}  ${tasa ?? "sin reporte"}${tasa ? " % E.A." : ""}  (${suyas.length} semanas)`,
+      );
+      if (soloMostrar) continue;
+
+      const [actual] = await directus(
+        "GET",
+        `/items/tasas_promedio?filter[entidad][_eq]=${e.codigo}&filter[producto][_eq]=${producto}&fields=id,tasa_ea&limit=1`,
+      );
+      const antes = actual?.tasa_ea == null ? null : Number(actual.tasa_ea);
+      const salto =
+        tasa !== null && antes !== null && Math.abs(tasa - antes) > SALTO;
+      const fila = {
+        entidad: e.codigo,
+        producto,
+        corte,
+        respaldo,
+        consulta_url: url,
+        actualizada: new Date().toISOString(),
+        ...(tasa === null
+          ? {
+              estado: "sin_reporte",
+              notas: `Sin desembolsos reportados en las ${SEMANAS} semanas al ${corte}; se conserva la tasa anterior.`,
+            }
+          : {
+              tasa_ea: tasa,
+              estado: "al_dia",
+              notas:
+                `Promedio ponderado por monto de ${suyas.length} semanas al ${corte}.` +
+                (salto
+                  ? ` REVISAR: cambió de ${antes} % a ${tasa} % (más de ${SALTO} puntos).`
+                  : ""),
+            }),
+      };
+      if (actual)
+        await directus("PATCH", `/items/tasas_promedio/${actual.id}`, fila);
+      else await directus("POST", "/items/tasas_promedio", fila);
+    }
+  }
+}
+
+main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});

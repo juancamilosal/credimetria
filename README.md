@@ -173,11 +173,14 @@ con `USURA_CONSUMO` (no se ofrece en vivienda).
   índice de tasas y tarifas, cómo extraer, patrón, estado, última revisión,
   huella y notas.
 - `tasas_promedio`: lo que cobra cada entidad en promedio según la
-  Superfinanciera (formato 88, datos.gov.co): una fila por entidad y
-  producto con la tasa E.A., la fecha de corte, cuándo se actualizó y si
-  está al día o sin reporte. El robot del promedio la sobrescribe cada
+  Superfinanciera (formato 88, datos.gov.co conjunto `qzsc-9esp`): una
+  fila por entidad y producto con la tasa E.A. (promedio ponderado por
+  monto de 4 semanas), la fecha de corte, cuándo se actualizó, si está al
+  día o sin reporte, el CSV de respaldo (`respaldo`) y el enlace de la
+  consulta (`consulta_url`). La sobrescribe el robot del promedio cada
   semana (sin historial, sin aprobación). Con ella se calcula la cuota, el
-  ahorro y el orden del ranking; el rango del PDF va al lado.
+  ahorro y el orden del ranking; el rango del PDF va al lado. Las entidades
+  se unen por `entidades.codigo_sfc` (tipo-código, ej. BBVA 1-13).
 - `documentos`: los PDF de tasas de cada fuente, con archivo, estado
   (nuevo, actual, anterior), vigencia, origen (manual o robot), huella
   SHA-256, notas, y quién y cuándo lo cargó.
@@ -187,6 +190,13 @@ con `USURA_CONSUMO` (no se ofrece en vivienda).
   amortización, frase del PDF, vigencia, estado (por revisar, publicada,
   rechazada, anterior), quién y cuándo la revisó, y notas. `captura` queda
   de casos anteriores a `documento`.
+
+## Robots
+
+En `robots/` (ver `robots/README.md`): dónde busca cada robot y qué guarda.
+`robots/promedio-sfc.mjs` actualiza `tasas_promedio` desde la
+Superfinanciera (`--sin-guardar` para solo verlo). El robot de los PDF de
+los bancos está por hacer.
 
 ## Estructura
 
