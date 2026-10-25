@@ -1,19 +1,35 @@
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { DatePipe, formatDate, NgTemplateOutlet } from '@angular/common';
+import {
+  Component,
+  computed,
+  inject,
+  LOCALE_ID,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { Meta } from '@angular/platform-browser';
+import { DomSanitizer, Meta, SafeResourceUrl } from '@angular/platform-browser';
 import { formatoTasa, TasaPipe } from '../../../compartido/pipes/formato';
 import {
+  DocumentoPdf,
+  EntidadAdmin,
+  FuenteAdmin,
+} from '../../../core/modelos/documento';
+import { Producto } from '../../../core/modelos/tasa';
+import {
   CambiosTasa,
-  ESTADOS_TASA,
-  EstadoTasa,
-  FuenteTasa,
   SistemaTasa,
   TasaAdmin,
   TipoTasa,
   UNIDADES_TASA,
   UnidadTasa,
 } from '../../../core/modelos/tasa-admin';
+import {
+  Direcciones,
+  DocumentoRepetido,
+  DocumentosAdminService,
+} from '../../../core/servicios/documentos-admin.service';
 import {
   mensajeError,
   SesionAdmin,
@@ -22,8 +38,6 @@ import { TasasAdminService } from '../../../core/servicios/tasas-admin.service';
 import { TasasService } from '../../../core/servicios/tasas.service';
 import { efectivaAnualDeMensual } from '../../../core/utilidades/credito';
 import { CabeceraAdmin } from '../cabecera/cabecera-admin';
-
-type Filtro = EstadoTasa | 'todas';
 
 const UNIDAD_TEXTO: Record<UnidadTasa, string> = {
   MV: 'M.V.',
@@ -44,10 +58,30 @@ function escribirDecimal(valor: number | null): string {
   return valor === null ? '' : String(+valor.toFixed(4)).replace('.', ',');
 }
 
+/** Un banco y un producto: lo publicado, lo que espera aprobación y su historia. */
+interface TarjetaTasa {
+  clave: string;
+  entidad: EntidadAdmin;
+  producto: Producto;
+  pdf: FuenteAdmin | null;
+  pagina: FuenteAdmin | null;
+  publicada: TasaAdmin | null;
+  porAprobar: TasaAdmin[];
+  historial: TasaAdmin[];
+  documentos: DocumentoPdf[];
+}
+
+/** Lo que se ve al comparar los dos PDF. */
+interface Comparacion {
+  titulo: string;
+  izquierda: { titulo: string; url: SafeResourceUrl | null } | null;
+  derecha: { titulo: string; url: SafeResourceUrl | null };
+}
+
 /**
- * Configuración de tasas: la lista de lo que el robot (o una persona) sacó de
- * las páginas de las entidades, con su fecha y el enlace a la fuente, para
- * publicarlo, rechazarlo o corregirlo sin entrar a Directus.
+ * Configuración de tasas: por cada banco y producto, la tasa publicada con
+ * su PDF y la que espera aprobación con el suyo, para compararlas (también
+ * los dos PDF lado a lado), corregirla y aprobarla en la misma pantalla.
  */
 @Component({
   selector: 'app-tasas-admin',
@@ -61,45 +95,87 @@ function escribirDecimal(valor: number | null): string {
   templateUrl: './tasas-admin.html',
   styleUrl: './tasas-admin.css',
 })
-export class TasasAdmin implements OnInit {
+export class TasasAdmin implements OnInit, OnDestroy {
   private readonly admin = inject(TasasAdminService);
+  private readonly docs = inject(DocumentosAdminService);
   private readonly sesion = inject(SesionAdmin);
   private readonly tasasPublicas = inject(TasasService);
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly locale = inject(LOCALE_ID);
 
-  protected readonly estados = ESTADOS_TASA;
   protected readonly unidades = UNIDADES_TASA;
   protected readonly productos = this.tasasPublicas.productos;
 
+  protected readonly entidades = signal<EntidadAdmin[]>([]);
+  protected readonly fuentes = signal<FuenteAdmin[]>([]);
+  protected readonly documentos = signal<DocumentoPdf[]>([]);
   protected readonly tasas = signal<TasaAdmin[]>([]);
-  protected readonly fuentes = signal<FuenteTasa[]>([]);
   protected readonly cargando = signal(true);
   protected readonly error = signal('');
-  protected readonly filtro = signal<Filtro>('por_revisar');
+  protected readonly aviso = signal('');
+  protected readonly soloPendientes = signal(false);
   protected readonly producto = signal<string>('todos');
-  /** Id de la tasa que se edita, 'nueva' o null. */
-  protected readonly editando = signal<number | 'nueva' | null>(null);
-  protected readonly ocupado = signal<number | 'nueva' | null>(null);
+  /** Id de la tasa que se edita. */
+  protected readonly editando = signal<number | null>(null);
+  /** Tarjeta con el formulario de cargar PDF o de direcciones abierto. */
+  protected readonly cargandoEn = signal<string | null>(null);
+  protected readonly direccionesEn = signal<string | null>(null);
+  protected readonly ocupado = signal<string | null>(null);
+  protected readonly comparando = signal<Comparacion | null>(null);
+  private enlacesBlob: string[] = [];
+  private archivo: File | null = null;
+  private vigencia = '';
+  protected url = '';
+  protected urlIndice = '';
 
-  protected readonly cuantas = computed(() => {
-    const conteo: Record<Filtro, number> = {
-      por_revisar: 0,
-      publicada: 0,
-      rechazada: 0,
-      todas: this.tasas().length,
-    };
-    for (const t of this.tasas()) conteo[t.estado]++;
-    return conteo;
+  protected readonly tarjetas = computed<TarjetaTasa[]>(() => {
+    const fuentes = this.fuentes();
+    const tasas = this.tasas();
+    const documentos = this.documentos();
+    return this.entidades()
+      .flatMap((entidad) => {
+        const propias = fuentes.filter((f) => f.entidad === entidad.codigo);
+        const productos = new Set<Producto>(propias.map((f) => f.producto));
+        for (const t of tasas) {
+          if (t.entidad.codigo === entidad.codigo) productos.add(t.producto);
+        }
+        if (!productos.size) productos.add('libre-inversion');
+        return [...productos].map((producto) => {
+          const deProducto = propias.filter((f) => f.producto === producto);
+          const pdf = deProducto.find((f) => f.tipo === 'pdf') ?? null;
+          const suyas = tasas.filter(
+            (t) =>
+              t.entidad.codigo === entidad.codigo && t.producto === producto,
+          );
+          return {
+            clave: `${entidad.codigo}:${producto}`,
+            entidad,
+            producto,
+            pdf,
+            pagina: deProducto.find((f) => f.tipo === 'pagina') ?? null,
+            publicada: suyas.find((t) => t.estado === 'publicada') ?? null,
+            porAprobar: suyas.filter((t) => t.estado === 'por_revisar'),
+            historial: suyas.filter(
+              (t) => t.estado === 'anterior' || t.estado === 'rechazada',
+            ),
+            documentos: pdf
+              ? documentos.filter((d) => d.fuente === pdf.id)
+              : [],
+          };
+        });
+      })
+      .filter(
+        (t) =>
+          (this.producto() === 'todos' || t.producto === this.producto()) &&
+          (!this.soloPendientes() || t.porAprobar.length > 0),
+      );
   });
-  protected readonly visibles = computed(() =>
-    this.tasas().filter(
-      (t) =>
-        (this.filtro() === 'todas' || t.estado === this.filtro()) &&
-        (this.producto() === 'todos' || t.producto === this.producto()),
-    ),
+  protected readonly pendientes = computed(
+    () => this.tasas().filter((t) => t.estado === 'por_revisar').length,
   );
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
-    fuente: [''],
+    documento: [''],
     valor_desde: [''],
     valor_hasta: [''],
     unidad: ['MV' as UnidadTasa | ''],
@@ -117,24 +193,26 @@ export class TasasAdmin implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    await this.cargar();
-  }
-
-  protected async cargar(): Promise<void> {
-    this.cargando.set(true);
-    this.error.set('');
     try {
-      const [tasas, fuentes] = await Promise.all([
+      const [entidades, fuentes, documentos, tasas] = await Promise.all([
+        this.docs.entidades(),
+        this.docs.fuentes(),
+        this.docs.documentos(),
         this.admin.listar(),
-        this.admin.fuentes(),
       ]);
-      this.tasas.set(tasas);
+      this.entidades.set(entidades);
       this.fuentes.set(fuentes);
+      this.documentos.set(documentos);
+      this.tasas.set(tasas);
     } catch (error) {
       this.error.set(mensajeError(error));
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.soltarBlobs();
   }
 
   protected nombreProducto(id: string): string {
@@ -143,42 +221,29 @@ export class TasasAdmin implements OnInit {
       : id;
   }
 
+  protected logo(entidad: EntidadAdmin): string | null {
+    return this.sesion.urlImagen(entidad.logo, 56);
+  }
+
+  protected urlArchivo(id: string): string | null {
+    return this.sesion.urlArchivo(id);
+  }
+
   /** "1,30 % a 2,13 % M.V." o "desde 1,10 % N.M.V." */
   protected publica(t: TasaAdmin): string {
-    if (t.valor_desde === null) return '—';
+    if (t.valor_desde === null) return 'Sin escribir';
     const unidad = t.unidad ? ' ' + UNIDAD_TEXTO[t.unidad] : '';
     return t.valor_hasta === null
       ? `desde ${formatoTasa(t.valor_desde)}${unidad}`
       : `${formatoTasa(t.valor_desde)} a ${formatoTasa(t.valor_hasta)}${unidad}`;
   }
 
-  /** Logo de la entidad al doble del alto en que se muestra (pantallas retina). */
-  protected logo(t: TasaAdmin): string | null {
-    return this.sesion.urlImagen(t.entidad.logo, 56);
-  }
-
-  /** Enlace a la copia guardada en Directus. */
-  protected copia(t: TasaAdmin): string | null {
-    return t.captura ? this.sesion.urlArchivo(t.captura.id) : null;
-  }
-
-  protected async subirCopia(t: TasaAdmin, evento: Event): Promise<void> {
-    const campo = evento.target as HTMLInputElement;
-    const archivo = campo.files?.[0];
-    campo.value = '';
-    if (!archivo) return;
-    await this.trabajar(t.id, async () => {
-      this.reemplazar(await this.admin.subirCaptura(t.id, archivo));
-    });
-  }
-
-  /** "bbva.com.co" para mostrar de dónde es el enlace. */
-  protected sitio(url: string): string {
-    try {
-      return new URL(url).hostname.replace(/^www\./, '');
-    } catch {
-      return url;
-    }
+  /** Cambio frente a la publicada: "▲ +0,03 pts", "▼ −1,20 pts" o "". */
+  protected cambio(nueva: number | null, antes: number | null | undefined) {
+    if (nueva === null || antes === null || antes === undefined) return '';
+    const dif = +(nueva - antes).toFixed(2);
+    if (dif === 0) return 'igual';
+    return `${dif > 0 ? '▲ +' : '▼ −'}${formatoTasa(Math.abs(dif)).replace(' %', '')} pts`;
   }
 
   protected revisor(t: TasaAdmin): string {
@@ -186,18 +251,58 @@ export class TasasAdmin implements OnInit {
     return p ? [p.first_name, p.last_name].filter(Boolean).join(' ') : '';
   }
 
-  protected async cambiarEstado(
-    t: TasaAdmin,
-    estado: EstadoTasa,
-  ): Promise<void> {
-    await this.trabajar(t.id, async () => {
-      this.reemplazar(await this.admin.cambiarEstado(t.id, estado));
+  protected quienCargo(d: DocumentoPdf | undefined): string {
+    if (!d) return '';
+    if (d.origen === 'robot') return 'el robot';
+    const u = d.user_created;
+    return u ? [u.first_name, u.last_name].filter(Boolean).join(' ') : '';
+  }
+
+  protected documentoDe(t: TasaAdmin): DocumentoPdf | undefined {
+    return this.documentos().find((d) => d.id === t.documento?.id);
+  }
+
+  // Aprobar, rechazar y editar
+
+  protected async aprobar(c: TarjetaTasa, t: TasaAdmin): Promise<void> {
+    await this.trabajar(c.clave, async () => {
+      const aprobada = await this.admin.aprobar(t, c.publicada, c.documentos);
+      const antes = c.publicada?.id;
+      const pdf = t.documento?.id;
+      this.tasas.update((lista) =>
+        lista.map((x) =>
+          x.id === aprobada.id
+            ? aprobada
+            : x.id === antes
+              ? { ...x, estado: 'anterior' }
+              : x,
+        ),
+      );
+      if (pdf) {
+        this.documentos.update((lista) =>
+          lista.map((d) =>
+            d.id === pdf
+              ? { ...d, estado: 'actual' }
+              : d.fuente === c.pdf?.id && d.estado === 'actual'
+                ? { ...d, estado: 'anterior' }
+                : d,
+          ),
+        );
+      }
+      this.aviso.set(`Tasa de ${c.entidad.nombre} aprobada y publicada.`);
+    });
+  }
+
+  protected async rechazar(c: TarjetaTasa, t: TasaAdmin): Promise<void> {
+    await this.trabajar(c.clave, async () => {
+      this.reemplazar(await this.admin.cambiarEstado(t.id, 'rechazada'));
+      this.aviso.set(`Tasa de ${c.entidad.nombre} rechazada.`);
     });
   }
 
   protected editar(t: TasaAdmin): void {
     this.form.reset({
-      fuente: '',
+      documento: t.documento ? String(t.documento.id) : '',
       valor_desde: escribirDecimal(t.valor_desde),
       valor_hasta: escribirDecimal(t.valor_hasta),
       unidad: t.unidad ?? '',
@@ -210,16 +315,6 @@ export class TasasAdmin implements OnInit {
       notas: t.notas ?? '',
     });
     this.editando.set(t.id);
-  }
-
-  protected nueva(): void {
-    this.form.reset();
-    this.form.controls.fuente.setValue(String(this.fuentes()[0]?.id ?? ''));
-    this.editando.set('nueva');
-  }
-
-  protected cancelar(): void {
-    this.editando.set(null);
   }
 
   /** Con la tasa mensual escrita, llena la E.A. */
@@ -237,11 +332,10 @@ export class TasasAdmin implements OnInit {
     });
   }
 
-  protected async guardar(): Promise<void> {
-    const id = this.editando();
-    if (id === null) return;
+  protected async guardar(c: TarjetaTasa, id: number): Promise<void> {
     const v = this.form.getRawValue();
     const cambios: CambiosTasa = {
+      documento: v.documento ? Number(v.documento) : null,
       valor_desde: leerDecimal(v.valor_desde),
       valor_hasta: leerDecimal(v.valor_hasta),
       unidad: v.unidad || null,
@@ -253,18 +347,165 @@ export class TasasAdmin implements OnInit {
       frase: v.frase.trim() || null,
       notas: v.notas.trim() || null,
     };
-    await this.trabajar(id, async () => {
-      if (id === 'nueva') {
-        const fuente = this.fuentes().find((f) => String(f.id) === v.fuente);
-        if (!fuente) throw new Error('Elige la fuente');
-        const tasa = await this.admin.crear(fuente, cambios);
-        this.tasas.update((lista) => [tasa, ...lista]);
-        this.filtro.set('por_revisar');
-      } else {
-        this.reemplazar(await this.admin.guardar(id, cambios));
-      }
+    await this.trabajar(c.clave, async () => {
+      this.reemplazar(await this.admin.guardar(id, cambios));
       this.editando.set(null);
     });
+  }
+
+  // Cargar un PDF nuevo
+
+  protected abrirCarga(c: TarjetaTasa): void {
+    this.archivo = null;
+    this.vigencia = '';
+    this.cargandoEn.set(c.clave);
+  }
+
+  protected elegirArchivo(evento: Event): void {
+    this.archivo = (evento.target as HTMLInputElement).files?.[0] ?? null;
+  }
+
+  protected escribirVigencia(evento: Event): void {
+    this.vigencia = (evento.target as HTMLInputElement).value;
+  }
+
+  /** Sube el PDF y crea la tasa por aprobar unida a él, lista para llenar. */
+  protected async cargarPdf(c: TarjetaTasa): Promise<void> {
+    const pdf = c.pdf;
+    if (!pdf) return;
+    if (!this.archivo) {
+      this.error.set('Elige el PDF que quieres cargar.');
+      return;
+    }
+    const archivo = this.archivo;
+    await this.trabajar(c.clave, async () => {
+      try {
+        const documento = await this.docs.cargar(
+          pdf.id,
+          archivo,
+          this.vigencia || null,
+        );
+        this.documentos.update((lista) => [documento, ...lista]);
+        const tasa = await this.admin.crearDesdeDocumento(pdf, documento);
+        this.tasas.update((lista) => [tasa, ...lista]);
+        this.cargandoEn.set(null);
+        this.editar(tasa);
+        this.aviso.set(
+          `PDF de ${c.entidad.nombre} cargado. Escribe las tasas que trae y apruébalas.`,
+        );
+      } catch (error) {
+        if (!(error instanceof DocumentoRepetido)) throw error;
+        this.error.set('Ese PDF ya está guardado. No se cargó de nuevo.');
+      }
+    });
+  }
+
+  // Comparar los dos PDF lado a lado
+
+  protected async comparar(c: TarjetaTasa, t: TasaAdmin): Promise<void> {
+    const nuevo = t.documento;
+    if (!nuevo) return;
+    const actual =
+      c.publicada?.documento ??
+      c.documentos.find((d) => d.estado === 'actual') ??
+      null;
+    await this.trabajar(c.clave, async () => {
+      const [der, izq] = await Promise.all([
+        this.enlaceBlob(nuevo.archivo.id),
+        actual && actual.id !== nuevo.id
+          ? this.enlaceBlob(actual.archivo.id)
+          : Promise.resolve(null),
+      ]);
+      const vigencia = (v: string | null | undefined) =>
+        v
+          ? `vigente desde ${formatDate(v, 'd MMM y', this.locale, 'UTC')}`
+          : 'sin vigencia';
+      this.comparando.set({
+        titulo: `${c.entidad.nombre} · ${this.nombreProducto(c.producto)}`,
+        izquierda:
+          actual && izq
+            ? {
+                titulo: `PDF actual · ${vigencia(actual.vigente_desde)}`,
+                url: izq,
+              }
+            : null,
+        derecha: {
+          titulo: `Por aprobar · ${vigencia(nuevo.vigente_desde)}`,
+          url: der,
+        },
+      });
+    });
+  }
+
+  protected cerrarComparacion(): void {
+    this.comparando.set(null);
+    this.soltarBlobs();
+  }
+
+  private async enlaceBlob(id: string): Promise<SafeResourceUrl> {
+    const blob = await this.sesion.descargar(id);
+    const url = URL.createObjectURL(
+      blob.type ? blob : new Blob([blob], { type: 'application/pdf' }),
+    );
+    this.enlacesBlob.push(url);
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  private soltarBlobs(): void {
+    for (const url of this.enlacesBlob) URL.revokeObjectURL(url);
+    this.enlacesBlob = [];
+  }
+
+  // Direcciones del banco
+
+  protected escribir(campo: 'url' | 'urlIndice', evento: Event): void {
+    this[campo] = (evento.target as HTMLInputElement).value;
+  }
+
+  protected abrirDirecciones(c: TarjetaTasa): void {
+    this.url = c.pdf?.url ?? '';
+    this.urlIndice = c.pdf?.url_indice ?? '';
+    this.direccionesEn.set(c.clave);
+  }
+
+  protected async guardarDirecciones(c: TarjetaTasa): Promise<void> {
+    const direcciones = this.direcciones();
+    if (!direcciones) return;
+    const pdf = c.pdf;
+    await this.trabajar(c.clave, async () => {
+      const fuente = pdf
+        ? await this.docs.editarFuente(pdf.id, direcciones)
+        : await this.docs.agregarFuente(
+            c.entidad.codigo,
+            c.producto,
+            direcciones,
+          );
+      this.fuentes.update((lista) =>
+        pdf
+          ? lista.map((f) => (f.id === fuente.id ? fuente : f))
+          : [...lista, fuente],
+      );
+      this.direccionesEn.set(null);
+      this.aviso.set(`Direcciones de ${c.entidad.nombre} guardadas.`);
+    });
+  }
+
+  /** Revisa las dos direcciones; null si alguna no sirve (y lo avisa). */
+  private direcciones(): Direcciones | null {
+    const url = this.url.trim();
+    const indice = this.urlIndice.trim();
+    const valida = (u: string) => /^https?:\/\/\S+$/.test(u);
+    if (!valida(url)) {
+      this.error.set('Escribe la dirección directa del PDF (https://…).');
+      return null;
+    }
+    if (indice && !valida(indice)) {
+      this.error.set(
+        'La página de tasas y tarifas debe ser una dirección completa (https://…).',
+      );
+      return null;
+    }
+    return { url, url_indice: indice || null };
   }
 
   private reemplazar(tasa: TasaAdmin): void {
@@ -273,12 +514,10 @@ export class TasasAdmin implements OnInit {
     );
   }
 
-  private async trabajar(
-    id: number | 'nueva',
-    tarea: () => Promise<void>,
-  ): Promise<void> {
-    this.ocupado.set(id);
+  private async trabajar(clave: string, tarea: () => Promise<void>) {
+    this.ocupado.set(clave);
     this.error.set('');
+    this.aviso.set('');
     try {
       await tarea();
     } catch (error) {

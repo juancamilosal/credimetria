@@ -63,13 +63,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./paginas/admin/tasas/tasas-admin').then((m) => m.TasasAdmin),
   },
-  {
-    path: 'admin/pdf',
-    title: 'PDF de tasas · Credimetría',
-    canActivate: [soloAdmin],
-    loadComponent: () =>
-      import('./paginas/admin/pdf/pdf-tasas').then((m) => m.PdfTasas),
-  },
+  { path: 'admin/pdf', redirectTo: 'admin/tasas' },
   { path: 'admin', redirectTo: 'admin/tasas' },
   { path: '**', redirectTo: '' },
 ];

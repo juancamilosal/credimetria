@@ -1,11 +1,10 @@
 import { Component, inject, input } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router } from '@angular/router';
 import { SesionAdmin } from '../../../core/servicios/sesion-admin.service';
 
-/** Cabecera de la administración: título, pestañas y la cuenta con "Salir". */
+/** Cabecera de la administración: título y la cuenta con "Salir". */
 @Component({
   selector: 'app-cabecera-admin',
-  imports: [RouterLink, RouterLinkActive],
   template: `
     <section class="cabecera">
       <div class="wrap cabeza">
@@ -22,26 +21,9 @@ import { SesionAdmin } from '../../../core/servicios/sesion-admin.service';
           </div>
         }
       </div>
-      <nav class="wrap pestanas" aria-label="Administración">
-        <a
-          routerLink="/admin/tasas"
-          routerLinkActive="activa"
-          ariaCurrentWhenActive="page"
-          >Tasas</a
-        >
-        <a
-          routerLink="/admin/pdf"
-          routerLinkActive="activa"
-          ariaCurrentWhenActive="page"
-          >PDF de tasas</a
-        >
-      </nav>
     </section>
   `,
   styles: `
-    .cabecera {
-      padding-bottom: 0;
-    }
     .cabeza {
       display: flex;
       justify-content: space-between;
@@ -53,25 +35,6 @@ import { SesionAdmin } from '../../../core/servicios/sesion-admin.service';
       display: flex;
       align-items: center;
       gap: 12px;
-    }
-    .pestanas {
-      display: flex;
-      gap: 4px;
-      margin-top: 20px;
-    }
-    .pestanas a {
-      padding: 12px 16px;
-      font-weight: 700;
-      color: var(--cm-gris);
-      text-decoration: none;
-      border-bottom: 3px solid transparent;
-    }
-    .pestanas a:hover {
-      color: var(--cm-tinta);
-    }
-    .pestanas a.activa {
-      color: var(--cm-marca-700);
-      border-bottom-color: var(--cm-marca-700);
     }
   `,
 })

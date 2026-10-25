@@ -139,6 +139,28 @@ export class SesionAdmin {
     return `${this.base}/assets/${id}?access_token=${encodeURIComponent(this.acceso)}`;
   }
 
+  /** Baja un archivo de Directus (para mostrar un PDF dentro de la página). */
+  async descargar(id: string): Promise<Blob> {
+    const bajar = () =>
+      firstValueFrom(
+        this.http.get(`${this.base}/assets/${id}`, {
+          responseType: 'blob',
+          headers: this.acceso
+            ? { Authorization: `Bearer ${this.acceso}` }
+            : {},
+        }),
+      );
+    try {
+      return await bajar();
+    } catch (error) {
+      if (!(error instanceof HttpErrorResponse) || error.status !== 401) {
+        throw error;
+      }
+      await this.renovar();
+      return bajar();
+    }
+  }
+
   /** Llama a Directus con el token; si venció, lo renueva una vez y reintenta. */
   async pedir<T>(
     metodo: 'GET' | 'POST' | 'PATCH' | 'DELETE',

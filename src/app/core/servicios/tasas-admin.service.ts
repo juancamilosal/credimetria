@@ -1,10 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import {
-  CambiosTasa,
-  EstadoTasa,
-  FuenteTasa,
-  TasaAdmin,
-} from '../modelos/tasa-admin';
+import { DocumentoPdf } from '../modelos/documento';
+import { CambiosTasa, EstadoTasa, TasaAdmin } from '../modelos/tasa-admin';
 import { SesionAdmin } from './sesion-admin.service';
 
 const CAMPOS_TASA = [
@@ -34,6 +30,11 @@ const CAMPOS_TASA = [
   'revisada_por.last_name',
   'captura.id',
   'captura.type',
+  'documento.id',
+  'documento.estado',
+  'documento.vigente_desde',
+  'documento.archivo.id',
+  'documento.archivo.filename_download',
 ].join(',');
 
 const DECIMALES = [
@@ -66,14 +67,6 @@ export class TasasAdminService {
     return tasas.map(leerTasa);
   }
 
-  fuentes(): Promise<FuenteTasa[]> {
-    return this.sesion.pedir<FuenteTasa[]>(
-      'GET',
-      '/items/fuentes?fields=id,producto,tipo,url,url_indice,' +
-        'entidad.codigo,entidad.nombre&sort=entidad,producto&limit=-1',
-    );
-  }
-
   /** Publica o rechaza, y deja dicho quién y cuándo. */
   async cambiarEstado(id: number, estado: EstadoTasa): Promise<TasaAdmin> {
     return this.escribir('PATCH', `/items/tasas_publicadas/${id}`, {
@@ -87,28 +80,53 @@ export class TasasAdminService {
     return this.escribir('PATCH', `/items/tasas_publicadas/${id}`, cambios);
   }
 
-  /** Guarda en Directus la copia del PDF (o una imagen) y la une a la tasa. */
-  async subirCaptura(id: number, archivo: File): Promise<TasaAdmin> {
-    const datos = new FormData();
-    datos.append('title', archivo.name);
-    datos.append('file', archivo, archivo.name);
-    const subido = await this.sesion.pedir<{ id: string }>(
-      'POST',
-      '/files',
-      datos,
-    );
-    return this.escribir('PATCH', `/items/tasas_publicadas/${id}`, {
-      captura: subido.id,
-    });
+  /**
+   * Aprueba una tasa: queda publicada y su PDF pasa a actual. La tasa que
+   * estaba publicada y el PDF que era actual pasan a anteriores; nada se
+   * borra.
+   */
+  async aprobar(
+    nueva: TasaAdmin,
+    publicada: TasaAdmin | null,
+    documentosFuente: DocumentoPdf[],
+  ): Promise<TasaAdmin> {
+    if (publicada) {
+      await this.sesion.pedir(
+        'PATCH',
+        `/items/tasas_publicadas/${publicada.id}`,
+        {
+          estado: 'anterior',
+        },
+      );
+    }
+    const pdf = nueva.documento?.id;
+    if (pdf) {
+      for (const d of documentosFuente) {
+        if (d.estado === 'actual' && d.id !== pdf) {
+          await this.sesion.pedir('PATCH', `/items/documentos/${d.id}`, {
+            estado: 'anterior',
+          });
+        }
+      }
+      await this.sesion.pedir('PATCH', `/items/documentos/${pdf}`, {
+        estado: 'actual',
+      });
+    }
+    return this.cambiarEstado(nueva.id, 'publicada');
   }
 
-  /** Tasa escrita a mano; queda por revisar como las del robot. */
-  crear(fuente: FuenteTasa, datos: CambiosTasa): Promise<TasaAdmin> {
+  /** Tasa por aprobar unida a un PDF recién cargado; los valores se llenan después. */
+  crearDesdeDocumento(
+    fuente: { id: number; entidad: string; producto: string },
+    documento: DocumentoPdf,
+  ): Promise<TasaAdmin> {
     return this.escribir('POST', '/items/tasas_publicadas', {
-      ...datos,
       fuente: fuente.id,
-      entidad: fuente.entidad.codigo,
+      entidad: fuente.entidad,
       producto: fuente.producto,
+      documento: documento.id,
+      vigente_desde: documento.vigente_desde,
+      unidad: 'MV',
       estado: 'por_revisar',
     });
   }

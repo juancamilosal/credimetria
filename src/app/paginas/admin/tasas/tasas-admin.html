@@ -1,28 +1,26 @@
 <app-cabecera-admin
   titulo="Configuración de tasas"
-  texto="Revisa lo que publican las entidades, con la fecha y el enlace de la fuente. Solo las tasas publicadas salen en la página."
+  texto="Cada banco con la tasa publicada y su PDF, y la que espera aprobación con el suyo. Compáralas, corrígelas y apruébalas aquí."
 />
 
 <div class="wrap contenido">
   <div class="barra">
-    <div class="filtros" role="group" aria-label="Estado">
-      @for (e of estados; track e.id) {
-        <button
-          type="button"
-          class="filtro"
-          [attr.aria-pressed]="filtro() === e.id"
-          (click)="filtro.set(e.id)"
-        >
-          {{ e.texto }} <span class="cuenta-num">{{ cuantas()[e.id] }}</span>
-        </button>
-      }
+    <div class="filtros" role="group" aria-label="Mostrar">
       <button
         type="button"
         class="filtro"
-        [attr.aria-pressed]="filtro() === 'todas'"
-        (click)="filtro.set('todas')"
+        [attr.aria-pressed]="!soloPendientes()"
+        (click)="soloPendientes.set(false)"
       >
-        Todas <span class="cuenta-num">{{ cuantas().todas }}</span>
+        Todos los bancos
+      </button>
+      <button
+        type="button"
+        class="filtro"
+        [attr.aria-pressed]="soloPendientes()"
+        (click)="soloPendientes.set(true)"
+      >
+        Por aprobar <span class="cuenta-num">{{ pendientes() }}</span>
       </button>
     </div>
     <div class="campo producto">
@@ -38,107 +36,36 @@
         }
       </select>
     </div>
-    <button
-      type="button"
-      class="btn btn-principal"
-      (click)="nueva()"
-      [disabled]="!fuentes().length || editando() === 'nueva'"
-    >
-      Nueva tasa
-    </button>
   </div>
 
   @if (error()) {
     <p class="aviso-error" role="alert">{{ error() }}</p>
   }
-
-  @if (editando() === "nueva") {
-    <section class="tarjeta editor" aria-label="Nueva tasa">
-      <h2>Nueva tasa</h2>
-      <ng-container *ngTemplateOutlet="formulario" />
-    </section>
+  @if (aviso()) {
+    <p class="aviso-ok" role="status">{{ aviso() }}</p>
   }
 
   @if (cargando()) {
     <p class="muted">Cargando tasas…</p>
   } @else {
     <ul class="lista">
-      @for (t of visibles(); track t.id) {
-        <li class="tarjeta tasa" [attr.data-estado]="t.estado">
-          <div class="tasa-cabeza">
+      @for (c of tarjetas(); track c.clave) {
+        <li class="tarjeta banco" [class.pendiente]="c.porAprobar.length">
+          <div class="banco-cabeza">
             <div class="marca">
-              @if (logo(t); as url) {
-                <span class="logo">
-                  <img [src]="url" alt="" height="28" loading="lazy" />
-                </span>
+              @if (logo(c.entidad); as url) {
+                <span class="logo"><img [src]="url" alt="" height="28" /></span>
               }
               <div>
-                <h2>{{ t.entidad.nombre }}</h2>
-                <span class="nota">{{ nombreProducto(t.producto) }}</span>
+                <h2>{{ c.entidad.nombre }}</h2>
+                <span class="nota">{{ nombreProducto(c.producto) }}</span>
               </div>
             </div>
-            @switch (t.estado) {
-              @case ("publicada") {
-                <span class="etq etq-ahorro">Publicada</span>
-              }
-              @case ("rechazada") {
-                <span class="etq etq-error">Rechazada</span>
-              }
-              @default {
-                <span class="etq etq-aviso">Por revisar</span>
-              }
-            }
-          </div>
-
-          @if (editando() === t.id) {
-            <ng-container *ngTemplateOutlet="formulario" />
-          } @else {
-            <dl class="datos">
-              <div>
-                <dt>Publica</dt>
-                <dd class="cifra">{{ publica(t) }}</dd>
-              </div>
-              <div>
-                <dt>Efectiva anual</dt>
-                <dd class="cifra">
-                  {{ t.ea_desde | tasa }}
-                  @if (t.ea_hasta !== null) {
-                    a {{ t.ea_hasta | tasa }}
-                  }
-                </dd>
-              </div>
-              <div>
-                <dt>Vigente desde</dt>
-                <dd>
-                  {{
-                    t.vigente_desde
-                      ? (t.vigente_desde | date: "d MMM y" : "UTC")
-                      : "No lo dice"
-                  }}
-                </dd>
-              </div>
-              <div>
-                <dt>Capturada</dt>
-                <dd>{{ t.capturada | date: "d MMM y, h:mm a" }}</dd>
-              </div>
-            </dl>
-
-            @if (t.fuente; as f) {
-              <p class="fuente">
-                <span class="etq etq-marca">{{
-                  f.tipo === "pdf" ? "PDF" : "Página"
-                }}</span>
+            <div class="enlaces">
+              @if (c.pdf; as f) {
                 <a [href]="f.url" target="_blank" rel="noopener noreferrer"
-                  >Abrir fuente en {{ sitio(f.url) }} ↗</a
+                  >PDF en el banco ↗</a
                 >
-                @if (copia(t); as url) {
-                  <a [href]="url" target="_blank" rel="noopener noreferrer"
-                    >Copia guardada{{
-                      t.captura?.type === "application/pdf" ? " (PDF)" : ""
-                    }}
-                    ↗</a
-                  >
-                }
                 @if (f.url_indice) {
                   <a
                     [href]="f.url_indice"
@@ -147,97 +74,400 @@
                     >Tasas y tarifas ↗</a
                   >
                 }
-              </p>
-            }
-
-            @if (t.frase) {
-              <blockquote>“{{ t.frase }}”</blockquote>
-            }
-            @if (t.notas) {
-              <p class="nota notas">{{ t.notas }}</p>
-            }
-            @if (t.revisada_en) {
-              <p class="nota">
-                {{ t.estado === "rechazada" ? "Rechazada" : "Revisada" }}
-                por {{ revisor(t) || "—" }} el
-                {{ t.revisada_en | date: "d MMM y, h:mm a" }}
-              </p>
-            }
-
-            <div class="acciones">
-              @if (t.estado !== "publicada") {
-                <button
-                  type="button"
-                  class="btn btn-principal"
-                  [disabled]="ocupado() === t.id"
-                  (click)="cambiarEstado(t, 'publicada')"
-                >
-                  Publicar
-                </button>
               }
-              @if (t.estado !== "rechazada") {
-                <button
-                  type="button"
-                  class="btn btn-borde"
-                  [disabled]="ocupado() === t.id"
-                  (click)="cambiarEstado(t, 'rechazada')"
+              @if (c.pagina; as p) {
+                <a [href]="p.url" target="_blank" rel="noopener noreferrer"
+                  >Página del producto ↗</a
                 >
-                  Rechazar
-                </button>
-              }
-              @if (t.estado !== "por_revisar") {
-                <button
-                  type="button"
-                  class="btn btn-borde"
-                  [disabled]="ocupado() === t.id"
-                  (click)="cambiarEstado(t, 'por_revisar')"
-                >
-                  Volver a revisar
-                </button>
               }
               <button
                 type="button"
-                class="btn btn-claro"
-                [disabled]="ocupado() === t.id"
-                (click)="editar(t)"
+                class="enlace-boton"
+                (click)="abrirDirecciones(c)"
               >
-                Editar
+                {{ c.pdf ? "Editar direcciones" : "Agregar dirección del PDF" }}
               </button>
-              <label class="btn btn-claro subir">
-                {{ t.captura ? "Cambiar copia" : "Subir copia del PDF" }}
-                <input
-                  type="file"
-                  accept="application/pdf,image/*"
-                  class="visualmente-oculto"
-                  [disabled]="ocupado() === t.id"
-                  (change)="subirCopia(t, $event)"
-                />
-              </label>
             </div>
+          </div>
+
+          @if (direccionesEn() === c.clave) {
+            <div class="direcciones">
+              <div class="campos-direccion">
+                <div class="campo">
+                  <label [for]="'url-' + c.clave"
+                    >Dirección directa del PDF</label
+                  >
+                  <input
+                    [id]="'url-' + c.clave"
+                    type="url"
+                    placeholder="https://…/tasas-octubre-2026.pdf"
+                    [value]="url"
+                    (input)="escribir('url', $event)"
+                  />
+                  <span class="nota"
+                    >La que abre el PDF, no la página que lo enlaza.</span
+                  >
+                </div>
+                <div class="campo">
+                  <label [for]="'indice-' + c.clave"
+                    >Página de tasas y tarifas (opcional)</label
+                  >
+                  <input
+                    [id]="'indice-' + c.clave"
+                    type="url"
+                    placeholder="https://…/tasas-y-tarifas"
+                    [value]="urlIndice"
+                    (input)="escribir('urlIndice', $event)"
+                  />
+                  <span class="nota"
+                    >Donde el banco publica el PDF de cada mes.</span
+                  >
+                </div>
+              </div>
+              <div class="acciones">
+                <button
+                  type="button"
+                  class="btn btn-principal"
+                  [disabled]="ocupado() === c.clave"
+                  (click)="guardarDirecciones(c)"
+                >
+                  Guardar direcciones
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-borde"
+                  (click)="direccionesEn.set(null)"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
+
+          <div class="columnas">
+            <section class="columna" aria-label="Publicada hoy">
+              <h3>Publicada hoy</h3>
+              @if (c.publicada; as p) {
+                <ng-container
+                  *ngTemplateOutlet="
+                    bloque;
+                    context: { $implicit: p, base: null }
+                  "
+                />
+              } @else {
+                <p class="vacio">Todavía no hay una tasa publicada.</p>
+              }
+            </section>
+
+            <section class="columna nueva" aria-label="Por aprobar">
+              <h3>Por aprobar</h3>
+              @for (t of c.porAprobar; track t.id) {
+                @if (editando() === t.id) {
+                  <ng-container
+                    *ngTemplateOutlet="
+                      formulario;
+                      context: { $implicit: c, id: t.id }
+                    "
+                  />
+                } @else {
+                  <ng-container
+                    *ngTemplateOutlet="
+                      bloque;
+                      context: { $implicit: t, base: c.publicada }
+                    "
+                  />
+                  <div class="acciones">
+                    <button
+                      type="button"
+                      class="btn btn-principal"
+                      [disabled]="
+                        ocupado() === c.clave || t.valor_desde === null
+                      "
+                      (click)="aprobar(c, t)"
+                    >
+                      Aprobar
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-borde"
+                      [disabled]="ocupado() === c.clave"
+                      (click)="rechazar(c, t)"
+                    >
+                      Rechazar
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-claro"
+                      [disabled]="ocupado() === c.clave"
+                      (click)="editar(t)"
+                    >
+                      Editar
+                    </button>
+                    @if (t.documento) {
+                      <button
+                        type="button"
+                        class="btn btn-claro"
+                        [disabled]="ocupado() === c.clave"
+                        (click)="comparar(c, t)"
+                      >
+                        Comparar PDF
+                      </button>
+                    }
+                  </div>
+                }
+              } @empty {
+                <p class="vacio">Nada por aprobar.</p>
+              }
+
+              @if (!c.pdf) {
+                <p class="nota">
+                  Para cargar el PDF, primero agrega su dirección.
+                </p>
+              } @else if (cargandoEn() === c.clave) {
+                <form
+                  class="carga"
+                  (submit)="$event.preventDefault(); cargarPdf(c)"
+                >
+                  <div class="campo">
+                    <label [for]="'pdf-' + c.clave">PDF nuevo</label>
+                    <input
+                      [id]="'pdf-' + c.clave"
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      (change)="elegirArchivo($event)"
+                    />
+                  </div>
+                  <div class="campo">
+                    <label [for]="'vig-' + c.clave">Vigente desde</label>
+                    <input
+                      [id]="'vig-' + c.clave"
+                      type="date"
+                      (input)="escribirVigencia($event)"
+                    />
+                  </div>
+                  <div class="acciones">
+                    <button
+                      type="submit"
+                      class="btn btn-principal"
+                      [disabled]="ocupado() === c.clave"
+                    >
+                      {{ ocupado() === c.clave ? "Cargando…" : "Cargar" }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-borde"
+                      (click)="cargandoEn.set(null)"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              } @else {
+                <button
+                  type="button"
+                  class="btn btn-claro cargar"
+                  (click)="abrirCarga(c)"
+                >
+                  Cargar PDF nuevo
+                </button>
+              }
+            </section>
+          </div>
+
+          @if (c.historial.length) {
+            <details class="historial">
+              <summary>Ver anteriores ({{ c.historial.length }})</summary>
+              <ul>
+                @for (t of c.historial; track t.id) {
+                  <li>
+                    <span
+                      class="etq"
+                      [class.etq-error]="t.estado === 'rechazada'"
+                      [class.etq-marca]="t.estado === 'anterior'"
+                      >{{
+                        t.estado === "rechazada" ? "Rechazada" : "Anterior"
+                      }}</span
+                    >
+                    <span class="cifra">{{ publica(t) }}</span>
+                    @if (t.vigente_desde) {
+                      <span class="nota"
+                        >vigente desde
+                        {{ t.vigente_desde | date: "d MMM y" : "UTC" }}</span
+                      >
+                    }
+                    @if (t.documento; as d) {
+                      @if (urlArchivo(d.archivo.id); as url) {
+                        <a
+                          [href]="url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          >PDF ↗</a
+                        >
+                      }
+                    }
+                  </li>
+                }
+              </ul>
+            </details>
           }
         </li>
       } @empty {
-        <li class="muted vacio">No hay tasas en esta lista.</li>
+        <li class="muted vacio">No hay bancos en esta lista.</li>
       }
     </ul>
   }
 </div>
 
-<ng-template #formulario>
-  <form class="formulario" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
-    @if (editando() === "nueva") {
-      <div class="campo ancho">
-        <label for="tfFuente">Fuente</label>
-        <select id="tfFuente" formControlName="fuente">
-          @for (f of fuentes(); track f.id) {
-            <option [value]="f.id">
-              {{ f.entidad.nombre }} · {{ nombreProducto(f.producto) }} ·
-              {{ f.tipo === "pdf" ? "PDF" : "Página" }} ({{ sitio(f.url) }})
-            </option>
+@if (comparando(); as cmp) {
+  <div
+    class="comparar"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tituloComparar"
+    (keydown.escape)="cerrarComparacion()"
+  >
+    <div class="comparar-cabeza">
+      <h2 id="tituloComparar">Comparar PDF · {{ cmp.titulo }}</h2>
+      <button
+        type="button"
+        class="btn btn-borde"
+        (click)="cerrarComparacion()"
+        autofocus
+      >
+        Cerrar
+      </button>
+    </div>
+    <div class="comparar-pdfs">
+      <section>
+        <h3>{{ cmp.izquierda?.titulo ?? "PDF actual" }}</h3>
+        @if (cmp.izquierda?.url; as url) {
+          <iframe [src]="url" title="PDF actual"></iframe>
+        } @else {
+          <p class="vacio">Todavía no hay un PDF actual para comparar.</p>
+        }
+      </section>
+      <section>
+        <h3>{{ cmp.derecha.titulo }}</h3>
+        @if (cmp.derecha.url; as url) {
+          <iframe [src]="url" title="PDF por aprobar"></iframe>
+        }
+      </section>
+    </div>
+  </div>
+}
+
+<ng-template #bloque let-t let-base="base">
+  <dl class="datos">
+    <div>
+      <dt>Publica</dt>
+      <dd class="cifra">{{ publica(t) }}</dd>
+    </div>
+    <div>
+      <dt>Efectiva anual</dt>
+      <dd class="cifra">
+        {{ t.ea_desde | tasa }}
+        @if (t.ea_hasta !== null) {
+          a {{ t.ea_hasta | tasa }}
+        }
+      </dd>
+      @if (base) {
+        <dd class="cambios">
+          @if (cambio(t.ea_desde, base.ea_desde); as d) {
+            <span>mín. {{ d }}</span>
           }
-        </select>
+          @if (cambio(t.ea_hasta, base.ea_hasta); as d) {
+            <span>máx. {{ d }}</span>
+          }
+        </dd>
+      }
+    </div>
+    <div>
+      <dt>Vigente desde</dt>
+      <dd>
+        {{
+          t.vigente_desde
+            ? (t.vigente_desde | date: "d MMM y" : "UTC")
+            : "No lo dice"
+        }}
+      </dd>
+    </div>
+  </dl>
+
+  @if (t.documento; as d) {
+    <div class="doc">
+      <span class="doc-icono" aria-hidden="true">PDF</span>
+      <div class="doc-texto">
+        <b>{{ d.archivo.filename_download || "PDF" }}</b>
+        @if (documentoDe(t); as info) {
+          <span class="nota">
+            Cargado el {{ info.date_created | date: "d MMM y" }}
+            @if (quienCargo(info); as quien) {
+              por {{ quien }}
+            }
+          </span>
+        }
       </div>
+      @if (urlArchivo(d.archivo.id); as url) {
+        <a
+          class="btn btn-borde abrir"
+          [href]="url"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Abrir</a
+        >
+      }
+    </div>
+  } @else if (t.captura) {
+    @if (urlArchivo(t.captura.id); as url) {
+      <p class="nota">
+        Sin PDF unido.
+        <a [href]="url" target="_blank" rel="noopener noreferrer"
+          >Ver copia guardada ↗</a
+        >
+      </p>
     }
+  } @else {
+    <p class="nota sin-pdf">Sin PDF: edítala y elige de cuál salió.</p>
+  }
+
+  @if (t.frase) {
+    <blockquote>“{{ t.frase }}”</blockquote>
+  }
+  @if (t.notas) {
+    <p class="nota notas">{{ t.notas }}</p>
+  }
+  @if (t.estado === "publicada" && t.revisada_en) {
+    <p class="nota">
+      Aprobada por {{ revisor(t) || "—" }} el
+      {{ t.revisada_en | date: "d MMM y, h:mm a" }}
+    </p>
+  }
+</ng-template>
+
+<ng-template #formulario let-c let-id="id">
+  <form
+    class="formulario"
+    [formGroup]="form"
+    (ngSubmit)="guardar(c, id)"
+    novalidate
+  >
+    <div class="campo ancho">
+      <label for="tfDocumento">PDF de donde sale</label>
+      <select id="tfDocumento" formControlName="documento">
+        <option value="">Sin PDF</option>
+        @for (d of c.documentos; track d.id) {
+          <option [value]="d.id">
+            {{ d.archivo.filename_download || "PDF" }}
+            @if (d.vigente_desde) {
+              · vigente desde {{ d.vigente_desde | date: "d MMM y" : "UTC" }}
+            }
+            @if (d.estado === "actual") {
+              (actual)
+            }
+          </option>
+        }
+      </select>
+    </div>
     <div class="campo">
       <label for="tfDesde">Publica desde (%)</label>
       <input id="tfDesde" inputmode="decimal" formControlName="valor_desde" />
@@ -288,7 +518,7 @@
       <input id="tfVigente" type="date" formControlName="vigente_desde" />
     </div>
     <div class="campo ancho">
-      <label for="tfFrase">Frase de la fuente</label>
+      <label for="tfFrase">Frase del PDF</label>
       <textarea id="tfFrase" rows="2" formControlName="frase"></textarea>
     </div>
     <div class="campo ancho">
@@ -303,7 +533,7 @@
       >
         Guardar
       </button>
-      <button type="button" class="btn btn-borde" (click)="cancelar()">
+      <button type="button" class="btn btn-borde" (click)="editando.set(null)">
         Cancelar
       </button>
     </div>

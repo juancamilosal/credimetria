@@ -1,6 +1,6 @@
 import { Producto } from './tasa';
 
-export type EstadoTasa = 'por_revisar' | 'publicada' | 'rechazada';
+export type EstadoTasa = 'por_revisar' | 'publicada' | 'rechazada' | 'anterior';
 export type UnidadTasa = 'MV' | 'NMV' | 'EA';
 export type TipoTasa = 'fija' | 'variable';
 export type SistemaTasa = 'cuota_fija' | 'cuota_decreciente' | 'no_dice';
@@ -36,8 +36,15 @@ export interface TasaAdmin {
   entidad: { codigo: string; nombre: string; logo: string | null };
   fuente: Omit<FuenteTasa, 'entidad' | 'producto'> | null;
   revisada_por: { first_name: string | null; last_name: string | null } | null;
-  /** Copia guardada del PDF o de la página, como prueba. */
+  /** Copia guardada antes de existir `documento` (casos viejos). */
   captura: { id: string; type: string | null } | null;
+  /** El PDF de donde salió la tasa. */
+  documento: {
+    id: number;
+    estado: 'nuevo' | 'actual' | 'anterior';
+    vigente_desde: string | null;
+    archivo: { id: string; filename_download: string | null };
+  } | null;
 }
 
 /** Lo que se puede escribir de una tasa desde la configuración. */
@@ -55,13 +62,7 @@ export type CambiosTasa = Partial<
     | 'vigente_desde'
     | 'notas'
   >
->;
-
-export const ESTADOS_TASA: { id: EstadoTasa; texto: string }[] = [
-  { id: 'por_revisar', texto: 'Por revisar' },
-  { id: 'publicada', texto: 'Publicadas' },
-  { id: 'rechazada', texto: 'Rechazadas' },
-];
+> & { documento?: number | null };
 
 export const UNIDADES_TASA: { id: UnidadTasa; texto: string }[] = [
   { id: 'MV', texto: 'M.V.' },

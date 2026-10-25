@@ -18,17 +18,16 @@ Siguen el documento "Credimetría · Pantallas a desarrollar en Angular" y el
 diseño "Credimetría · Marca y página web", con una paleta más sobria que la
 morada y oro del diseño (ver abajo).
 
-| Ruta                 | Pantalla          | Qué hace                                                                                                                                                            |
-| -------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                                    |
-| `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas                      |
-| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                     |
-| `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                             |
-| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                                     |
-| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                                            |
-| `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                                            |
-| `/admin/tasas`       | Configuración     | Solo administradores de Directus: revisar, publicar, rechazar, corregir y agregar tasas con su fecha y el enlace de la fuente                                       |
-| `/admin/pdf`         | PDF de tasas      | Por banco y producto: el PDF actual, el nuevo por aceptar (manual o del robot) y los anteriores; cargar, usar como actual, descartar y agregar la dirección del PDF |
+| Ruta                 | Pantalla          | Qué hace                                                                                                                                                              |
+| -------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                                      |
+| `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas                        |
+| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                       |
+| `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                               |
+| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                                       |
+| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                                              |
+| `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                                              |
+| `/admin/tasas`       | Configuración     | Solo administradores de Directus: por banco, la tasa publicada y la que espera aprobación, cada una con su PDF; comparar los PDF, editar, aprobar y cargar PDF nuevos |
 
 - **Ranking como en Excel** (`paginas/ranking/` y
   `compartido/tabla-ranking/`): cada título ordena la tabla al tocarlo (↑/↓,
@@ -105,31 +104,27 @@ Directus. No está en el menú: se entra por `/admin`.
   las cuentas con acceso de administrador (`admin_access` en sus
   políticas). El token de acceso queda en memoria y el de renovación en
   `sessionStorage`: recargar no cierra la sesión, cerrar la pestaña sí.
-- **Configuración** (`/admin/tasas`, con la guarda `soloAdmin`): lista de
-  `tasas_publicadas` filtrable por estado (Por revisar, Publicadas,
-  Rechazadas, Todas) y producto. Cada tasa muestra lo que publica la
-  entidad, la E.A., la fecha de vigencia, cuándo se capturó, el enlace a la
-  fuente (página o PDF, y la página de tasas y tarifas si la hay), la frase
-  y las notas, con el logo de la entidad (de `entidades.logo`, pedido a
-  Directus con el token en la dirección porque los archivos no son
-  públicos), y el enlace a la copia guardada del PDF o la página
-  (`captura`). "Subir copia del PDF" sube el archivo a Directus y lo une a
-  la tasa. Se puede publicar, rechazar, volver a revisar, editar
-  (con "Calcular E.A." desde la tasa mensual) y crear una tasa nueva desde
-  una fuente. Al publicar o rechazar se guardan `revisada_por` y
-  `revisada_en`.
-- **PDF de tasas** (`/admin/pdf`): una tarjeta por banco y producto con el
-  logo, los enlaces al PDF en el banco, la página de tasas y tarifas y la
-  página del producto. A la izquierda el **PDF actual** y a la derecha el
-  **PDF nuevo** (vigencia, cuándo y quién lo cargó, tamaño y "Abrir").
-  "Cargar PDF" sube el archivo con su fecha de vigencia y lo deja como
-  nuevo; si su huella SHA-256 ya existe, avisa y no lo sube. "Usar como
-  actual" pasa el actual a anterior (nunca se borra) y "Descartar" quita un
-  nuevo que no sirve. Si el banco no tiene fuente PDF, pide la dirección
-  directa del PDF y, opcional, la página de tasas y tarifas que lo enlaza, y
-  crea la fuente. "Editar direcciones" corrige las dos (la dirección del PDF
-  debe abrir el PDF, no la página índice). Las dos pestañas comparten la cabecera
-  `paginas/admin/cabecera/`.
+- **Configuración de tasas** (`/admin/tasas`, con la guarda `soloAdmin`):
+  todo en una pantalla. Una tarjeta por banco y producto, con su logo (de
+  `entidades.logo`, pedido a Directus con el token en la dirección porque
+  los archivos no son públicos) y los enlaces al PDF en el banco, la página
+  de tasas y tarifas y la página del producto ("Editar direcciones" o
+  "Agregar dirección del PDF"; la dirección debe abrir el PDF, no la página
+  índice). Dos columnas:
+  - **Publicada hoy**: la tasa que sale en la página, con su PDF (`Abrir`).
+  - **Por aprobar**: la tasa nueva con su PDF, lo que cambia frente a la
+    publicada (mín. ▲ +1,05 pts) y los botones **Aprobar**, **Rechazar**,
+    **Editar** (con "Calcular E.A." y el PDF de donde sale) y **Comparar
+    PDF**, que muestra el PDF actual y el nuevo lado a lado (se bajan con
+    el token y se ven como blob dentro de la página). **Cargar PDF nuevo**
+    sube el PDF con su vigencia (si su huella SHA-256 ya existe, avisa) y
+    crea la tasa por aprobar unida a él, lista para escribir los valores.
+  - **Aprobar** deja la tasa publicada y su PDF como actual; la tasa que
+    estaba publicada y el PDF anterior pasan a `anterior`. Nada se borra:
+    "Ver anteriores" muestra las anteriores y rechazadas con su PDF.
+  - Filtros: todos los bancos o solo los que tienen algo por aprobar, y
+    producto. La cabecera con "Salir" está en `paginas/admin/cabecera/`.
+  - `/admin/pdf` (la pestaña que hubo antes) lleva a esta pantalla.
 - Estas rutas no se prerenderizan (`RenderMode.Client`) y llevan
   `noindex`. La dirección de Directus está en `core/config/directus.ts`.
 - **Directus debe permitir CORS** para el dominio de la página. En las
@@ -162,10 +157,11 @@ que el robot debe bajar los PDF con un navegador real.
   (nuevo, actual, anterior), vigencia, origen (manual o robot), huella
   SHA-256, notas, y quién y cuándo lo cargó.
 - `tasas_publicadas`: historial (no se sobrescribe) con fuente, entidad,
-  producto, valor desde y hasta, unidad (M.V., N.M.V., E.A.), E.A. desde y
-  hasta, tipo de tasa, sistema de amortización, frase de la fuente,
-  vigencia, captura, estado (por revisar, publicada, rechazada), quién y
-  cuándo la revisó, y notas.
+  producto, el PDF de donde salió (`documento`), valor desde y hasta,
+  unidad (M.V., N.M.V., E.A.), E.A. desde y hasta, tipo de tasa, sistema de
+  amortización, frase del PDF, vigencia, estado (por revisar, publicada,
+  rechazada, anterior), quién y cuándo la revisó, y notas. `captura` queda
+  de casos anteriores a `documento`.
 
 ## Estructura
 

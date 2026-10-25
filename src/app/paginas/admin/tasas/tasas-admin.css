@@ -2,7 +2,7 @@
   padding-block: 28px 64px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .barra {
@@ -48,12 +48,21 @@
   flex: 0 1 220px;
 }
 
-.aviso-error {
-  background: var(--cm-error-100);
-  color: var(--cm-error);
+.aviso-error,
+.aviso-ok {
   border-radius: var(--cm-r-boton);
   padding: 12px 14px;
   font-weight: 600;
+}
+
+.aviso-error {
+  background: var(--cm-error-100);
+  color: var(--cm-error);
+}
+
+.aviso-ok {
+  background: var(--cm-ahorro-100);
+  color: var(--cm-ahorro-700);
 }
 
 .lista {
@@ -62,27 +71,23 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
-.tasa {
-  gap: 14px;
+.banco {
+  gap: 16px;
+}
+
+.banco.pendiente {
   border-left: 4px solid var(--cm-aviso-800);
 }
 
-.tasa[data-estado="publicada"] {
-  border-left-color: var(--cm-ahorro-600);
-}
-
-.tasa[data-estado="rechazada"] {
-  border-left-color: var(--cm-error);
-}
-
-.tasa-cabeza {
+.banco-cabeza {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
+  align-items: center;
+  gap: 12px 20px;
+  flex-wrap: wrap;
 }
 
 /* El logo junto al nombre, para reconocer la entidad de un vistazo */
@@ -120,10 +125,72 @@ h2 {
   font-weight: 800;
 }
 
+h3 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--cm-gris);
+}
+
+.enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-weight: 600;
+}
+
+.enlace-boton {
+  font: inherit;
+  font-weight: 600;
+  color: var(--cm-enlace);
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.direcciones {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.campos-direccion {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px 16px;
+}
+
+.columnas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.columna {
+  background: var(--cm-fondo);
+  border-radius: var(--cm-r-tarjeta);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.columna.nueva {
+  border: 1px dashed var(--cm-linea);
+}
+
+.vacio {
+  color: var(--cm-gris);
+}
+
 .datos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 12px 20px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 16px;
   margin: 0;
 }
 
@@ -137,22 +204,62 @@ h2 {
   font-weight: 600;
 }
 
-.fuente {
+.cambios {
   display: flex;
   flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 13px;
+  color: var(--cm-aviso-800);
+}
+
+.doc {
+  display: flex;
   align-items: center;
-  gap: 8px 14px;
-  font-weight: 600;
+  gap: 12px;
+  background: var(--cm-blanco);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-boton);
+  padding: 12px;
+}
+
+.doc-icono {
+  flex: none;
+  width: 40px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: var(--cm-error-100);
+  color: var(--cm-error);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.doc-texto {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   overflow-wrap: anywhere;
+}
+
+.abrir {
+  flex: none;
+}
+
+.sin-pdf {
+  color: var(--cm-aviso-800);
+  font-weight: 600;
 }
 
 blockquote {
   margin: 0;
   padding: 10px 14px;
   border-left: 3px solid var(--cm-linea);
-  background: var(--cm-fondo);
+  background: var(--cm-blanco);
   border-radius: 0 var(--cm-r-boton) var(--cm-r-boton) 0;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .notas {
@@ -165,18 +272,42 @@ blockquote {
   gap: 10px;
 }
 
-.vacio {
-  padding: 24px 0;
+.cargar {
+  align-self: flex-start;
 }
 
-.editor h2 {
-  margin-bottom: 4px;
+.carga {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historial summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--cm-enlace);
+}
+
+.historial ul {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historial li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
 }
 
 .formulario {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 14px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px 14px;
   align-items: end;
 }
 
@@ -199,20 +330,70 @@ blockquote {
   min-height: 48px;
 }
 
-/* En celular el logo va encima del nombre para que el nombre no se corte */
-@media (max-width: 600px) {
+/* Los dos PDF lado a lado, encima de todo */
+.comparar {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--cm-fondo);
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  gap: 12px;
+}
+
+.comparar-cabeza {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.comparar-pdfs {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.comparar-pdfs section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.comparar-pdfs iframe {
+  flex: 1;
+  width: 100%;
+  min-height: 300px;
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-boton);
+  background: #fff;
+}
+
+@media (max-width: 760px) {
+  .columnas,
+  .comparar-pdfs {
+    grid-template-columns: 1fr;
+  }
+
   .marca {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-}
 
-.subir {
-  cursor: pointer;
-}
+  .doc {
+    flex-wrap: wrap;
+  }
 
-.subir:focus-within {
-  outline: 3px solid var(--cm-marca-600);
-  outline-offset: 2px;
+  .doc-texto {
+    flex-basis: calc(100% - 52px);
+  }
+
+  .abrir {
+    margin-left: 52px;
+  }
 }
