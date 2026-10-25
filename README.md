@@ -51,7 +51,9 @@ src/app/
 ```
 
 Los colores, fuentes, radios y espacios están como variables `--cm-*` en
-`src/styles.css`. La página va siempre en modo claro. Ningún componente escribe
+`src/styles.css`. La página arranca en modo claro; el botón de luna o sol
+del encabezado cambia a oscuro (`TemaService`, guardado en el navegador y
+aplicado antes de pintar desde `index.html` para que no parpadee). Ningún componente escribe
 colores a mano. La paleta es sobria a propósito:
 
 - **Base blanca y gris neutro**, con el encabezado y las cabeceras en blanco.

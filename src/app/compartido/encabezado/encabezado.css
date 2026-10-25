@@ -40,8 +40,22 @@ nav a.activo {
   margin-left: 10px;
 }
 
-.btn-menu {
-  display: none;
+/* Orden en escritorio: marca, menú, tema */
+.marca {
+  order: 0;
+}
+
+nav {
+  order: 1;
+  margin-left: auto;
+}
+
+.tema {
+  order: 2;
+}
+
+.btn-icono {
+  display: inline-flex;
   width: 44px;
   height: 44px;
   border-radius: var(--cm-r-boton);
@@ -50,6 +64,14 @@ nav a.activo {
   color: var(--cm-tinta);
   align-items: center;
   justify-content: center;
+}
+
+.btn-icono:hover {
+  border-color: var(--cm-gris);
+}
+
+.btn-menu {
+  display: none;
 }
 
 .saltar:focus {
@@ -67,8 +89,20 @@ nav a.activo {
 }
 
 @media (max-width: 860px) {
+  /* En celular: marca, tema y menú arriba; los enlaces debajo */
+  .tema {
+    order: 1;
+    margin-left: auto;
+  }
+
   .btn-menu {
     display: inline-flex;
+    order: 2;
+  }
+
+  nav {
+    order: 3;
+    margin-left: 0;
   }
 
   nav {

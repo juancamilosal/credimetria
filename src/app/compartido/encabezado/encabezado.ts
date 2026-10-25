@@ -7,6 +7,7 @@ import {
   RouterLinkActive,
 } from '@angular/router';
 import { filter } from 'rxjs';
+import { TemaService } from '../../core/servicios/tema.service';
 import { Logo } from '../logo/logo';
 
 @Component({
@@ -17,6 +18,7 @@ import { Logo } from '../logo/logo';
 })
 export class Encabezado {
   protected readonly menuAbierto = signal(false);
+  protected readonly temas = inject(TemaService);
 
   constructor() {
     // El menú del celular se cierra al cambiar de página.
