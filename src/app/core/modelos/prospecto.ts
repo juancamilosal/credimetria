@@ -8,38 +8,23 @@ export const URGENCIAS: { id: Urgencia; texto: string; cuando: string }[] = [
   { id: 'tres', texto: 'En 3 meses', cuando: 'pronto' },
 ];
 
-export const INGRESOS = [
-  'Pensionado',
-  'Empleado',
-  'Docente',
-  'Empleado público',
-  'Independiente',
-] as const;
-
-export const SALARIOS = [
-  'Menos de $2 millones',
-  '$2 a $4 millones',
-  '$4 a $8 millones',
-  'Más de $8 millones',
-] as const;
-
-export type Reporte = 'no' | 'si' | 'no-se';
-
 export interface Canales {
   whatsapp: boolean;
   llamada: boolean;
   correo: boolean;
 }
 
-/** Lo que la persona llena en el formulario de asesoría. */
+/**
+ * Lo que la persona llena en el formulario de asesoría: lo mínimo para que
+ * un asesor la contacte. Ingresos, reportes y demás los pregunta el asesor.
+ */
 export interface DatosProspecto {
   producto: Producto;
-  monto: number;
-  ingreso: string;
-  salario: string;
+  /** Monto aproximado; `null` si no lo dijo. */
+  monto: number | null;
   ciudad: string;
-  reporte: Reporte;
-  urgencia: Urgencia;
+  /** Solo si llegó desde una pantalla que la preguntó (inicio, Compara tu oferta). */
+  urgencia: Urgencia | null;
   nombre: string;
   celular: string;
   canales: Canales;

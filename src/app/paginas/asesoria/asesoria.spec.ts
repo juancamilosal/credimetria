@@ -4,6 +4,7 @@ import {
   convertToParamMap,
   provideRouter,
 } from '@angular/router';
+import { ProspectosService } from '../../core/servicios/prospectos.service';
 import { Asesoria } from './asesoria';
 
 describe('Asesoria', () => {
@@ -33,7 +34,7 @@ describe('Asesoria', () => {
     fixture.detectChanges();
   }
 
-  /** Toca el botón con ese texto (chips, montos rápidos o navegación). */
+  /** Toca el botón con ese texto (chips o montos rápidos). */
   function tocar(texto: string) {
     const boton = [...html.querySelectorAll<HTMLButtonElement>('button')].find(
       (b) => b.textContent?.trim() === texto,
@@ -43,107 +44,78 @@ describe('Asesoria', () => {
     fixture.detectChanges();
   }
 
-  function titulo(): string {
-    return html.querySelector('#tituloPaso')!.textContent!.trim();
+  function autorizar() {
+    html.querySelector<HTMLInputElement>('.autoriza input')!.click();
+    fixture.detectChanges();
   }
 
-  function llenarPaso1() {
-    tocar('$20.000.000');
-    tocar('Continuar');
+  function enviar() {
+    html.querySelector<HTMLButtonElement>('button[type=submit]')!.click();
+    fixture.detectChanges();
   }
 
-  function llenarPaso2() {
-    tocar('Empleado');
-    tocar('$2 a $4 millones');
-    tocar('No');
-    tocar('Medellín');
-    tocar('Continuar');
-  }
-
-  it('arranca en el paso 1 y no sigue sin monto', () => {
+  it('ya no pregunta ingresos, rango de ingreso ni reportes', () => {
     crear();
-    expect(titulo()).toContain('Paso 1 de 3');
-    tocar('Continuar');
-    expect(titulo()).toContain('Paso 1 de 3');
-    expect(html.querySelector('#errMonto')).not.toBeNull();
+    expect(html.textContent).not.toContain('¿De dónde vienen tus ingresos?');
+    expect(html.textContent).not.toContain('reportes negativos');
+    expect(html.querySelectorAll('fieldset').length).toBe(3);
   });
 
-  it('el monto rápido llena el campo y deja seguir', () => {
+  it('el botón queda bloqueado hasta marcar la autorización', () => {
     crear();
-    tocar('$20.000.000');
-    expect(html.querySelector<HTMLInputElement>('#asMonto')!.value).toBe(
-      '20.000.000',
-    );
-    tocar('Continuar');
-    expect(titulo()).toContain('Paso 2 de 3 · Tu perfil');
-    expect(html.querySelector('.resumen')?.textContent).toContain(
-      'Compra de cartera · $20.000.000 · Ya',
-    );
-  });
-
-  it('el paso 2 pide elegir cada opción y "Otra" deja escribir la ciudad', () => {
-    crear();
-    llenarPaso1();
-    tocar('Continuar');
-    expect(titulo()).toContain('Paso 2 de 3');
-    expect(html.querySelectorAll('fieldset .error').length).toBe(4);
-
-    tocar('Empleado');
-    tocar('$2 a $4 millones');
-    tocar('No');
-    tocar('Otra');
-    expect(html.querySelector('#asCiudad')).not.toBeNull();
-    tocar('Continuar');
-    expect(html.textContent).toContain('Escribe tu ciudad.');
-    escribir('#asCiudad', 'Pereira');
-    tocar('Continuar');
-    expect(titulo()).toContain('Paso 3 de 3');
-  });
-
-  it('"Atrás" vuelve sin perder lo elegido', () => {
-    crear();
-    llenarPaso1();
-    tocar('Empleado');
-    tocar('Atrás');
-    expect(titulo()).toContain('Paso 1 de 3');
-    tocar('Continuar');
-    expect(
-      html.querySelector('[aria-labelledby=lbIngreso] [aria-pressed=true]')
-        ?.textContent,
-    ).toContain('Empleado');
-  });
-
-  it('el botón final queda bloqueado hasta marcar la autorización', () => {
-    crear();
-    llenarPaso1();
-    llenarPaso2();
     const boton = html.querySelector<HTMLButtonElement>('button[type=submit]')!;
     expect(boton.disabled).toBeTrue();
     expect(boton.textContent).toContain('Marca la autorización');
-    html.querySelector<HTMLInputElement>('.autoriza input')!.click();
-    fixture.detectChanges();
+    autorizar();
     expect(boton.disabled).toBeFalse();
     expect(boton.textContent).toContain('Quiero que me asesoren');
   });
 
-  it('muestra los errores del paso 3 al intentar enviar vacío', () => {
+  it('pide crédito, ciudad, nombre y celular, pero no el monto', () => {
     crear();
-    llenarPaso1();
-    llenarPaso2();
-    html.querySelector<HTMLInputElement>('.autoriza input')!.click();
-    fixture.detectChanges();
-    html.querySelector<HTMLButtonElement>('button[type=submit]')!.click();
-    fixture.detectChanges();
+    autorizar();
+    enviar();
+    expect(html.querySelector('#errProducto')).not.toBeNull();
+    expect(html.querySelector('#errCiudad')).not.toBeNull();
     expect(html.querySelector('#errNombre')).not.toBeNull();
     expect(html.querySelector('#errCel')).not.toBeNull();
+    expect(html.querySelector('#errMonto')).toBeNull();
     expect(html.querySelector('.listo')).toBeNull();
+  });
+
+  it('un monto que no está en los botones llega en "Otro monto"', () => {
+    crear({ producto: 'libranza', monto: '15000000', origen: 'oferta' });
+    expect(html.querySelector<HTMLInputElement>('#asMonto')!.value).toBe(
+      '15.000.000',
+    );
+  });
+
+  it('"Otro monto" abre el campo y valida el mínimo', () => {
+    crear();
+    expect(html.querySelector('#asMonto')).toBeNull();
+    tocar('Otro monto');
+    escribir('#asMonto', '500.000');
+    autorizar();
+    enviar();
+    expect(html.querySelector('#errMonto')).not.toBeNull();
+  });
+
+  it('"Otra" deja escribir la ciudad', () => {
+    crear();
+    tocar('Otra');
+    expect(html.querySelector('#asCiudad')).not.toBeNull();
+    autorizar();
+    enviar();
+    expect(html.querySelector('#errCiudad')?.textContent).toContain(
+      'Escribe tu ciudad.',
+    );
   });
 
   it('llega lleno desde el simulador', () => {
     crear({ producto: 'libranza', monto: '20000000', origen: 'simulador' });
-    expect(html.querySelector<HTMLInputElement>('#asMonto')!.value).toBe(
-      '20.000.000',
-    );
+    expect(
+      html.querySelector('.rapido[aria-pressed=true]')?.textContent,
+    ).toContain('$20.000.000');
     expect(
       html.querySelector('app-chips button[aria-pressed=true]')?.textContent,
     ).toContain('Libranza');
@@ -152,26 +124,49 @@ describe('Asesoria', () => {
     );
   });
 
-  it('con todo bien muestra "¡Listo!" según la urgencia', async () => {
+  it('con lo mínimo envía y guarda la prueba de la autorización', async () => {
     crear({ urgencia: 'mes' });
-    llenarPaso1();
-    llenarPaso2();
+    const enviarProspecto = spyOn(
+      TestBed.inject(ProspectosService),
+      'enviar',
+    ).and.callThrough();
+    tocar('Libre inversión');
+    tocar('Medellín');
     escribir('#asNombre', 'Ana');
     escribir('#asCel', '300 123 4567');
-    html.querySelector<HTMLInputElement>('.autoriza input')!.click();
-    fixture.detectChanges();
-    html.querySelector<HTMLButtonElement>('button[type=submit]')!.click();
+    autorizar();
+    enviar();
     await fixture.whenStable();
     fixture.detectChanges();
     expect(html.querySelector('.listo h1')?.textContent).toContain(
       '¡Listo! Un asesor te contactará en los próximos días',
     );
+    const prospecto = enviarProspecto.calls.mostRecent().args[0];
+    expect(prospecto.producto).toBe('libre-inversion');
+    expect(prospecto.ciudad).toBe('Medellín');
+    expect(prospecto.monto).toBeNull();
+    expect(prospecto.celular).toBe('3001234567');
+    expect(prospecto.autorizacion.texto).toContain('Autorizo a Credimetría');
+  });
+
+  it('sin urgencia en el enlace dice "pronto"', async () => {
+    crear();
+    tocar('Libranza');
+    tocar('$10.000.000');
+    tocar('Cali');
+    escribir('#asNombre', 'Luis');
+    escribir('#asCel', '3109876543');
+    autorizar();
+    enviar();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(html.querySelector('.listo h1')?.textContent).toContain(
+      'te contactará pronto',
+    );
   });
 
   it('pide el correo si marca Correo', () => {
     crear();
-    llenarPaso1();
-    llenarPaso2();
     const casillas = html.querySelectorAll<HTMLInputElement>(
       '[formGroupName=canales] input',
     );

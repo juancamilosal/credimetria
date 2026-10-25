@@ -18,15 +18,15 @@ Siguen el documento "Credimetría · Pantallas a desarrollar en Angular" y el
 diseño "Credimetría · Marca y página web", con una paleta más sobria que la
 morada y oro del diseño (ver abajo).
 
-| Ruta                 | Pantalla          | Qué hace                                                                                                                                         |
-| -------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                 |
-| `/ranking`           | Ranking de tasas  | Lista completa por tasa real con filtros de producto y tipo de entidad (`?producto=…&tipo=…`)                                                    |
-| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría  |
-| `/simulador`         | Simulador         | Cuota, total y ahorro frente a la mejor entidad, comparador de dos entidades y las 3 que menos cobran del producto elegido                       |
-| `/asesoria`          | Asesoría          | Formulario de prospecto en 3 pasos (qué necesitas, tu perfil, cómo te contactamos), casi todo con botones, con autorización de datos obligatoria |
-| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                         |
-| `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                         |
+| Ruta                 | Pantalla          | Qué hace                                                                                                                                        |
+| -------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                |
+| `/ranking`           | Ranking de tasas  | Lista completa por tasa real con filtros de producto y tipo de entidad (`?producto=…&tipo=…`)                                                   |
+| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría |
+| `/simulador`         | Simulador         | Cuota, total y ahorro frente a la mejor entidad, comparador de dos entidades y las 3 que menos cobran del producto elegido                      |
+| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombre, celular y autorización de datos obligatoria                             |
+| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                        |
+| `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                        |
 
 - **Compara tu oferta** (`paginas/compara-oferta/`): preguntas fijas con
   botones (producto, monto, plazo, qué le dijeron: tasa E.A., tasa mensual o
@@ -43,13 +43,12 @@ morada y oro del diseño (ver abajo).
   plazo del simulador; muestra la cuota de cada una y cuánto se ahorra con la
   más barata (Banco de Bogotá contra AV Villas, $20.000.000 a 48 meses →
   $2.090.784). Usa la tasa que cada una cobra en promedio.
-- **Asesoría en 3 pasos** (`paginas/asesoria/`): barra de progreso, un paso
-  corto a la vez y resumen del paso 1 con "Cambiar". Solo se escribe el
-  nombre y el celular (y el monto si no se elige uno de los rápidos o no
-  llega lleno); ingresos, rango de ingreso, reportes y ciudad son botones,
-  con "Otra" para escribir la ciudad. Cada paso valida sus campos antes de
-  seguir y "Atrás" no pierde nada. Es un solo formulario reactivo, así que
-  `ProspectosService` y la prueba de la autorización no cambian.
+- **Asesoría corta** (`paginas/asesoria/`): una sola pantalla con lo mínimo
+  para que el asesor contacte a la persona: qué crédito le interesa, monto
+  (opcional, con botones de $5, $10, $20 y $50 millones u "Otro monto"),
+  ciudad (botones con las principales y "Otra"), nombre, celular, canal y la
+  autorización. Ingresos, reportes y demás los pregunta el asesor. La
+  urgencia solo se guarda si llega en el enlace (inicio o Compara tu oferta).
 - El simulador y el ranking llevan a `/asesoria` con el producto, el monto,
   la entidad o la urgencia en la dirección, y el formulario llega lleno.
 - Con los valores por defecto el simulador da $648.087, $604.529 y un ahorro

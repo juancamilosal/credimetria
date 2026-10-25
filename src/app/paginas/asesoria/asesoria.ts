@@ -18,13 +18,7 @@ import {
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { Chips } from '../../compartido/chips/chips';
 import { formatoPesos, PesosPipe } from '../../compartido/pipes/formato';
-import {
-  INGRESOS,
-  Reporte,
-  SALARIOS,
-  URGENCIAS,
-  Urgencia,
-} from '../../core/modelos/prospecto';
+import { URGENCIAS, Urgencia } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
 import { ProspectosService } from '../../core/servicios/prospectos.service';
 import { TasasService } from '../../core/servicios/tasas.service';
@@ -39,19 +33,6 @@ const MONTOS_RAPIDOS = [5_000_000, 10_000_000, 20_000_000, 50_000_000];
 const CIUDADES = ['Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Bucaramanga'];
 const OTRA = 'Otra';
 
-/** Los 3 pasos y los campos que revisa cada uno antes de seguir. */
-const PASOS = [
-  { titulo: 'Qué necesitas', campos: ['producto', 'monto', 'urgencia'] },
-  {
-    titulo: 'Tu perfil',
-    campos: ['ingreso', 'salario', 'reporte', 'ciudad'],
-  },
-  {
-    titulo: 'Cómo te contactamos',
-    campos: ['nombre', 'celular', 'canales', 'correo', 'autorizo'],
-  },
-] as const;
-
 /** Productos en el orden del formulario: compra de cartera primero. */
 const ORDEN_PRODUCTOS: Producto[] = [
   'compra-cartera',
@@ -61,9 +42,11 @@ const ORDEN_PRODUCTOS: Producto[] = [
   'vivienda',
 ];
 
-function montoMinimo(
+/** El monto es opcional; si lo escribe, que sea de al menos $1.000.000. */
+function montoOpcional(
   control: AbstractControl<string>,
 ): ValidationErrors | null {
+  if (!control.value.trim()) return null;
   return leerNumero(control.value) >= MONTO_MINIMO
     ? null
     : { montoMinimo: true };
@@ -88,9 +71,10 @@ function canalesValidos(grupo: AbstractControl): ValidationErrors | null {
 }
 
 /**
- * Formulario de prospecto en 3 pasos cortos, casi todo con botones. Solo se
- * envía con la autorización de datos marcada (Ley 1581) y guarda la prueba
- * de esa autorización.
+ * Formulario de prospecto en una sola pantalla corta: qué crédito le
+ * interesa, la ciudad y cómo contactarla. Ingresos, reportes y demás los
+ * pregunta el asesor. Solo se envía con la autorización de datos marcada
+ * (Ley 1581) y guarda la prueba de esa autorización.
  */
 @Component({
   selector: 'app-asesoria',
@@ -104,53 +88,29 @@ export class Asesoria {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder).nonNullable;
   private readonly injector = inject(Injector);
-  /** Entidad elegida en el ranking, si llegó desde allí. */
-  private entidad: string | null = null;
   private readonly formulario =
     viewChild.required<ElementRef<HTMLElement>>('formulario');
+  /** Entidad elegida en el ranking, si llegó desde allí. */
+  private entidad: string | null = null;
+  /** Urgencia, solo si la trae el enlace (inicio o Compara tu oferta). */
+  private urgencia: Urgencia | null = null;
 
   protected readonly opcionesProducto = ORDEN_PRODUCTOS.map((id) => ({
     valor: id,
     texto: this.tasas.nombre(id),
   }));
-  protected readonly opcionesUrgencia = URGENCIAS.map((u) => ({
-    valor: u.id,
-    texto: u.texto,
-  }));
-  protected readonly opcionesIngreso = INGRESOS.map((i) => ({
-    valor: i,
-    texto: i,
-  }));
-  protected readonly opcionesSalario = SALARIOS.map((s) => ({
-    valor: s,
-    texto: s,
-  }));
-  protected readonly opcionesReporte = [
-    { valor: 'no', texto: 'No' },
-    { valor: 'si', texto: 'Sí' },
-    { valor: 'no-se', texto: 'No sé' },
-  ];
   protected readonly opcionesCiudad = [...CIUDADES, OTRA].map((c) => ({
     valor: c,
     texto: c,
   }));
   protected readonly montosRapidos = MONTOS_RAPIDOS;
-  protected readonly pasos = PASOS;
-  /** Paso actual: 0, 1 o 2. */
-  protected readonly paso = signal(0);
-  /** Ciudad elegida en los botones ('Otra' muestra el campo para escribirla). */
-  protected readonly ciudadElegida = signal('');
   protected readonly conectado = this.prospectos.conectado;
 
   protected readonly form = this.fb.group(
     {
-      producto: ['compra-cartera' as string, Validators.required],
-      monto: ['', montoMinimo],
-      ingreso: ['', Validators.required],
-      salario: ['', Validators.required],
+      producto: ['', Validators.required],
+      monto: ['', montoOpcional],
       ciudad: ['', Validators.required],
-      reporte: ['' as Reporte | '', Validators.required],
-      urgencia: ['ya' as string],
       nombre: ['', Validators.required],
       celular: ['', celularColombiano],
       canales: this.fb.group({ whatsapp: true, llamada: false, correo: false }),
@@ -162,29 +122,18 @@ export class Asesoria {
 
   protected readonly autorizo = toSignal(
     this.form.controls.autorizo.valueChanges,
-    {
-      initialValue: false,
-    },
+    { initialValue: false },
   );
   protected readonly quiereCorreo = toSignal(
     this.form.controls.canales.controls.correo.valueChanges,
     { initialValue: false },
   );
 
-  /** Resumen del paso 1 que se ve en los pasos siguientes. */
-  protected resumen(): string {
-    const v = this.form.getRawValue();
-    const urgencia = URGENCIAS.find((u) => u.id === v.urgencia);
-    return [
-      this.tasas.nombre(v.producto as Producto),
-      formatoPesos(leerNumero(v.monto)),
-      urgencia?.texto,
-    ].join(' · ');
-  }
-  /** Intentó seguir en este paso: muestra los errores aunque no haya tocado. */
-  protected readonly intentoPaso = signal(false);
-
-  /** Texto que explica de dónde viene la persona (simulador o ranking). */
+  /** Muestra el campo para escribir un monto que no está en los botones. */
+  protected readonly otroMonto = signal(false);
+  /** Ciudad elegida en los botones ('Otra' muestra el campo para escribirla). */
+  protected readonly ciudadElegida = signal('');
+  /** Texto que explica de dónde viene la persona. */
   protected readonly vieneDe = signal<string | null>(null);
   protected readonly intentoEnviar = signal(false);
   protected readonly enviado = signal<string | null>(null);
@@ -196,15 +145,28 @@ export class Asesoria {
   /** Muestra el error de un campo solo después de tocarlo o de intentar enviar. */
   protected mostrarError(nombre: keyof typeof this.form.controls): boolean {
     const control = this.form.controls[nombre];
-    return (
-      control.invalid &&
-      (control.touched || this.intentoEnviar() || this.intentoPaso())
-    );
+    return control.invalid && (control.touched || this.intentoEnviar());
+  }
+
+  protected errorGrupo(error: 'sinCanal' | 'correo'): boolean {
+    return this.form.hasError(error) && this.intentoEnviar();
   }
 
   protected elegirMonto(monto: number): void {
+    this.otroMonto.set(false);
     this.form.controls.monto.setValue(formatoPesos(monto).slice(1));
-    this.form.controls.monto.markAsTouched();
+  }
+
+  protected escribirOtroMonto(): void {
+    this.otroMonto.set(true);
+    this.form.controls.monto.setValue('');
+    this.enfocar('#asMonto');
+  }
+
+  protected formatearMonto(): void {
+    const valor = leerNumero(this.form.controls.monto.value);
+    if (valor > 0)
+      this.form.controls.monto.setValue(formatoPesos(valor).slice(1));
   }
 
   protected elegirCiudad(ciudad: string): void {
@@ -216,34 +178,6 @@ export class Asesoria {
     }
   }
 
-  /** Revisa los campos del paso actual y, si están bien, pasa al siguiente. */
-  protected continuar(): void {
-    const campos = PASOS[this.paso()].campos;
-    campos.forEach((c) => this.form.controls[c].markAsTouched());
-    if (campos.some((c) => this.form.controls[c].invalid)) {
-      this.intentoPaso.set(true);
-      this.enfocarPrimerError();
-      return;
-    }
-    this.irAPaso(this.paso() + 1);
-  }
-
-  protected irAPaso(paso: number): void {
-    this.intentoPaso.set(false);
-    this.paso.set(paso);
-    this.enfocar('#tituloPaso', true);
-  }
-
-  protected errorGrupo(error: 'sinCanal' | 'correo'): boolean {
-    return this.form.hasError(error) && this.intentoEnviar();
-  }
-
-  protected formatearMonto(): void {
-    const valor = leerNumero(this.form.controls.monto.value);
-    if (valor > 0)
-      this.form.controls.monto.setValue(formatoPesos(valor).slice(1));
-  }
-
   protected async enviar(): Promise<void> {
     this.intentoEnviar.set(true);
     this.form.markAllAsTouched();
@@ -253,15 +187,13 @@ export class Asesoria {
       return;
     }
     const v = this.form.getRawValue();
+    const monto = leerNumero(v.monto);
     const prospecto = this.prospectos.armar(
       {
         producto: v.producto as Producto,
-        monto: leerNumero(v.monto),
-        ingreso: v.ingreso,
-        salario: v.salario,
+        monto: monto > 0 ? monto : null,
         ciudad: v.ciudad.trim(),
-        reporte: v.reporte as Reporte,
-        urgencia: v.urgencia as Urgencia,
+        urgencia: this.urgencia,
         nombre: v.nombre.trim(),
         celular: v.celular.replace(/\D/g, ''),
         canales: v.canales,
@@ -271,14 +203,13 @@ export class Asesoria {
       this.router.url,
     );
     await this.prospectos.enviar(prospecto);
-    const urgencia = URGENCIAS.find((u) => u.id === v.urgencia) ?? URGENCIAS[0];
-    this.enviado.set(urgencia.cuando);
+    const urgencia = URGENCIAS.find((u) => u.id === this.urgencia);
+    this.enviado.set(urgencia?.cuando ?? 'pronto');
     globalThis.scrollTo?.(0, 0);
   }
 
   protected volver(): void {
     this.enviado.set(null);
-    this.paso.set(0);
   }
 
   private llenarDesdeEnlace(params: ParamMap): void {
@@ -290,44 +221,35 @@ export class Asesoria {
     if (producto && ORDEN_PRODUCTOS.includes(producto as Producto)) {
       this.form.controls.producto.setValue(producto);
     }
-    if (monto > 0)
+    if (monto > 0) {
       this.form.controls.monto.setValue(formatoPesos(monto).slice(1));
-    if (URGENCIAS.some((u) => u.id === urgencia)) {
-      this.form.controls.urgencia.setValue(urgencia!);
+      this.otroMonto.set(!MONTOS_RAPIDOS.includes(monto));
     }
+    const conocida = URGENCIAS.find((u) => u.id === urgencia);
+    if (conocida) this.urgencia = conocida.id;
 
     const origen = params.get('origen');
     const nombre =
       producto && this.tasas.esProducto(producto)
         ? this.tasas.nombre(producto)
         : null;
+    const conMonto = monto > 0 ? ', ' + formatoPesos(monto) : '';
     if (origen === 'simulador' && nombre) {
-      this.vieneDe.set(
-        `Desde el simulador: ${nombre}${monto > 0 ? ', ' + formatoPesos(monto) : ''}.`,
-      );
+      this.vieneDe.set(`Desde el simulador: ${nombre}${conMonto}.`);
     } else if (origen === 'oferta' && nombre) {
-      this.vieneDe.set(
-        `Desde Compara tu oferta: ${nombre}${monto > 0 ? ', ' + formatoPesos(monto) : ''}.`,
-      );
+      this.vieneDe.set(`Desde Compara tu oferta: ${nombre}${conMonto}.`);
     } else if (origen === 'ranking' && this.entidad && nombre) {
       this.vieneDe.set(`Desde el ranking: ${this.entidad}, ${nombre}.`);
     }
   }
 
   /** Pone el foco en un elemento cuando ya está en pantalla. */
-  private enfocar(selector: string, subir = false): void {
+  private enfocar(selector: string): void {
     afterNextRender(
-      () => {
-        const el =
-          this.formulario().nativeElement.querySelector<HTMLElement>(selector);
-        if (subir) {
-          this.formulario().nativeElement.scrollIntoView?.({
-            behavior: 'smooth',
-            block: 'start',
-          });
-        }
-        el?.focus({ preventScroll: subir });
-      },
+      () =>
+        this.formulario()
+          .nativeElement.querySelector<HTMLElement>(selector)
+          ?.focus(),
       { injector: this.injector },
     );
   }
