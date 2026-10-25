@@ -1,43 +1,71 @@
 <section class="cabecera">
   <div class="wrap hero">
     <span class="sello">Con datos de la Superintendencia Financiera</span>
-    <h1>Mide tu crédito antes de firmarlo</h1>
+    <h1>Compara con datos, no con promesas</h1>
     <p>
-      Escribe la tasa que te ofrecieron y te mostramos si es buena, cuánto
-      pagarías en total y quién te cobra menos.
+      Los bancos anuncian tasas "desde" que casi nadie recibe. Credimetría te
+      muestra la tasa que de verdad cobra cada banco, cooperativa y financiera,
+      para que elijas tu crédito sabiendo cuánto vas a pagar.
     </p>
+    <div class="acciones">
+      <a class="btn btn-principal" routerLink="/ranking"
+        >Ver ranking de tasas</a
+      >
+      <a class="btn btn-borde" routerLink="/simulador">Calcula tu cuota</a>
+    </div>
   </div>
 </section>
 
 <div class="wrap">
-  <section id="simulador" class="sim" aria-label="Simulador">
-    <app-simulador [(producto)]="producto" />
-  </section>
-
-  <section class="seccion" aria-labelledby="tituloRanking">
-    <div class="titulo-sec">
+  <section class="top tarjeta" aria-labelledby="tituloTop">
+    <div class="top-cabeza">
       <div>
-        <h2 id="tituloRanking">Ranking por tasa real</h2>
-        <p class="muted sub">
-          Ordenado por lo que cobran en promedio, no por quién paga publicidad.
+        <h2 id="tituloTop">Las 3 tasas más bajas en libre inversión</h2>
+        <p class="nota">
+          Tasa efectiva anual que cobran en promedio · {{ corte.fuente }}, corte
+          {{ corte.fecha | date: "d MMM y" : "UTC" }}
         </p>
       </div>
-      <a routerLink="/ranking" [queryParams]="{ producto: producto() }">
+      <a routerLink="/ranking" [queryParams]="{ producto: 'libre-inversion' }">
         Ver ranking completo
       </a>
     </div>
-    <app-tabla-ranking
-      [filas]="top()"
-      [producto]="producto()"
-      [titulo]="nombreProducto() + ' · las 3 que menos cobran'"
-    />
-    <p class="nota fuente">
-      Tasas efectivas anuales reportadas a la {{ corte.fuente }}. Tu tasa final
-      depende de tu perfil.
-      @if (corte.ejemplo) {
-        Por ahora son datos de ejemplo.
+
+    <ol class="bancos">
+      @for (banco of mejores; track banco.entidad; let i = $index) {
+        <li class="banco" [class.primero]="i === 0">
+          <div class="banco-cabeza">
+            <span class="puesto cifra">{{ i + 1 }}</span>
+            <div>
+              <h3>{{ banco.entidad }}</h3>
+              <span class="nota">{{ banco.tipo }}</span>
+            </div>
+            @if (i === 0) {
+              <span class="etq etq-ahorro mejor">Mejor tasa</span>
+            }
+          </div>
+          <div class="cobra">
+            <span class="nota">Cobra en promedio</span>
+            <strong class="cifra">{{ banco.tasaReal | tasa }}</strong>
+          </div>
+          <div class="anuncia">
+            <span class="nota">
+              Anuncia desde
+              <b class="cifra">{{ banco.tasaAnunciada | tasa }}</b>
+            </span>
+            @if (banco.diferencia !== null) {
+              <span class="etq etq-aviso">{{ banco.diferencia | puntos }}</span>
+            }
+          </div>
+        </li>
       }
-    </p>
+    </ol>
+
+    @if (corte.ejemplo) {
+      <p class="etq etq-aviso ejemplo">
+        Datos de ejemplo mientras conectamos los reportes de la Superfinanciera
+      </p>
+    }
   </section>
 
   <section id="como-funciona" class="seccion" aria-labelledby="tituloComo">
@@ -53,6 +81,15 @@
         </li>
       }
     </ol>
+  </section>
+
+  <section class="seccion" aria-labelledby="tituloEntidades">
+    <h2 id="tituloEntidades" class="entidades-titulo">Comparamos tasas de</h2>
+    <ul class="entidades">
+      @for (entidad of entidades; track entidad) {
+        <li>{{ entidad }}</li>
+      }
+    </ul>
   </section>
 
   <section class="seccion">
@@ -77,11 +114,7 @@
         <a
           class="btn btn-claro continuar"
           routerLink="/asesoria"
-          [queryParams]="{
-            urgencia: urgencia(),
-            producto: producto(),
-            origen: 'inicio',
-          }"
+          [queryParams]="{ urgencia: urgencia(), origen: 'inicio' }"
         >
           Continuar
         </a>

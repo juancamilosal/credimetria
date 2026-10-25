@@ -1,6 +1,6 @@
 # Credimetría
 
-**Mide antes de prestar.** Página web que compara la tasa que anuncian y la
+**Compara con datos, no con promesas.** Página web que compara la tasa que anuncian y la
 tasa que de verdad cobran bancos, cooperativas y financieras en Colombia, y
 conecta a la persona con un asesor de crédito aliado.
 
@@ -18,13 +18,14 @@ Siguen el documento "Credimetría · Pantallas a desarrollar en Angular" y el
 diseño "Credimetría · Marca y página web", con una paleta más sobria que la
 morada y oro del diseño (ver abajo).
 
-| Ruta                 | Pantalla         | Qué hace                                                                                               |
-| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------ |
-| `/`                  | Inicio           | Simulador (cuota, total y ahorro frente a la mejor entidad), las 3 mejores tasas, cómo funciona y urgencia |
-| `/ranking`           | Ranking de tasas | Lista completa por tasa real con filtros de producto y tipo de entidad (`?producto=…&tipo=…`)           |
-| `/asesoria`          | Asesoría         | Formulario de prospecto con validaciones y autorización de datos obligatoria                            |
-| `/aliados`           | Asesores aliados | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                |
-| `/politica-de-datos` | Política         | Borrador: el texto legal falta y debe estar antes de abrir el formulario                               |
+| Ruta                 | Pantalla         | Qué hace                                                                                                                         |
+| -------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                  | Inicio           | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría |
+| `/ranking`           | Ranking de tasas | Lista completa por tasa real con filtros de producto y tipo de entidad (`?producto=…&tipo=…`)                                    |
+| `/simulador`         | Simulador        | Cuota, total y ahorro frente a la mejor entidad, con las 3 que menos cobran del producto elegido                                 |
+| `/asesoria`          | Asesoría         | Formulario de prospecto con validaciones y autorización de datos obligatoria                                                     |
+| `/aliados`           | Asesores aliados | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                         |
+| `/politica-de-datos` | Política         | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                         |
 
 - El simulador y el ranking llevan a `/asesoria` con el producto, el monto,
   la entidad o la urgencia en la dirección, y el formulario llega lleno.
@@ -46,7 +47,7 @@ src/app/
     datos/        tasas y aliados de ejemplo, usura del mes
     servicios/    TasasService, AliadosService, ProspectosService
     utilidades/   cálculos de crédito (tasa mensual, cuota, ahorro)
-  paginas/        inicio (con el simulador), ranking, asesoria, aliados y
+  paginas/        inicio, ranking, simulador, asesoria, aliados y
                   politica-datos
 ```
 
@@ -85,7 +86,7 @@ colores a mano. La paleta es sobria a propósito:
 ```bash
 npm install
 npm start                      # http://localhost:4200 (sin SSR)
-npm run build                  # compila y prerenderiza las 5 rutas
+npm run build                  # compila y prerenderiza las 6 rutas
 npm run serve:ssr:credimetria  # sirve la compilación con SSR
 npm test                       # pruebas con Karma
 npx prettier --write "src/**/*.{ts,html,css}"

@@ -1,15 +1,18 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Chips } from '../../compartido/chips/chips';
-import { TablaRanking } from '../../compartido/tabla-ranking/tabla-ranking';
+import { PuntosPipe, TasaPipe } from '../../compartido/pipes/formato';
 import { URGENCIAS } from '../../core/modelos/prospecto';
-import { Producto } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
-import { Simulador } from './simulador/simulador';
 
+/**
+ * Inicio: qué hace Credimetría, las 3 tasas más bajas de libre inversión,
+ * cómo funciona, con qué entidades comparamos y la entrada a la asesoría.
+ */
 @Component({
   selector: 'app-inicio',
-  imports: [RouterLink, Chips, TablaRanking, Simulador],
+  imports: [DatePipe, RouterLink, Chips, PuntosPipe, TasaPipe],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',
 })
@@ -17,14 +20,15 @@ export class Inicio {
   private readonly tasas = inject(TasasService);
 
   protected readonly corte = this.tasas.corte;
-  /** Producto elegido en el simulador; el ranking resumido lo sigue. */
-  protected readonly producto = signal<Producto>('libre-inversion');
-  protected readonly top = computed(() =>
-    this.tasas.ranking(this.producto()).slice(0, 3),
-  );
-  protected readonly nombreProducto = computed(() =>
-    this.tasas.nombre(this.producto()),
-  );
+  protected readonly mejores = this.tasas
+    .ranking('libre-inversion')
+    .slice(0, 3)
+    .map((t) => ({
+      ...t,
+      diferencia:
+        t.tasaAnunciada === null ? null : t.tasaReal - t.tasaAnunciada,
+    }));
+  protected readonly entidades = this.tasas.entidades();
 
   protected readonly urgencias = URGENCIAS.map((u) => ({
     valor: u.id,

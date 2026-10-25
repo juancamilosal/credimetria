@@ -1,21 +1,22 @@
 .hero {
-  padding-block: 48px 124px;
+  padding-block: 56px 120px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
 }
 
 .hero h1 {
-  font-size: clamp(32px, 5.5vw, 50px);
+  font-size: clamp(34px, 6vw, 56px);
   font-weight: 800;
+  max-width: 18ch;
 }
 
 .hero p {
   font-size: clamp(16px, 2.2vw, 19px);
   color: var(--cm-gris);
-  max-width: 58ch;
+  max-width: 60ch;
 }
 
 .sello {
@@ -27,19 +28,137 @@
   font-weight: 600;
 }
 
-/* El simulador se monta sobre el borde de la portada */
-.sim {
-  max-width: 1000px;
-  margin: -100px auto 0;
-  scroll-margin-top: 24px;
+.acciones {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.sub {
-  margin-top: 6px;
+/* Tarjeta de las 3 mejores: se monta sobre el borde de la portada */
+.top {
+  margin-top: -84px;
+  padding: 24px;
+  gap: 20px;
 }
 
-.fuente {
-  margin-top: 10px;
+.top-cabeza {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px 24px;
+  flex-wrap: wrap;
+}
+
+.top-cabeza h2 {
+  font-size: clamp(20px, 2.6vw, 24px);
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.top-cabeza a {
+  font-weight: 700;
+}
+
+.bancos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.banco {
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-tarjeta);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.primero {
+  border-color: var(--cm-ahorro-600);
+}
+
+.banco-cabeza {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.banco-cabeza h3 {
+  font-size: 18px;
+}
+
+.puesto {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--cm-fondo);
+  color: var(--cm-enlace);
+  font-weight: 500;
+}
+
+.mejor {
+  margin-left: auto;
+}
+
+.cobra {
+  display: flex;
+  flex-direction: column;
+}
+
+.cobra strong {
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1.15;
+}
+
+.anuncia {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--cm-linea-suave);
+  padding-top: 12px;
+}
+
+.ejemplo {
+  align-self: flex-start;
+  white-space: normal;
+}
+
+/* Entidades que comparamos */
+.entidades-titulo {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cm-gris);
+  letter-spacing: 0;
+  margin-bottom: 12px;
+}
+
+.entidades {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.entidades li {
+  padding: 8px 14px;
+  border: 1px solid var(--cm-linea);
+  border-radius: 999px;
+  background: var(--cm-blanco);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cm-gris);
 }
 
 .pasos {
@@ -112,7 +231,15 @@
 
 @media (max-width: 760px) {
   .hero {
-    padding-block: 24px 112px;
+    padding-block: 32px 104px;
+  }
+
+  .top {
+    padding: 18px;
+  }
+
+  .bancos {
+    grid-template-columns: 1fr;
   }
 
   /* Pasos apilados, número a la izquierda */

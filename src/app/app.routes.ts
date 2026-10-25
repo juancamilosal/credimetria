@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    title: 'Credimetría · Mide tu crédito antes de firmarlo',
+    title: 'Credimetría · Compara con datos, no con promesas',
     loadComponent: () =>
       import('./paginas/inicio/inicio').then((m) => m.Inicio),
   },
@@ -12,6 +12,14 @@ export const routes: Routes = [
     title: 'Ranking de tasas · Credimetría',
     loadComponent: () =>
       import('./paginas/ranking/ranking').then((m) => m.Ranking),
+  },
+  {
+    path: 'simulador',
+    title: 'Simulador de crédito · Credimetría',
+    loadComponent: () =>
+      import('./paginas/simulador/simulador-pagina').then(
+        (m) => m.SimuladorPagina,
+      ),
   },
   {
     path: 'asesoria',

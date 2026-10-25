@@ -33,6 +33,13 @@ export class TasasService {
     return this.ranking(producto)[0];
   }
 
+  /** Nombres de todas las entidades que comparamos, en orden alfabético. */
+  entidades(): string[] {
+    return [...new Set(TASAS.map((t) => t.entidad))].sort((a, b) =>
+      a.localeCompare(b, 'es'),
+    );
+  }
+
   nombre(producto: Producto): string {
     return this.productos.find((p) => p.id === producto)?.nombre ?? producto;
   }
