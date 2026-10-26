@@ -287,6 +287,43 @@ export const REGLAS = {
     },
   },
 
+  davibank: {
+    // Antes Scotiabank Colpatria. PDF "Tasas y productos crédito"
+    // (Tasas-y-productos-credito-2026.pdf), enlazado en davibank.com/tasas-y-tarifas.
+    // Libre inversión solo en E.A. (desde y hasta); la M.V. se calcula.
+    enlace:
+      /[^"'\s<>()]*Tasas-y-productos-credito[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
+    leer(texto) {
+      const t = plano(texto);
+      // "Vigentes mes de Octubre (del día 1 al día 31) 2026"
+      const vig = exigir(
+        t,
+        /Vigentes mes de (\p{L}+) \(del día (\d{1,2}) al día \d{1,2}\) (\d{4})/u,
+        "la vigencia del mes",
+      );
+      const bloque = despuesDe(
+        t,
+        /Consumo Libre Inversión/,
+        'la tabla "Consumo Libre Inversión"',
+      );
+      const m = exigir(
+        bloque,
+        /Corriente desde \** ?([\d,]+)% ([\d,]+)%/,
+        'la fila "Corriente desde" de libre inversión',
+      );
+      const eaDesde = numero(m[1]);
+      const eaHasta = numero(m[2]);
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: mensual(eaHasta),
+        vigencia: fecha(`${vig[2]} de ${vig[1]} de ${vig[3]}`),
+        frase: m[0],
+      };
+    },
+  },
+
   "av-villas": {
     // "Tasas Activas 01 <Mes> <Año>.pdf"; si la fuente tiene url_indice, se
     // busca ahí el enlace más nuevo.
