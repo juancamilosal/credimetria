@@ -213,11 +213,13 @@ async function revisarFuente(fuente) {
     }
   }
 
-  console.log(`${nombre}: PDF nuevo`, tasa ?? "", problemas);
+  const queEs =
+    fuente.tipo === "pagina" ? "tasa nueva en su página" : "PDF nuevo";
+  console.log(`${nombre}: ${queEs}`, tasa ?? "", problemas);
   if (soloMirar)
     return problemas.length
-      ? { problema: `${nombre}: PDF nuevo, pero ${problemas.join(" ")}` }
-      : { nuevo: `${nombre}: PDF nuevo (sin guardar, --sin-guardar).` };
+      ? { problema: `${nombre}: ${queEs}, pero ${problemas.join(" ")}` }
+      : { nuevo: `${nombre}: ${queEs} (sin guardar, --sin-guardar).` };
 
   const copia = await prueba();
   const archivo = await subirArchivo(
@@ -274,10 +276,10 @@ async function revisarFuente(fuente) {
 
   return leida
     ? {
-        nuevo: `${nombre}: PDF nuevo (rige desde ${tasa.vigencia}). Leí ${tasa.mvDesde} % a ${sinMaxima ? USURA.mv + " % (usura)" : tasa.mvHasta + " %"} M.V.; está por aprobar.`,
+        nuevo: `${nombre}: ${queEs} (rige desde ${tasa.vigencia}). Leí ${tasa.mvDesde} % a ${sinMaxima ? USURA.mv + " % (usura)" : tasa.mvHasta + " %"} M.V.; está por aprobar.`,
       }
     : {
-        problema: `${nombre}: PDF nuevo guardado, pero no pude leer la tasa: ${problemas.join(" ")} Quedó por aprobar sin valores.`,
+        problema: `${nombre}: ${queEs} guardado, pero no pude leer la tasa: ${problemas.join(" ")} Quedó por aprobar sin valores.`,
       };
 }
 

@@ -25,6 +25,7 @@ const ESPERADO = {
   bancolombia: [1.3, 16.77, 2.12, 28.57, "2026-10-01"],
   davivienda: [1.38, 17.87, null, null, "2026-10-19"],
   "av-villas": [1.24, 16, 2.118, 28.59, "2026-10-01"],
+  "banco-falabella": [1.13, 14.435, 2.117, 28.581, "2026-10-01"],
 };
 
 describe("reglas por banco", () => {
@@ -128,6 +129,14 @@ describe("ayudas", () => {
         "/d/Tasas+Activas+01+Diciembre+2026.pdf",
       ]),
       "/d/Tasas+Activas+01+Abril+2027.pdf",
+    );
+    // Meses abreviados (Falabella).
+    assert.equal(
+      masReciente([
+        "/doc/02-VERTICAL-TASAS-SEP-2026.pdf",
+        "/doc/02-VERTICAL-TASAS-OCT-2026.pdf",
+      ]),
+      "/doc/02-VERTICAL-TASAS-OCT-2026.pdf",
     );
     // Números largos en la dirección no cuentan como año.
     assert.equal(

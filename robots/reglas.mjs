@@ -242,6 +242,45 @@ export const REGLAS = {
     },
   },
 
+  "banco-falabella": {
+    // "TASAS DE INTERÉS VIGENTES" (p. ej. 02-VERTICAL-TASAS-OCT-2026.pdf),
+    // enlazado en la página de tasas y tarifas (url_indice) junto al de
+    // tarifas, que es otro PDF.
+    enlace: /[^"'\s<>()]*TASAS[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
+    leer(texto) {
+      const t = plano(texto);
+      const bloque = despuesDe(
+        t,
+        /Crédito de Libre Inversión/,
+        'la tabla "Crédito de Libre Inversión"',
+      );
+      // "Vigencia: 01 al 31 de octubre de 2026": rige desde el primer día.
+      const vig = exigir(
+        bloque,
+        /Vigencia: (\d{1,2}) al \d{1,2} de ([^\n]+)/,
+        "la vigencia de libre inversión",
+      );
+      const mv = exigir(
+        bloque,
+        /Mes Vencida ([\d,]+)% M\.V\. ([\d,]+)% M\.V\./,
+        'la fila "Mes Vencida" de libre inversión',
+      );
+      const ea = exigir(
+        bloque,
+        /Efectiva Anual ([\d,]+)% E\.A\. ([\d,]+)% E\.A\./,
+        'la fila "Efectiva Anual" de libre inversión',
+      );
+      return {
+        mvDesde: numero(mv[1]),
+        mvHasta: numero(mv[2]),
+        eaDesde: numero(ea[1]),
+        eaHasta: numero(ea[2]),
+        vigencia: fecha(`${vig[1]} de ${vig[2]}`),
+        frase: `${mv[0]} · ${ea[0]}`,
+      };
+    },
+  },
+
   "av-villas": {
     // "Tasas Activas 01 <Mes> <Año>.pdf"; si la fuente tiene url_indice, se
     // busca ahí el enlace más nuevo.
@@ -329,7 +368,12 @@ export function masReciente(enlaces) {
     const t = decodeURIComponent(u).toLowerCase();
     // Año suelto: no el "2085" de "/10212085/".
     const año = Number(t.match(/(?<!\d)20\d\d(?!\d)/)?.[0] ?? 0);
-    const mes = MESES.findIndex((m) => t.includes(m));
+    let mes = MESES.findIndex((m) => t.includes(m));
+    // Meses abreviados: "TASAS-OCT-2026".
+    if (mes < 0)
+      mes = MESES.findIndex((m) =>
+        new RegExp(`(^|[^a-z])${m.slice(0, 3)}([^a-z]|$)`).test(t),
+      );
     return año * 100 + (mes + 1);
   };
   return [...enlaces].sort((a, b) => puntaje(b) - puntaje(a))[0] ?? null;

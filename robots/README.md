@@ -45,6 +45,7 @@ Davivienda 22,71 % E.A.
 | Bancolombia     | Enlace `Actualizacion_tasas_<Mes>_<Año>.pdf` más nuevo del tarifario (índice)   | "…para los créditos de Libre Inversión": desde y hasta, M.V. y E.A.        |
 | Davivienda      | Dirección fija `/documents/d/guest/tasas-tarifas-davivienda` (**bloquea**)      | "CrediExpress Fijo - Tradicional", fila "Libre Inversión"; hasta = usura   |
 | Banco Popular   | **No publica PDF**: tabla en su página de tasas (fuente de tipo `pagina`)       | "Préstamo Personal de Libre Destino E.A.": desde y hasta (solo E.A.; M.V. calculada) |
+| Banco Falabella | Enlace "TASAS" más nuevo (p. ej. `02-VERTICAL-TASAS-OCT-2026.pdf`) en `/tasas-tarifas` | Tabla "Crédito de Libre Inversión": desde y hasta, M.V. y E.A.; vigencia "01 al 31 de …" |
 | AV Villas       | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo     | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"          |
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
