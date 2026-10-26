@@ -474,6 +474,48 @@ export const REGLAS = {
     },
   },
 
+  "banco-serfinanza": {
+    // PDF mensual "TASAS-1-DE-<MES>-DE-<AÑO>.pdf" (wp-content/uploads/AAAA/MM),
+    // enlazado en /servicio-al-cliente/tasas/. Tabla "Libre Inversión" (no la
+    // de "Libranza Libre Inversión"): una tasa fija por monto ("Hasta $50 MM",
+    // "Mayor a $50 MM"). Desde = la más baja, hasta = la más alta.
+    enlace: /[^"'\s<>()]*TASAS-[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
+    leer(texto) {
+      const t = plano(texto);
+      const desde = despuesDe(
+        t,
+        /(?:^|\n) ?Libre Inversión Tasa M\.V\. Tasa E\.A\./m,
+        'la tabla "Libre Inversión" (no la de libranza)',
+      );
+      const fin = desde.search(/Nota:/);
+      const tabla = fin > 0 ? desde.slice(0, fin) : desde.slice(0, 1500);
+      const filas = [
+        ...tabla.matchAll(
+          /(?:Hasta|Mayor a) \$ ?\d+ ?MM ([\d,]+)% Nominal M\.V ([\d,]+)% EA/g,
+        ),
+      ];
+      if (!filas.length)
+        throw new ReglaRota(
+          'No encontré las filas "Hasta / Mayor a $… MM" de libre inversión en el documento.',
+        );
+      const vig = exigir(
+        desde,
+        /Vigencia de tasas a partir del ([^\n]+)/,
+        "la vigencia de libre inversión",
+      );
+      const mv = filas.map((f) => numero(f[1]));
+      const ea = filas.map((f) => numero(f[2]));
+      return {
+        mvDesde: Math.min(...mv),
+        mvHasta: Math.max(...mv),
+        eaDesde: Math.min(...ea),
+        eaHasta: Math.max(...ea),
+        vigencia: fecha(vig[1]),
+        frase: filas.map((f) => f[0]).join(" · "),
+      };
+    },
+  },
+
   "av-villas": {
     // "Tasas Activas 01 <Mes> <Año>.pdf"; si la fuente tiene url_indice, se
     // busca ahí el enlace más nuevo.
