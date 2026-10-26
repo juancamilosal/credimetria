@@ -427,6 +427,44 @@ export const REGLAS = {
     },
   },
 
+  bancoomeva: {
+    // "Cartelera Crediticia" mensual (Cartelera_Crediticia_v278.pdf…), en
+    // la página de tasas de crédito, con el mes más nuevo primero. Trae una
+    // página para clientes y otra para asociados a Coomeva: se usa la de
+    // clientes (la que le aplica a cualquiera). Solo publica "Tasa desde"
+    // E.A.: hasta = usura.
+    enlace:
+      /[^"'\s<>()]*Cartelera[_-]Crediticia[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
+    leer(texto) {
+      const t = plano(texto);
+      const clientes = despuesDe(
+        t,
+        /Aplica para Clientes Bancoomeva/,
+        'la página "Aplica para Clientes Bancoomeva"',
+      );
+      // "Vigentes mes de 01 al 31 octubre 2026."
+      const vig = exigir(
+        clientes,
+        /Vigentes mes de (\d{1,2}) al \d{1,2} (\p{L}+) (\d{4})/u,
+        "la vigencia del mes",
+      );
+      const m = exigir(
+        clientes,
+        /Libre Inversi[oó]n [^\n]*? ([\d,]+) ?% E\.A/,
+        'la fila "Libre Inversión" de crédito de consumo',
+      );
+      const eaDesde = numero(m[1]);
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta: null,
+        mvHasta: null,
+        vigencia: fecha(`${vig[1]} de ${vig[2]} de ${vig[3]}`),
+        frase: m[0].replace(/\s+/g, " "),
+      };
+    },
+  },
+
   "av-villas": {
     // "Tasas Activas 01 <Mes> <Año>.pdf"; si la fuente tiene url_indice, se
     // busca ahí el enlace más nuevo.
