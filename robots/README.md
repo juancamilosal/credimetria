@@ -58,8 +58,9 @@ Davivienda 22,71 % E.A.
   Falabella): el robot revisa a diario el PDF guardado (el servidor de
   archivos sí deja bajarlo), pero no puede encontrar el del mes siguiente
   porque la página que lo enlaza responde 403. Desde el día 2 de cada mes, si
-  la última tasa guardada es de un mes anterior, entra en el recordatorio
-  (que sale los lunes y el día 2) para subir el PDF nuevo a mano.
+  la última tasa guardada es de un mes anterior, el recordatorio sale **todos
+  los días** hasta que se sube el PDF nuevo en `/admin/tasas` (Davivienda, que no
+  deja ver nada, sigue saliendo solo los lunes).
 - **Revisa lo leído:** desde entre 5 % y la usura, hasta no mayor que la
   usura ni menor que la desde, M.V. y E.A. que cuadren entre sí y fecha de
   vigencia. Si algo falla, la tasa queda por aprobar **sin valores** y con
