@@ -255,6 +255,11 @@ en `public/imagenes/` y su entrada en `FOTOS`.
 
 ## Datos de ejemplo y pendientes
 
+- **Bancos con logo**: en el ranking (tabla y tarjetas del celular) y en el
+  inicio se muestra solo el logo, porque ya trae el nombre; el nombre queda
+  para lectores de pantalla (`visualmente-oculto`). Si una entidad no tiene
+  logo, se muestra el nombre. Por eso conviene subir logos que digan el
+  nombre del banco.
 - **Las tasas vienen de Directus** (desde el 25 oct 2026, 5 bancos de
   prueba en libre inversión: AV Villas, Bancolombia, BBVA, Banco de Bogotá y
   Davivienda). `TasasService.cargar()` corre al arrancar

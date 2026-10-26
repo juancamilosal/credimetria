@@ -126,7 +126,8 @@
                   ><img [src]="fila.logo" alt="" height="20" loading="lazy"
                 /></span>
               }
-              <b>{{ fila.entidad }}</b>
+              <!-- Con logo, el nombre queda solo para lectores de pantalla -->
+              <b [class.visualmente-oculto]="fila.logo">{{ fila.entidad }}</b>
             </span>
             @if (fila.puesto === 1 && marcarMejor()) {
               <span class="etq etq-ahorro mejor">Mejor tasa</span>
@@ -200,7 +201,9 @@
               ><img [src]="fila.logo" alt="" height="20" loading="lazy"
             /></span>
           }
-          {{ fila.entidad }}</b
+          <span [class.visualmente-oculto]="fila.logo">{{
+            fila.entidad
+          }}</span></b
         >
         @if (fila.puesto === 1 && marcarMejor()) {
           <span class="etq etq-ahorro">Mejor tasa</span>

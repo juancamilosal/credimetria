@@ -203,6 +203,25 @@ th[aria-sort="descending"] .flecha {
   gap: 8px;
 }
 
+.tarjeta-top {
+  flex-wrap: wrap;
+}
+
+.tarjeta-top .nombre {
+  min-width: 0;
+}
+
+/* En las tarjetas del celular el logo va un poco más grande */
+.tarjeta .logo-mini {
+  height: 34px;
+  padding: 0 8px;
+}
+
+.tarjeta .logo-mini img {
+  height: 20px;
+  max-width: 130px;
+}
+
 .tarjeta-top .pos {
   margin-right: 6px;
 }

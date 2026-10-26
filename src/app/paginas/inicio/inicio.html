@@ -51,7 +51,9 @@
               /></span>
             }
             <div>
-              <h3>{{ banco.entidad }}</h3>
+              <h3 [class.visualmente-oculto]="banco.logo">
+                {{ banco.entidad }}
+              </h3>
               <span class="nota">{{ banco.tipo }}</span>
             </div>
             @if (i === 0) {
