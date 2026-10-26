@@ -75,6 +75,7 @@ export class Ranking {
 
   protected readonly corte = this.tasas.corte;
   protected readonly sinConexion = this.tasas.sinConexion;
+  protected readonly cargando = this.tasas.cargando;
   protected readonly productos = this.tasas.productos;
   protected readonly tipos = [TODAS, ...this.tasas.tipos];
   protected readonly plazos = PLAZOS;
@@ -104,6 +105,8 @@ export class Ranking {
   protected readonly titulo = computed(() => {
     const n = this.filas().length;
     const tipo = this.tipo() === TODAS ? '' : ` · ${this.tipo()}`;
+    if (this.cargando())
+      return `${this.tasas.nombre(this.producto())}${tipo} · cargando…`;
     return `${this.tasas.nombre(this.producto())}${tipo} · ${n} ${n === 1 ? 'entidad' : 'entidades'}`;
   });
   /** Índice de la opción de orden del celular que coincide, o -1. */

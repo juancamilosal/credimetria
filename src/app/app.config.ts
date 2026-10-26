@@ -1,10 +1,11 @@
-import { registerLocaleData } from '@angular/common';
+import { isPlatformServer, registerLocaleData } from '@angular/common';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import localeEsCo from '@angular/common/locales/es-CO';
 import {
   ApplicationConfig,
   inject,
   LOCALE_ID,
+  PLATFORM_ID,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
@@ -35,7 +36,12 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideClientHydration(withEventReplay()),
     { provide: LOCALE_ID, useValue: 'es-CO' },
-    // Las tasas se leen de Directus antes de pintar la página.
-    provideAppInitializer(() => inject(TasasService).cargar()),
+    // En el servidor las tasas se leen de Directus antes de armar la página.
+    // En el navegador no se espera: si no vinieron con la página, se piden
+    // a /api/tasas mientras la tabla muestra el esqueleto.
+    provideAppInitializer(() => {
+      const carga = inject(TasasService).cargar();
+      return isPlatformServer(inject(PLATFORM_ID)) ? carga : undefined;
+    }),
   ],
 };

@@ -63,6 +63,8 @@ export class TasasService {
       ejemplo: false,
     },
   );
+  /** Todavía se están trayendo las tasas (la tabla muestra el esqueleto). */
+  readonly cargando = signal(!this.iniciales);
   /** No se pudieron leer las tasas. */
   readonly sinConexion = signal(false);
 
@@ -99,6 +101,8 @@ export class TasasService {
       this.sinConexion.set(false);
     } catch {
       this.sinConexion.set(true);
+    } finally {
+      this.cargando.set(false);
     }
   }
 

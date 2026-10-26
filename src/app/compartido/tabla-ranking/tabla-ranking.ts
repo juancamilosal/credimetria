@@ -77,6 +77,9 @@ export class TablaRanking {
   readonly monto = input(MONTO_RANKING);
   readonly plazo = input(PLAZO_RANKING);
   readonly ordenable = input(false);
+  /** Mientras llegan las tasas, filas de esqueleto en vez de la lista. */
+  readonly cargando = input(false);
+  protected readonly esqueleto = [1, 2, 3, 4, 5];
   readonly orden = model<OrdenRanking>(ORDEN_REAL);
   /** Tipos para el filtro del título "Tipo"; vacío si no se filtra. */
   readonly tipos = input<string[]>([]);

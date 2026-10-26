@@ -6,6 +6,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { provideLocationMocks } from '@angular/common/testing';
 import { provideRouter, Router } from '@angular/router';
+import { TasasService } from '../../core/servicios/tasas.service';
 import { Ranking } from './ranking';
 
 /** Tasa real de AV Villas en libre inversión, la primera del ranking. */
@@ -151,5 +152,14 @@ describe('Ranking', () => {
     fixture.detectChanges();
     const enlace = html.querySelector<HTMLAnchorElement>('tbody .quiero')!;
     expect(enlace.getAttribute('href')).toContain('monto=15000000');
+  });
+
+  it('muestra el esqueleto mientras llegan las tasas', () => {
+    TestBed.inject(TasasService).cargando.set(true);
+    fixture.detectChanges();
+    expect(html.querySelectorAll('tbody tr.cargando').length).toBe(5);
+    expect(entidades()).toEqual([]);
+    expect(html.querySelector('caption')!.textContent).toContain('cargando');
+    expect(html.textContent).not.toContain('Todavía no tenemos tasas');
   });
 });

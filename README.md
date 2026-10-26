@@ -40,7 +40,11 @@ morada y oro del diseño (ver abajo).
   por" y "Tipo de entidad". Todo queda en la dirección
   (`?producto=…&tipo=…&monto=…&plazo=…&orden=diferencia-desc`, con
   `Location.replaceState`, sin navegar, para que la pantalla no suba) y "Quiero
-  esta" lleva el monto a la asesoría.
+  esta" lleva el monto a la asesoría. Las cifras de cada fila van en la
+  misma línea (`vertical-align: baseline`) y los logos miden 40 px de alto.
+  Si las tasas no vinieron con la página, la tabla y las tarjetas muestran
+  un esqueleto (`TasasService.cargando`) mientras llegan de `/api/tasas`;
+  en el servidor la página se arma ya con las tasas.
 - **Compara tu oferta** (`paginas/compara-oferta/`): preguntas fijas con
   botones (producto, monto, plazo, qué le dijeron: tasa E.A., tasa mensual o
   solo la cuota). Convierte la tasa mensual a E.A., saca la tasa real de la

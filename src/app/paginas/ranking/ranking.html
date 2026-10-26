@@ -105,6 +105,7 @@
     [monto]="monto()"
     [plazo]="plazo()"
     [ordenable]="true"
+    [cargando]="cargando()"
     [(orden)]="orden"
     [tipos]="tipos"
     [(tipo)]="tipo"
@@ -114,7 +115,7 @@
       * Tope de usura del mes: la entidad no publica una tasa máxima en su PDF.
     </p>
   }
-  @if (!filas().length && !sinConexion()) {
+  @if (!filas().length && !sinConexion() && !cargando()) {
     <p class="nota pie-tabla">
       Todavía no tenemos tasas de este producto. Pronto las agregamos.
     </p>
