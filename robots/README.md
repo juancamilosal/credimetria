@@ -62,8 +62,11 @@ Davivienda 22,71 % E.A.
   mano en `/admin/tasas`.
 - **Davivienda bloquea servidores** (prueba del 26 oct 2026 en el VPS: 403
   con Node, con `curl` y con Chromium de Playwright, incluso en su página de
-  tasas). Su regla tiene `bloquea: true`: el robot lo intenta cada día, pero
-  avisa solo los lunes, con el enlace, para revisarlo y subirlo a mano.
+  tasas). Su regla tiene `bloquea: true`: el robot lo intenta cada día y,
+  los lunes, manda un **correo aparte de recordatorio** con cada banco que
+  toca revisar a mano: enlace al PDF, página del banco y el último PDF
+  guardado (desde cuándo rige y cuándo se subió). `--recordatorio` lo manda
+  el día que sea.
 
 ### Cuando una regla se rompe
 

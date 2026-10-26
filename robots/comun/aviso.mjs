@@ -9,12 +9,13 @@
 const ADMIN = "https://credimetria.valkiriacode.com/admin/tasas";
 
 /**
- * Manda un correo con los puntos de `lineas`. Nunca lanza error: si el
+ * Manda un correo con los puntos de `lineas` (y antes, si llega, `intro`). Nunca lanza error: si el
  * correo falla, lo deja en la consola para verlo en los registros.
  */
-export async function avisar(asunto, lineas) {
+export async function avisar(asunto, lineas, intro) {
   const cuerpo = [
-    ...lineas.map((l) => `• ${l}`),
+    ...(intro ? [intro, ""] : []),
+    lineas.map((l) => `• ${l}`).join("\n\n"),
     "",
     `Revisa y aprueba en ${ADMIN}`,
     "",

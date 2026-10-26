@@ -7,13 +7,17 @@
 //   3. Si es nuevo, lo sube a `documentos` (origen robot) y crea en
 //      `tasas_publicadas` la tasa leída, en "por revisar". Nunca publica:
 //      siempre la aprueba una persona en /admin/tasas.
-//   4. Manda un correo si no encontró el PDF, si la regla ya no lo lee, si lo
+//   4. Los bancos que bloquean la descarga (regla con `bloquea`) van en un
+//      recordatorio aparte los lunes, con los enlaces para revisarlos a mano.
+//   5. Manda un correo si no encontró el PDF, si la regla ya no lo lee, si lo
 //      leído no tiene sentido o si hay una tasa nueva por aprobar.
 //
 // Uso:
 //   DIRECTUS_TOKEN=<token del robot> node robots/pdf-bancos.mjs
 //   node robots/pdf-bancos.mjs --sin-guardar     (revisa sin escribir nada)
 //   node robots/pdf-bancos.mjs --probar bbva archivo.pdf   (solo la regla)
+//   --recordatorio   manda hoy el recordatorio de los bancos que se revisan
+//                    a mano (normalmente sale los lunes)
 
 import { readFile } from "node:fs/promises";
 import { avisar } from "./comun/aviso.mjs";
@@ -28,6 +32,11 @@ const USURA = JSON.parse(
   ),
 );
 const soloMirar = process.argv.includes("--sin-guardar");
+/** Día del recordatorio de los bancos que se revisan a mano (1 = lunes). */
+const DIA_RECORDATORIO = 1;
+const recordar =
+  process.argv.includes("--recordatorio") ||
+  new Date().getDay() === DIA_RECORDATORIO;
 
 /** Lee un PDF con la regla del banco y dice qué encontró. */
 async function leerPdf(banco, datos) {
@@ -61,6 +70,23 @@ async function direcciones(fuente, regla, notas) {
   return lista.filter((u, i) => u && lista.indexOf(u) === i);
 }
 
+/**
+ * Lo que va en el recordatorio de un banco que se revisa a mano: dónde ver
+ * su PDF y cuál es el último que está guardado.
+ */
+async function recordatorio(fuente, nombre) {
+  const [ultimo] = await directus(
+    "GET",
+    `/items/documentos?filter[fuente][_eq]=${fuente.id}&sort=-vigente_desde,-date_created&limit=1&fields=vigente_desde,date_created`,
+  );
+  return [
+    `${nombre}`,
+    `   PDF de tasas: ${fuente.url}`,
+    ...(fuente.url_indice ? [`   Página: ${fuente.url_indice}`] : []),
+    `   Último guardado: ${ultimo ? `rige desde ${ultimo.vigente_desde ?? "—"} (subido el ${ultimo.date_created.slice(0, 10)})` : "ninguno"}`,
+  ].join("\n");
+}
+
 /** Revisa una fuente; devuelve qué pasó para el correo. */
 async function revisarFuente(fuente) {
   const banco = fuente.entidad?.codigo;
@@ -87,12 +113,7 @@ async function revisarFuente(fuente) {
   if (!datos) {
     if (regla.bloquea) {
       console.log(`${nombre}: bloquea la descarga desde el servidor.`);
-      // Recordatorio semanal (lunes) en vez de un correo diario.
-      return new Date().getDay() === 1
-        ? {
-            problema: `${nombre}: no deja bajar su PDF desde el servidor. Revísalo a mano (${fuente.url}) y, si cambió, súbelo en /admin/tasas.`,
-          }
-        : {};
+      return { manual: await recordatorio(fuente, nombre) };
     }
     return {
       problema: `${nombre}: no encontré el PDF. ${[...notas, ...fallos].join(" · ")}`,
@@ -208,11 +229,13 @@ async function main() {
   );
   const nuevos = [];
   const problemas = [];
+  const manuales = [];
   for (const fuente of fuentes) {
     try {
       const r = await revisarFuente(fuente);
       if (r.nuevo) nuevos.push(r.nuevo);
       if (r.problema) problemas.push(r.problema);
+      if (r.manual) manuales.push(r.manual);
     } catch (error) {
       problemas.push(
         `${fuente.entidad?.nombre ?? fuente.id}: error inesperado: ${error.message}`,
@@ -230,6 +253,15 @@ async function main() {
       nuevos,
     );
   else console.log(`Sin cambios en ${fuentes.length} PDF.`);
+
+  // Recordatorio semanal, en un correo aparte, de los bancos que no dejan
+  // bajar su PDF desde el servidor.
+  if (manuales.length && recordar)
+    await avisar(
+      `Recordatorio: revisa a mano ${manuales.length === 1 ? "1 banco" : `${manuales.length} bancos`}`,
+      manuales,
+      "Estos bancos no dejan que el robot baje su PDF. Ábrelo y, si la fecha o las tasas cambiaron, súbelo en Configuración de tasas (Cargar PDF nuevo).",
+    );
 }
 
 main().catch(async (error) => {
