@@ -105,5 +105,13 @@ describe("ayudas", () => {
       ]),
       "/d/Tasas+Activas+01+Abril+2027.pdf",
     );
+    // Números largos en la dirección no cuentan como año.
+    assert.equal(
+      masReciente([
+        "/documents/37648/10212085/Tasas+Activas+01+Octubre+2026+%281%29.pdf/f5",
+        "/documents/2920580/51181841/Tasas+Activas+01+Abril+2026v1.pdf/8d",
+      ]),
+      "/documents/37648/10212085/Tasas+Activas+01+Octubre+2026+%281%29.pdf/f5",
+    );
   });
 });

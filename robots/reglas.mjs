@@ -276,7 +276,8 @@ export function revisar(t, usura) {
 export function masReciente(enlaces) {
   const puntaje = (u) => {
     const t = decodeURIComponent(u).toLowerCase();
-    const año = Number(t.match(/20\d\d/)?.[0] ?? 0);
+    // Año suelto: no el "2085" de "/10212085/".
+    const año = Number(t.match(/(?<!\d)20\d\d(?!\d)/)?.[0] ?? 0);
     const mes = MESES.findIndex((m) => t.includes(m));
     return año * 100 + (mes + 1);
   };
