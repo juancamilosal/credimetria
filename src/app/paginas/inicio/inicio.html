@@ -30,8 +30,10 @@
       <div>
         <h2 id="tituloTop">Las 3 tasas más bajas en libre inversión</h2>
         <p class="nota">
-          Tasa efectiva anual que cobran en promedio · {{ corte().fuente }},
-          corte
+          Tasa efectiva anual que cobran en promedio, según la
+          <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
+            >{{ fuente.texto }} ↗</a
+          >, corte
           {{ corte().fecha | date: "d MMM y" : "UTC" }}
         </p>
       </div>
@@ -71,6 +73,13 @@
               {{ monto | pesos }} a {{ plazo }} meses</span
             >
           </div>
+
+          <p class="total">
+            Pagarías en total <b class="cifra">{{ banco.total | pesos }}</b>
+            <span class="nota"
+              >de intereses {{ banco.total - monto | pesos }}</span
+            >
+          </p>
 
           <dl class="detalle">
             <div>

@@ -85,8 +85,11 @@
     <span class="solo-escritorio"
       >Toca los títulos de la tabla para ordenar; el embudo de "Tipo" filtra.
     </span>
-    Cuota estimada con {{ monto() | pesos }} a {{ plazo() }} meses ·
-    Actualizado:
+    Cuota estimada con {{ monto() | pesos }} a {{ plazo() }} meses · Promedio de
+    la
+    <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
+      >{{ fuente.texto }} ↗</a
+    >, corte
     {{ corte().fecha | date: "d MMM y" : "UTC" }}
     @if (corte().ejemplo) {
       <span class="etq etq-aviso">Datos de ejemplo</span>
@@ -128,8 +131,20 @@
     <div class="tarjeta">
       <b>Cobra en promedio</b>
       <span class="muted">
-        El promedio de los créditos que la entidad desembolsó, según su reporte
-        a la Superfinanciera.
+        El promedio de los créditos que la entidad desembolsó en las últimas 4
+        semanas, según el reporte que envía a la Superfinanciera. Con esta tasa
+        calculamos la cuota.
+        <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
+          >Ver los datos ↗</a
+        >
+      </span>
+    </div>
+    <div class="tarjeta">
+      <b>Pago total</b>
+      <span class="muted">
+        Todo lo que le pagarías a la entidad al terminar: la cuota por el número
+        de meses. Lo que pasa del monto prestado son los intereses. No incluye
+        seguros ni otros cargos.
       </span>
     </div>
     <div class="tarjeta destacada">

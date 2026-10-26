@@ -34,7 +34,8 @@ morada y oro del diseño (ver abajo).
   `compartido/tabla-ranking/`): cada título ordena la tabla al tocarlo (↑/↓,
   `aria-sort`) y el embudo del título "Tipo" filtra por tipo de entidad.
   Arriba se elige el producto y se escriben el monto y el plazo, y la cuota
-  estimada de todas se recalcula al instante. El # siempre es el puesto por
+  estimada y el **pago total** (cuota redondeada × meses, con los intereses
+  debajo; sin seguros ni cargos) de todas se recalculan al instante. El # siempre es el puesto por
   tasa real. En celular, donde no se ven los títulos, hay listas de "Ordenar
   por" y "Tipo de entidad". Todo queda en la dirección
   (`?producto=…&tipo=…&monto=…&plazo=…&orden=diferencia-desc`) y "Quiero
@@ -255,6 +256,10 @@ en `public/imagenes/` y su entrada en `FOTOS`.
 
 ## Datos de ejemplo y pendientes
 
+- **Fuente del promedio a la vista**: el inicio y el ranking enlazan el
+  conjunto de la Superfinanciera en datos.gov.co (`FUENTE_PROMEDIO` en
+  `core/datos/tasas.ts`) de donde sale "Cobra en promedio". Las tarjetas del
+  inicio muestran también "Pagarías en total" y los intereses.
 - **Bancos con logo**: en el ranking (tabla y tarjetas del celular) y en el
   inicio se muestra solo el logo, porque ya trae el nombre; el nombre queda
   para lectores de pantalla (`visualmente-oculto`). Si una entidad no tiene

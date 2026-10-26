@@ -13,6 +13,7 @@ import {
   PLAZO_RANKING,
 } from '../../compartido/tabla-ranking/tabla-ranking';
 import { cuotaMensual } from '../../core/utilidades/credito';
+import { FUENTE_PROMEDIO } from '../../core/datos/tasas';
 import { FOTOS } from '../../core/datos/fotos';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
@@ -39,18 +40,23 @@ export class Inicio {
     this.tasas
       .ranking('libre-inversion')
       .slice(0, 3)
-      .map((t) => ({
-        ...t,
-        diferencia:
-          t.tasaAnunciada === null ? null : t.tasaReal - t.tasaAnunciada,
-        cuota: cuotaMensual(this.monto, t.tasaReal, this.plazo),
-      })),
+      .map((t) => {
+        const cuota = cuotaMensual(this.monto, t.tasaReal, this.plazo);
+        return {
+          ...t,
+          diferencia:
+            t.tasaAnunciada === null ? null : t.tasaReal - t.tasaAnunciada,
+          cuota,
+          total: Math.round(cuota) * this.plazo,
+        };
+      }),
   );
   protected readonly hayUsura = computed(() =>
     this.mejores().some((t) => t.hastaUsura),
   );
   protected readonly entidades = this.tasas.listaEntidades;
   protected readonly fotos = FOTOS;
+  protected readonly fuente = FUENTE_PROMEDIO;
 
   /** Tarjetas con foto por tipo de crédito; cada una lleva a su ranking. */
   protected readonly productos = computed(() =>

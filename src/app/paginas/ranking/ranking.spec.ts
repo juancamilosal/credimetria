@@ -1,7 +1,16 @@
 import { TASAS_DE_PRUEBA } from '../../core/datos/tasas-prueba';
+import { TASAS_PRUEBA } from '../../core/datos/tasas-prueba';
+import { cuotaMensual } from '../../core/utilidades/credito';
+import { formatoPesos } from '../../compartido/pipes/formato';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Ranking } from './ranking';
+
+/** Tasa real de AV Villas en libre inversión, la primera del ranking. */
+const TASAS_PRUEBA_AV_VILLAS = () =>
+  TASAS_PRUEBA.filter((t) => t.producto === 'libre-inversion').sort(
+    (a, b) => a.tasaReal - b.tasaReal,
+  )[0].tasaReal;
 
 describe('Ranking', () => {
   let fixture: ComponentFixture<Ranking>;
@@ -102,6 +111,18 @@ describe('Ranking', () => {
     expect(html.querySelector('.ayuda')?.textContent).toContain(
       'Cuota estimada con $10.000.000 a 36 meses',
     );
+  });
+
+  it('muestra el pago total y los intereses, y enlaza la fuente del promedio', () => {
+    const celda = html.querySelector('tbody tr td:nth-child(8)')!;
+    const cuota = cuotaMensual(20_000_000, TASAS_PRUEBA_AV_VILLAS(), 48);
+    expect(celda.textContent).toContain(formatoPesos(Math.round(cuota) * 48));
+    expect(celda.textContent).toContain(
+      'intereses ' + formatoPesos(Math.round(cuota) * 48 - 20_000_000),
+    );
+    const enlace = html.querySelector<HTMLAnchorElement>('.ayuda a')!;
+    expect(enlace.href).toContain('datos.gov.co');
+    expect(enlace.target).toBe('_blank');
   });
 
   it('"Quiero esta" lleva el monto a la asesoría', () => {

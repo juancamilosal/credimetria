@@ -155,6 +155,19 @@
   line-height: 1.1;
 }
 
+.total {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--cm-fondo);
+  text-align: center;
+  font-size: 14px;
+}
+
+.total .nota {
+  display: block;
+}
+
 .detalle {
   display: flex;
   justify-content: space-between;

@@ -20,6 +20,7 @@ import {
   TODAS,
 } from '../../compartido/tabla-ranking/tabla-ranking';
 import { Producto, TipoEntidad } from '../../core/modelos/tasa';
+import { FUENTE_PROMEDIO } from '../../core/datos/tasas';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { leerNumero } from '../../core/utilidades/credito';
 
@@ -50,6 +51,7 @@ const COLUMNAS: ColumnaRanking[] = [
   'tasaReal',
   'diferencia',
   'cuota',
+  'total',
 ];
 
 /**
@@ -76,6 +78,7 @@ export class Ranking {
   protected readonly tipos = [TODAS, ...this.tasas.tipos];
   protected readonly plazos = PLAZOS;
   protected readonly ordenes = ORDENES;
+  protected readonly fuente = FUENTE_PROMEDIO;
 
   protected readonly producto = signal<Producto>('libre-inversion');
   protected readonly tipo = signal<string>(TODAS);

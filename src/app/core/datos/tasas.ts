@@ -14,3 +14,13 @@ export const PRODUCTOS: InfoProducto[] = [
  * Se actualiza cada mes.
  */
 export const USURA_CONSUMO = { tasa: 28.59, mes: 'octubre de 2026' };
+
+/**
+ * De dónde sale la tasa "Cobra en promedio": el reporte semanal de tasas
+ * (formato 88) que las entidades envían a la Superfinanciera, publicado en
+ * datos.gov.co. Promediamos las últimas 4 semanas, ponderando por monto.
+ */
+export const FUENTE_PROMEDIO = {
+  texto: 'Superfinanciera en datos.gov.co',
+  url: 'https://www.datos.gov.co/Econom-a-y-Finanzas/Tasas-de-inter-s-activas-por-tipo-de-cr-dito-ltimo/qzsc-9esp',
+};

@@ -47,7 +47,16 @@ describe('Inicio', () => {
     expect(primera.querySelector('.cobra')?.textContent).toContain(
       'Cuota de $',
     );
+    expect(primera.querySelector('.total')?.textContent).toContain(
+      'Pagarías en total $',
+    );
+    expect(primera.querySelector('.total')?.textContent).toContain(
+      'de intereses $',
+    );
     expect(primera.querySelector('.detalle')?.textContent).toContain('Anuncia');
+    expect(
+      html.querySelector<HTMLAnchorElement>('.top-cabeza .nota a')?.href,
+    ).toContain('datos.gov.co');
     expect(
       primera.querySelector<HTMLAnchorElement>('.quiero')?.getAttribute('href'),
     ).toContain('origen=inicio');

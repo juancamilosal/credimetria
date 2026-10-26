@@ -25,7 +25,8 @@ export type ColumnaRanking =
   | 'tasaAnunciada'
   | 'tasaReal'
   | 'diferencia'
-  | 'cuota';
+  | 'cuota'
+  | 'total';
 
 export interface OrdenRanking {
   columna: ColumnaRanking;
@@ -40,11 +41,14 @@ interface FilaVista extends TasaEntidad {
   puesto: number;
   diferencia: number | null;
   cuota: number;
+  /** Lo que se paga al final: cuota × meses. */
+  total: number;
 }
 
 /**
  * Entidades por tasa real: tabla en escritorio y tarjetas en celular. Con
- * `completa` agrega la cuota estimada y el enlace "Quiero esta". Con
+ * `completa` agrega la cuota estimada, el pago total y el enlace "Quiero
+ * esta". Con
  * `ordenable`, cada título ordena la tabla al tocarlo (como en Excel) y el
  * título "Tipo" filtra por tipo de entidad.
  */
@@ -80,13 +84,17 @@ export class TablaRanking {
   protected readonly todas = TODAS;
 
   protected readonly vista = computed<FilaVista[]>(() => {
-    const filas = this.filas().map((t, i) => ({
-      ...t,
-      puesto: i + 1,
-      diferencia:
-        t.tasaAnunciada === null ? null : t.tasaReal - t.tasaAnunciada,
-      cuota: cuotaMensual(this.monto(), t.tasaReal, this.plazo()),
-    }));
+    const filas = this.filas().map((t, i) => {
+      const cuota = cuotaMensual(this.monto(), t.tasaReal, this.plazo());
+      return {
+        ...t,
+        puesto: i + 1,
+        diferencia:
+          t.tasaAnunciada === null ? null : t.tasaReal - t.tasaAnunciada,
+        cuota,
+        total: Math.round(cuota) * this.plazo(),
+      };
+    });
     if (!this.ordenable()) return filas;
     const { columna, dir } = this.orden();
     const signo = dir === 'asc' ? 1 : -1;
