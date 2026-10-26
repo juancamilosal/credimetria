@@ -94,14 +94,6 @@
   gap: 14px;
   background: var(--cm-blanco);
   box-shadow: 0 1px 2px rgb(15 27 42 / 0.04);
-  transition:
-    transform 0.15s,
-    box-shadow 0.15s;
-}
-
-.banco:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgb(15 27 42 / 0.08);
 }
 
 .primero {

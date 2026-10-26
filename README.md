@@ -264,7 +264,8 @@ en `public/imagenes/` y su entrada en `FOTOS`.
 - **Fuente del promedio a la vista**: el inicio y el ranking enlazan el
   conjunto de la Superfinanciera en datos.gov.co (`FUENTE_PROMEDIO` en
   `core/datos/tasas.ts`) de donde sale "Cobra en promedio". Las tarjetas del
-  inicio muestran también "Pagarías en total" y los intereses.
+  inicio muestran también "Pagarías en total" y los intereses, y quedan
+  quietas al pasar el mouse (sin animación).
 - **Bancos con logo**: en el ranking (tabla y tarjetas del celular) y en el
   inicio se muestra solo el logo, porque ya trae el nombre; el nombre queda
   para lectores de pantalla (`visualmente-oculto`). Si una entidad no tiene
