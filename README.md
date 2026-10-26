@@ -198,8 +198,12 @@ con `USURA_CONSUMO` (no se ofrece en vivienda).
 
 En `robots/` (ver `robots/README.md`): dónde busca cada robot y qué guarda.
 `robots/promedio-sfc.mjs` actualiza `tasas_promedio` desde la
-Superfinanciera (`--sin-guardar` para solo verlo). El robot de los PDF de
-los bancos está por hacer.
+Superfinanciera (`--sin-guardar` para solo verlo). `robots/pdf-bancos.mjs`
+revisa el PDF de cada banco con reglas por banco (`robots/reglas.mjs`): si
+cambió, lo guarda y deja la tasa leída por aprobar en `/admin/tasas`. Ambos
+mandan correo si algo falla o si hay algo que aprobar. Corren en Coolify con
+`robots/Dockerfile` (pasos en `robots/README.md`). Pruebas: `cd robots &&
+npm test`.
 
 ## Estructura
 
@@ -209,7 +213,8 @@ src/app/
                   (pesos: $20.000.000, tasa: 21,48 %, puntos: +7,38 pts)
   core/
     modelos/      tasa, prospecto y aliado
-    datos/        productos, usura del mes, aliados de ejemplo y tasas
+    datos/        productos, usura del mes (usura.json, la lee también el
+                  robot de los PDF), aliados de ejemplo y tasas
                   solo para las pruebas
     servicios/    TasasService, AliadosService, ProspectosService
     utilidades/   cálculos de crédito (tasa mensual, cuota, ahorro, tasa

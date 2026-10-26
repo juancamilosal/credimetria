@@ -10,6 +10,12 @@
 //   DIRECTUS_URL=https://credimetria-api.valkiriacode.com \
 //   DIRECTUS_TOKEN=<token del usuario robot> node robots/promedio-sfc.mjs
 //   node robots/promedio-sfc.mjs --sin-guardar   (solo muestra los promedios)
+//
+// Manda un correo (comun/aviso.mjs) si falla, si un banco no reportó o si
+// una tasa saltó más de 2 puntos.
+
+import { avisar } from "./comun/aviso.mjs";
+import { directus, hayToken } from "./comun/directus.mjs";
 
 const SFC = "https://www.datos.gov.co/resource/qzsc-9esp.json";
 const SEMANAS = 4;
@@ -19,27 +25,9 @@ const PRODUCTOS = { "libre-inversion": "Libre inversión" };
 const SALTO = 2;
 
 const soloMostrar = process.argv.includes("--sin-guardar");
-const DIRECTUS =
-  process.env.DIRECTUS_URL ?? "https://credimetria-api.valkiriacode.com";
-const TOKEN = process.env.DIRECTUS_TOKEN;
-
-async function directus(metodo, ruta, cuerpo) {
-  const r = await fetch(DIRECTUS + ruta, {
-    method: metodo,
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-      ...(cuerpo instanceof FormData
-        ? {}
-        : { "Content-Type": "application/json" }),
-    },
-    body:
-      cuerpo instanceof FormData ? cuerpo : cuerpo && JSON.stringify(cuerpo),
-  });
-  const texto = await r.text();
-  if (!r.ok)
-    throw new Error(`${metodo} ${ruta} → ${r.status} ${texto.slice(0, 300)}`);
-  return texto ? JSON.parse(texto).data : null;
-}
+const TOKEN = hayToken();
+/** Lo que necesita que alguien lo mire (va por correo al final). */
+const revisar = [];
 
 async function sfc(params) {
   const url = `${SFC}?${new URLSearchParams(params)}`;
@@ -153,6 +141,14 @@ async function main() {
       const antes = actual?.tasa_ea == null ? null : Number(actual.tasa_ea);
       const salto =
         tasa !== null && antes !== null && Math.abs(tasa - antes) > SALTO;
+      if (tasa === null)
+        revisar.push(
+          `${e.codigo}: sin reporte en las ${SEMANAS} semanas al ${corte}; se dejó la tasa anterior.`,
+        );
+      if (salto)
+        revisar.push(
+          `${e.codigo}: el promedio cambió de ${antes} % a ${tasa} % (más de ${SALTO} puntos).`,
+        );
       const fila = {
         entidad: e.codigo,
         producto,
@@ -182,7 +178,13 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exit(1);
-});
+main()
+  .then(() =>
+    revisar.length
+      ? avisar("El promedio de la Superfinanciera necesita revisión", revisar)
+      : undefined,
+  )
+  .catch(async (error) => {
+    await avisar("El robot del promedio falló", [error.message]);
+    process.exit(1);
+  });

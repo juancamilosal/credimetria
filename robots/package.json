@@ -1,0 +1,14 @@
+{
+  "name": "credimetria-robots",
+  "private": true,
+  "type": "module",
+  "description": "Robots que actualizan las tasas de Credimetría en Directus",
+  "scripts": {
+    "promedio": "node promedio-sfc.mjs",
+    "pdf": "node pdf-bancos.mjs",
+    "test": "node --test pruebas/*.test.mjs"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}

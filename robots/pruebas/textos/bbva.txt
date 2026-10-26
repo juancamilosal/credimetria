@@ -1,0 +1,46 @@
+                           Tasas de interés líneas de crédito de consumo
+                                                       Vigencia: A partir de Octubre 05 de 2026
+
+
+                                                                 Libre Inversión
+                                                               Tasa Política RAR*
+         Segmento                             Tasa Mínima                                  Tasa Máxima         Plazo en meses         Cuotas al año
+                                         E.A                  M.V                      E.A              M.V
+               Todos                   23,47%                1,77%                   28,56%            2,12%       6 A 72                12 y 14
+                                                               Crédito Educativo
+                                                               Tasa Política RAR*
+         Segmento                             Tasa Mínima                                 Tasa Máxima          Plazo en meses         Cuotas al año
+                                         E.A                  M.V                      E.A             M.V
+               Todos                   28,56%                2,12%                   28,56%           2,12%        6 A 12                  12
+                                                                     Cupo Rotativo
+                                                                 Tasa Política**
+         Segmento                                    E.A                                     M.V
+                                                                                                                       Plazo en meses
+  Banca personal y Premium                          25,00%                                   1,88%
+     (Bin 250665 TPs Q5 QR QS QX)
+                                                                                                                    Diferido automático a 60
+     Clásico Transaccional                          28,56%                                   2,12%
+
+                                            Libre Inversión - Compra de Cartera
+                                                               Tasa Política RAR*
+         Segmento                        Tasa Mínima Política                         Tasa Máxima Política     Plazo en meses         Cuotas al año
+                                         E.A              M.V                          E.A              M.V
+               Todos                   28,56%           2,12%                        28,56%            2,12%       6 A 12                12 y 14
+
+                                             Cupo Rotativo - Compra de Cartera
+                                                                 Tasa Política**
+         Segmento                                     E.A                                     M.V
+                                                                                                                       Plazo en meses
+  Banca personal y Premium                          20,00%                                   1,53%
+                                                                                                                            12 A 60
+    Clásico Transaccional                           28,56%                                   2,12%
+
+                                                             Libre Inversión - CDT
+                                                                     Tasa Política
+         Segmento                        Tasa Mínima Política                         Tasa Máxima Política     Plazo en meses         Cuotas al año
+                                         E.A              M.V                          E.A              M.V
+               Todos                   15,33%           1,20%                        15,33%            1,20%       6 A 60                  12
+
+* Tasa de interés, depende del perfil del cliente
+**Tasa de interés Fija.
+

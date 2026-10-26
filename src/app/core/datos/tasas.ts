@@ -1,3 +1,4 @@
+import usura from './usura.json';
 import { InfoProducto } from '../modelos/tasa';
 
 export const PRODUCTOS: InfoProducto[] = [
@@ -9,11 +10,11 @@ export const PRODUCTOS: InfoProducto[] = [
 ];
 
 /**
- * Tasa de usura de octubre de 2026 para crédito de consumo ordinario
- * (certificada por la Superfinanciera). Ninguna entidad puede cobrar más.
- * Se actualiza cada mes.
+ * Tasa de usura del mes para crédito de consumo ordinario (certificada por
+ * la Superfinanciera). Ninguna entidad puede cobrar más. Se actualiza cada
+ * mes en `usura.json`, que también lee el robot de los PDF.
  */
-export const USURA_CONSUMO = { tasa: 28.59, mes: 'octubre de 2026' };
+export const USURA_CONSUMO: { tasa: number; mv: number; mes: string } = usura;
 
 /**
  * De dónde sale la tasa "Cobra en promedio": el reporte semanal de tasas
