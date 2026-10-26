@@ -79,21 +79,28 @@ async function main() {
   const hace = new Date(Date.now() - 49 * 864e5).toISOString().slice(0, 10);
 
   for (const [producto, nombreSfc] of Object.entries(PRODUCTOS)) {
-    const lista = entidades
-      .map((e) => `'${partir(e.codigo_sfc).codigo}'`)
-      .join(",");
-    const { url, filas: recientes } = await sfc({
-      $select:
-        "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte," +
-        "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
-        "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
-      $where:
-        `producto_de_cr_dito='${nombreSfc}' AND codigo_entidad in (${lista}) ` +
-        `AND fecha_corte >= '${hace}'`,
-      $group: "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte",
-      $order: "codigo_entidad,fecha_corte",
-      $limit: "1000",
-    });
+    // Una consulta por banco: sumar todos juntos tarda más de ~30 s y
+    // datos.gov.co corta la conexión; uno por uno tarda entre 4 y 10 s.
+    const recientes = [];
+    const consultas = new Map(); // codigo de la entidad → enlace de su consulta
+    for (const e of entidades) {
+      const { tipo, codigo } = partir(e.codigo_sfc);
+      const { url, filas } = await sfc({
+        $select:
+          "nombre_entidad,fecha_corte," +
+          "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
+          "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
+        $where:
+          `producto_de_cr_dito='${nombreSfc}' AND tipo_entidad='${tipo}' ` +
+          `AND codigo_entidad='${codigo}' AND fecha_corte >= '${hace}'`,
+        $group: "nombre_entidad,fecha_corte",
+        $order: "fecha_corte",
+        $limit: "100",
+      });
+      consultas.set(e.codigo, url);
+      for (const f of filas)
+        recientes.push({ ...f, tipo_entidad: tipo, codigo_entidad: codigo });
+    }
     const cortes = [...new Set(recientes.map((f) => f.fecha_corte))]
       .sort()
       .reverse()
@@ -108,7 +115,7 @@ async function main() {
     // Respaldo: lo que respondió la Superfinanciera, con el enlace.
     const csv = [
       `# Fuente: Superintendencia Financiera de Colombia, formato 88, datos.gov.co qzsc-9esp`,
-      `# Consulta:,${url}`,
+      ...[...consultas].map(([codigo, url]) => `# Consulta ${codigo}:,${url}`),
       `# Promedio ponderado por monto = suma(tasa * monto) / suma(monto). Producto: ${nombreSfc}. Consultado el ${new Date().toISOString().slice(0, 10)}.`,
       "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte,tasa_ea_ponderada,monto_desembolsado,numero_creditos",
       ...filas.map((f) =>
@@ -173,7 +180,7 @@ async function main() {
         producto,
         corte,
         respaldo,
-        consulta_url: url,
+        consulta_url: consultas.get(e.codigo),
         actualizada: new Date().toISOString(),
         ...(tasa === null
           ? {

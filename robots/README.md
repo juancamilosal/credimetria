@@ -13,7 +13,10 @@ crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
 - **Cómo:** por entidad (`entidades.codigo_sfc`, tipo-código: Bogotá 1-1,
   Bancolombia 1-7, BBVA 1-13, Davivienda 1-39, AV Villas 1-49) y producto
   (`Libre inversión`), promedio ponderado por monto de las últimas 4
-  semanas.
+  semanas. Hace **una consulta por banco** (4 a 10 s cada una): sumar todos
+  juntos pasaba de ~30 s y datos.gov.co cortaba la conexión. Cada consulta
+  tiene 2 minutos de límite y hasta 3 intentos; cada banco guarda el enlace
+  de su propia consulta.
 - **Guarda:** una fila por entidad y producto en `tasas_promedio`
   (sobrescribe, sin historial, sin aprobación), con la fecha de corte, el
   CSV de respaldo y el enlace de la consulta. Avisa en las notas si una
