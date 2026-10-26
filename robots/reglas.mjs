@@ -15,6 +15,8 @@
 //   bloquea: true si el banco rechaza descargas desde servidores (403 aun con
 //     navegador) o su página no le muestra las tasas al servidor. Se sigue intentando, pero el aviso llega solo los lunes:
 //     ese PDF se revisa y se sube a mano en /admin/tasas.
+//   elegir(enlaces) → de los enlaces encontrados con `enlace`, la dirección
+//     del PDF más nuevo (si no, el del mes más reciente en el nombre).
 //   buscar(fuente, hoy) → direcciones posibles del PDF, la más nueva primero.
 //     Por defecto la de la fuente; `enlace` la busca en la página índice.
 //   leer(texto) → { mvDesde, eaDesde, mvHasta, eaHasta, vigencia, frase }.
@@ -428,13 +430,20 @@ export const REGLAS = {
   },
 
   bancoomeva: {
-    // "Cartelera Crediticia" mensual (Cartelera_Crediticia_v278.pdf…), en
-    // la página de tasas de crédito, con el mes más nuevo primero. Trae una
+    // "Cartelera Crediticia" mensual, en la página de tasas de crédito. Trae una
     // página para clientes y otra para asociados a Coomeva: se usa la de
     // clientes (la que le aplica a cualquiera). Solo publica "Tasa desde"
     // E.A.: hasta = usura.
-    enlace:
-      /[^"'\s<>()]*Cartelera[_-]Crediticia[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
+    // En la página cada mes es un "descargar.php?idFile=<n>" (con o sin "/"
+    // al comienzo y a veces con un espacio); el más nuevo tiene el número
+    // más alto.
+    enlace: /descargar\.php\?idFile=\s*\d+/gi,
+    elegir: (enlaces) => {
+      const numeros = enlaces.map((e) => Number(e.match(/\d+$/)[0]));
+      return numeros.length
+        ? `https://www.bancoomeva.com.co/descargar.php?idFile=${Math.max(...numeros)}`
+        : null;
+    },
     leer(texto) {
       const t = plano(texto);
       const clientes = despuesDe(

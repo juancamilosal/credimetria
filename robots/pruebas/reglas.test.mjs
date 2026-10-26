@@ -157,6 +157,15 @@ describe("ayudas", () => {
       ]),
       "/doc/02-VERTICAL-TASAS-OCT-2026.pdf",
     );
+    // Bancoomeva: el idFile más alto.
+    assert.equal(
+      REGLAS.bancoomeva.elegir([
+        "descargar.php?idFile=25298",
+        "/descargar.php?idFile= 24960",
+        "descargar.php?idFile=25257",
+      ]),
+      "https://www.bancoomeva.com.co/descargar.php?idFile=25298",
+    );
     // Números largos en la dirección no cuentan como año.
     assert.equal(
       masReciente([

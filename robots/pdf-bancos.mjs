@@ -81,10 +81,12 @@ async function direcciones(fuente, regla, notas) {
   if (regla.enlace && fuente.url_indice) {
     try {
       const html = (await pagina(fuente.url_indice)).replaceAll("&amp;", "&");
-      const enlaces = [...html.matchAll(regla.enlace)].map(
-        (m) => new URL(m[0], fuente.url_indice).href,
-      );
-      const nuevo = masReciente(enlaces);
+      const encontrados = [...html.matchAll(regla.enlace)].map((m) => m[0]);
+      const nuevo = regla.elegir
+        ? regla.elegir(encontrados)
+        : masReciente(
+            encontrados.map((e) => new URL(e, fuente.url_indice).href),
+          );
       if (nuevo) lista.unshift(nuevo);
       else notas.push(`No vi el enlace al PDF en ${fuente.url_indice}.`);
     } catch (error) {
