@@ -391,6 +391,34 @@ export const REGLAS = {
     },
   },
 
+  "lulo-bank": {
+    // No publica PDF: página legal "Tasas y tarifas del crédito" con un solo
+    // rango "Desde … M.V - … EA hasta … M.V - … EA".
+    pagina: true,
+    pantallazo: "Tasas y tarifas del crédito",
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(
+        t,
+        /vigentes desde el (\d{1,2} de \p{L}+ de \d{4})/u,
+        "la vigencia de las tasas",
+      );
+      const m = exigir(
+        t,
+        /Desde ([\d.,]+)% M\.?V\.? - ([\d.,]+)% E\.?A\.? hasta ([\d.,]+)% M\.?V\.? - ([\d.,]+)% E\.?A/,
+        'el rango "Desde … M.V - … EA hasta … M.V - … EA"',
+      );
+      return {
+        mvDesde: numero(m[1]),
+        eaDesde: numero(m[2]),
+        mvHasta: numero(m[3]),
+        eaHasta: numero(m[4]),
+        vigencia: fecha(vig[1]),
+        frase: m[0],
+      };
+    },
+  },
+
   "av-villas": {
     // "Tasas Activas 01 <Mes> <Año>.pdf"; si la fuente tiene url_indice, se
     // busca ahí el enlace más nuevo.

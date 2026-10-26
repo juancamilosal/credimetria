@@ -63,6 +63,19 @@ describe("reglas por banco", () => {
     assert.deepEqual(revisar(t, USURA), []);
   });
 
+  it("lulo-bank: lee el rango de su página legal (no publica PDF)", () => {
+    const html = readFileSync(
+      new URL("./textos/lulo-bank.html", import.meta.url),
+      "utf8",
+    );
+    const t = REGLAS["lulo-bank"].leer(textoHtml(html));
+    assert.deepEqual(
+      [t.mvDesde, t.eaDesde, t.mvHasta, t.eaHasta, t.vigencia],
+      [1.17, 14.97, 1.88, 25, "2025-10-01"],
+    );
+    assert.deepEqual(revisar(t, USURA), []);
+  });
+
   it("avisa qué no encontró si el PDF cambió de forma", () => {
     assert.throws(
       () => REGLAS.bbva.leer(texto("davivienda")),
