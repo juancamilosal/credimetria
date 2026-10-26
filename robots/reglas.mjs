@@ -6,6 +6,10 @@
 //     (fuente de tipo "pagina"). El robot lee el texto de la página y, si la
 //     tasa cambió, guarda un pantallazo de la tabla (`pantallazo`: texto
 //     que identifica la tabla) como prueba.
+//   mensual: true si el banco publica un PDF nuevo cada mes con otra dirección
+//     y su página índice bloquea al servidor (Falabella). El robot revisa el
+//     PDF guardado y, si ya es de un mes anterior, lo pone en el recordatorio
+//     para subir a mano el del mes.
 //   bloquea: true si el banco rechaza descargas desde servidores (403 aun con
 //     navegador). Se sigue intentando, pero el aviso llega solo los lunes:
 //     ese PDF se revisa y se sube a mano en /admin/tasas.
@@ -243,9 +247,11 @@ export const REGLAS = {
   },
 
   "banco-falabella": {
-    // "TASAS DE INTERÉS VIGENTES" (p. ej. 02-VERTICAL-TASAS-OCT-2026.pdf),
-    // enlazado en la página de tasas y tarifas (url_indice) junto al de
-    // tarifas, que es otro PDF.
+    // "TASAS DE INTERÉS VIGENTES" (p. ej. 02-VERTICAL-TASAS-OCT-2026.pdf, en
+    // assets.ctfassets.net), enlazado en la página de tasas y tarifas
+    // (url_indice) junto al de tarifas. Esa página responde 403 al servidor
+    // (también con Chromium, oct 2026): cada mes se sube a mano.
+    mensual: true,
     enlace: /[^"'\s<>()]*TASAS[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
     leer(texto) {
       const t = plano(texto);
@@ -392,4 +398,15 @@ export function mismasTasas(leida, guardada) {
       guardada[c] !== undefined &&
       Math.abs(Number(guardada[c]) - leida[c]) < 0.0001,
   );
+}
+
+/**
+ * El último PDF guardado de un banco mensual ya es de un mes anterior al de
+ * `hoy` (desde el día 2, para darle al banco un día para publicar).
+ */
+export function mesVencido(vigenteDesde, hoy) {
+  if (hoy.getDate() < 2) return false;
+  if (!vigenteDesde) return true;
+  const [año, mes] = vigenteDesde.split("-").map(Number);
+  return año * 12 + mes < hoy.getFullYear() * 12 + hoy.getMonth() + 1;
 }

@@ -9,6 +9,7 @@ import {
   fecha,
   masReciente,
   mensual,
+  mesVencido,
   mismasTasas,
   REGLAS,
   revisar,
@@ -191,5 +192,16 @@ describe("páginas web", () => {
   it("pasa de E.A. a M.V.", () => {
     assert.equal(mensual(25.23), 1.8925);
     assert.equal(mensual(16.77), 1.3003);
+  });
+});
+
+describe("mesVencido", () => {
+  const dia = (d) => new Date(2026, 10, d); // noviembre de 2026
+  it("avisa desde el día 2 si lo guardado es de un mes anterior", () => {
+    assert.equal(mesVencido("2026-10-01", dia(1)), false);
+    assert.equal(mesVencido("2026-10-01", dia(2)), true);
+    assert.equal(mesVencido("2026-11-01", dia(15)), false);
+    assert.equal(mesVencido(null, dia(5)), true);
+    assert.equal(mesVencido("2025-12-01", new Date(2026, 0, 3)), true);
   });
 });

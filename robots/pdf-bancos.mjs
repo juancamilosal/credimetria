@@ -13,6 +13,8 @@
 //      siempre la aprueba una persona en /admin/tasas.
 //   4. Los bancos que bloquean la descarga (regla con `bloquea`) van en un
 //      recordatorio aparte los lunes, con los enlaces para revisarlos a mano.
+//      Los de PDF mensual con índice bloqueado (`mensual`) entran ahí cuando
+//      lo guardado es de un mes anterior (también el día 2 de cada mes).
 //   5. Manda un correo si no encontró el PDF, si la regla ya no lo lee, si lo
 //      leído no tiene sentido o si hay una tasa nueva por aprobar.
 //
@@ -29,7 +31,13 @@ import { avisar } from "./comun/aviso.mjs";
 import { directus, hayToken, subirArchivo } from "./comun/directus.mjs";
 import { pantallazo } from "./comun/pantallazo.mjs";
 import { bajarPdf, huella, pagina, textoHtml, textoPdf } from "./comun/pdf.mjs";
-import { masReciente, mismasTasas, REGLAS, revisar } from "./reglas.mjs";
+import {
+  masReciente,
+  mesVencido,
+  mismasTasas,
+  REGLAS,
+  revisar,
+} from "./reglas.mjs";
 
 const USURA = JSON.parse(
   await readFile(
@@ -40,9 +48,11 @@ const USURA = JSON.parse(
 const soloMirar = process.argv.includes("--sin-guardar");
 /** Día del recordatorio de los bancos que se revisan a mano (1 = lunes). */
 const DIA_RECORDATORIO = 1;
+// Los lunes, y el día 2 de cada mes (cuando cambian los PDF mensuales).
 const recordar =
   process.argv.includes("--recordatorio") ||
-  new Date().getDay() === DIA_RECORDATORIO;
+  new Date().getDay() === DIA_RECORDATORIO ||
+  new Date().getDate() === 2;
 
 /** Lee el texto (del PDF o de la página) con la regla del banco. */
 function leerTexto(banco, texto) {
@@ -91,6 +101,23 @@ async function recordatorio(fuente, nombre) {
     `   PDF de tasas: ${fuente.url}`,
     ...(fuente.url_indice ? [`   Página: ${fuente.url_indice}`] : []),
     `   Último guardado: ${ultimo ? `rige desde ${ultimo.vigente_desde ?? "—"} (subido el ${ultimo.date_created.slice(0, 10)})` : "ninguno"}`,
+  ].join("\n");
+}
+
+/**
+ * Banco con PDF mensual (regla `mensual`): si lo último guardado es de un
+ * mes anterior, el texto para el recordatorio; si no, null.
+ */
+async function pdfDelMes(fuente, nombre) {
+  const [ultimo] = await directus(
+    "GET",
+    `/items/tasas_publicadas?filter[fuente][_eq]=${fuente.id}&filter[estado][_in]=publicada,por_revisar` +
+      "&sort=-vigente_desde&limit=1&fields=vigente_desde",
+  );
+  if (!mesVencido(ultimo?.vigente_desde, new Date())) return null;
+  return [
+    `${nombre}: publica un PDF nuevo cada mes y su página no deja entrar al robot. Lo último guardado rige desde ${ultimo?.vigente_desde ?? "—"}: baja el de este mes y súbelo.`,
+    `   Página: ${fuente.url_indice ?? fuente.url}`,
   ].join("\n");
 }
 
@@ -314,6 +341,13 @@ async function main() {
       if (r.nuevo) nuevos.push(r.nuevo);
       if (r.problema) problemas.push(r.problema);
       if (r.manual) manuales.push(r.manual);
+      if (REGLAS[fuente.entidad?.codigo]?.mensual) {
+        const vencido = await pdfDelMes(fuente, fuente.entidad.nombre);
+        if (vencido) {
+          console.log(vencido.split("\n")[0]);
+          manuales.push(vencido);
+        }
+      }
     } catch (error) {
       problemas.push(
         `${fuente.entidad?.nombre ?? fuente.id}: error inesperado: ${error.message}`,
@@ -338,7 +372,7 @@ async function main() {
     await avisar(
       `Recordatorio: revisa a mano ${manuales.length === 1 ? "1 banco" : `${manuales.length} bancos`}`,
       manuales,
-      "Estos bancos no dejan que el robot baje su PDF. Ábrelo y, si la fecha o las tasas cambiaron, súbelo en Configuración de tasas (Cargar PDF nuevo).",
+      "Estos bancos no dejan que el robot baje su PDF o encuentre el del mes. Ábrelo y, si la fecha o las tasas cambiaron, súbelo en Configuración de tasas (Cargar PDF nuevo).",
     );
 }
 

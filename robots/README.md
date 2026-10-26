@@ -45,7 +45,7 @@ Davivienda 22,71 % E.A.
 | Bancolombia     | Enlace `Actualizacion_tasas_<Mes>_<Año>.pdf` más nuevo del tarifario (índice)   | "…para los créditos de Libre Inversión": desde y hasta, M.V. y E.A.        |
 | Davivienda      | Dirección fija `/documents/d/guest/tasas-tarifas-davivienda` (**bloquea**)      | "CrediExpress Fijo - Tradicional", fila "Libre Inversión"; hasta = usura   |
 | Banco Popular   | **No publica PDF**: tabla en su página de tasas (fuente de tipo `pagina`)       | "Préstamo Personal de Libre Destino E.A.": desde y hasta (solo E.A.; M.V. calculada) |
-| Banco Falabella | Enlace "TASAS" más nuevo (p. ej. `02-VERTICAL-TASAS-OCT-2026.pdf`) en `/tasas-tarifas` | Tabla "Crédito de Libre Inversión": desde y hasta, M.V. y E.A.; vigencia "01 al 31 de …" |
+| Banco Falabella | PDF mensual en Contentful (`assets.ctfassets.net/…/02-VERTICAL-TASAS-OCT-2026.pdf`); su página `/tasas-tarifas` **bloquea** al servidor | Tabla "Crédito de Libre Inversión": desde y hasta, M.V. y E.A.; vigencia "01 al 31 de …" |
 | AV Villas       | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo     | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"          |
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
@@ -54,6 +54,12 @@ Davivienda 22,71 % E.A.
   Si cambió, toma un **pantallazo de la tabla** con Chromium (Playwright,
   instalado en el Dockerfile) y lo guarda en `documentos` como prueba, en
   lugar del PDF. En la web el enlace dice "Tasas en la página del banco".
+- **PDF mensual con índice bloqueado** (regla con `mensual: true`, hoy
+  Falabella): el robot revisa a diario el PDF guardado (el servidor de
+  archivos sí deja bajarlo), pero no puede encontrar el del mes siguiente
+  porque la página que lo enlaza responde 403. Desde el día 2 de cada mes, si
+  la última tasa guardada es de un mes anterior, entra en el recordatorio
+  (que sale los lunes y el día 2) para subir el PDF nuevo a mano.
 - **Revisa lo leído:** desde entre 5 % y la usura, hasta no mayor que la
   usura ni menor que la desde, M.V. y E.A. que cuadren entre sí y fecha de
   vigencia. Si algo falla, la tasa queda por aprobar **sin valores** y con
