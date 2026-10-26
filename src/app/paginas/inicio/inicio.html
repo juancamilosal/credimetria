@@ -44,42 +44,83 @@
       @for (banco of mejores(); track banco.entidad; let i = $index) {
         <li class="banco" [class.primero]="i === 0">
           <div class="banco-cabeza">
-            <span class="puesto cifra">{{ i + 1 }}</span>
-            @if (banco.logo) {
-              <span class="logo"
-                ><img [src]="banco.logo" alt="" height="24"
-              /></span>
-            }
-            <div>
-              <h3 [class.visualmente-oculto]="banco.logo">
-                {{ banco.entidad }}
-              </h3>
-              <span class="nota">{{ banco.tipo }}</span>
-            </div>
+            <span class="puesto cifra">#{{ i + 1 }}</span>
             @if (i === 0) {
-              <span class="etq etq-ahorro mejor">Mejor tasa</span>
+              <span class="etq etq-ahorro">Mejor tasa</span>
+            } @else {
+              <span class="nota">{{ banco.tipo }}</span>
             }
           </div>
+
+          <div class="marca">
+            @if (banco.logo) {
+              <span class="logo"
+                ><img [src]="banco.logo" alt="" height="28"
+              /></span>
+            }
+            <h3 [class.visualmente-oculto]="banco.logo">
+              {{ banco.entidad }}
+            </h3>
+          </div>
+
           <div class="cobra">
             <span class="nota">Cobra en promedio</span>
             <strong class="cifra">{{ banco.tasaReal | tasa }}</strong>
+            <span class="nota"
+              >Cuota de <b class="cifra">{{ banco.cuota | pesos }}</b> por
+              {{ monto | pesos }} a {{ plazo }} meses</span
+            >
           </div>
-          <div class="anuncia">
-            <span class="nota">
-              Anuncia
-              <b class="cifra">{{ banco.tasaAnunciada | tasa }}</b>
-              @if (banco.tasaHasta) {
-                a
-                <b class="cifra">{{ banco.tasaHasta | tasa }}</b>
-              }
-            </span>
+
+          <dl class="detalle">
+            <div>
+              <dt>Anuncia</dt>
+              <dd class="cifra">
+                {{ banco.tasaAnunciada | tasa }}
+                @if (banco.tasaHasta) {
+                  a {{ banco.tasaHasta | tasa
+                  }}{{ banco.hastaUsura ? "*" : "" }}
+                }
+              </dd>
+            </div>
             @if (banco.diferencia !== null) {
-              <span class="etq etq-aviso">{{ banco.diferencia | puntos }}</span>
+              <div>
+                <dt>Diferencia</dt>
+                <dd>
+                  <span class="etq etq-aviso">{{
+                    banco.diferencia | puntos
+                  }}</span>
+                </dd>
+              </div>
             }
+          </dl>
+
+          <div class="banco-pie">
+            @if (banco.pdf) {
+              <a [href]="banco.pdf" target="_blank" rel="noopener noreferrer"
+                >PDF del banco ↗</a
+              >
+            }
+            <a
+              class="quiero"
+              routerLink="/asesoria"
+              [queryParams]="{
+                producto: 'libre-inversion',
+                entidad: banco.entidad,
+                monto: monto,
+                origen: 'inicio',
+              }"
+              >Quiero esta →</a
+            >
           </div>
         </li>
       }
     </ol>
+    @if (hayUsura()) {
+      <p class="nota">
+        * Tope de usura del mes: el banco no publica una tasa máxima.
+      </p>
+    }
 
     @if (corte().ejemplo) {
       <p class="etq etq-aviso ejemplo">

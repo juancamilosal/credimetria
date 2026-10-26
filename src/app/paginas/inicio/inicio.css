@@ -83,62 +83,113 @@
 }
 
 .banco {
+  /* Tarjeta cuadrada: crece si el contenido no cabe */
+  aspect-ratio: 1;
+  min-width: 0;
   border: 1px solid var(--cm-linea);
-  border-radius: var(--cm-r-tarjeta);
-  padding: 18px;
+  border-radius: var(--cm-r-bloque);
+  padding: 22px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+  background: var(--cm-blanco);
+  box-shadow: 0 1px 2px rgb(15 27 42 / 0.04);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.banco:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgb(15 27 42 / 0.08);
 }
 
 .primero {
-  border-color: var(--cm-ahorro-600);
+  border: 2px solid var(--cm-ahorro-600);
+  background: linear-gradient(
+    180deg,
+    var(--cm-ahorro-100) 0%,
+    var(--cm-blanco) 42%
+  );
 }
 
 .banco-cabeza {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.banco-cabeza h3 {
-  font-size: 18px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
 .puesto {
-  flex: none;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--cm-fondo);
-  color: var(--cm-enlace);
+  font-size: 14px;
   font-weight: 500;
+  color: var(--cm-enlace);
+  background: var(--cm-fondo);
+  border-radius: 999px;
+  padding: 4px 10px;
 }
 
-.mejor {
-  margin-left: auto;
+.marca {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 52px;
+}
+
+.marca h3 {
+  font-size: 20px;
+  text-align: center;
 }
 
 .cobra {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
 }
 
 .cobra strong {
-  font-size: 34px;
+  font-size: 42px;
   font-weight: 500;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
-.anuncia {
+.detalle {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  border-top: 1px solid var(--cm-linea-suave);
+  margin: auto 0 0;
   padding-top: 12px;
+  border-top: 1px solid var(--cm-linea-suave);
+}
+
+.detalle dt {
+  font-size: 12px;
+  color: var(--cm-gris);
+}
+
+.detalle dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+
+.detalle div:last-child {
+  text-align: right;
+}
+
+.banco-pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.quiero {
+  margin-left: auto;
 }
 
 .ejemplo {
@@ -386,7 +437,7 @@
   }
 
   .bancos {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   /* Pasos apilados, número a la izquierda */
@@ -407,20 +458,19 @@
 
 /* Logo del banco; fondo blanco para que se vea en modo oscuro */
 .logo {
-  flex: none;
   display: grid;
   place-items: center;
-  height: 36px;
-  padding: 0 8px;
+  height: 52px;
+  padding: 0 16px;
   background: #fff;
   border: 1px solid var(--cm-linea);
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .logo img {
   display: block;
-  height: 20px;
+  height: 28px;
   width: auto;
-  max-width: 96px;
+  max-width: 160px;
   object-fit: contain;
 }

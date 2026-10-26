@@ -3,7 +3,16 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Chips } from '../../compartido/chips/chips';
 import { Foto } from '../../compartido/foto/foto';
-import { PuntosPipe, TasaPipe } from '../../compartido/pipes/formato';
+import {
+  PesosPipe,
+  PuntosPipe,
+  TasaPipe,
+} from '../../compartido/pipes/formato';
+import {
+  MONTO_RANKING,
+  PLAZO_RANKING,
+} from '../../compartido/tabla-ranking/tabla-ranking';
+import { cuotaMensual } from '../../core/utilidades/credito';
 import { FOTOS } from '../../core/datos/fotos';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
@@ -15,7 +24,7 @@ import { TasasService } from '../../core/servicios/tasas.service';
  */
 @Component({
   selector: 'app-inicio',
-  imports: [DatePipe, RouterLink, Chips, Foto, PuntosPipe, TasaPipe],
+  imports: [DatePipe, RouterLink, Chips, Foto, PesosPipe, PuntosPipe, TasaPipe],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',
 })
@@ -23,6 +32,9 @@ export class Inicio {
   private readonly tasas = inject(TasasService);
 
   protected readonly corte = this.tasas.corte;
+  /** Monto y plazo de ejemplo para la cuota de cada tarjeta. */
+  protected readonly monto = MONTO_RANKING;
+  protected readonly plazo = PLAZO_RANKING;
   protected readonly mejores = computed(() =>
     this.tasas
       .ranking('libre-inversion')
@@ -31,7 +43,11 @@ export class Inicio {
         ...t,
         diferencia:
           t.tasaAnunciada === null ? null : t.tasaReal - t.tasaAnunciada,
+        cuota: cuotaMensual(this.monto, t.tasaReal, this.plazo),
       })),
+  );
+  protected readonly hayUsura = computed(() =>
+    this.mejores().some((t) => t.hastaUsura),
   );
   protected readonly entidades = this.tasas.listaEntidades;
   protected readonly fotos = FOTOS;
