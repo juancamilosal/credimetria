@@ -32,7 +32,7 @@
 import { readFile } from "node:fs/promises";
 import { avisar } from "./comun/aviso.mjs";
 import { directus, hayToken, subirArchivo } from "./comun/directus.mjs";
-import { pantallazo } from "./comun/pantallazo.mjs";
+import { pantallazo, textoConNavegador } from "./comun/pantallazo.mjs";
 import { bajarPdf, huella, pagina, textoHtml, textoPdf } from "./comun/pdf.mjs";
 import {
   masReciente,
@@ -167,7 +167,9 @@ async function revisarFuente(fuente) {
     url = fuente.url;
     let texto;
     try {
-      texto = textoHtml(await pagina(url));
+      texto = regla.navegador
+        ? await textoConNavegador(url, regla.pantallazo)
+        : textoHtml(await pagina(url));
     } catch (error) {
       return {
         problema: `${nombre}: no pude abrir su página de tasas (${url} → ${error.message}).`,

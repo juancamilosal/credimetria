@@ -10,6 +10,8 @@
 //     y su página índice bloquea al servidor (Falabella). El robot revisa el
 //     PDF guardado y, si ya es de un mes anterior, lo pone en el recordatorio
 //     para subir a mano el del mes.
+//   navegador: true si la página se arma con JavaScript y el texto solo se ve
+//     abriéndola con Chromium.
 //   bloquea: true si el banco rechaza descargas desde servidores (403 aun con
 //     navegador). Se sigue intentando, pero el aviso llega solo los lunes:
 //     ese PDF se revisa y se sube a mano en /admin/tasas.
@@ -71,14 +73,14 @@ class ReglaRota extends Error {}
 /** Busca `patron` en `texto` o avisa que la regla ya no sirve. */
 function exigir(texto, patron, queBusca) {
   const m = texto.match(patron);
-  if (!m) throw new ReglaRota(`No encontré ${queBusca} en el PDF.`);
+  if (!m) throw new ReglaRota(`No encontré ${queBusca} en el documento.`);
   return m;
 }
 
 /** Desde el primer `ancla` hasta el final (o error si no está). */
 function despuesDe(texto, ancla, queBusca) {
   const i = texto.search(ancla);
-  if (i < 0) throw new ReglaRota(`No encontré ${queBusca} en el PDF.`);
+  if (i < 0) throw new ReglaRota(`No encontré ${queBusca} en el documento.`);
   return texto.slice(i);
 }
 
@@ -393,11 +395,14 @@ export const REGLAS = {
 
   "lulo-bank": {
     // No publica PDF: página legal "Tasas y tarifas del crédito" con un solo
-    // rango "Desde … M.V - … EA hasta … M.V - … EA".
+    // rango "Desde … M.V - … EA hasta … M.V - … EA". La página se arma con
+    // JavaScript (el HTML no trae las tasas): se lee con el navegador.
     pagina: true,
+    navegador: true,
     pantallazo: "Tasas y tarifas del crédito",
     leer(texto) {
-      const t = plano(texto);
+      // En el navegador cada línea puede quedar aparte: todo en una línea.
+      const t = texto.replace(/\s+/g, " ");
       const vig = exigir(
         t,
         /vigentes desde el (\d{1,2} de \p{L}+ de \d{4})/u,
