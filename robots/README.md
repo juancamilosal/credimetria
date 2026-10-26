@@ -56,7 +56,7 @@ Davivienda 22,71 % E.A.
 | Davibank        | Enlace `Tasas-y-productos-credito…pdf` en `davibank.com/tasas-y-tarifas` (antes Scotiabank Colpatria) | "Consumo Libre Inversión", fila "Corriente desde": E.A. desde y hasta (M.V. calculada); vigencia "mes de … (del día 1 al día 31)" |
 | Banco de Occidente | Dirección fija `/documents/d/guest/tasas-personas-bdo` (índice `/tarifas`)      | "Cupo línea Préstamo Personal", columna LIBRE INVERSIÓN: desde y hasta, M.V. y E.A. |
 | Banco Caja Social | Dirección fija `…/credito-consumo/Tasas-Credito-Libre-Destino.pdf` (índice `/informacion-corporativa/tasas-precios-y-comisiones/`) | Fila "Libre Inversión": E.A. y M.V. desde y hasta; vigencia "18-Jun-2026" (no mensual) |
-| Lulo Bank       | **No publica PDF**: página legal `/legals/doc-tasas-tarifas-credito` (fuente `pagina`) | "Desde … M.V - … EA hasta … M.V - … EA"; vigencia "vigentes desde el …" |
+| Lulo Bank       | **No publica PDF**: página legal `/legals/doc-tasas-tarifas-credito` (fuente `pagina`). Se arma con JavaScript y **no le muestra las tasas al servidor** (ni con Chromium): recordatorio de los lunes | "Desde … M.V - … EA hasta … M.V - … EA"; vigencia "vigentes desde el …" |
 | AV Villas       | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo     | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"          |
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot

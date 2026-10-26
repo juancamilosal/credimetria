@@ -13,7 +13,7 @@
 //   navegador: true si la página se arma con JavaScript y el texto solo se ve
 //     abriéndola con Chromium.
 //   bloquea: true si el banco rechaza descargas desde servidores (403 aun con
-//     navegador). Se sigue intentando, pero el aviso llega solo los lunes:
+//     navegador) o su página no le muestra las tasas al servidor. Se sigue intentando, pero el aviso llega solo los lunes:
 //     ese PDF se revisa y se sube a mano en /admin/tasas.
 //   buscar(fuente, hoy) → direcciones posibles del PDF, la más nueva primero.
 //     Por defecto la de la fuente; `enlace` la busca en la página índice.
@@ -396,9 +396,12 @@ export const REGLAS = {
   "lulo-bank": {
     // No publica PDF: página legal "Tasas y tarifas del crédito" con un solo
     // rango "Desde … M.V - … EA hasta … M.V - … EA". La página se arma con
-    // JavaScript (el HTML no trae las tasas): se lee con el navegador.
+    // JavaScript (el HTML no trae las tasas): se lee con el navegador. Desde
+    // el VPS ni el navegador recibe las tasas (26 caracteres, oct 2026): queda
+    // en el recordatorio de los lunes y se carga a mano.
     pagina: true,
     navegador: true,
+    bloquea: true,
     pantallazo: "Tasas y tarifas del crédito",
     leer(texto) {
       // En el navegador cada línea puede quedar aparte: todo en una línea.

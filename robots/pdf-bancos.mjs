@@ -105,7 +105,7 @@ async function recordatorio(fuente, nombre) {
   );
   return [
     `${nombre}`,
-    `   PDF de tasas: ${fuente.url}`,
+    `   ${fuente.tipo === "pagina" ? "Página de tasas" : "PDF de tasas"}: ${fuente.url}`,
     ...(fuente.url_indice ? [`   Página: ${fuente.url_indice}`] : []),
     `   Último guardado: ${ultimo ? `rige desde ${ultimo.vigente_desde ?? "—"} (subido el ${ultimo.date_created.slice(0, 10)})` : "ninguno"}`,
   ].join("\n");
@@ -176,6 +176,12 @@ async function revisarFuente(fuente) {
       };
     }
     ({ tasa, problemas } = leerTexto(banco, texto));
+    // Página que no le muestra las tasas al servidor (Lulo): al recordatorio
+    // de los lunes en vez de un aviso diario de regla rota.
+    if (!tasa && regla.bloquea) {
+      console.log(`${nombre}: su página no le muestra las tasas al servidor.`);
+      return { manual: await recordatorio(fuente, nombre) };
+    }
     marca = huella(Buffer.from(JSON.stringify(tasa ?? texto)));
     if (await yaVisto(marca)) {
       console.log(`${nombre}: sin cambios.`);
