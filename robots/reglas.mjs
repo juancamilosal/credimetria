@@ -2,6 +2,9 @@
 // leer de su texto (pdftotext -layout) la tasa de libre inversión.
 //
 // Cada regla tiene:
+//   bloquea: true si el banco rechaza descargas desde servidores (403 aun con
+//     navegador). Se sigue intentando, pero el aviso llega solo los lunes:
+//     ese PDF se revisa y se sube a mano en /admin/tasas.
 //   buscar(fuente, hoy) → direcciones posibles del PDF, la más nueva primero.
 //     Por defecto la de la fuente; `enlace` la busca en la página índice.
 //   leer(texto) → { mvDesde, eaDesde, mvHasta, eaHasta, vigencia, frase }.
@@ -160,6 +163,9 @@ export const REGLAS = {
 
   davivienda: {
     // Dirección fija; libre inversión en la tabla "Créditos de Consumo".
+    // Rechaza la descarga desde el servidor (403 con fetch, curl y Chromium,
+    // oct 2026): se carga a mano.
+    bloquea: true,
     leer(texto) {
       const t = plano(texto);
       const bloque = despuesDe(

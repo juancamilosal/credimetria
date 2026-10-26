@@ -84,10 +84,20 @@ async function revisarFuente(fuente) {
       fallos.push(`${posible} → ${error.message}`);
     }
   }
-  if (!datos)
+  if (!datos) {
+    if (regla.bloquea) {
+      console.log(`${nombre}: bloquea la descarga desde el servidor.`);
+      // Recordatorio semanal (lunes) en vez de un correo diario.
+      return new Date().getDay() === 1
+        ? {
+            problema: `${nombre}: no deja bajar su PDF desde el servidor. Revísalo a mano (${fuente.url}) y, si cambió, súbelo en /admin/tasas.`,
+          }
+        : {};
+    }
     return {
       problema: `${nombre}: no encontré el PDF. ${[...notas, ...fallos].join(" · ")}`,
     };
+  }
 
   const ahora = new Date().toISOString();
   const marca = huella(datos);

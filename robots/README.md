@@ -41,7 +41,7 @@ Davivienda 22,71 % E.A.
 | BBVA            | Dirección fija (`DO-01-Tasas-creditos-consumo.pdf`); cambia el contenido        | Tabla "Libre Inversión", fila "Todos": mínima y máxima                     |
 | Banco de Bogotá | `/documents/d/guest/tasas-<mes>-<año>` del mes actual; si no está, el de antes  | Filas "Libre Destino … (Desde)": la más baja; hasta = usura                |
 | Bancolombia     | Enlace `Actualizacion_tasas_<Mes>_<Año>.pdf` más nuevo del tarifario (índice)   | "…para los créditos de Libre Inversión": desde y hasta, M.V. y E.A.        |
-| Davivienda      | Dirección fija `/documents/d/guest/tasas-tarifas-davivienda`                    | "CrediExpress Fijo - Tradicional", fila "Libre Inversión"; hasta = usura   |
+| Davivienda      | Dirección fija `/documents/d/guest/tasas-tarifas-davivienda` (**bloquea**)      | "CrediExpress Fijo - Tradicional", fila "Libre Inversión"; hasta = usura   |
 | AV Villas       | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo     | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"          |
 
 - **Revisa lo leído:** desde entre 5 % y la usura, hasta no mayor que la
@@ -60,6 +60,10 @@ Davivienda 22,71 % E.A.
 - **Sin navegador:** pide el PDF como un navegador (sin Playwright). Si un
   banco lo bloquea, llega el correo de "no encontré el PDF" y se carga a
   mano en `/admin/tasas`.
+- **Davivienda bloquea servidores** (prueba del 26 oct 2026 en el VPS: 403
+  con Node, con `curl` y con Chromium de Playwright, incluso en su página de
+  tasas). Su regla tiene `bloquea: true`: el robot lo intenta cada día, pero
+  avisa solo los lunes, con el enlace, para revisarlo y subirlo a mano.
 
 ### Cuando una regla se rompe
 
