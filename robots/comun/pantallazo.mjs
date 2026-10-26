@@ -2,6 +2,8 @@
 // el pantallazo de la tabla de tasas, como prueba de lo que decía el día que
 // cambió, y el texto de las páginas que se arman con JavaScript.
 
+import { textoHtml } from "./pdf.mjs";
+
 const NAVEGADOR =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36";
 
@@ -22,17 +24,28 @@ async function conNavegador(url, hacer) {
 }
 
 /**
- * Texto visible de una página que se arma con JavaScript (Lulo): el HTML que
- * llega al servidor no trae las tasas. Espera a que aparezca `texto`.
+ * Texto de una página que se arma con JavaScript (Lulo): el HTML que llega
+ * al servidor no trae las tasas. Espera a que el navegador la arme y junta el
+ * texto de la página y de sus marcos (iframes), aunque esté oculto.
  */
 export function textoConNavegador(url, texto) {
   return conNavegador(url, async (pagina) => {
     await pagina
-      .getByText(texto, { exact: false })
-      .first()
-      .waitFor({ timeout: 30_000 })
+      .waitForFunction(
+        (buscado) => document.documentElement.textContent.includes(buscado),
+        texto,
+        { timeout: 30_000 },
+      )
       .catch(() => {});
-    return pagina.locator("body").innerText();
+    const partes = [];
+    for (const marco of pagina.frames()) {
+      try {
+        partes.push(textoHtml(await marco.content()));
+      } catch {
+        // Marco de otro sitio que no deja leerse: no importa.
+      }
+    }
+    return partes.join("\n");
   });
 }
 
