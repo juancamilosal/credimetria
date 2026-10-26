@@ -29,18 +29,23 @@ const TOKEN = hayToken();
 /** Lo que necesita que alguien lo mire (va por correo al final). */
 const revisar = [];
 
-/** Consulta a datos.gov.co, con 2 minutos de límite y un reintento. */
+/** Consulta a datos.gov.co: 2 minutos de límite y hasta 3 intentos. */
 async function sfc(params) {
   const url = `${SFC}?${new URLSearchParams(params)}`;
   for (let intento = 1; ; intento++) {
     try {
       const r = await fetch(url, { signal: AbortSignal.timeout(120_000) });
-      if (!r.ok) throw new Error(`datos.gov.co → ${r.status}`);
+      if (!r.ok) throw new Error(`respondió ${r.status}`);
       return { url, filas: await r.json() };
     } catch (error) {
-      if (intento >= 2)
-        throw new Error(`datos.gov.co no respondió: ${error.message}`);
-      console.log(`datos.gov.co no respondió (${error.message}); reintento…`);
+      // "fetch failed" esconde la causa real (conexión, DNS, certificado).
+      const causa = error.cause?.code ?? error.cause?.message ?? error.message;
+      if (intento >= 3)
+        throw new Error(`datos.gov.co no respondió en 3 intentos: ${causa}`);
+      console.log(
+        `datos.gov.co no respondió (${causa}); reintento en ${15 * intento} s…`,
+      );
+      await new Promise((listo) => setTimeout(listo, 15_000 * intento));
     }
   }
 }
