@@ -59,7 +59,7 @@ Davivienda 22,71 % E.A.
 | Lulo Bank       | **No publica PDF**: página legal `/legals/doc-tasas-tarifas-credito` (fuente `pagina`). Se arma con JavaScript y **no le muestra las tasas al servidor** (ni con Chromium): recordatorio de los lunes | "Desde … M.V - … EA hasta … M.V - … EA"; vigencia "vigentes desde el …" |
 | Bancoomeva      | "Cartelera Crediticia" mensual: el `descargar.php?idFile=<n>` con el número más alto en `/publicaciones/164289/tasas-de-credito/` | Página "Aplica para Clientes Bancoomeva" (no la de asociados): "Libre Inversión … Tasa desde % E.A"; hasta = usura |
 | Banco Serfinanza | `TASAS-1-DE-<MES>-DE-<AÑO>.pdf` más nuevo en `/servicio-al-cliente/tasas/` | Tabla "Libre Inversión" (no la de libranza): tasa fija por monto; desde = la más baja, hasta = la más alta |
-| Banco Finandina | `…/historial tasas y tarifas/tasas/tasas-<mes>-<año>.pdf` del mes actual (o el de la fuente; también la página de historial) | "Préstamo para libre inversión Desde … NMV - Equivalente al … EA"; hasta = usura |
+| Banco Finandina | `…/historial tasas y tarifas/tasas/tasas-<mes>-<año>.pdf` del mes actual (o el de la fuente; también la página de historial). **Y su página de tasas vigentes**, que se actualiza antes | "Préstamo para libre inversión Desde … NMV - Equivalente al … EA"; hasta = usura |
 | AV Villas       | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo     | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"          |
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
@@ -75,6 +75,13 @@ Davivienda 22,71 % E.A.
   la última tasa guardada es de un mes anterior, el recordatorio sale **todos
   los días** hasta que se sube el PDF nuevo en `/admin/tasas` (Davivienda, que no
   deja ver nada, sigue saliendo solo los lunes).
+- **PDF o página de tasas vigentes** (regla con `paginaVigente`, hoy
+  Finandina): el robot lee los dos. Se prefiere el **PDF**; si la página
+  rige desde una fecha más nueva (el PDF del mes aún no sale), usa la
+  **página** con pantallazo. Cuando sale el PDF de esa fecha con las mismas
+  tasas, crea igual la tasa por aprobar para que la prueba quede con el PDF
+  oficial. Cada tasa guarda de dónde salió (`enlace` y `enlace_es_pagina` en
+  `tasas_publicadas`), y la web enlaza ahí.
 - **Revisa lo leído:** desde entre 5 % y la usura, hasta no mayor que la
   usura ni menor que la desde, M.V. y E.A. que cuadren entre sí y fecha de
   vigencia. Si algo falla, la tasa queda por aprobar **sin valores** y con

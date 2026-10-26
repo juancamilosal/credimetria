@@ -51,10 +51,19 @@ export function textoConNavegador(url, texto) {
 
 /**
  * PNG de la tabla (o sección) que contiene `texto`; si no la encuentra o no
- * se ve, de la página completa.
+ * se ve, de la página completa. `clic`: texto de la pestaña que hay que tocar
+ * antes para que la tabla se vea.
  */
-export function pantallazo(url, texto) {
+export function pantallazo(url, texto, { clic } = {}) {
   return conNavegador(url, async (pagina) => {
+    // Pestaña que hay que abrir para que se vea la tabla (Finandina).
+    if (clic)
+      await pagina
+        .getByText(clic, { exact: true })
+        .first()
+        .click({ timeout: 10_000 })
+        .then(() => pagina.waitForTimeout(1_000))
+        .catch(() => {});
     // La tabla que tiene el texto o, si la página no usa tablas (Lulo), la
     // sección; si no se encuentra ninguna, la página completa.
     for (const etiqueta of ["table", "section", "article", "main"]) {

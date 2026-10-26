@@ -267,6 +267,10 @@ en `public/imagenes/` y su entrada en `FOTOS`.
   fija" en el simulador) que lo explica con un ejemplo (`AYUDA_DIFERENCIA`
   en `core/datos/tasas.ts`): en el inicio, en el título de la tabla del
   ranking y en las tarjetas del celular.
+- **Enlace de cada tasa**: `tasas_publicadas.enlace` y `enlace_es_pagina`
+  (26 oct 2026) dicen de dónde salió esa tasa (PDF o página). La web los usa
+  y, en las tasas anteriores a esos campos, usa la dirección y el tipo de la
+  fuente. El "Lector web" puede leerlos.
 - **Bancos sin PDF**: si la fuente de la tasa publicada es la página del
   banco (`fuentes.tipo = pagina`, hoy Banco Popular), el enlace dice "Tasas
   en la página del banco ↗" (o "Página ↗" en la tabla) en vez de "PDF del

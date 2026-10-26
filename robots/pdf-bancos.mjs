@@ -130,6 +130,22 @@ async function pdfDelMes(fuente, nombre) {
   ].join("\n");
 }
 
+/**
+ * Página de tasas vigentes de un banco que también publica PDF (regla con
+ * `paginaVigente`): la tasa que muestra hoy, para compararla con el PDF.
+ */
+async function leerPaginaVigente(cfg) {
+  try {
+    const texto = cfg.navegador
+      ? await textoConNavegador(cfg.url, cfg.pantallazo)
+      : textoHtml(await pagina(cfg.url));
+    const tasa = cfg.leer(texto);
+    return { tasa, problemas: revisar(tasa, USURA) };
+  } catch (error) {
+    return { tasa: null, problemas: [error.message] };
+  }
+}
+
 /** Revisa una fuente; devuelve qué pasó para el correo. */
 async function revisarFuente(fuente) {
   const banco = fuente.entidad?.codigo;
@@ -163,6 +179,9 @@ async function revisarFuente(fuente) {
     ).length > 0;
 
   let url, marca, tasa, problemas, prueba;
+  // La tasa sale de una página (y no de un PDF): el enlace de la web dice
+  // "Tasas en la página del banco".
+  let enPagina = fuente.tipo === "pagina";
   if (fuente.tipo === "pagina") {
     // Banco sin PDF: se lee la página y la huella es la de la tasa leída (la
     // página completa cambia en cada visita).
@@ -208,7 +227,18 @@ async function revisarFuente(fuente) {
         fallos.push(`${posible} → ${error.message}`);
       }
     }
-    if (!datos) {
+    // Si el banco también muestra la tasa en su página de tasas vigentes, se
+    // prefiere el PDF, salvo que la página sea más nueva (el PDF del mes aún
+    // no sale): entonces la página, con pantallazo.
+    const vigente = regla.paginaVigente
+      ? await leerPaginaVigente(regla.paginaVigente)
+      : null;
+    if (vigente && !vigente.tasa)
+      console.log(
+        `${nombre}: no leí su página de tasas vigentes`,
+        vigente.problemas,
+      );
+    if (!datos && !vigente?.tasa) {
       if (regla.bloquea) {
         console.log(`${nombre}: bloquea la descarga desde el servidor.`);
         return { manual: await recordatorio(fuente, nombre) };
@@ -217,18 +247,46 @@ async function revisarFuente(fuente) {
         problema: `${nombre}: no encontré el PDF. ${[...notas, ...fallos].join(" · ")}`,
       };
     }
-    marca = huella(datos);
-    if (await yaVisto(marca)) {
-      console.log(`${nombre}: sin cambios.`);
-      return sinCambios(url, marca);
+    const delPdf =
+      datos && vigente ? leerTexto(banco, await textoPdf(datos)) : null;
+    if (
+      vigente?.tasa &&
+      (!delPdf?.tasa ||
+        (vigente.tasa.vigencia ?? "") > (delPdf.tasa.vigencia ?? ""))
+    ) {
+      url = regla.paginaVigente.url;
+      enPagina = true;
+      ({ tasa, problemas } = vigente);
+      console.log(
+        `${nombre}: su página (rige desde ${tasa.vigencia}) es más nueva que el PDF${delPdf?.tasa ? ` (${delPdf.tasa.vigencia})` : ""}: se usa la página.`,
+      );
+      marca = huella(Buffer.from(JSON.stringify(tasa)));
+      if (await yaVisto(marca)) {
+        console.log(`${nombre}: sin cambios.`);
+        return sinCambios(fuente.url, marca);
+      }
+      prueba = async () => ({
+        datos: await pantallazo(url, regla.paginaVigente.pantallazo, {
+          clic: regla.paginaVigente.clic,
+        }),
+        tipo: "image/png",
+        extension: "png",
+        nota: `Pantallazo tomado por el robot de ${url} (el PDF del mes aún no estaba publicado)`,
+      });
+    } else {
+      marca = huella(datos);
+      if (await yaVisto(marca)) {
+        console.log(`${nombre}: sin cambios.`);
+        return sinCambios(url, marca);
+      }
+      ({ tasa, problemas } = delPdf ?? leerTexto(banco, await textoPdf(datos)));
+      prueba = async () => ({
+        datos,
+        tipo: "application/pdf",
+        extension: "pdf",
+        nota: `Bajado por el robot de ${url}`,
+      });
     }
-    ({ tasa, problemas } = leerTexto(banco, await textoPdf(datos)));
-    prueba = async () => ({
-      datos,
-      tipo: "application/pdf",
-      extension: "pdf",
-      nota: `Bajado por el robot de ${url}`,
-    });
   }
 
   const leida = tasa && !problemas.length;
@@ -242,13 +300,22 @@ async function revisarFuente(fuente) {
 
   // Si las tasas son las mismas de la publicada (o de una que ya espera
   // aprobación), no se crea nada: el banco solo volvió a subir el PDF.
+  let conPdfOficial = false;
   if (leida) {
     const guardadas = await directus(
       "GET",
       `/items/tasas_publicadas?filter[fuente][_eq]=${fuente.id}&filter[estado][_in]=publicada,por_revisar` +
-        "&fields=estado,valor_desde,valor_hasta,ea_desde,ea_hasta&limit=-1",
+        "&fields=estado,valor_desde,valor_hasta,ea_desde,ea_hasta,enlace_es_pagina&limit=-1",
     );
-    const igual = guardadas.find((g) => mismasTasas(valores, g));
+    // Si la guardada salió de la página y ahora llega el PDF oficial con lo
+    // mismo, sí se crea: así la prueba queda con el PDF.
+    const igual = guardadas.find(
+      (g) =>
+        mismasTasas(valores, g) &&
+        !(fuente.tipo !== "pagina" && !enPagina && g.enlace_es_pagina),
+    );
+    conPdfOficial =
+      !igual && !enPagina && guardadas.some((g) => mismasTasas(valores, g));
     if (igual) {
       console.log(
         `${nombre}: el PDF cambió, pero las tasas son las mismas de la ${igual.estado === "publicada" ? "publicada" : "que espera aprobación"}; no se crea nada.`,
@@ -257,8 +324,7 @@ async function revisarFuente(fuente) {
     }
   }
 
-  const queEs =
-    fuente.tipo === "pagina" ? "tasa nueva en su página" : "PDF nuevo";
+  const queEs = enPagina ? "tasa nueva en su página" : "PDF nuevo";
   console.log(`${nombre}: ${queEs}`, tasa ?? "", problemas);
   if (soloMirar)
     return problemas.length
@@ -301,19 +367,23 @@ async function revisarFuente(fuente) {
     vigente_desde: tasa?.vigencia ?? null,
     tipo_tasa: publicada?.tipo_tasa ?? null,
     sistema_amortizacion: publicada?.sistema_amortizacion ?? null,
+    enlace: url,
+    enlace_es_pagina: enPagina,
     ...(leida
       ? {
           ...valores,
           hasta_origen: sinMaxima ? "usura" : "entidad",
           frase: tasa.frase,
-          notas: `Leída por el robot.${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}`,
+          notas: `Leída por el robot.${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
         }
       : {
           notas: `El robot no pudo leer la tasa: ${problemas.join(" ")} Llénala mirando el PDF.`,
         }),
   });
   await directus("PATCH", `/items/fuentes/${fuente.id}`, {
-    url,
+    // Si la tasa salió de la página de tasas vigentes, la fuente conserva la
+    // dirección del último PDF.
+    url: enPagina && fuente.tipo !== "pagina" ? fuente.url : url,
     ultimo_hash: marca,
     ultima_revision: ahora,
   });

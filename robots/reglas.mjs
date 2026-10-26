@@ -15,6 +15,9 @@
 //   bloquea: true si el banco rechaza descargas desde servidores (403 aun con
 //     navegador) o su página no le muestra las tasas al servidor. Se sigue intentando, pero el aviso llega solo los lunes:
 //     ese PDF se revisa y se sube a mano en /admin/tasas.
+//   paginaVigente: { url, leer, pantallazo, clic?, navegador? } si el banco
+//     también muestra la tasa en una página que se actualiza antes que el PDF:
+//     se prefiere el PDF, salvo que la página rija desde una fecha más nueva.
 //   elegir(enlaces) → de los enlaces encontrados con `enlace`, la dirección
 //     del PDF más nuevo (si no, el del mes más reciente en el nombre).
 //   buscar(fuente, hoy) → direcciones posibles del PDF, la más nueva primero.
@@ -522,6 +525,35 @@ export const REGLAS = {
     // historial). Fila "Préstamo para libre inversión Desde … NMV -
     // Equivalente al … EA": solo el desde; hasta = usura.
     enlace: /[^"'\s<>()]*tasas-\p{L}+-\d{4}\.pdf/giu,
+    // Su página de tasas vigentes se actualiza antes que el PDF del historial
+    // (el 26 oct 2026 la página ya tenía octubre y el último PDF era de
+    // septiembre): si la página es más nueva, se usa con pantallazo.
+    paginaVigente: {
+      url: "https://www.bancofinandina.com/servicio-al-cliente/tasas-y-tarifas/tasas-vigentes",
+      pantallazo: "Préstamo para libre inversión",
+      clic: "Tasas de interés",
+      leer(texto) {
+        const t = texto.replace(/\s+/g, " ");
+        const vig = exigir(
+          t,
+          /Las tasas aplican a partir del (\d{1,2} de \p{L}+ de \d{4})/u,
+          'la fecha "Las tasas aplican a partir del …"',
+        );
+        const m = exigir(
+          t,
+          /Préstamo para libre inversión Desde ([\d.,]+)% NMV . Equivalente al ([\d.,]+)% EA/,
+          'la fila "Préstamo para libre inversión"',
+        );
+        return {
+          mvDesde: numero(m[1]),
+          eaDesde: numero(m[2]),
+          mvHasta: null,
+          eaHasta: null,
+          vigencia: fecha(vig[1]),
+          frase: m[0],
+        };
+      },
+    },
     buscar(fuente, hoy) {
       const base =
         "https://www.bancofinandina.com/hubfs/Backup%20Sitefinity/Files/historial%20tasas%20y%20tarifas/tasas/";

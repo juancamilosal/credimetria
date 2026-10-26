@@ -88,6 +88,23 @@ describe("reglas por banco", () => {
     assert.match(revisar(t, USURA).join(), /supera la usura/);
   });
 
+  it("banco-finandina: su página de tasas vigentes es más nueva que el PDF", () => {
+    const html = readFileSync(
+      new URL("./textos/banco-finandina-vigentes.html", import.meta.url),
+      "utf8",
+    );
+    const regla = REGLAS["banco-finandina"];
+    const pagina = regla.paginaVigente.leer(textoHtml(html));
+    assert.deepEqual(
+      [pagina.mvDesde, pagina.eaDesde, pagina.vigencia],
+      [2.11, 28.48, "2026-10-01"],
+    );
+    assert.deepEqual(revisar(pagina, USURA), []);
+    // La del PDF de septiembre es más vieja: el robot usaría la página.
+    const pdf = regla.leer(texto("banco-finandina"));
+    assert.ok(pagina.vigencia > pdf.vigencia);
+  });
+
   it("avisa qué no encontró si el PDF cambió de forma", () => {
     assert.throws(
       () => REGLAS.bbva.leer(texto("davivienda")),
