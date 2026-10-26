@@ -516,6 +516,42 @@ export const REGLAS = {
     },
   },
 
+  "banco-finandina": {
+    // Un PDF por mes: /hubfs/Backup Sitefinity/Files/historial tasas y
+    // tarifas/tasas/tasas-<mes>-<año>.pdf (también en la página de
+    // historial). Fila "Préstamo para libre inversión Desde … NMV -
+    // Equivalente al … EA": solo el desde; hasta = usura.
+    enlace: /[^"'\s<>()]*tasas-\p{L}+-\d{4}\.pdf/giu,
+    buscar(fuente, hoy) {
+      const base =
+        "https://www.bancofinandina.com/hubfs/Backup%20Sitefinity/Files/historial%20tasas%20y%20tarifas/tasas/";
+      const nuevo = `${base}tasas-${MESES[hoy.getMonth()]}-${hoy.getFullYear()}.pdf`;
+      return [nuevo, fuente.url].filter((u, i, l) => u && l.indexOf(u) === i);
+    },
+    leer(texto) {
+      const t = plano(texto);
+      // "Tasas vigentes Septiembre 2026"
+      const vig = exigir(
+        t,
+        /Tasas vigentes (\p{L}+) (\d{4})/u,
+        "el mes de las tasas vigentes",
+      );
+      const m = exigir(
+        t,
+        /Préstamo para libre inversión Desde ([\d.,]+)% NMV . Equivalente al ([\d.,]+)% EA/,
+        'la fila "Préstamo para libre inversión"',
+      );
+      return {
+        mvDesde: numero(m[1]),
+        eaDesde: numero(m[2]),
+        mvHasta: null,
+        eaHasta: null,
+        vigencia: fecha(`1 de ${vig[1]} de ${vig[2]}`),
+        frase: m[0],
+      };
+    },
+  },
+
   "av-villas": {
     // "Tasas Activas 01 <Mes> <Año>.pdf"; si la fuente tiene url_indice, se
     // busca ahí el enlace más nuevo.
@@ -566,7 +602,11 @@ export function revisar(t, usura) {
   const ok = (v) => typeof v === "number" && Number.isFinite(v);
   if (!ok(t.mvDesde) || !ok(t.eaDesde)) problemas.push("No leí la tasa desde.");
   else {
-    if (t.eaDesde < 5 || t.eaDesde > usura.tasa + 0.01)
+    if (t.eaDesde > usura.tasa + 0.01)
+      problemas.push(
+        `La tasa desde (${t.eaDesde} % E.A.) supera la usura de ${usura.mes ?? "este mes"} (${usura.tasa} %): el documento puede ser de un mes anterior.`,
+      );
+    else if (t.eaDesde < 5)
       problemas.push(`La tasa desde (${t.eaDesde} % E.A.) no es creíble.`);
     if (Math.abs(efectiva(t.mvDesde) - t.eaDesde) > 0.3)
       problemas.push(

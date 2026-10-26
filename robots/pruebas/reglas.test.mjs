@@ -78,6 +78,16 @@ describe("reglas por banco", () => {
     assert.deepEqual(revisar(t, USURA), []);
   });
 
+  it("banco-finandina: lee la fila y la revisión ve que supera la usura", () => {
+    const t = REGLAS["banco-finandina"].leer(texto("banco-finandina"));
+    assert.deepEqual(
+      [t.mvDesde, t.eaDesde, t.eaHasta, t.vigencia],
+      [2.15, 29.08, null, "2026-09-01"],
+    );
+    // 29,08 % de septiembre no cabe en la usura de octubre (28,59 %).
+    assert.match(revisar(t, USURA).join(), /supera la usura/);
+  });
+
   it("avisa qué no encontró si el PDF cambió de forma", () => {
     assert.throws(
       () => REGLAS.bbva.leer(texto("davivienda")),
