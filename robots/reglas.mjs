@@ -324,6 +324,45 @@ export const REGLAS = {
     },
   },
 
+  "banco-de-occidente": {
+    // Dirección fija /documents/d/guest/tasas-personas-bdo (cambia el
+    // contenido). PDF de 18 páginas con todo: libre inversión está en
+    // "Cupo línea Préstamo Personal", columnas LIBRE INVERSIÓN (desde, hasta)
+    // y COMPRA DE CARTERA (desde, hasta). Debajo, el crédito rotativo.
+    leer(texto) {
+      const t = plano(texto);
+      const bloque = despuesDe(
+        t,
+        /Cupo línea Préstamo Personal/,
+        'la tabla "Cupo línea Préstamo Personal"',
+      );
+      const mv = exigir(
+        bloque,
+        /Tasa M\.V ([\d,]+)% ([\d,]+)%/,
+        'la fila "Tasa M.V" de libre inversión',
+      );
+      const ea = exigir(
+        bloque,
+        /Tasa E\.A ([\d,]+)% ([\d,]+)%/,
+        'la fila "Tasa E.A" de libre inversión',
+      );
+      // "*Vigencia del 01 al 31 de Octubre de 2026"
+      const vig = exigir(
+        bloque,
+        /Vigencia del (\d{1,2}) al \d{1,2} de ([^\n]+)/,
+        "la vigencia del préstamo personal",
+      );
+      return {
+        mvDesde: numero(mv[1]),
+        mvHasta: numero(mv[2]),
+        eaDesde: numero(ea[1]),
+        eaHasta: numero(ea[2]),
+        vigencia: fecha(`${vig[1]} de ${vig[2]}`),
+        frase: `Libre inversión: ${mv[0]} · ${ea[0]}`,
+      };
+    },
+  },
+
   "av-villas": {
     // "Tasas Activas 01 <Mes> <Año>.pdf"; si la fuente tiene url_indice, se
     // busca ahí el enlace más nuevo.
