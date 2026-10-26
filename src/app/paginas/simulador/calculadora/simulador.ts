@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Ayuda } from '../../../compartido/ayuda/ayuda';
 import { EntradaMoneda } from '../../../compartido/entrada-moneda/entrada-moneda';
 import {
   formatoPesos,
@@ -50,7 +51,7 @@ const PRODUCTOS_SIMULADOR: Producto[] = [
  */
 @Component({
   selector: 'app-simulador',
-  imports: [RouterLink, EntradaMoneda, PesosPipe, TasaPipe],
+  imports: [RouterLink, Ayuda, EntradaMoneda, PesosPipe, TasaPipe],
   templateUrl: './simulador.html',
   styleUrl: './simulador.css',
 })
@@ -83,8 +84,6 @@ export class Simulador {
   protected readonly sistema = computed<SistemaAmortizacion>(() =>
     this.fija() ? 'fija' : 'decreciente',
   );
-  /** Globo de ayuda abierto (para tocarlo en el celular). */
-  protected readonly ayudaAbierta = signal(false);
 
   protected readonly tabla = computed(() =>
     this.listo()

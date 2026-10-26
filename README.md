@@ -204,7 +204,7 @@ los bancos está por hacer.
 
 ```
 src/app/
-  compartido/     encabezado, pie, logo, chips, tabla del ranking y pipes
+  compartido/     encabezado, pie, logo, chips, globo de ayuda, tabla del ranking y pipes
                   (pesos: $20.000.000, tasa: 21,48 %, puntos: +7,38 pts)
   core/
     modelos/      tasa, prospecto y aliado
@@ -256,6 +256,11 @@ en `public/imagenes/` y su entrada en `FOTOS`.
 
 ## Datos de ejemplo y pendientes
 
+- **Diferencia explicada**: el "+3,57 pts" lleva debajo "más (o menos) de
+  lo que anuncia" y un globo "?" (`compartido/ayuda/`, el mismo de "Cuota
+  fija" en el simulador) que lo explica con un ejemplo (`AYUDA_DIFERENCIA`
+  en `core/datos/tasas.ts`): en el inicio, en el título de la tabla del
+  ranking y en las tarjetas del celular.
 - **Fuente del promedio a la vista**: el inicio y el ranking enlazan el
   conjunto de la Superfinanciera en datos.gov.co (`FUENTE_PROMEDIO` en
   `core/datos/tasas.ts`) de donde sale "Cobra en promedio". Las tarjetas del

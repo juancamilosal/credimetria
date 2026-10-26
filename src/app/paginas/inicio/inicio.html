@@ -94,11 +94,22 @@
             </div>
             @if (banco.diferencia !== null) {
               <div>
-                <dt>Diferencia</dt>
+                <dt>
+                  Diferencia
+                  <app-ayuda
+                    [globo]="'tipDiferencia' + i"
+                    etiqueta="Qué es la diferencia"
+                    [texto]="ayudaDiferencia"
+                  />
+                </dt>
                 <dd>
                   <span class="etq etq-aviso">{{
                     banco.diferencia | puntos
                   }}</span>
+                  <span class="dif-texto"
+                    >{{ banco.diferencia >= 0 ? "más" : "menos" }} de lo que
+                    anuncia</span
+                  >
                 </dd>
               </div>
             }

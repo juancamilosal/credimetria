@@ -90,9 +90,22 @@
             </button>
           </th>
           <th scope="col" class="der" [attr.aria-sort]="ariaSort('diferencia')">
-            <button type="button" class="orden" (click)="ordenar('diferencia')">
-              Diferencia <span class="flecha">{{ flecha("diferencia") }}</span>
-            </button>
+            <span class="con-ayuda">
+              <button
+                type="button"
+                class="orden"
+                (click)="ordenar('diferencia')"
+              >
+                Diferencia
+                <span class="flecha">{{ flecha("diferencia") }}</span>
+              </button>
+              <app-ayuda
+                globo="tipDiferencia"
+                etiqueta="Qué es la diferencia"
+                lado="abajo"
+                [texto]="ayudaDiferencia"
+              />
+            </span>
           </th>
           @if (completa()) {
             <th scope="col" class="der" [attr.aria-sort]="ariaSort('cuota')">
@@ -112,7 +125,16 @@
           <th scope="col">Tipo</th>
           <th scope="col" class="der">Anuncia</th>
           <th scope="col" class="der">Cobra en promedio</th>
-          <th scope="col" class="der">Diferencia</th>
+          <th scope="col" class="der">
+            <span class="con-ayuda"
+              >Diferencia
+              <app-ayuda
+                globo="tipDiferencia"
+                etiqueta="Qué es la diferencia"
+                lado="abajo"
+                [texto]="ayudaDiferencia"
+            /></span>
+          </th>
           @if (completa()) {
             <th scope="col" class="der">Cuota estimada</th>
             <th scope="col" class="der">Pago total</th>
@@ -247,7 +269,20 @@
           <span class="cifra real">{{ fila.tasaReal | tasa }}</span>
         </div>
         @if (fila.diferencia !== null) {
-          <span class="etq etq-aviso dif">{{ fila.diferencia | puntos }}</span>
+          <div class="dif">
+            <span class="nota con-ayuda"
+              >Diferencia
+              <app-ayuda
+                [globo]="'tipDiferenciaCel' + fila.puesto"
+                etiqueta="Qué es la diferencia"
+                [texto]="ayudaDiferencia"
+            /></span>
+            <span class="etq etq-aviso">{{ fila.diferencia | puntos }}</span>
+            <span class="nota"
+              >{{ fila.diferencia >= 0 ? "más" : "menos" }} de lo que
+              anuncia</span
+            >
+          </div>
         }
       </div>
       @if (completa()) {

@@ -1,0 +1,15 @@
+<button
+  type="button"
+  class="tip-boton"
+  [attr.aria-label]="etiqueta()"
+  [attr.aria-describedby]="globo()"
+  [attr.aria-expanded]="abierta()"
+  (click)="abierta.set(!abierta())"
+  (blur)="abierta.set(false)"
+  (keydown.escape)="abierta.set(false)"
+>
+  ?
+</button>
+<span class="tip" role="tooltip" [id]="globo()" [class.abierto]="abierta()">
+  {{ texto() }}
+</span>

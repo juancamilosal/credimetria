@@ -8,8 +8,10 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { AYUDA_DIFERENCIA } from '../../core/datos/tasas';
 import { Producto, TasaEntidad } from '../../core/modelos/tasa';
 import { cuotaMensual } from '../../core/utilidades/credito';
+import { Ayuda } from '../ayuda/ayuda';
 import { PesosPipe, PuntosPipe, TasaPipe } from '../pipes/formato';
 
 /** Monto y plazo con los que se calcula la cuota estimada si no llegan otros. */
@@ -54,7 +56,7 @@ interface FilaVista extends TasaEntidad {
  */
 @Component({
   selector: 'app-tabla-ranking',
-  imports: [RouterLink, PesosPipe, PuntosPipe, TasaPipe],
+  imports: [RouterLink, Ayuda, PesosPipe, PuntosPipe, TasaPipe],
   templateUrl: './tabla-ranking.html',
   styleUrl: './tabla-ranking.css',
   host: {
@@ -82,6 +84,7 @@ export class TablaRanking {
 
   protected readonly menuTipo = signal(false);
   protected readonly todas = TODAS;
+  protected readonly ayudaDiferencia = AYUDA_DIFERENCIA;
 
   protected readonly vista = computed<FilaVista[]>(() => {
     const filas = this.filas().map((t, i) => {

@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Ayuda } from '../../compartido/ayuda/ayuda';
 import { Chips } from '../../compartido/chips/chips';
 import { Foto } from '../../compartido/foto/foto';
 import {
@@ -13,7 +14,7 @@ import {
   PLAZO_RANKING,
 } from '../../compartido/tabla-ranking/tabla-ranking';
 import { cuotaMensual } from '../../core/utilidades/credito';
-import { FUENTE_PROMEDIO } from '../../core/datos/tasas';
+import { AYUDA_DIFERENCIA, FUENTE_PROMEDIO } from '../../core/datos/tasas';
 import { FOTOS } from '../../core/datos/fotos';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
@@ -25,7 +26,16 @@ import { TasasService } from '../../core/servicios/tasas.service';
  */
 @Component({
   selector: 'app-inicio',
-  imports: [DatePipe, RouterLink, Chips, Foto, PesosPipe, PuntosPipe, TasaPipe],
+  imports: [
+    DatePipe,
+    RouterLink,
+    Ayuda,
+    Chips,
+    Foto,
+    PesosPipe,
+    PuntosPipe,
+    TasaPipe,
+  ],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',
 })
@@ -57,6 +67,7 @@ export class Inicio {
   protected readonly entidades = this.tasas.listaEntidades;
   protected readonly fotos = FOTOS;
   protected readonly fuente = FUENTE_PROMEDIO;
+  protected readonly ayudaDiferencia = AYUDA_DIFERENCIA;
 
   /** Tarjetas con foto por tipo de crédito; cada una lleva a su ranking. */
   protected readonly productos = computed(() =>

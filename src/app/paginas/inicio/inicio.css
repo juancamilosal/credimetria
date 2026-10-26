@@ -192,6 +192,23 @@
   text-align: right;
 }
 
+.detalle dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detalle div:last-child dt {
+  justify-content: flex-end;
+}
+
+.dif-texto {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--cm-gris);
+}
+
 .banco-pie {
   display: flex;
   justify-content: space-between;

@@ -68,28 +68,11 @@
         <span class="caja" aria-hidden="true"></span>
         Cuota fija
       </label>
-      <span class="tip-ancla">
-        <button
-          type="button"
-          class="tip-boton"
-          aria-label="Qué es la cuota fija"
-          aria-describedby="tipCuotaFija"
-          [attr.aria-expanded]="ayudaAbierta()"
-          (click)="ayudaAbierta.set(!ayudaAbierta())"
-          (blur)="ayudaAbierta.set(false)"
-          (keydown.escape)="ayudaAbierta.set(false)"
-        >
-          ?
-        </button>
-        <span
-          class="tip"
-          role="tooltip"
-          id="tipCuotaFija"
-          [class.abierto]="ayudaAbierta()"
-        >
-          {{ ayudaCuotaFija }}
-        </span>
-      </span>
+      <app-ayuda
+        globo="tipCuotaFija"
+        etiqueta="Qué es la cuota fija"
+        [texto]="ayudaCuotaFija"
+      />
     </div>
 
     @if (superaUsura()) {

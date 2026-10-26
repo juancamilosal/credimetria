@@ -125,6 +125,15 @@ describe('Ranking', () => {
     expect(enlace.target).toBe('_blank');
   });
 
+  it('explica la diferencia con un globo de ayuda en el título', () => {
+    const globo = html.querySelector('thead #tipDiferencia')!;
+    expect(globo.getAttribute('role')).toBe('tooltip');
+    expect(globo.textContent).toContain('anuncia desde 16 %');
+    expect(html.querySelector('.tarjetas .dif')?.textContent).toMatch(
+      /(más|menos) de lo que\s+anuncia/,
+    );
+  });
+
   it('"Quiero esta" lleva el monto a la asesoría', () => {
     const monto = html.querySelector<HTMLInputElement>('#rkMonto')!;
     monto.value = '15.000.000';

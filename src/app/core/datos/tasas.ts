@@ -24,3 +24,7 @@ export const FUENTE_PROMEDIO = {
   texto: 'Superfinanciera en datos.gov.co',
   url: 'https://www.datos.gov.co/Econom-a-y-Finanzas/Tasas-de-inter-s-activas-por-tipo-de-cr-dito-ltimo/qzsc-9esp',
 };
+
+/** Explicación de la columna "Diferencia", para quien no la entienda. */
+export const AYUDA_DIFERENCIA =
+  'Es lo que cobra en promedio menos la tasa más baja que anuncia. Ejemplo: si anuncia desde 16 % y cobra en promedio 19,57 %, la diferencia es +3,57 puntos. Mientras más alta, más lejos está lo que anuncia de lo que de verdad cobra. Si es negativa, cobra en promedio menos de lo que anuncia.';

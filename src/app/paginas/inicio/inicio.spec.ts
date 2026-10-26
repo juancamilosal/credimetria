@@ -54,6 +54,13 @@ describe('Inicio', () => {
       'de intereses $',
     );
     expect(primera.querySelector('.detalle')?.textContent).toContain('Anuncia');
+    // La diferencia se explica en palabras y con un globo de ayuda.
+    expect(primera.querySelector('.dif-texto')?.textContent).toMatch(
+      /(más|menos) de lo que\s+anuncia/,
+    );
+    expect(primera.querySelector('#tipDiferencia0')?.textContent).toContain(
+      'cobra en promedio menos la tasa más baja',
+    );
     expect(
       html.querySelector<HTMLAnchorElement>('.top-cabeza .nota a')?.href,
     ).toContain('datos.gov.co');

@@ -1,0 +1,86 @@
+:host {
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.tip-boton {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--cm-linea);
+  background: var(--cm-fondo);
+  color: var(--cm-gris);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: help;
+  /* Área táctil de 44 px sin agrandar el círculo */
+  position: relative;
+}
+
+.tip-boton::before {
+  content: "";
+  position: absolute;
+  inset: -11px;
+}
+
+.tip-boton:hover,
+.tip-boton:focus-visible,
+.tip-boton[aria-expanded="true"] {
+  color: var(--cm-marca-700);
+  border-color: var(--cm-marca-700);
+}
+
+.tip {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  bottom: calc(100% + 10px);
+  right: -8px;
+  width: min(280px, 80vw);
+  padding: 12px 14px;
+  border-radius: var(--cm-r-boton);
+  background: var(--cm-tinta);
+  color: var(--cm-blanco);
+  font-family: var(--cm-f-texto, inherit);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+}
+
+.tip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  right: 14px;
+  border: 7px solid transparent;
+  border-top-color: var(--cm-tinta);
+}
+
+:host(.abajo) .tip {
+  bottom: auto;
+  top: calc(100% + 10px);
+}
+
+:host(.abajo) .tip::after {
+  top: auto;
+  bottom: 100%;
+  border-top-color: transparent;
+  border-bottom-color: var(--cm-tinta);
+}
+
+:host(:hover) .tip,
+.tip-boton:focus-visible + .tip,
+.tip.abierto {
+  display: block;
+}
