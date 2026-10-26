@@ -38,7 +38,8 @@ morada y oro del diseño (ver abajo).
   debajo; sin seguros ni cargos) de todas se recalculan al instante. El # siempre es el puesto por
   tasa real. En celular, donde no se ven los títulos, hay listas de "Ordenar
   por" y "Tipo de entidad". Todo queda en la dirección
-  (`?producto=…&tipo=…&monto=…&plazo=…&orden=diferencia-desc`) y "Quiero
+  (`?producto=…&tipo=…&monto=…&plazo=…&orden=diferencia-desc`, con
+  `Location.replaceState`, sin navegar, para que la pantalla no suba) y "Quiero
   esta" lleva el monto a la asesoría.
 - **Compara tu oferta** (`paginas/compara-oferta/`): preguntas fijas con
   botones (producto, monto, plazo, qué le dijeron: tasa E.A., tasa mensual o

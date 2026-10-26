@@ -1,4 +1,4 @@
-import { DatePipe, isPlatformBrowser } from '@angular/common';
+import { DatePipe, isPlatformBrowser, Location } from '@angular/common';
 import {
   Component,
   computed,
@@ -71,6 +71,7 @@ export class Ranking {
   private readonly tasas = inject(TasasService);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
+  private readonly location = inject(Location);
 
   protected readonly corte = this.tasas.corte;
   protected readonly sinConexion = this.tasas.sinConexion;
@@ -130,11 +131,13 @@ export class Ranking {
             ? null
             : `${columna}-${dir}`,
       };
-      this.router.navigate([], {
+      // Solo se cambia la dirección, sin navegar: una navegación del router
+      // sube la pantalla al inicio cada vez que se ordena o se filtra.
+      const url = this.router.createUrlTree([], {
         relativeTo: this.ruta,
         queryParams,
-        replaceUrl: true,
       });
+      this.location.replaceState(this.router.serializeUrl(url));
     });
   }
 

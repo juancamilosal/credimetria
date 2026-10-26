@@ -3,7 +3,9 @@ import { TASAS_PRUEBA } from '../../core/datos/tasas-prueba';
 import { cuotaMensual } from '../../core/utilidades/credito';
 import { formatoPesos } from '../../compartido/pipes/formato';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { Location } from '@angular/common';
+import { provideLocationMocks } from '@angular/common/testing';
+import { provideRouter, Router } from '@angular/router';
 import { Ranking } from './ranking';
 
 /** Tasa real de AV Villas en libre inversión, la primera del ranking. */
@@ -19,7 +21,7 @@ describe('Ranking', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [Ranking],
-      providers: [provideRouter([]), TASAS_DE_PRUEBA],
+      providers: [provideRouter([]), provideLocationMocks(), TASAS_DE_PRUEBA],
     });
     fixture = TestBed.createComponent(Ranking);
     fixture.detectChanges();
@@ -69,6 +71,14 @@ describe('Ranking', () => {
     expect(html.querySelectorAll('tbody tr .pos')[1].textContent?.trim()).toBe(
       '7',
     );
+  });
+
+  it('guarda el orden en la dirección sin navegar (la pantalla no sube)', () => {
+    const navegar = spyOn(TestBed.inject(Router), 'navigateByUrl');
+    tocar(titulo('Diferencia'));
+    fixture.detectChanges();
+    expect(TestBed.inject(Location).path()).toContain('orden=diferencia-asc');
+    expect(navegar).not.toHaveBeenCalled();
   });
 
   it('deja al final las entidades sin tasa anunciada', () => {
