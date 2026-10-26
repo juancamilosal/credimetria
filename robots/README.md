@@ -83,6 +83,13 @@ Davivienda 22,71 % E.A.
   tasas, crea igual la tasa por aprobar para que la prueba quede con el PDF
   oficial. Cada tasa guarda de dónde salió (`enlace` y `enlace_es_pagina` en
   `tasas_publicadas`), y la web enlaza ahí.
+- **Reservados para libranza** (inactivos en `entidades`, 26 oct 2026): **GNB
+  Sudameris** (1-12) no publica tasa de libre inversión; su PDF fijo
+  `/ws/documentos?d=TASAS` trae libranza 24,60 % E.A. (fuente de libranza
+  pausada, id 22). **Banco Unión** (1-67) reporta 30 créditos de libre
+  inversión en 4 semanas y presta sobre todo rotativo y libranza. No se
+  toman tasas de comparadores (ComparaBien muestra a GNB en 23,14 % sin
+  fuente oficial).
 - **Revisa lo leído:** desde entre 5 % y la usura, hasta no mayor que la
   usura ni menor que la desde, M.V. y E.A. que cuadren entre sí y fecha de
   vigencia. Si algo falla, la tasa queda por aprobar **sin valores** y con
