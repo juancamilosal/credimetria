@@ -118,7 +118,7 @@ describe('TasasAdmin', () => {
     await crearCon([porAprobar, publicada]);
   }
 
-  async function crearCon(lista: TasaAdmin[]) {
+  async function crearCon(lista: TasaAdmin[], deBancos = fuentes) {
     admin = jasmine.createSpyObj<TasasAdminService>('TasasAdminService', [
       'listar',
       'cambiarEstado',
@@ -147,7 +147,7 @@ describe('TasasAdmin', () => {
       BBVA,
       { codigo: 'davivienda', nombre: 'Davivienda', logo: null },
     ]);
-    docs.fuentes.and.resolveTo(fuentes);
+    docs.fuentes.and.resolveTo(deBancos);
     docs.documentos.and.resolveTo([docNuevo, docActual]);
     descargar = jasmine
       .createSpy('descargar')
@@ -363,6 +363,52 @@ describe('TasasAdmin', () => {
     expect(html.querySelectorAll('.banco')[1].textContent).toContain(
       'Cargar PDF nuevo',
     );
+  });
+
+  it('a un banco que solo publica en su página le carga un pantallazo', async () => {
+    const pagina: FuenteAdmin = {
+      id: 5,
+      producto: 'libre-inversion',
+      tipo: 'pagina',
+      url: 'https://www.davivienda.com/tasas',
+      url_indice: null,
+      entidad: 'davivienda',
+    };
+    await crearCon([], [...fuentes, pagina]);
+    const subido = documento({ id: 13, fuente: 5, estado: 'nuevo' });
+    docs.cargar.and.resolveTo(subido);
+    admin.crearDesdeDocumento.and.resolveTo(
+      tasa({ id: 4, estado: 'por_revisar', documento: null }),
+    );
+    const davivienda = html.querySelectorAll('.banco')[1];
+    expect(davivienda.textContent).not.toContain('primero agrega');
+    boton(davivienda, 'Cargar pantallazo nuevo').click();
+    fixture.detectChanges();
+    const campo = davivienda.querySelector<HTMLInputElement>(
+      '.carga input[type="file"]',
+    )!;
+    expect(campo.accept).toContain('image/png');
+    const imagen = new File(['png'], 'tasas.png', { type: 'image/png' });
+    Object.defineProperty(campo, 'files', { value: [imagen] });
+    campo.dispatchEvent(new Event('change'));
+    davivienda.querySelector<HTMLFormElement>('.carga')!.requestSubmit();
+    await esperar();
+    expect(docs.cargar).toHaveBeenCalledWith(5, imagen, null);
+    expect(admin.crearDesdeDocumento).toHaveBeenCalledWith(pagina, subido);
+  });
+
+  it('deja al final los bancos sin nada por aprobar', async () => {
+    await crearCon([
+      tasa({
+        id: 5,
+        estado: 'por_revisar',
+        entidad: { codigo: 'davivienda', nombre: 'Davivienda', logo: null },
+      }),
+    ]);
+    const nombres = [...html.querySelectorAll('.banco h2')].map((h) =>
+      h.textContent!.trim(),
+    );
+    expect(nombres).toEqual(['Davivienda', 'BBVA']);
   });
 
   it('filtra los bancos con algo por aprobar', async () => {

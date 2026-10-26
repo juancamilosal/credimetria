@@ -238,7 +238,7 @@
                 <p class="vacio">Nada por aprobar.</p>
               }
 
-              @if (!c.pdf) {
+              @if (!c.carga) {
                 <p class="nota">
                   Para cargar el PDF, primero agrega su dirección.
                 </p>
@@ -248,11 +248,17 @@
                   (submit)="$event.preventDefault(); cargarPdf(c)"
                 >
                   <div class="campo">
-                    <label [for]="'pdf-' + c.clave">PDF nuevo</label>
+                    <label [for]="'pdf-' + c.clave">{{
+                      c.pdf ? "PDF nuevo" : "Pantallazo de la página"
+                    }}</label>
                     <input
                       [id]="'pdf-' + c.clave"
                       type="file"
-                      accept="application/pdf,.pdf"
+                      [accept]="
+                        c.pdf
+                          ? 'application/pdf,.pdf'
+                          : 'image/png,image/jpeg,image/webp'
+                      "
                       (change)="elegirArchivo($event)"
                     />
                   </div>
@@ -287,8 +293,14 @@
                   class="btn btn-claro cargar"
                   (click)="abrirCarga(c)"
                 >
-                  Cargar PDF nuevo
+                  {{ c.pdf ? "Cargar PDF nuevo" : "Cargar pantallazo nuevo" }}
                 </button>
+                @if (!c.pdf) {
+                  <p class="nota">
+                    No publica PDF: carga un pantallazo de su página con la tasa
+                    y la fecha.
+                  </p>
+                }
               }
             </section>
           </div>

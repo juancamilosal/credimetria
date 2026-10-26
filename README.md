@@ -28,7 +28,7 @@ morada y oro del diseño (ver abajo).
 | `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                                       |
 | `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                                              |
 | `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                                              |
-| `/admin/tasas`       | Configuración     | Solo administradores de Directus: por banco, la tasa publicada y la que espera aprobación, cada una con su PDF; comparar los PDF, editar, aprobar y cargar PDF nuevos |
+| `/admin/tasas`       | Configuración     | Solo administradores de Directus: por banco, la tasa publicada y la que espera aprobación, cada una con su PDF; comparar los PDF, editar, aprobar y cargar PDF o pantallazos nuevos |
 
 - **Ranking como en Excel** (`paginas/ranking/` y
   `compartido/tabla-ranking/`): cada título ordena la tabla al tocarlo (↑/↓,
@@ -122,6 +122,11 @@ Directus. No está en el menú: se entra por `/admin`.
     el token y se ven como blob dentro de la página). **Cargar PDF nuevo**
     sube el PDF con su vigencia (si su huella SHA-256 ya existe, avisa) y
     crea la tasa por aprobar unida a él, lista para escribir los valores.
+    Si el banco no publica PDF (fuente de tipo página, como Lulo o
+    Popular), el botón es **Cargar pantallazo nuevo** y sube una imagen de
+    su página; la tasa creada enlaza a la página en el sitio.
+  - Los bancos con algo por aprobar salen primero; al final, los que no
+    tienen nada (los que toca cargar a mano).
   - La **tasa publicada** se puede corregir si se aprobó por error:
     **Editar** sus valores (si cambia la vigencia, también cambia la de su
     PDF), **Cambiar archivo** sube el PDF correcto en lugar del equivocado

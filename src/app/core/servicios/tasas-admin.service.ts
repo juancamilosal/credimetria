@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { DocumentoPdf } from '../modelos/documento';
+import { DocumentoPdf, FuenteAdmin } from '../modelos/documento';
 import { CambiosTasa, EstadoTasa, TasaAdmin } from '../modelos/tasa-admin';
 import { SesionAdmin } from './sesion-admin.service';
 
@@ -140,9 +140,12 @@ export class TasasAdminService {
     return this.cambiarEstado(nueva.id, 'publicada');
   }
 
-  /** Tasa por aprobar unida a un PDF recién cargado; los valores se llenan después. */
+  /**
+   * Tasa por aprobar unida a un PDF (o pantallazo) recién cargado; los
+   * valores se llenan después. El enlace del sitio lleva a la fuente.
+   */
   crearDesdeDocumento(
-    fuente: { id: number; entidad: string; producto: string },
+    fuente: FuenteAdmin,
     documento: DocumentoPdf,
   ): Promise<TasaAdmin> {
     return this.escribir('POST', '/items/tasas_publicadas', {
@@ -150,6 +153,8 @@ export class TasasAdminService {
       entidad: fuente.entidad,
       producto: fuente.producto,
       documento: documento.id,
+      enlace: fuente.url,
+      enlace_es_pagina: fuente.tipo === 'pagina',
       vigente_desde: documento.vigente_desde,
       unidad: 'MV',
       estado: 'por_revisar',
