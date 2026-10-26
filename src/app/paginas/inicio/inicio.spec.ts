@@ -69,6 +69,14 @@ describe('Inicio', () => {
     ).toContain('origen=inicio');
   });
 
+  it('enlaza el PDF del banco o, si no publica PDF, su página de tasas', () => {
+    const pies = [...crear().querySelectorAll('.banco-pie a:first-child')].map(
+      (a) => a.textContent!.replace(/\s+/g, ' ').trim(),
+    );
+    expect(pies[0]).toBe('PDF del banco ↗');
+    expect(pies[1]).toBe('Tasas en la página del banco ↗');
+  });
+
   it('no muestra el simulador', () => {
     expect(crear().querySelector('app-simulador')).toBeNull();
   });

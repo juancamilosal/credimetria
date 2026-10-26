@@ -12,6 +12,10 @@ RUN apt-get update \
 WORKDIR /app
 COPY robots/package.json robots/package-lock.json robots/
 RUN cd robots && npm ci --omit=dev
+# Chromium de Playwright, para el pantallazo de los bancos que publican la
+# tasa en su página y no en un PDF (Banco Popular).
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN cd robots && npx playwright install --with-deps chromium
 COPY robots/*.mjs robots/
 COPY robots/comun robots/comun
 # La usura del mes, la misma que usa la página.

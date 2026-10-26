@@ -267,6 +267,11 @@ en `public/imagenes/` y su entrada en `FOTOS`.
   fija" en el simulador) que lo explica con un ejemplo (`AYUDA_DIFERENCIA`
   en `core/datos/tasas.ts`): en el inicio, en el título de la tabla del
   ranking y en las tarjetas del celular.
+- **Bancos sin PDF**: si la fuente de la tasa publicada es la página del
+  banco (`fuentes.tipo = pagina`, hoy Banco Popular), el enlace dice "Tasas
+  en la página del banco ↗" (o "Página ↗" en la tabla) en vez de "PDF del
+  banco ↗". El servidor lo sabe por `fuente.tipo` (`enPagina` en
+  `TasaEntidad`).
 - **Fuente del promedio a la vista**: el inicio y el ranking enlazan el
   conjunto de la Superfinanciera en datos.gov.co (`FUENTE_PROMEDIO` en
   `core/datos/tasas.ts`) de donde sale "Cobra en promedio". Las tarjetas del

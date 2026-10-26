@@ -9,6 +9,7 @@
     "test": "node --test pruebas/*.test.mjs"
   },
   "dependencies": {
-    "nodemailer": "^6.9.16"
+    "nodemailer": "^6.9.16",
+    "playwright": "1.49.1"
   }
 }

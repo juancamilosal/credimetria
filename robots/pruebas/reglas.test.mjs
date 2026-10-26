@@ -4,9 +4,11 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
+import { textoHtml } from "../comun/pdf.mjs";
 import {
   fecha,
   masReciente,
+  mensual,
   mismasTasas,
   REGLAS,
   revisar,
@@ -40,6 +42,21 @@ describe("reglas por banco", () => {
       assert.ok(t.frase);
     });
   }
+
+  it("banco-popular: lee la tabla de su página (no publica PDF)", () => {
+    const html = readFileSync(
+      new URL("./textos/banco-popular.html", import.meta.url),
+      "utf8",
+    );
+    const t = REGLAS["banco-popular"].leer(textoHtml(html));
+    assert.deepEqual(
+      [t.eaDesde, t.eaHasta, t.mvDesde, t.mvHasta, t.vigencia],
+      [25.23, 25.23, mensual(25.23), mensual(25.23), "2026-02-05"],
+    );
+    // No toma la tabla de compra de cartera (24,10 %).
+    assert.doesNotMatch(t.frase, /24,1000/);
+    assert.deepEqual(revisar(t, USURA), []);
+  });
 
   it("avisa qué no encontró si el PDF cambió de forma", () => {
     assert.throws(
@@ -92,6 +109,7 @@ describe("ayudas", () => {
     assert.equal(fecha("Octubre 05 de 2026"), "2026-10-05");
     assert.equal(fecha("octubre de 2026"), "2026-10-01");
     assert.equal(fecha("19 de Octubre de 2026"), "2026-10-19");
+    assert.equal(fecha("Febrero 5/2026 "), "2026-02-05");
     assert.equal(fecha("sin fecha"), null);
   });
 
@@ -150,5 +168,19 @@ describe("mismasTasas", () => {
       false,
     );
     assert.equal(mismasTasas(leida, { ...guardada, valor_hasta: null }), false);
+  });
+});
+
+describe("páginas web", () => {
+  it("saca el texto visible, sin scripts ni etiquetas", () => {
+    const t = textoHtml(
+      '<p>Hola&nbsp;<b>mundo</b> &amp; m&aacute;s &#36;1</p><script>var x = "no";</script>',
+    );
+    assert.equal(t, "Hola mundo & m&aacute;s $1");
+  });
+
+  it("pasa de E.A. a M.V.", () => {
+    assert.equal(mensual(25.23), 1.8925);
+    assert.equal(mensual(16.77), 1.3003);
   });
 });

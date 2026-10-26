@@ -118,7 +118,12 @@
           <div class="banco-pie">
             @if (banco.pdf) {
               <a [href]="banco.pdf" target="_blank" rel="noopener noreferrer"
-                >PDF del banco ↗</a
+                >{{
+                  banco.enPagina
+                    ? "Tasas en la página del banco"
+                    : "PDF del banco"
+                }}
+                ↗</a
               >
             }
             <a

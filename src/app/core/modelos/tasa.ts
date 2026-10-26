@@ -23,8 +23,10 @@ export interface TasaEntidad {
   hastaUsura?: boolean;
   /** Desde cuándo rige el PDF (AAAA-MM-DD). */
   vigencia?: string | null;
-  /** Dirección del PDF oficial de la entidad. */
+  /** Dirección del PDF oficial de la entidad (o de su página de tasas). */
   pdf?: string | null;
+  /** La entidad no publica PDF: `pdf` es su página de tasas. */
+  enPagina?: boolean;
   /** Logo de la entidad (dirección de la imagen). */
   logo?: string | null;
 }

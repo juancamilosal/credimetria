@@ -22,6 +22,7 @@ export const TASAS_PRUEBA: TasaEntidad[] = [
     producto: 'libre-inversion',
     tasaReal: 21.48,
     tasaAnunciada: 14.1,
+    pdf: 'https://ejemplo.com/tasas-av-villas.pdf',
   },
   {
     entidad: 'Confiar',
@@ -29,6 +30,9 @@ export const TASAS_PRUEBA: TasaEntidad[] = [
     producto: 'libre-inversion',
     tasaReal: 21.9,
     tasaAnunciada: 17.9,
+    // Sin PDF: publica la tasa en su página.
+    pdf: 'https://ejemplo.com/confiar/tasas',
+    enPagina: true,
   },
   {
     entidad: 'Bancolombia',

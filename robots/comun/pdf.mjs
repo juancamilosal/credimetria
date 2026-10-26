@@ -1,4 +1,4 @@
-// Bajar un PDF, sacar su huella y su texto.
+// Bajar un PDF, sacar su huella y su texto; texto de una página web.
 
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -57,4 +57,31 @@ export async function textoPdf(datos) {
   } finally {
     await rm(carpeta, { recursive: true, force: true });
   }
+}
+
+const ENTIDADES = {
+  nbsp: " ",
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+};
+
+/** Texto visible de una página HTML: sin scripts, estilos ni etiquetas. */
+export function textoHtml(html) {
+  return html
+    .replace(/<(script|style|noscript)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&(#x?[0-9a-f]+|\w+);/gi, (todo, e) => {
+      if (e[0] === "#")
+        return String.fromCodePoint(
+          e[1] === "x" || e[1] === "X"
+            ? parseInt(e.slice(2), 16)
+            : Number(e.slice(1)),
+        );
+      return ENTIDADES[e.toLowerCase()] ?? todo;
+    })
+    .replace(/\s+/g, " ")
+    .trim();
 }

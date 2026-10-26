@@ -1,12 +1,14 @@
 // Robot de los PDF: revisa el PDF oficial de tasas de cada banco y, si
 // cambió, lo guarda en Directus con la tasa leída por aprobar.
 //
-// Para cada fuente activa de tipo PDF (colección `fuentes`):
+// Para cada fuente activa de tipo PDF (colección `fuentes`), o de tipo página
+// en los bancos que no publican PDF (regla con `pagina`):
 //   1. Busca el PDF con la regla del banco (reglas.mjs) y lo baja.
 //   2. Si la huella SHA-256 es la misma de la última vez, no hace nada. Si
 //      el PDF cambió pero las tasas leídas son las mismas de la publicada (o
 //      de una por aprobar), tampoco: solo anota la huella nueva.
-//   3. Si es nuevo, lo sube a `documentos` (origen robot) y crea en
+//   3. Si es nuevo, lo sube a `documentos` (origen robot; de una página, un
+//      pantallazo de la tabla) y crea en
 //      `tasas_publicadas` la tasa leída, en "por revisar". Nunca publica:
 //      siempre la aprueba una persona en /admin/tasas.
 //   4. Los bancos que bloquean la descarga (regla con `bloquea`) van en un
@@ -17,14 +19,16 @@
 // Uso:
 //   DIRECTUS_TOKEN=<token del robot> node robots/pdf-bancos.mjs
 //   node robots/pdf-bancos.mjs --sin-guardar     (revisa sin escribir nada)
-//   node robots/pdf-bancos.mjs --probar bbva archivo.pdf   (solo la regla)
+//   node robots/pdf-bancos.mjs --probar bbva archivo.pdf   (solo la regla;
+//                    también acepta la página guardada: archivo.html)
 //   --recordatorio   manda hoy el recordatorio de los bancos que se revisan
 //                    a mano (normalmente sale los lunes)
 
 import { readFile } from "node:fs/promises";
 import { avisar } from "./comun/aviso.mjs";
 import { directus, hayToken, subirArchivo } from "./comun/directus.mjs";
-import { bajarPdf, huella, pagina, textoPdf } from "./comun/pdf.mjs";
+import { pantallazo } from "./comun/pantallazo.mjs";
+import { bajarPdf, huella, pagina, textoHtml, textoPdf } from "./comun/pdf.mjs";
 import { masReciente, mismasTasas, REGLAS, revisar } from "./reglas.mjs";
 
 const USURA = JSON.parse(
@@ -40,13 +44,14 @@ const recordar =
   process.argv.includes("--recordatorio") ||
   new Date().getDay() === DIA_RECORDATORIO;
 
-/** Lee un PDF con la regla del banco y dice qué encontró. */
-async function leerPdf(banco, datos) {
+/** Lee el texto (del PDF o de la página) con la regla del banco. */
+function leerTexto(banco, texto) {
   const regla = REGLAS[banco];
+  if (!regla && fuente.tipo === "pagina") return {};
   if (!regla)
     return { tasa: null, problemas: [`No hay regla para "${banco}".`] };
   try {
-    const tasa = regla.leer(await textoPdf(datos));
+    const tasa = regla.leer(texto);
     return { tasa, problemas: revisar(tasa, USURA) };
   } catch (error) {
     return { tasa: null, problemas: [error.message] };
@@ -94,46 +99,16 @@ async function revisarFuente(fuente) {
   const banco = fuente.entidad?.codigo;
   const nombre = fuente.entidad?.nombre ?? banco;
   const regla = REGLAS[banco];
+  if (!regla && fuente.tipo === "pagina") return {};
   if (!regla)
     return {
       problema: `${nombre}: no hay regla para leer su PDF (reglas.mjs).`,
     };
-
-  const notas = [];
-  let url = null;
-  let datos = null;
-  const fallos = [];
-  for (const posible of await direcciones(fuente, regla, notas)) {
-    try {
-      datos = await bajarPdf(posible);
-      url = posible;
-      break;
-    } catch (error) {
-      fallos.push(`${posible} → ${error.message}`);
-    }
-  }
-  if (!datos) {
-    if (regla.bloquea) {
-      console.log(`${nombre}: bloquea la descarga desde el servidor.`);
-      return { manual: await recordatorio(fuente, nombre) };
-    }
-    return {
-      problema: `${nombre}: no encontré el PDF. ${[...notas, ...fallos].join(" · ")}`,
-    };
-  }
+  // Las fuentes de tipo página solo se revisan en bancos sin PDF.
+  if ((fuente.tipo === "pagina") !== Boolean(regla.pagina)) return {};
 
   const ahora = new Date().toISOString();
-  const marca = huella(datos);
-  const yaVisto =
-    marca === fuente.ultimo_hash ||
-    (
-      await directus(
-        "GET",
-        `/items/documentos?filter[huella][_eq]=${marca}&fields=id&limit=1`,
-      )
-    ).length > 0;
-  if (yaVisto) {
-    console.log(`${nombre}: sin cambios.`);
+  const sinCambios = async (url, marca) => {
     if (!soloMirar)
       await directus("PATCH", `/items/fuentes/${fuente.id}`, {
         url,
@@ -141,9 +116,77 @@ async function revisarFuente(fuente) {
         ultima_revision: ahora,
       });
     return {};
+  };
+  const yaVisto = async (marca) =>
+    marca === fuente.ultimo_hash ||
+    (
+      await directus(
+        "GET",
+        `/items/documentos?filter[huella][_eq]=${marca}&fields=id&limit=1`,
+      )
+    ).length > 0;
+
+  let url, marca, tasa, problemas, prueba;
+  if (fuente.tipo === "pagina") {
+    // Banco sin PDF: se lee la página y la huella es la de la tasa leída (la
+    // página completa cambia en cada visita).
+    url = fuente.url;
+    let texto;
+    try {
+      texto = textoHtml(await pagina(url));
+    } catch (error) {
+      return {
+        problema: `${nombre}: no pude abrir su página de tasas (${url} → ${error.message}).`,
+      };
+    }
+    ({ tasa, problemas } = leerTexto(banco, texto));
+    marca = huella(Buffer.from(JSON.stringify(tasa ?? texto)));
+    if (await yaVisto(marca)) {
+      console.log(`${nombre}: sin cambios.`);
+      return sinCambios(url, marca);
+    }
+    prueba = async () => ({
+      datos: await pantallazo(url, regla.pantallazo),
+      tipo: "image/png",
+      extension: "png",
+      nota: `Pantallazo tomado por el robot de ${url}`,
+    });
+  } else {
+    const notas = [];
+    const fallos = [];
+    let datos = null;
+    for (const posible of await direcciones(fuente, regla, notas)) {
+      try {
+        datos = await bajarPdf(posible);
+        url = posible;
+        break;
+      } catch (error) {
+        fallos.push(`${posible} → ${error.message}`);
+      }
+    }
+    if (!datos) {
+      if (regla.bloquea) {
+        console.log(`${nombre}: bloquea la descarga desde el servidor.`);
+        return { manual: await recordatorio(fuente, nombre) };
+      }
+      return {
+        problema: `${nombre}: no encontré el PDF. ${[...notas, ...fallos].join(" · ")}`,
+      };
+    }
+    marca = huella(datos);
+    if (await yaVisto(marca)) {
+      console.log(`${nombre}: sin cambios.`);
+      return sinCambios(url, marca);
+    }
+    ({ tasa, problemas } = leerTexto(banco, await textoPdf(datos)));
+    prueba = async () => ({
+      datos,
+      tipo: "application/pdf",
+      extension: "pdf",
+      nota: `Bajado por el robot de ${url}`,
+    });
   }
 
-  const { tasa, problemas } = await leerPdf(banco, datos);
   const leida = tasa && !problemas.length;
   const sinMaxima = leida && tasa.eaHasta === null;
   const valores = leida && {
@@ -166,13 +209,7 @@ async function revisarFuente(fuente) {
       console.log(
         `${nombre}: el PDF cambió, pero las tasas son las mismas de la ${igual.estado === "publicada" ? "publicada" : "que espera aprobación"}; no se crea nada.`,
       );
-      if (!soloMirar)
-        await directus("PATCH", `/items/fuentes/${fuente.id}`, {
-          url,
-          ultimo_hash: marca,
-          ultima_revision: ahora,
-        });
-      return {};
+      return sinCambios(url, marca);
     }
   }
 
@@ -182,10 +219,11 @@ async function revisarFuente(fuente) {
       ? { problema: `${nombre}: PDF nuevo, pero ${problemas.join(" ")}` }
       : { nuevo: `${nombre}: PDF nuevo (sin guardar, --sin-guardar).` };
 
+  const copia = await prueba();
   const archivo = await subirArchivo(
-    datos,
-    `${banco}-${(tasa?.vigencia ?? ahora).slice(0, 10)}.pdf`,
-    "application/pdf",
+    copia.datos,
+    `${banco}-${(tasa?.vigencia ?? ahora).slice(0, 10)}.${copia.extension}`,
+    copia.tipo,
     `${nombre} · tasas · ${tasa?.vigencia ?? "revisado " + ahora.slice(0, 10)}`,
   );
   const documento = await directus("POST", "/items/documentos", {
@@ -195,7 +233,7 @@ async function revisarFuente(fuente) {
     vigente_desde: tasa?.vigencia ?? null,
     origen: "robot",
     huella: marca,
-    notas: `Bajado por el robot de ${url}`,
+    notas: copia.nota,
   });
 
   // Tipo de tasa y sistema se copian de la publicada o, si no hay, de la
@@ -248,7 +286,13 @@ async function main() {
   const i = process.argv.indexOf("--probar");
   if (i > 0) {
     const [banco, archivo] = process.argv.slice(i + 1);
-    const resultado = await leerPdf(banco, await readFile(archivo));
+    const contenido = await readFile(archivo);
+    const resultado = leerTexto(
+      banco,
+      /\.html?$/i.test(archivo)
+        ? textoHtml(contenido.toString("utf8"))
+        : await textoPdf(contenido),
+    );
     console.log(JSON.stringify(resultado, null, 2));
     process.exit(resultado.problemas.length ? 1 : 0);
   }
@@ -256,8 +300,8 @@ async function main() {
   if (!hayToken()) throw new Error("Falta DIRECTUS_TOKEN.");
   const fuentes = await directus(
     "GET",
-    "/items/fuentes?filter[tipo][_eq]=pdf&filter[estado][_eq]=activa&limit=-1" +
-      "&fields=id,producto,url,url_indice,ultimo_hash,entidad.codigo,entidad.nombre",
+    "/items/fuentes?filter[tipo][_in]=pdf,pagina&filter[estado][_eq]=activa&limit=-1" +
+      "&fields=id,tipo,producto,url,url_indice,ultimo_hash,entidad.codigo,entidad.nombre",
   );
   const nuevos = [];
   const problemas = [];
@@ -284,7 +328,7 @@ async function main() {
       `${nuevos.length === 1 ? "Hay una tasa nueva" : `Hay ${nuevos.length} tasas nuevas`} por aprobar`,
       nuevos,
     );
-  else console.log(`Sin cambios en ${fuentes.length} PDF.`);
+  else console.log("Sin cambios.");
 
   // Recordatorio semanal, en un correo aparte, de los bancos que no dejan
   // bajar su PDF desde el servidor.

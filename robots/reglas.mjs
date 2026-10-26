@@ -2,6 +2,10 @@
 // leer de su texto (pdftotext -layout) la tasa de libre inversión.
 //
 // Cada regla tiene:
+//   pagina: true si el banco no publica PDF y la tasa está en su página web
+//     (fuente de tipo "pagina"). El robot lee el texto de la página y, si la
+//     tasa cambió, guarda un pantallazo de la tabla (`pantallazo`: texto
+//     que identifica la tabla) como prueba.
 //   bloquea: true si el banco rechaza descargas desde servidores (403 aun con
 //     navegador). Se sigue intentando, pero el aviso llega solo los lunes:
 //     ese PDF se revisa y se sube a mano en /admin/tasas.
@@ -33,12 +37,17 @@ export const numero = (texto) => Number(texto.replace(",", "."));
 /** Texto sin espacios repetidos, para buscar con expresiones sencillas. */
 const plano = (texto) => texto.replace(/[ \t]+/g, " ");
 
-/** "1 de Octubre de 2026", "Octubre 05 de 2026" u "octubre de 2026" → AAAA-MM-DD. */
+/**
+ * "1 de Octubre de 2026", "Octubre 05 de 2026", "Febrero 5/2026" u "octubre
+ * de 2026" → AAAA-MM-DD.
+ */
 export function fecha(texto) {
   const t = texto.toLowerCase();
   let m = t.match(/(\d{1,2}) de (\p{L}+) (?:de )?(\d{4})/u);
   if (m && MESES.includes(m[2])) return iso(m[3], m[2], m[1]);
   m = t.match(/(\p{L}+) (\d{1,2}) de (\d{4})/u);
+  if (m && MESES.includes(m[1])) return iso(m[3], m[1], m[2]);
+  m = t.match(/(\p{L}+) (\d{1,2})\/(\d{4})/u);
   if (m && MESES.includes(m[1])) return iso(m[3], m[1], m[2]);
   m = t.match(/(\p{L}+) de (\d{4})/u);
   if (m && MESES.includes(m[1])) return iso(m[2], m[1], 1);
@@ -65,6 +74,44 @@ function despuesDe(texto, ancla, queBusca) {
 }
 
 export const REGLAS = {
+  "banco-popular": {
+    // No publica PDF: la tabla "Préstamo Personal de Libre Destino" está en
+    // su página de tasas. Solo publica E.A. (una por rango de monto).
+    pagina: true,
+    pantallazo: "Préstamo Personal de Libre Destino E.A.",
+    leer(texto) {
+      const t = plano(texto);
+      const desde = despuesDe(
+        t,
+        /Préstamo Personal de Libre Destino E\.A\./,
+        'la tabla "Préstamo Personal de Libre Destino E.A."',
+      );
+      // Hasta la tabla siguiente (la de compra de cartera).
+      const fin = desde.indexOf("Préstamo Personal", 10);
+      const tabla = fin > 0 ? desde.slice(0, fin) : desde.slice(0, 1500);
+      const vig = exigir(
+        tabla,
+        /vigentes a partir de ([^)]+)\)/,
+        "la vigencia de la tabla",
+      );
+      const rangos = [...tabla.matchAll(/Desde ([\d,]+)% hasta ([\d,]+)%/g)];
+      if (!rangos.length)
+        throw new ReglaRota(
+          'No encontré las tasas "Desde … hasta …" de la tabla de libre destino.',
+        );
+      const eaDesde = Math.min(...rangos.map((r) => numero(r[1])));
+      const eaHasta = Math.max(...rangos.map((r) => numero(r[2])));
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: mensual(eaHasta),
+        vigencia: fecha(vig[1]),
+        frase: tabla.trim().replace(/\s+/g, " ").slice(0, 400),
+      };
+    },
+  },
+
   bbva: {
     // Dirección fija; cambia el contenido.
     leer(texto) {
@@ -228,6 +275,10 @@ export const REGLAS = {
     },
   },
 };
+
+/** E.A. → M.V. (en %), con 4 decimales, para bancos que solo publican E.A. */
+export const mensual = (ea) =>
+  +(((1 + ea / 100) ** (1 / 12) - 1) * 100).toFixed(4);
 
 /** M.V. → E.A. (en %). */
 export const efectiva = (mv) => ((1 + mv / 100) ** 12 - 1) * 100;

@@ -176,8 +176,11 @@
                 [href]="fila.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                [attr.aria-label]="'PDF de tasas de ' + fila.entidad"
-                >PDF ↗</a
+                [attr.aria-label]="
+                  (fila.enPagina ? 'Página de tasas de ' : 'PDF de tasas de ') +
+                  fila.entidad
+                "
+                >{{ fila.enPagina ? "Página" : "PDF" }} ↗</a
               >
             }
           </td>
@@ -260,7 +263,10 @@
               [href]="fila.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              >PDF del banco ↗</a
+              >{{
+                fila.enPagina ? "Tasas en la página del banco" : "PDF del banco"
+              }}
+              ↗</a
             >
           }
         </div>

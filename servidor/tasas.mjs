@@ -30,7 +30,7 @@ async function leer() {
     pedir(
       "/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1" +
         "&fields=producto,ea_desde,ea_hasta,hasta_origen,vigente_desde," +
-        "entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,fuente.url",
+        "entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,fuente.*",
     ).then((r) => r.json()),
     pedir(
       "/items/tasas_promedio?limit=-1&fields=entidad,producto,tasa_ea,corte",
@@ -57,6 +57,8 @@ async function leer() {
       hastaUsura: p.hasta_origen === "usura",
       vigencia: p.vigente_desde,
       pdf: p.fuente?.url ?? null,
+      // El banco publica la tasa en su página y no en un PDF.
+      enPagina: p.fuente?.tipo === "pagina",
       logo: p.entidad.logo ? `/api/logos/${p.entidad.codigo}` : null,
     });
   }
