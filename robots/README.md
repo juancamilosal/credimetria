@@ -55,6 +55,7 @@ Davivienda 22,71 % E.A.
 | Banco Falabella | PDF mensual en Contentful (`assets.ctfassets.net/…/02-VERTICAL-TASAS-OCT-2026.pdf`); su página `/tasas-tarifas` **bloquea** al servidor | Tabla "Crédito de Libre Inversión": desde y hasta, M.V. y E.A.; vigencia "01 al 31 de …" |
 | Davibank        | Enlace `Tasas-y-productos-credito…pdf` en `davibank.com/tasas-y-tarifas` (antes Scotiabank Colpatria) | "Consumo Libre Inversión", fila "Corriente desde": E.A. desde y hasta (M.V. calculada); vigencia "mes de … (del día 1 al día 31)" |
 | Banco de Occidente | Dirección fija `/documents/d/guest/tasas-personas-bdo` (índice `/tarifas`)      | "Cupo línea Préstamo Personal", columna LIBRE INVERSIÓN: desde y hasta, M.V. y E.A. |
+| Banco Caja Social | Dirección fija `…/credito-consumo/Tasas-Credito-Libre-Destino.pdf` (índice `/informacion-corporativa/tasas-precios-y-comisiones/`) | Fila "Libre Inversión": E.A. y M.V. desde y hasta; vigencia "18-Jun-2026" (no mensual) |
 | AV Villas       | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo     | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"          |
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot

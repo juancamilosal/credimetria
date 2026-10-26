@@ -42,8 +42,8 @@ export const numero = (texto) => Number(texto.replace(",", "."));
 const plano = (texto) => texto.replace(/[ \t]+/g, " ");
 
 /**
- * "1 de Octubre de 2026", "Octubre 05 de 2026", "Febrero 5/2026" u "octubre
- * de 2026" → AAAA-MM-DD.
+ * "1 de Octubre de 2026", "Octubre 05 de 2026", "Febrero 5/2026", "18-Jun-2026"
+ * u "octubre de 2026" → AAAA-MM-DD.
  */
 export function fecha(texto) {
   const t = texto.toLowerCase();
@@ -53,6 +53,11 @@ export function fecha(texto) {
   if (m && MESES.includes(m[1])) return iso(m[3], m[1], m[2]);
   m = t.match(/(\p{L}+) (\d{1,2})\/(\d{4})/u);
   if (m && MESES.includes(m[1])) return iso(m[3], m[1], m[2]);
+  m = t.match(/(\d{1,2})-(\p{L}{3})-(\d{4})/u);
+  if (m) {
+    const mes = MESES.find((x) => x.startsWith(m[2]));
+    if (mes) return iso(m[3], mes, m[1]);
+  }
   m = t.match(/(\p{L}+) de (\d{4})/u);
   if (m && MESES.includes(m[1])) return iso(m[2], m[1], 1);
   return null;
@@ -359,6 +364,29 @@ export const REGLAS = {
         eaHasta: numero(ea[2]),
         vigencia: fecha(`${vig[1]} de ${vig[2]}`),
         frase: `Libre inversión: ${mv[0]} · ${ea[0]}`,
+      };
+    },
+  },
+
+  "banco-caja-social": {
+    // Dirección fija .../credito-consumo/Tasas-Credito-Libre-Destino.pdf
+    // (una página). Fila "Libre Inversión": E.A. y M.V. desde, E.A. y M.V.
+    // hasta. No es mensual: "Vigentes a partir del 18-Jun-2026".
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(t, /Vigentes a partir del ([^\n]+)/, "la vigencia");
+      const m = exigir(
+        t,
+        /Libre Inversión ([\d.,]+)% ([\d.,]+)% ([\d.,]+)% ([\d.,]+)%/,
+        'la fila "Libre Inversión"',
+      );
+      return {
+        eaDesde: numero(m[1]),
+        mvDesde: numero(m[2]),
+        eaHasta: numero(m[3]),
+        mvHasta: numero(m[4]),
+        vigencia: fecha(vig[1]),
+        frase: m[0],
       };
     },
   },

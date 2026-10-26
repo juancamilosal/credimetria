@@ -27,6 +27,7 @@ const ESPERADO = {
   davivienda: [1.38, 17.87, null, null, "2026-10-19"],
   "av-villas": [1.24, 16, 2.118, 28.59, "2026-10-01"],
   "banco-falabella": [1.13, 14.435, 2.117, 28.581, "2026-10-01"],
+  "banco-caja-social": [1.37, 17.75, 1.99, 26.7, "2026-06-18"],
   "banco-de-occidente": [1.55, 20.27, 2.11, 28.44, "2026-10-01"],
   davibank: [mensual(17.74), 17.74, mensual(28.59), 28.59, "2026-10-01"],
 };
@@ -114,6 +115,7 @@ describe("ayudas", () => {
     assert.equal(fecha("octubre de 2026"), "2026-10-01");
     assert.equal(fecha("19 de Octubre de 2026"), "2026-10-19");
     assert.equal(fecha("Febrero 5/2026 "), "2026-02-05");
+    assert.equal(fecha("18-Jun-2026"), "2026-06-18");
     assert.equal(fecha("sin fecha"), null);
   });
 
