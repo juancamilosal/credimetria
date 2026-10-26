@@ -164,10 +164,13 @@ async function revisarFuente(fuente) {
     notas: `Bajado por el robot de ${url}`,
   });
 
-  // Tipo de tasa y sistema se copian de la publicada (el PDF no los cambia).
+  // Tipo de tasa y sistema se copian de la publicada o, si no hay, de la
+  // última anterior (el PDF no los cambia). Con -estado, "publicada" va
+  // antes que "anterior".
   const [publicada] = await directus(
     "GET",
-    `/items/tasas_publicadas?filter[fuente][_eq]=${fuente.id}&filter[estado][_eq]=publicada&fields=tipo_tasa,sistema_amortizacion&limit=1`,
+    `/items/tasas_publicadas?filter[fuente][_eq]=${fuente.id}&filter[estado][_in]=publicada,anterior` +
+      `&sort=-estado,-id&fields=tipo_tasa,sistema_amortizacion&limit=1`,
   );
   const leida = tasa && !problemas.length;
   const sinMaxima = leida && tasa.eaHasta === null;
