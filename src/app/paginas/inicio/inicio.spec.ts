@@ -39,9 +39,18 @@ describe('Inicio', () => {
       .slice(0, 3)
       .map((t) => t.entidad);
     expect(nombres).toEqual(esperados);
-    expect(html.querySelector('.primero .mejor')?.textContent).toContain(
+    expect(html.querySelector('.primero .etq-ahorro')?.textContent).toContain(
       'Mejor tasa',
     );
+    // Cada tarjeta trae lo que cobra, la cuota de ejemplo y el rango.
+    const primera = html.querySelector('.primero')!;
+    expect(primera.querySelector('.cobra')?.textContent).toContain(
+      'Cuota de $',
+    );
+    expect(primera.querySelector('.detalle')?.textContent).toContain('Anuncia');
+    expect(
+      primera.querySelector<HTMLAnchorElement>('.quiero')?.getAttribute('href'),
+    ).toContain('origen=inicio');
   });
 
   it('no muestra el simulador', () => {
