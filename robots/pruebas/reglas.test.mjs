@@ -29,6 +29,7 @@ const ESPERADO = {
   "banco-falabella": [1.13, 14.435, 2.117, 28.581, "2026-10-01"],
   bancoomeva: [mensual(24.6), 24.6, null, null, "2026-10-01"],
   "banco-serfinanza": [1.69, 22.28, 1.79, 23.75, "2026-10-01"],
+  "banco-agrario": [mensual(26.68), 26.68, mensual(27.64), 27.64, "2026-10-05"],
   "banco-caja-social": [1.37, 17.75, 1.99, 26.7, "2026-06-18"],
   "banco-de-occidente": [1.55, 20.27, 2.11, 28.44, "2026-10-01"],
   davibank: [mensual(17.74), 17.74, mensual(28.59), 28.59, "2026-10-01"],
@@ -193,6 +194,15 @@ describe("ayudas", () => {
         "descargar.php?idFile=25257",
       ]),
       "https://www.bancoomeva.com.co/descargar.php?idFile=25298",
+    );
+    // Banco Agrario: la semana que empieza más tarde.
+    assert.equal(
+      REGLAS["banco-agrario"].elegir([
+        "/doc/Tasas_colocaciones_del_19oct_al_25oct_2026.pdf",
+        "/doc/Tasas_colocaciones_del_26oct_al_01nov_2026.pdf",
+        "/doc/Tasas_colocaciones_del_28sep_al_04oct_2026.pdf",
+      ]),
+      "/doc/Tasas_colocaciones_del_26oct_al_01nov_2026.pdf",
     );
     // Números largos en la dirección no cuentan como año.
     assert.equal(

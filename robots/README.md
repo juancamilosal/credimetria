@@ -60,6 +60,7 @@ Davivienda 22,71 % E.A.
 | Bancoomeva      | "Cartelera Crediticia" mensual: el `descargar.php?idFile=<n>` con el número más alto en `/publicaciones/164289/tasas-de-credito/` | Página "Aplica para Clientes Bancoomeva" (no la de asociados): "Libre Inversión … Tasa desde % E.A"; hasta = usura |
 | Banco Serfinanza | `TASAS-1-DE-<MES>-DE-<AÑO>.pdf` más nuevo en `/servicio-al-cliente/tasas/` | Tabla "Libre Inversión" (no la de libranza): tasa fija por monto; desde = la más baja, hasta = la más alta |
 | Banco Finandina | `…/historial tasas y tarifas/tasas/tasas-<mes>-<año>.pdf` del mes actual (o el de la fuente; también la página de historial). **Y su página de tasas vigentes**, que se actualiza antes | "Préstamo para libre inversión Desde … NMV - Equivalente al … EA"; hasta = usura |
+| Banco Agrario   | PDF **semanal** `Tasas_colocaciones_del_<d><mes>_al_<d><mes>_<año>.pdf`: el que empieza más tarde | Página "Creditos de Consumo" (recursos propios): desde = "PERSONAL - LIBRE DESTINO", hasta = "CREDITO DIGITAL LIBRE INVERSIÓN"; vigencia "DEL … AL … DE …" de esa sección |
 | AV Villas       | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo     | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"          |
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot

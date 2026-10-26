@@ -584,6 +584,71 @@ export const REGLAS = {
     },
   },
 
+  "banco-agrario": {
+    // PDF semanal "Tasas_colocaciones_del_26oct_al_01nov_2026.pdf" (15
+    // páginas). Libre inversión: sección "CREDITOS CON RECURSOS PROPIOS DEL
+    // <d> AL <d> DE <MES> DE <AÑO>" → "Creditos de Consumo". Publica una tasa
+    // fija por línea: desde = "PERSONAL - LIBRE DESTINO" (oficina) y hasta =
+    // "CREDITO DIGITAL LIBRE INVERSIÓN" (decisión del 26 oct 2026).
+    enlace: /[^"'\s<>()]*Tasas[_-]colocaciones[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
+    // El más nuevo es el que empieza más tarde: "del_26oct_al_01nov_2026".
+    elegir: (enlaces) => {
+      const inicio = (e) => {
+        const m = decodeURIComponent(e)
+          .toLowerCase()
+          .match(/del_(\d{1,2})([a-z]{3})_al_\d{1,2}[a-z]{3}_(\d{4})/);
+        if (!m) return "";
+        const mes = MESES.findIndex((x) => x.startsWith(m[2])) + 1;
+        return `${m[3]}-${String(mes).padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+      };
+      return (
+        [...enlaces].sort((a, b) => (inicio(b) > inicio(a) ? 1 : -1))[0] ?? null
+      );
+    },
+    leer(texto) {
+      const t = plano(texto);
+      const i = t.search(/Creditos de Consumo/);
+      if (i < 0)
+        throw new ReglaRota(
+          'No encontré la sección "Creditos de Consumo" en el documento.',
+        );
+      // La fecha de la sección de recursos propios, justo antes.
+      const fechas = [
+        ...t
+          .slice(0, i)
+          .matchAll(/DEL (\d{1,2}) AL \d{1,2} DE (\p{L}+) DE (\d{4})/gu),
+      ];
+      if (!fechas.length)
+        throw new ReglaRota(
+          'No encontré la fecha "DEL … AL … DE … DE …" de los créditos con recursos propios.',
+        );
+      const [, dia, mes, año] = fechas.at(-1);
+      const consumo = t.slice(i);
+      const oficina = exigir(
+        consumo,
+        /PERSONAL - LIBRE DESTINO [^\n]*? ([\d.,]+)%/,
+        'la línea "PERSONAL - LIBRE DESTINO"',
+      );
+      const digital = consumo.match(
+        /CREDITO DIGITAL LIBRE INVERSI[OÓ]N [^\n]*? ([\d.,]+)%/,
+      );
+      const eaDesde = numero(oficina[1]);
+      const eaHasta = digital ? numero(digital[1]) : null;
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: eaHasta === null ? null : mensual(eaHasta),
+        vigencia: fecha(`${dia} de ${mes.toLowerCase()} de ${año}`),
+        frase:
+          `${eaDesde} % E.A. Personal - Libre destino (oficina)` +
+          (digital
+            ? ` · ${eaHasta} % E.A. Crédito digital libre inversión`
+            : ""),
+      };
+    },
+  },
+
   "av-villas": {
     // "Tasas Activas 01 <Mes> <Año>.pdf"; si la fuente tiene url_indice, se
     // busca ahí el enlace más nuevo.
