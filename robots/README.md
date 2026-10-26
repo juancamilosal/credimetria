@@ -17,6 +17,10 @@ crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
   juntos pasaba de ~30 s y datos.gov.co cortaba la conexión. Cada consulta
   tiene 2 minutos de límite y hasta 3 intentos; cada banco guarda el enlace
   de su propia consulta.
+- **Pendiente al abrir otro producto:** en vez de una consulta por banco y
+  producto (20 bancos × 5 productos = 100 consultas, ~10 min), pedir por
+  banco todos los productos a la vez, agrupando por producto y semana (20
+  consultas, ~3–4 min). Todos los productos están en el mismo conjunto.
 - **Guarda:** una fila por entidad y producto en `tasas_promedio`
   (sobrescribe, sin historial, sin aprobación), con la fecha de corte, el
   CSV de respaldo y el enlace de la consulta. Avisa en las notas si una
