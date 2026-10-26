@@ -29,11 +29,20 @@ const TOKEN = hayToken();
 /** Lo que necesita que alguien lo mire (va por correo al final). */
 const revisar = [];
 
+/** Consulta a datos.gov.co, con 2 minutos de límite y un reintento. */
 async function sfc(params) {
   const url = `${SFC}?${new URLSearchParams(params)}`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`datos.gov.co → ${r.status}`);
-  return { url, filas: await r.json() };
+  for (let intento = 1; ; intento++) {
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(120_000) });
+      if (!r.ok) throw new Error(`datos.gov.co → ${r.status}`);
+      return { url, filas: await r.json() };
+    } catch (error) {
+      if (intento >= 2)
+        throw new Error(`datos.gov.co no respondió: ${error.message}`);
+      console.log(`datos.gov.co no respondió (${error.message}); reintento…`);
+    }
+  }
 }
 
 /** "1-13" → { tipo: '1', codigo: '13' } */
@@ -59,32 +68,37 @@ async function main() {
           "/items/entidades?fields=codigo,codigo_sfc&filter[activa][_eq]=true&filter[codigo_sfc][_nnull]=true&limit=-1",
         );
 
-  // Las últimas semanas con datos.
-  const { filas: cortes } = await sfc({
-    $select: "fecha_corte",
-    $group: "fecha_corte",
-    $order: "fecha_corte desc",
-    $limit: String(SEMANAS),
-  });
-  const desde = cortes.at(-1).fecha_corte.slice(0, 10);
-  const corte = cortes[0].fecha_corte.slice(0, 10);
+  // Se piden las últimas 7 semanas y se usan las 4 más recientes con datos
+  // (preguntar antes por las fechas de corte agrupando todo el conjunto es
+  // muy lento en datos.gov.co y a veces no responde).
+  const hace = new Date(Date.now() - 49 * 864e5).toISOString().slice(0, 10);
 
   for (const [producto, nombreSfc] of Object.entries(PRODUCTOS)) {
     const lista = entidades
       .map((e) => `'${partir(e.codigo_sfc).codigo}'`)
       .join(",");
-    const { url, filas } = await sfc({
+    const { url, filas: recientes } = await sfc({
       $select:
         "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte," +
         "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
         "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
       $where:
         `producto_de_cr_dito='${nombreSfc}' AND codigo_entidad in (${lista}) ` +
-        `AND fecha_corte >= '${desde}'`,
+        `AND fecha_corte >= '${hace}'`,
       $group: "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte",
       $order: "codigo_entidad,fecha_corte",
       $limit: "1000",
     });
+    const cortes = [...new Set(recientes.map((f) => f.fecha_corte))]
+      .sort()
+      .reverse()
+      .slice(0, SEMANAS);
+    if (!cortes.length)
+      throw new Error(
+        `datos.gov.co no trajo datos de ${nombreSfc} desde ${hace}.`,
+      );
+    const corte = cortes[0].slice(0, 10);
+    const filas = recientes.filter((f) => cortes.includes(f.fecha_corte));
 
     // Respaldo: lo que respondió la Superfinanciera, con el enlace.
     const csv = [
