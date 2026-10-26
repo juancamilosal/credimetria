@@ -283,3 +283,18 @@ export function masReciente(enlaces) {
   };
   return [...enlaces].sort((a, b) => puntaje(b) - puntaje(a))[0] ?? null;
 }
+
+/**
+ * Lo leído (`leida`, con el hasta ya resuelto) es igual a una tasa guardada
+ * en Directus (`guardada`: valor_desde, valor_hasta, ea_desde y ea_hasta, que
+ * llegan como texto). Si es igual, el PDF cambió pero las tasas no.
+ */
+export function mismasTasas(leida, guardada) {
+  const campos = ["valor_desde", "valor_hasta", "ea_desde", "ea_hasta"];
+  return campos.every(
+    (c) =>
+      guardada[c] !== null &&
+      guardada[c] !== undefined &&
+      Math.abs(Number(guardada[c]) - leida[c]) < 0.0001,
+  );
+}

@@ -3,7 +3,9 @@
 //
 // Para cada fuente activa de tipo PDF (colección `fuentes`):
 //   1. Busca el PDF con la regla del banco (reglas.mjs) y lo baja.
-//   2. Si la huella SHA-256 es la misma de la última vez, no hace nada.
+//   2. Si la huella SHA-256 es la misma de la última vez, no hace nada. Si
+//      el PDF cambió pero las tasas leídas son las mismas de la publicada (o
+//      de una por aprobar), tampoco: solo anota la huella nueva.
 //   3. Si es nuevo, lo sube a `documentos` (origen robot) y crea en
 //      `tasas_publicadas` la tasa leída, en "por revisar". Nunca publica:
 //      siempre la aprueba una persona en /admin/tasas.
@@ -23,7 +25,7 @@ import { readFile } from "node:fs/promises";
 import { avisar } from "./comun/aviso.mjs";
 import { directus, hayToken, subirArchivo } from "./comun/directus.mjs";
 import { bajarPdf, huella, pagina, textoPdf } from "./comun/pdf.mjs";
-import { masReciente, REGLAS, revisar } from "./reglas.mjs";
+import { masReciente, mismasTasas, REGLAS, revisar } from "./reglas.mjs";
 
 const USURA = JSON.parse(
   await readFile(
@@ -142,6 +144,38 @@ async function revisarFuente(fuente) {
   }
 
   const { tasa, problemas } = await leerPdf(banco, datos);
+  const leida = tasa && !problemas.length;
+  const sinMaxima = leida && tasa.eaHasta === null;
+  const valores = leida && {
+    valor_desde: tasa.mvDesde,
+    valor_hasta: sinMaxima ? USURA.mv : tasa.mvHasta,
+    ea_desde: tasa.eaDesde,
+    ea_hasta: sinMaxima ? USURA.tasa : tasa.eaHasta,
+  };
+
+  // Si las tasas son las mismas de la publicada (o de una que ya espera
+  // aprobación), no se crea nada: el banco solo volvió a subir el PDF.
+  if (leida) {
+    const guardadas = await directus(
+      "GET",
+      `/items/tasas_publicadas?filter[fuente][_eq]=${fuente.id}&filter[estado][_in]=publicada,por_revisar` +
+        "&fields=estado,valor_desde,valor_hasta,ea_desde,ea_hasta&limit=-1",
+    );
+    const igual = guardadas.find((g) => mismasTasas(valores, g));
+    if (igual) {
+      console.log(
+        `${nombre}: el PDF cambió, pero las tasas son las mismas de la ${igual.estado === "publicada" ? "publicada" : "que espera aprobación"}; no se crea nada.`,
+      );
+      if (!soloMirar)
+        await directus("PATCH", `/items/fuentes/${fuente.id}`, {
+          url,
+          ultimo_hash: marca,
+          ultima_revision: ahora,
+        });
+      return {};
+    }
+  }
+
   console.log(`${nombre}: PDF nuevo`, tasa ?? "", problemas);
   if (soloMirar)
     return problemas.length
@@ -172,8 +206,6 @@ async function revisarFuente(fuente) {
     `/items/tasas_publicadas?filter[fuente][_eq]=${fuente.id}&filter[estado][_in]=publicada,anterior` +
       `&sort=-estado,-id&fields=tipo_tasa,sistema_amortizacion&limit=1`,
   );
-  const leida = tasa && !problemas.length;
-  const sinMaxima = leida && tasa.eaHasta === null;
   await directus("POST", "/items/tasas_publicadas", {
     fuente: fuente.id,
     entidad: banco,
@@ -187,10 +219,7 @@ async function revisarFuente(fuente) {
     sistema_amortizacion: publicada?.sistema_amortizacion ?? null,
     ...(leida
       ? {
-          valor_desde: tasa.mvDesde,
-          valor_hasta: sinMaxima ? USURA.mv : tasa.mvHasta,
-          ea_desde: tasa.eaDesde,
-          ea_hasta: sinMaxima ? USURA.tasa : tasa.eaHasta,
+          ...valores,
           hasta_origen: sinMaxima ? "usura" : "entidad",
           frase: tasa.frase,
           notas: `Leída por el robot.${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}`,

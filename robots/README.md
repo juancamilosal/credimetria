@@ -31,7 +31,9 @@ Davivienda 22,71 % E.A.
 - **Qué hace:** lee `fuentes` (tipo PDF, estado activa) y, con la regla de
   cada banco (`reglas.mjs`), busca y baja su PDF. Si la huella SHA-256 es la
   misma de la última vez (o ya está en `documentos`), solo marca la
-  revisión. Si es nuevo: lo sube a `documentos` (origen `robot`), lee la
+  revisión. Si el PDF cambió pero las tasas leídas son **las mismas** de la
+  publicada (o de una que ya espera aprobación), tampoco crea nada: solo
+  anota la huella nueva. Así no hay que aprobar lo que no cambió. Si es nuevo: lo sube a `documentos` (origen `robot`), lee la
   tasa de libre inversión y crea la tasa **por aprobar** unida al PDF. Nunca
   publica: siempre se aprueba en `/admin/tasas`.
 - **Reglas por banco** (texto de `pdftotext -layout`):

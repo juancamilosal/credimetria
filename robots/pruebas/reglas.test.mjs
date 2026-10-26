@@ -4,7 +4,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
-import { fecha, masReciente, REGLAS, revisar } from "../reglas.mjs";
+import {
+  fecha,
+  masReciente,
+  mismasTasas,
+  REGLAS,
+  revisar,
+} from "../reglas.mjs";
 
 const USURA = { tasa: 28.59, mv: 2.118 };
 const texto = (banco) =>
@@ -113,5 +119,36 @@ describe("ayudas", () => {
       ]),
       "/documents/37648/10212085/Tasas+Activas+01+Octubre+2026+%281%29.pdf/f5",
     );
+  });
+});
+
+describe("mismasTasas", () => {
+  const leida = {
+    valor_desde: 1.3,
+    valor_hasta: 2.12,
+    ea_desde: 16.77,
+    ea_hasta: 28.57,
+  };
+  const guardada = {
+    valor_desde: "1.3000",
+    valor_hasta: "2.1200",
+    ea_desde: "16.7700",
+    ea_hasta: "28.5700",
+  };
+
+  it("reconoce la misma tasa aunque Directus la mande como texto", () => {
+    assert.equal(mismasTasas(leida, guardada), true);
+  });
+
+  it("ve el cambio en cualquiera de los cuatro valores", () => {
+    assert.equal(
+      mismasTasas(leida, { ...guardada, valor_desde: "1.3200" }),
+      false,
+    );
+    assert.equal(
+      mismasTasas(leida, { ...guardada, ea_hasta: "28.5900" }),
+      false,
+    );
+    assert.equal(mismasTasas(leida, { ...guardada, valor_hasta: null }), false);
   });
 });
