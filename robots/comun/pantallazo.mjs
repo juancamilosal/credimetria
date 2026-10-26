@@ -65,17 +65,34 @@ export function pantallazo(url, texto, { clic } = {}) {
         .then(() => pagina.waitForTimeout(1_000))
         .catch(() => {});
     // La tabla que tiene el texto o, si la página no usa tablas (Lulo), la
-    // sección; si no se encuentra ninguna, la página completa.
+    // sección más cercana que no sea enorme.
     for (const etiqueta of ["table", "section", "article", "main"]) {
       const parte = pagina.locator(etiqueta, { hasText: texto }).last();
       try {
         if (!(await parte.count())) continue;
+        const caja = await parte.boundingBox();
+        if (caja && caja.height > 1400) continue;
         await parte.scrollIntoViewIfNeeded({ timeout: 10_000 });
         return await parte.screenshot({ timeout: 10_000 });
       } catch {
         // No se ve: probar con la siguiente.
       }
     }
-    return pagina.screenshot({ fullPage: true });
+    // Sin tabla ni sección (filas hechas con div, como Finandina): el bloque
+    // más grande alrededor del texto que no pase de 1.400 px de alto.
+    try {
+      const marca = pagina.getByText(texto, { exact: false }).first();
+      await marca.scrollIntoViewIfNeeded({ timeout: 10_000 });
+      let mejor = marca;
+      for (let nivel = 1; nivel <= 8; nivel++) {
+        const padre = marca.locator(`xpath=ancestor::*[${nivel}]`);
+        const caja = await padre.boundingBox();
+        if (!caja || caja.height > 1400) break;
+        mejor = padre;
+      }
+      return await mejor.screenshot({ timeout: 10_000 });
+    } catch {
+      return pagina.screenshot({ fullPage: true });
+    }
   });
 }
