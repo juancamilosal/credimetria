@@ -24,6 +24,8 @@
 //   node robots/pdf-bancos.mjs --sin-guardar     (revisa sin escribir nada)
 //   node robots/pdf-bancos.mjs --probar bbva archivo.pdf   (solo la regla;
 //                    también acepta la página guardada: archivo.html)
+//   --hoy 2026-11-03   simula esa fecha (probar recordatorios, con
+//                    --sin-guardar)
 //   --recordatorio   manda hoy el recordatorio de los bancos que bloquean
 //                    (normalmente sale los lunes)
 
@@ -47,13 +49,17 @@ const USURA = JSON.parse(
   ),
 );
 const soloMirar = process.argv.includes("--sin-guardar");
+// --hoy AAAA-MM-DD simula la fecha (para probar los recordatorios); solo
+// cambia qué se avisa, no las fechas que se guardan.
+const iHoy = process.argv.indexOf("--hoy");
+const HOY =
+  iHoy > 0 ? new Date(`${process.argv[iHoy + 1]}T12:00:00`) : new Date();
 /** Día del recordatorio de los bancos que se revisan a mano (1 = lunes). */
 const DIA_RECORDATORIO = 1;
 // Los bancos que bloquean van los lunes; los PDF mensuales vencidos, a diario
 // hasta que se sube el nuevo.
 const recordar =
-  process.argv.includes("--recordatorio") ||
-  new Date().getDay() === DIA_RECORDATORIO;
+  process.argv.includes("--recordatorio") || HOY.getDay() === DIA_RECORDATORIO;
 
 /** Lee el texto (del PDF o de la página) con la regla del banco. */
 function leerTexto(banco, texto) {
@@ -71,7 +77,7 @@ function leerTexto(banco, texto) {
 
 /** Direcciones donde puede estar el PDF, la más probable primero. */
 async function direcciones(fuente, regla, notas) {
-  const lista = regla.buscar?.(fuente, new Date()) ?? [fuente.url];
+  const lista = regla.buscar?.(fuente, HOY) ?? [fuente.url];
   if (regla.enlace && fuente.url_indice) {
     try {
       const html = (await pagina(fuente.url_indice)).replaceAll("&amp;", "&");
@@ -115,7 +121,7 @@ async function pdfDelMes(fuente, nombre) {
     `/items/tasas_publicadas?filter[fuente][_eq]=${fuente.id}&filter[estado][_in]=publicada,por_revisar` +
       "&sort=-vigente_desde&limit=1&fields=vigente_desde",
   );
-  if (!mesVencido(ultimo?.vigente_desde, new Date())) return null;
+  if (!mesVencido(ultimo?.vigente_desde, HOY)) return null;
   return [
     `${nombre}: publica un PDF nuevo cada mes y su página no deja entrar al robot. Lo último guardado rige desde ${ultimo?.vigente_desde ?? "—"}: baja el de este mes y súbelo.`,
     `   Página: ${fuente.url_indice ?? fuente.url}`,
