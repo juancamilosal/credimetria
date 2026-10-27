@@ -376,3 +376,12 @@ button {
   color: #f6c343;
   font-size: 13px;
 }
+
+/* "No publica su tasa": el banco sale solo con el promedio de la Superfinanciera */
+.no-publica {
+  font-family: var(--cm-f-texto);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--cm-gris);
+  white-space: nowrap;
+}

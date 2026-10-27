@@ -162,9 +162,9 @@
         }
       } @else {
         @for (fila of vista(); track fila.entidad) {
-          <tr [class.primera]="fila.puesto === 1 && marcarMejor()">
+          <tr [class.primera]="esMejor(fila)">
             <td class="pos">
-              @if (fila.puesto === 1 && marcarMejor()) {
+              @if (esMejor(fila)) {
                 <span class="destacado esquina"
                   ><span class="estrella" aria-hidden="true">★</span> Mejor tasa
                   <span class="estrella" aria-hidden="true">★</span></span
@@ -185,7 +185,11 @@
             </td>
             <td class="muted">{{ fila.tipo }}</td>
             <td class="der cifra muted">
-              {{ fila.tasaAnunciada | tasa }}
+              @if (fila.tasaAnunciada === null) {
+                <span class="no-publica">No publica su tasa</span>
+              } @else {
+                {{ fila.tasaAnunciada | tasa }}
+              }
               @if (fila.tasaHasta) {
                 <span class="hasta"
                   >a {{ fila.tasaHasta | tasa
@@ -267,8 +271,8 @@
     }
   } @else {
     @for (fila of vista(); track fila.entidad) {
-      <li class="tarjeta" [class.primera]="fila.puesto === 1 && marcarMejor()">
-        @if (fila.puesto === 1 && marcarMejor()) {
+      <li class="tarjeta" [class.primera]="esMejor(fila)">
+        @if (esMejor(fila)) {
           <span class="destacado esquina"
             ><span class="estrella" aria-hidden="true">★</span> Mejor tasa
             <span class="estrella" aria-hidden="true">★</span></span
@@ -291,8 +295,12 @@
         <div class="tasas">
           <div>
             <span class="nota">Anuncia</span>
-            <span class="cifra muted"
-              >{{ fila.tasaAnunciada | tasa }}
+            <span class="cifra muted">
+              @if (fila.tasaAnunciada === null) {
+                <span class="no-publica">No publica su tasa</span>
+              } @else {
+                {{ fila.tasaAnunciada | tasa }}
+              }
               @if (fila.tasaHasta) {
                 a {{ fila.tasaHasta | tasa }}{{ fila.hastaUsura ? "*" : "" }}
               }

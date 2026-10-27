@@ -25,8 +25,27 @@ async function pedir(ruta) {
 
 const numero = (v) => (v === null || v === undefined ? null : Number(v));
 
+/**
+ * Bancos que en un producto no publican su tasa (fuente con `como_extraer`
+ * "solo_promedio", p. ej. Banco Popular en libranza): salen solo con el
+ * promedio de la Superfinanciera. Si no se pueden leer, la página sigue sin
+ * ellos.
+ */
+async function soloPromedio() {
+  try {
+    const r = await pedir(
+      "/items/fuentes?filter[como_extraer][_eq]=solo_promedio&filter[estado][_eq]=activa&limit=-1" +
+        "&fields=producto,entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,entidad.activa",
+    );
+    return (await r.json()).data;
+  } catch (error) {
+    console.error("No se pudieron leer los bancos sin tasa:", error.message);
+    return [];
+  }
+}
+
 async function leer() {
-  const [publicadas, promedios] = await Promise.all([
+  const [publicadas, promedios, sinTasa] = await Promise.all([
     pedir(
       "/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1" +
         "&fields=producto,ea_desde,ea_hasta,hasta_origen,vigente_desde,enlace,enlace_es_pagina," +
@@ -35,6 +54,7 @@ async function leer() {
     pedir(
       "/items/tasas_promedio?limit=-1&fields=entidad,producto,tasa_ea,corte",
     ).then((r) => r.json()),
+    soloPromedio(),
   ]);
   const idsLogo = new Map();
   const tasas = [];
@@ -63,6 +83,32 @@ async function leer() {
         ? Boolean(p.enlace_es_pagina)
         : p.fuente?.tipo === "pagina",
       logo: p.entidad.logo ? `/api/logos/${p.entidad.codigo}` : null,
+    });
+  }
+  // Sin tasa publicada: solo con su promedio, sin rango ni enlace.
+  for (const f of sinTasa) {
+    const e = f.entidad;
+    if (!e?.activa) continue;
+    if (tasas.some((t) => t.entidad === e.nombre && t.producto === f.producto))
+      continue;
+    const promedio = promedios.data.find(
+      (x) => x.entidad === e.codigo && x.producto === f.producto,
+    );
+    const real = numero(promedio?.tasa_ea);
+    if (real === null) continue;
+    if (e.logo) idsLogo.set(e.codigo, e.logo);
+    tasas.push({
+      entidad: e.nombre,
+      tipo: e.tipo,
+      producto: f.producto,
+      tasaReal: real,
+      tasaAnunciada: null,
+      tasaHasta: null,
+      hastaUsura: false,
+      vigencia: null,
+      pdf: null,
+      enPagina: false,
+      logo: e.logo ? `/api/logos/${e.codigo}` : null,
     });
   }
   const cortes = promedios.data

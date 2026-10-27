@@ -44,8 +44,11 @@
 
     <ol class="bancos">
       @for (banco of mejores(); track banco.entidad; let i = $index) {
-        <li class="banco" [class.primero]="i === 0">
-          @if (i === 0) {
+        <li
+          class="banco"
+          [class.primero]="i === 0 && banco.tasaAnunciada !== null"
+        >
+          @if (i === 0 && banco.tasaAnunciada !== null) {
             <span class="destacado cinta"
               ><span class="estrella" aria-hidden="true">★</span> Mejor tasa
               <span class="estrella" aria-hidden="true">★</span></span
@@ -92,7 +95,11 @@
             <div>
               <dt>Anuncia</dt>
               <dd class="cifra">
-                {{ banco.tasaAnunciada | tasa }}
+                @if (banco.tasaAnunciada === null) {
+                  <span class="no-publica">No publica su tasa</span>
+                } @else {
+                  {{ banco.tasaAnunciada | tasa }}
+                }
                 @if (banco.tasaHasta) {
                   a {{ banco.tasaHasta | tasa
                   }}{{ banco.hastaUsura ? "*" : "" }}

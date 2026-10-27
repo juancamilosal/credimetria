@@ -1,12 +1,15 @@
 import { TASAS_DE_PRUEBA } from '../../core/datos/tasas-prueba';
-import { TASAS_PRUEBA } from '../../core/datos/tasas-prueba';
+import { CORTE_PRUEBA, TASAS_PRUEBA } from '../../core/datos/tasas-prueba';
 import { cuotaMensual } from '../../core/utilidades/credito';
 import { formatoPesos } from '../../compartido/pipes/formato';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { provideLocationMocks } from '@angular/common/testing';
 import { provideRouter, Router } from '@angular/router';
-import { TasasService } from '../../core/servicios/tasas.service';
+import {
+  TASAS_INICIALES,
+  TasasService,
+} from '../../core/servicios/tasas.service';
 import { Ranking } from './ranking';
 
 /** Tasa real de AV Villas en libre inversión, la primera del ranking. */
@@ -172,5 +175,51 @@ describe('Ranking', () => {
       'Mejor tasa',
     );
     expect(html.querySelectorAll('tbody .destacado').length).toBe(1);
+  });
+
+  it('al banco sin tasa publicada le dice "No publica su tasa"', () => {
+    const fila = [...html.querySelectorAll('tbody tr')].find((tr) =>
+      tr.textContent!.includes('Banco de Bogotá'),
+    )!;
+    expect(fila.querySelector('.no-publica')?.textContent).toContain(
+      'No publica su tasa',
+    );
+  });
+
+  it('no destaca como "Mejor tasa" a un banco que no publica su tasa', () => {
+    TestBed.resetTestingModule();
+    const [a, b] = TASAS_PRUEBA.filter((t) => t.producto === 'libranza');
+    TestBed.configureTestingModule({
+      imports: [Ranking],
+      providers: [
+        provideRouter([]),
+        provideLocationMocks(),
+        {
+          provide: TASAS_INICIALES,
+          useValue: {
+            corte: CORTE_PRUEBA,
+            tasas: [
+              {
+                ...a,
+                entidad: 'Solo promedio',
+                tasaReal: 10,
+                tasaAnunciada: null,
+              },
+              { ...b, entidad: 'Publica', tasaReal: 12, tasaAnunciada: 11 },
+            ],
+          },
+        },
+      ],
+    });
+    const f = TestBed.createComponent(Ranking);
+    TestBed.inject(Router);
+    f.detectChanges();
+    const h: HTMLElement = f.nativeElement;
+    const select = h.querySelector<HTMLSelectElement>('#rkProducto')!;
+    select.value = 'libranza';
+    select.dispatchEvent(new Event('change'));
+    f.detectChanges();
+    expect(h.querySelector('tbody tr .numero')?.textContent?.trim()).toBe('1');
+    expect(h.querySelectorAll('tbody .destacado').length).toBe(0);
   });
 });

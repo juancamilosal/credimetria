@@ -118,6 +118,16 @@ export class TablaRanking {
     });
   });
 
+  /**
+   * La fila lleva "★ Mejor tasa ★": la primera, si se marca y si el banco
+   * publica su tasa (uno que solo tiene promedio no se destaca).
+   */
+  protected esMejor(fila: FilaVista): boolean {
+    return (
+      fila.puesto === 1 && this.marcarMejor() && fila.tasaAnunciada !== null
+    );
+  }
+
   protected ordenar(columna: ColumnaRanking): void {
     const actual = this.orden();
     this.orden.set(

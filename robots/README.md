@@ -87,8 +87,11 @@ Davivienda 22,71 % E.A.
 | Finandina       | El mismo y su página de tasas vigentes      | Fila "Libranza Desde … NMV": 21,27 % E.A.                                   |
 | Bancoomeva      | La misma cartelera                          | Clientes, fila "Libre Inversion" de LIBRANZA: 23,58 % E.A.                  |
 
-  Faltan (no la traen en el PDF que se baja): Popular, Occidente, Caja
-  Social, y los nuevos Pichincha, GNB Sudameris, Bancien y Banco Unión.
+  **Banco Popular** no publica la tasa de Prestayá (su libranza; en su
+  página solo está la tasa moratoria): fuente con `como_extraer` =
+  `solo_promedio`, que el robot no revisa; la página lo muestra solo con el
+  promedio. Faltan: Occidente, Caja Social, y los nuevos Pichincha, GNB
+  Sudameris, Bancien y Banco Unión.
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
   lee la tabla del HTML de su página (sin navegador). Como la página cambia

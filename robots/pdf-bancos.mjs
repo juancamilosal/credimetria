@@ -432,7 +432,8 @@ async function main() {
   if (!hayToken()) throw new Error("Falta DIRECTUS_TOKEN.");
   const fuentes = await directus(
     "GET",
-    "/items/fuentes?filter[tipo][_in]=pdf,pagina&filter[estado][_eq]=activa&limit=-1" +
+    // Las de "solo_promedio" (el banco no publica su tasa) no se revisan.
+    "/items/fuentes?filter[tipo][_in]=pdf,pagina&filter[estado][_eq]=activa&filter[como_extraer][_neq]=solo_promedio&limit=-1" +
       "&fields=id,tipo,producto,url,url_indice,ultimo_hash,entidad.codigo,entidad.nombre",
   );
   const nuevos = [];

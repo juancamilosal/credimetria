@@ -335,6 +335,14 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   minutos y, si Directus falla, sigue con la última. Al armar la página en
   el servidor, las tasas van dentro de ella (`TransferState`): el navegador
   no las vuelve a pedir y nunca ve Directus ni el token.
+- **Bancos que no publican su tasa** en un producto (fuente con
+  `como_extraer` = "Solo promedio", hoy Banco Popular en libranza: no publica
+  la tasa de Prestayá): `/api/tasas` los agrega solo con el promedio de la
+  Superfinanciera. En el ranking dicen "No publica su tasa" en vez del rango,
+  la diferencia queda en "—" y nunca llevan "★ Mejor tasa ★". El robot de los
+  PDF no revisa esas fuentes. El Lector web necesita poder leer `entidad`,
+  `producto`, `como_extraer` y `estado` de `fuentes`; si no puede, la página
+  sigue sin esos bancos.
 - **Variables del servidor** (Coolify): `DIRECTUS_TOKEN` (token del "Lector
   web", obligatorio) y `DIRECTUS_URL` (opcional). Sin el token, la página
   sale sin tasas.
