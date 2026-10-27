@@ -62,6 +62,14 @@ function escribirDecimal(valor: number | null): string {
   return valor === null ? '' : String(+valor.toFixed(4)).replace('.', ',');
 }
 
+/** El PDF que se muestra: la copia resaltada si la hay, si no el original. */
+export function verPdf(d: {
+  archivo: { id: string };
+  archivo_resaltado?: { id: string } | null;
+}): string {
+  return d.archivo_resaltado?.id ?? d.archivo.id;
+}
+
 /** Un banco y un producto: lo publicado, lo que espera aprobación y su historia. */
 interface TarjetaTasa {
   clave: string;
@@ -251,6 +259,8 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected logo(entidad: EntidadAdmin): string | null {
     return this.sesion.urlImagen(entidad.logo, 56);
   }
+
+  protected readonly verPdf = verPdf;
 
   protected urlArchivo(id: string): string | null {
     return this.sesion.urlArchivo(id);
@@ -487,6 +497,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
                       id: cambiado.archivo.id,
                       filename_download: cambiado.archivo.filename_download,
                     },
+                    archivo_resaltado: null,
                   },
                 }
               : x,
@@ -601,9 +612,9 @@ export class TasasAdmin implements OnInit, OnDestroy {
       null;
     await this.trabajar(c.clave, async () => {
       const [der, izq] = await Promise.all([
-        this.enlaceBlob(nuevo.archivo.id),
+        this.enlaceBlob(verPdf(nuevo)),
         actual && actual.id !== nuevo.id
-          ? this.enlaceBlob(actual.archivo.id)
+          ? this.enlaceBlob(verPdf(actual))
           : Promise.resolve(null),
       ]);
       const vigencia = (v: string | null | undefined) =>

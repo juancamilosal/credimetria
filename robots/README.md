@@ -62,54 +62,70 @@ Davivienda 22,71 % E.A.
   huella se revisa **por fuente** (el PDF puede ser nuevo para libranza
   aunque ya esté guardado para libre inversión) y el archivo se sube **una
   sola vez** (el documento de libranza usa el mismo archivo).
+- **Tasa resaltada en verde** (`comun/resaltar.mjs`): con cada PDF nuevo
+  leído, el robot guarda en `documentos.archivo_resaltado` una copia con
+  recuadros verdes sobre las cifras de la tasa (desde y hasta, M.V. y
+  E.A.), el título del producto o de la fila de donde salen y la fecha de
+  la vigencia. Ubica las palabras con `pdftotext -bbox-layout` y dibuja los
+  recuadros con `pdf-lib`. Si una cifra se repite, elige el grupo más
+  compacto en la página (y, si empatan, el que va después del título del
+  producto); una regla puede dar `ancla` cuando el nombre del producto sale
+  en varias partes (Ban100: "Crédito de Libranza"). El original no se toca
+  (es la prueba y su huella dice si el banco lo cambió); en un PDF de
+  varios productos, cada uno tiene su propia copia resaltada. Si no
+  encuentra las cifras, no hay copia y se ve el original. `/admin/tasas`
+  abre y compara la copia, con un enlace al original.
+- **PDF ya guardados** (`resaltar.mjs`): resalta los documentos sin copia
+  que ya tienen la tasa escrita (los anteriores a esta función o los
+  subidos a mano). `--sin-guardar` solo dice qué haría.
 - **Reglas por banco** (texto de `pdftotext -layout`):
 
-| Banco           | Dónde está el PDF                                                               | Qué lee                                                                    |
-| --------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| BBVA            | Dirección fija (`DO-01-Tasas-creditos-consumo.pdf`); cambia el contenido        | Tabla "Libre Inversión", fila "Todos": mínima y máxima                     |
-| Banco de Bogotá | `/documents/d/guest/tasas-<mes>-<año>` del mes actual; si no está, el de antes  | Filas "Libre Destino … (Desde)": la más baja; hasta = usura                |
-| Bancolombia     | Enlace `Actualizacion_tasas_<Mes>_<Año>.pdf` más nuevo del tarifario (índice)   | "…para los créditos de Libre Inversión": desde y hasta, M.V. y E.A.        |
-| Davivienda      | Dirección fija `/documents/d/guest/tasas-tarifas-davivienda` (**bloquea**)      | "CrediExpress Fijo - Tradicional", fila "Libre Inversión"; hasta = usura   |
-| Banco Popular   | **No publica PDF**: tabla en su página de tasas (fuente de tipo `pagina`)       | "Préstamo Personal de Libre Destino E.A.": desde y hasta (solo E.A.; M.V. calculada) |
-| Banco Falabella | PDF mensual en Contentful (`assets.ctfassets.net/…/02-VERTICAL-TASAS-OCT-2026.pdf`); su página `/tasas-tarifas` **bloquea** al servidor | Tabla "Crédito de Libre Inversión": desde y hasta, M.V. y E.A.; vigencia "01 al 31 de …" |
-| Davibank        | Enlace `Tasas-y-productos-credito…pdf` en `davibank.com/tasas-y-tarifas` (antes Scotiabank Colpatria) | "Consumo Libre Inversión", fila "Corriente desde": E.A. desde y hasta (M.V. calculada); vigencia "mes de … (del día 1 al día 31)" |
-| Banco de Occidente | Dirección fija `/documents/d/guest/tasas-personas-bdo` (índice `/tarifas`)      | "Cupo línea Préstamo Personal", columna LIBRE INVERSIÓN: desde y hasta, M.V. y E.A. |
-| Banco Caja Social | Dirección fija `…/credito-consumo/Tasas-Credito-Libre-Destino.pdf` (índice `/informacion-corporativa/tasas-precios-y-comisiones/`) | Fila "Libre Inversión": E.A. y M.V. desde y hasta; vigencia "18-Jun-2026" (no mensual) |
-| Lulo Bank       | **No publica PDF**: página legal `/legals/doc-tasas-tarifas-credito` (fuente `pagina`). Se arma con JavaScript y **no le muestra las tasas al servidor** (ni con Chromium). Regla con `manual: true` (27 oct 2026): el robot **ya no abre su página**, solo lo pone en el recordatorio | "Desde … M.V - … EA hasta … M.V - … EA"; vigencia "vigentes desde el …" |
-| Bancoomeva      | "Cartelera Crediticia" mensual: el `descargar.php?idFile=<n>` con el número más alto en `/publicaciones/164289/tasas-de-credito/` | Página "Aplica para Clientes Bancoomeva" (no la de asociados): "Libre Inversión … Tasa desde % E.A"; hasta = usura |
-| Banco Serfinanza | `TASAS-1-DE-<MES>-DE-<AÑO>.pdf` más nuevo en `/servicio-al-cliente/tasas/` | Tabla "Libre Inversión" (no la de libranza): tasa fija por monto; desde = la más baja, hasta = la más alta |
-| Banco Finandina | `…/historial tasas y tarifas/tasas/tasas-<mes>-<año>.pdf` del mes actual (o el de la fuente; también la página de historial). **Y su página de tasas vigentes**, que se actualiza antes | "Préstamo para libre inversión Desde … NMV - Equivalente al … EA"; hasta = usura |
-| Banco Agrario   | PDF **semanal** `Tasas_colocaciones_del_<d><mes>_al_<d><mes>_<año>.pdf`: el que empieza más tarde | Página "Creditos de Consumo" (recursos propios): desde = "PERSONAL - LIBRE DESTINO", hasta = "CREDITO DIGITAL LIBRE INVERSIÓN"; vigencia "DEL … AL … DE …" de esa sección |
-| AV Villas       | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo     | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"          |
+| Banco              | Dónde está el PDF                                                                                                                                                                                                                                                                      | Qué lee                                                                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BBVA               | Dirección fija (`DO-01-Tasas-creditos-consumo.pdf`); cambia el contenido                                                                                                                                                                                                               | Tabla "Libre Inversión", fila "Todos": mínima y máxima                                                                                                                    |
+| Banco de Bogotá    | `/documents/d/guest/tasas-<mes>-<año>` del mes actual; si no está, el de antes                                                                                                                                                                                                         | Filas "Libre Destino … (Desde)": la más baja; hasta = usura                                                                                                               |
+| Bancolombia        | Enlace `Actualizacion_tasas_<Mes>_<Año>.pdf` más nuevo del tarifario (índice)                                                                                                                                                                                                          | "…para los créditos de Libre Inversión": desde y hasta, M.V. y E.A.                                                                                                       |
+| Davivienda         | Dirección fija `/documents/d/guest/tasas-tarifas-davivienda` (**bloquea**)                                                                                                                                                                                                             | "CrediExpress Fijo - Tradicional", fila "Libre Inversión"; hasta = usura                                                                                                  |
+| Banco Popular      | **No publica PDF**: tabla en su página de tasas (fuente de tipo `pagina`)                                                                                                                                                                                                              | "Préstamo Personal de Libre Destino E.A.": desde y hasta (solo E.A.; M.V. calculada)                                                                                      |
+| Banco Falabella    | PDF mensual en Contentful (`assets.ctfassets.net/…/02-VERTICAL-TASAS-OCT-2026.pdf`); su página `/tasas-tarifas` **bloquea** al servidor                                                                                                                                                | Tabla "Crédito de Libre Inversión": desde y hasta, M.V. y E.A.; vigencia "01 al 31 de …"                                                                                  |
+| Davibank           | Enlace `Tasas-y-productos-credito…pdf` en `davibank.com/tasas-y-tarifas` (antes Scotiabank Colpatria)                                                                                                                                                                                  | "Consumo Libre Inversión", fila "Corriente desde": E.A. desde y hasta (M.V. calculada); vigencia "mes de … (del día 1 al día 31)"                                         |
+| Banco de Occidente | Dirección fija `/documents/d/guest/tasas-personas-bdo` (índice `/tarifas`)                                                                                                                                                                                                             | "Cupo línea Préstamo Personal", columna LIBRE INVERSIÓN: desde y hasta, M.V. y E.A.                                                                                       |
+| Banco Caja Social  | Dirección fija `…/credito-consumo/Tasas-Credito-Libre-Destino.pdf` (índice `/informacion-corporativa/tasas-precios-y-comisiones/`)                                                                                                                                                     | Fila "Libre Inversión": E.A. y M.V. desde y hasta; vigencia "18-Jun-2026" (no mensual)                                                                                    |
+| Lulo Bank          | **No publica PDF**: página legal `/legals/doc-tasas-tarifas-credito` (fuente `pagina`). Se arma con JavaScript y **no le muestra las tasas al servidor** (ni con Chromium). Regla con `manual: true` (27 oct 2026): el robot **ya no abre su página**, solo lo pone en el recordatorio | "Desde … M.V - … EA hasta … M.V - … EA"; vigencia "vigentes desde el …"                                                                                                   |
+| Bancoomeva         | "Cartelera Crediticia" mensual: el `descargar.php?idFile=<n>` con el número más alto en `/publicaciones/164289/tasas-de-credito/`                                                                                                                                                      | Página "Aplica para Clientes Bancoomeva" (no la de asociados): "Libre Inversión … Tasa desde % E.A"; hasta = usura                                                        |
+| Banco Serfinanza   | `TASAS-1-DE-<MES>-DE-<AÑO>.pdf` más nuevo en `/servicio-al-cliente/tasas/`                                                                                                                                                                                                             | Tabla "Libre Inversión" (no la de libranza): tasa fija por monto; desde = la más baja, hasta = la más alta                                                                |
+| Banco Finandina    | `…/historial tasas y tarifas/tasas/tasas-<mes>-<año>.pdf` del mes actual (o el de la fuente; también la página de historial). **Y su página de tasas vigentes**, que se actualiza antes                                                                                                | "Préstamo para libre inversión Desde … NMV - Equivalente al … EA"; hasta = usura                                                                                          |
+| Banco Agrario      | PDF **semanal** `Tasas_colocaciones_del_<d><mes>_al_<d><mes>_<año>.pdf`: el que empieza más tarde                                                                                                                                                                                      | Página "Creditos de Consumo" (recursos propios): desde = "PERSONAL - LIBRE DESTINO", hasta = "CREDITO DIGITAL LIBRE INVERSIÓN"; vigencia "DEL … AL … DE …" de esa sección |
+| AV Villas          | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo                                                                                                                                                                                                            | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"                                                                                                         |
 
 - **Reglas de libranza** (`<banco>:libranza`). Desde = la tasa fija más
   baja de la tabla de libranza (de todas las pagadurías y plazos); hasta = la
   más alta si el banco la publica, si no la usura. Los convenios especiales
   (Policía, Ministerio de Defensa, Grupo Olímpica) no cuentan.
 
-| Banco           | PDF                                         | Qué lee (oct 2026)                                                          |
-| --------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
-| BBVA            | **Aparte**: `…/libranzas/DO-01-tasas-libranza.pdf` (dirección fija) | "Crédito de Libranza", tasas desde por segmento: 13,14 % E.A. (pensionados) |
-| Banco de Bogotá | El mismo                                    | Tablas "LIBRANZAS … (Desde)" por pagaduría y plazo: 16,70 % E.A.            |
-| Davivienda      | El mismo (se carga a mano)                  | Página "Créditos de Libranza", CrediExpress Fijo Libranza: 16,76 % E.A.     |
-| AV Villas       | El mismo                                    | "Créditos de Consumo", fila LIBRANZA: 16,15 % a 28,59 % E.A.                |
-| Bancolombia     | El mismo                                    | "…para las Libranzas", tasa fija de empleados y Fopep: 14,30 % a 28,57 %    |
-| Banco Agrario   | El mismo (semanal)                          | Tabla "Credito de Libranza" (sin convenios especiales): 19,30 % a 25,60 %   |
-| Serfinanza      | El mismo                                    | "Libranza Libre Inversión" sin Grupo Olímpica: 18,02 % a 19,42 % E.A.       |
-| Finandina       | El mismo y su página de tasas vigentes      | Fila "Libranza Desde … NMV": 21,27 % E.A.                                   |
-| Bancoomeva      | La misma cartelera                          | Clientes, fila "Libre Inversion" de LIBRANZA: 23,58 % E.A.                  |
-| Pichincha       | "Tasas de colocación y captación" (dirección Liferay que cambia): se busca en `/web/corporativo/tasas-y-tarifas` | "Líneas de Consumo · Libranza", Nuevo y Compra de cartera: 16,21 % a 28,59 % E.A.; vigencia propia de libranza (1 jul 2026) |
-| Bancien (Ban100) | "Tarifario tasas B100": se busca en `/tasas-y-tarifas` | Página "Crédito de Libranza", Tasa de Interés: 1,50 % a 2,1176 % M.V. (19,56 % a 28,59 % E.A.) |
-| GNB Sudameris   | Dirección fija `/ws/documentos?d=TASAS` (todos los productos) | "CRÉDITO DE LIBRANZA* 24,60 % E.A.": **solo publica la máxima** (`soloMaxima`, sin desde); la página dice "hasta 24,60 %, solo publica la máxima" |
-| Caja Social     | **Aparte**: `…/credito-consumo/Tasas-Libranzas.pdf` (dirección fija) | Filas "Libranza" y "Libranza Compra de Cartera": 16,65 % a 28,05 % E.A.  |
+| Banco            | PDF                                                                                                              | Qué lee (oct 2026)                                                                                                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BBVA             | **Aparte**: `…/libranzas/DO-01-tasas-libranza.pdf` (dirección fija)                                              | "Crédito de Libranza", tasas desde por segmento: 13,14 % E.A. (pensionados)                                                                        |
+| Banco de Bogotá  | El mismo                                                                                                         | Tablas "LIBRANZAS … (Desde)" por pagaduría y plazo: 16,70 % E.A.                                                                                   |
+| Davivienda       | El mismo (se carga a mano)                                                                                       | Página "Créditos de Libranza", CrediExpress Fijo Libranza: 16,76 % E.A.                                                                            |
+| AV Villas        | El mismo                                                                                                         | "Créditos de Consumo", fila LIBRANZA: 16,15 % a 28,59 % E.A.                                                                                       |
+| Bancolombia      | El mismo                                                                                                         | "…para las Libranzas", tasa fija de empleados y Fopep: 14,30 % a 28,57 %                                                                           |
+| Banco Agrario    | El mismo (semanal)                                                                                               | Tabla "Credito de Libranza" (sin convenios especiales): 19,30 % a 25,60 %                                                                          |
+| Serfinanza       | El mismo                                                                                                         | "Libranza Libre Inversión" sin Grupo Olímpica: 18,02 % a 19,42 % E.A.                                                                              |
+| Finandina        | El mismo y su página de tasas vigentes                                                                           | Fila "Libranza Desde … NMV": 21,27 % E.A.                                                                                                          |
+| Bancoomeva       | La misma cartelera                                                                                               | Clientes, fila "Libre Inversion" de LIBRANZA: 23,58 % E.A.                                                                                         |
+| Pichincha        | "Tasas de colocación y captación" (dirección Liferay que cambia): se busca en `/web/corporativo/tasas-y-tarifas` | "Líneas de Consumo · Libranza", Nuevo y Compra de cartera: 16,21 % a 28,59 % E.A.; vigencia propia de libranza (1 jul 2026)                        |
+| Bancien (Ban100) | "Tarifario tasas B100": se busca en `/tasas-y-tarifas`                                                           | Página "Crédito de Libranza", Tasa de Interés: 1,50 % a 2,1176 % M.V. (19,56 % a 28,59 % E.A.)                                                     |
+| GNB Sudameris    | Dirección fija `/ws/documentos?d=TASAS` (todos los productos)                                                    | "CRÉDITO DE LIBRANZA\* 24,60 % E.A.": **solo publica la máxima** (`soloMaxima`, sin desde); la página dice "hasta 24,60 %, solo publica la máxima" |
+| Caja Social      | **Aparte**: `…/credito-consumo/Tasas-Libranzas.pdf` (dirección fija)                                             | Filas "Libranza" y "Libranza Compra de Cartera": 16,65 % a 28,05 % E.A.                                                                            |
 
-  **Banco Popular** no publica la tasa de Prestayá (su libranza; en su
-  página solo está la tasa moratoria): fuente con `como_extraer` =
-  `solo_promedio`, que el robot no revisa; la página lo muestra solo con el
-  promedio. **Banco de Occidente** tampoco la publica (en su PDF y su
-  página solo está el seguro "Cuota Protegida Libranza"): también
-  `solo_promedio`. **Banco Unión** tampoco la publica (sus documentos piden
-  captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que reportan libranza.
+**Banco Popular** no publica la tasa de Prestayá (su libranza; en su
+página solo está la tasa moratoria): fuente con `como_extraer` =
+`solo_promedio`, que el robot no revisa; la página lo muestra solo con el
+promedio. **Banco de Occidente** tampoco la publica (en su PDF y su
+página solo está el seguro "Cuota Protegida Libranza"): también
+`solo_promedio`. **Banco Unión** tampoco la publica (sus documentos piden
+captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que reportan libranza.
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
   lee la tabla del HTML de su página (sin navegador). Como la página cambia
@@ -169,7 +185,7 @@ Davivienda 22,71 % E.A.
 ### Cuando una regla se rompe
 
 1. Bajar el PDF nuevo y probar la regla: `node robots/pdf-bancos.mjs
-   --probar bbva archivo.pdf` (muestra lo leído y los problemas).
+--probar bbva archivo.pdf` (muestra lo leído y los problemas).
 2. Ver el texto con `pdftotext -layout archivo.pdf -`, ajustar la regla en
    `reglas.mjs` y agregar el texto en `pruebas/textos/` si cambia la forma.
 3. `cd robots && npm test` (las pruebas usan el texto de los PDF reales).
@@ -180,7 +196,8 @@ Davivienda 22,71 % E.A.
    leer `entidades`, `fuentes`, `documentos` y `tasas_publicadas`; crear en
    `tasas_publicadas` (solo `estado = por_revisar`), `documentos` y
    `directus_files`; actualizar en `fuentes` (`url`, `ultimo_hash`,
-   `ultima_revision`); crear y actualizar `tasas_promedio`. Generar su token.
+   `ultima_revision`) y en `documentos` (`archivo_resaltado`, para
+   `resaltar.mjs`); crear y actualizar `tasas_promedio`. Generar su token.
 2. **Recurso nuevo en Coolify** desde este repo, rama `develop`, con
    Dockerfile `robots/Dockerfile` y contexto en la raíz. No expone puertos.
 3. **Variables:** `DIRECTUS_TOKEN` (del Robot), `DIRECTUS_URL`
@@ -194,5 +211,7 @@ Davivienda 22,71 % E.A.
 
 - `cd robots && npm install && npm test`
 - `node robots/promedio-sfc.mjs --sin-guardar` (no necesita token)
+- `DIRECTUS_TOKEN=… node robots/resaltar.mjs --sin-guardar` (qué PDF
+  guardados resaltaría)
 - `DIRECTUS_TOKEN=… node robots/pdf-bancos.mjs --sin-guardar` (revisa sin
   escribir; necesita `pdftotext`)

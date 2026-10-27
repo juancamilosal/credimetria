@@ -501,13 +501,26 @@
             }
           </span>
         }
+        @if (d.archivo_resaltado && urlArchivo(d.archivo.id); as original) {
+          <span class="nota resaltado">
+            Tasa resaltada en verde ·
+            <a [href]="original" target="_blank" rel="noopener noreferrer"
+              >ver el original</a
+            >
+          </span>
+        }
       </div>
-      @if (urlArchivo(d.archivo.id); as url) {
+      @if (urlArchivo(verPdf(d)); as url) {
         <a
           class="btn btn-borde abrir"
           [href]="url"
           target="_blank"
           rel="noopener noreferrer"
+          [title]="
+            d.archivo_resaltado
+              ? 'Con la tasa resaltada en verde'
+              : 'Abrir el PDF'
+          "
           >Abrir</a
         >
       }

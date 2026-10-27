@@ -10,7 +10,8 @@
 //      el PDF cambió pero las tasas leídas son las mismas de la publicada (o
 //      de una por aprobar), tampoco: solo anota la huella nueva.
 //   3. Si es nuevo, lo sube a `documentos` (origen robot; de una página, un
-//      pantallazo de la tabla) y crea en
+//      pantallazo de la tabla), con una copia que tiene las cifras leídas
+//      resaltadas en verde (`archivo_resaltado`), y crea en
 //      `tasas_publicadas` la tasa leída, en "por revisar". Nunca publica:
 //      siempre la aprueba una persona en /admin/tasas.
 //   4. Los bancos que bloquean la descarga (regla con `bloquea`) van en un
@@ -37,6 +38,7 @@ import { avisar } from "./comun/aviso.mjs";
 import { directus, hayToken, subirArchivo } from "./comun/directus.mjs";
 import { pantallazo, textoConNavegador } from "./comun/pantallazo.mjs";
 import { bajarPdf, huella, pagina, textoHtml, textoPdf } from "./comun/pdf.mjs";
+import { resaltarPdf } from "./comun/resaltar.mjs";
 import {
   masReciente,
   mesVencido,
@@ -384,9 +386,33 @@ async function revisarFuente(fuente) {
       copia.tipo,
       `${fuente.entidad?.nombre ?? banco} · tasas · ${tasa?.vigencia ?? "revisado " + ahora.slice(0, 10)}`,
     ));
+  // Copia con las cifras leídas resaltadas en verde (solo PDF; el original
+  // queda igual).
+  const resaltado =
+    leida && copia.tipo === "application/pdf"
+      ? await resaltarPdf(copia.datos, {
+          cifras: [
+            tasa.mvDesde,
+            tasa.eaDesde,
+            ...(sinMaxima ? [] : [tasa.mvHasta, tasa.eaHasta]),
+          ],
+          vigencia: tasa.vigencia,
+          producto: fuente.producto,
+          ancla: regla.ancla,
+        })
+      : null;
+  const archivoResaltado =
+    resaltado &&
+    (await subirArchivo(
+      resaltado,
+      `${banco}-${(tasa?.vigencia ?? ahora).slice(0, 10)}-resaltado.pdf`,
+      "application/pdf",
+      `${fuente.entidad?.nombre ?? banco} · ${fuente.producto} · resaltado`,
+    ));
   const documento = await directus("POST", "/items/documentos", {
     fuente: fuente.id,
     archivo,
+    archivo_resaltado: archivoResaltado ?? null,
     estado: "nuevo",
     vigente_desde: tasa?.vigencia ?? null,
     origen: "robot",

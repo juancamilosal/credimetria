@@ -123,6 +123,11 @@ Directus. No está en el menú: se entra por `/admin`.
   "Agregar dirección del PDF"; la dirección debe abrir el PDF, no la página
   índice). Dos columnas:
   - **Publicada hoy**: la tasa que sale en la página, con su PDF (`Abrir`).
+    `Abrir` y `Comparar PDF` muestran la copia que guarda el robot con la
+    tasa, el título del producto y la vigencia **resaltados en verde**
+    (`documentos.archivo_resaltado`); debajo del nombre, "ver el original"
+    abre el PDF del banco sin marcas. Si se cambia el archivo, la copia
+    resaltada se borra (era del anterior).
   - **Por aprobar**: la tasa nueva con su PDF, lo que cambia frente a la
     publicada (mín. ▲ +1,05 pts) y los botones **Aprobar**, **Rechazar**,
     **Editar** (con "Calcular E.A." y el PDF de donde sale) y **Comparar

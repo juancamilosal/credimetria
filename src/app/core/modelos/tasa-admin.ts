@@ -46,6 +46,8 @@ export interface TasaAdmin {
     estado: 'nuevo' | 'actual' | 'anterior';
     vigente_desde: string | null;
     archivo: { id: string; filename_download: string | null };
+    /** Copia con las cifras de la tasa resaltadas en verde. */
+    archivo_resaltado?: { id: string } | null;
   } | null;
 }
 

@@ -234,6 +234,30 @@ describe('TasasAdmin', () => {
     );
   });
 
+  it('abre y compara la copia con la tasa resaltada, si la hay', async () => {
+    await crearCon([
+      {
+        ...porAprobar,
+        documento: {
+          ...porAprobar.documento!,
+          archivo_resaltado: { id: 'r11' },
+        },
+      },
+      publicada,
+    ]);
+    const nueva = html.querySelector('[aria-label="Por aprobar"]')!;
+    expect(nueva.querySelector('a.abrir')?.getAttribute('href')).toBe(
+      'https://d/assets/r11',
+    );
+    expect(nueva.querySelector('.resaltado a')?.getAttribute('href')).toBe(
+      'https://d/assets/f11',
+    );
+    boton(html.querySelector('.banco')!, 'Comparar PDF').click();
+    await esperar();
+    expect(descargar).toHaveBeenCalledWith('r11');
+    expect(descargar).not.toHaveBeenCalledWith('f11');
+  });
+
   it('compara los dos PDF lado a lado', async () => {
     await crear();
     boton(html.querySelector('.banco')!, 'Comparar PDF').click();

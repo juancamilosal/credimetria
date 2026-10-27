@@ -9,6 +9,7 @@ const CAMPOS_DOCUMENTO = [
   'archivo.id',
   'archivo.filename_download',
   'archivo.filesize',
+  'archivo_resaltado.id',
   'estado',
   'vigente_desde',
   'origen',
@@ -184,9 +185,11 @@ export class DocumentosAdminService {
     const cambiado = await this.sesion.pedir<DocumentoPdf>(
       'PATCH',
       `/items/documentos/${documento.id}?fields=${CAMPOS_DOCUMENTO}`,
-      { archivo: subido.id, huella },
+      // La copia resaltada era del archivo anterior.
+      { archivo: subido.id, huella, archivo_resaltado: null },
     );
     await this.borrarSiNadieLoUsa(documento.archivo.id);
+    await this.borrarResaltado(documento);
     return cambiado;
   }
 
@@ -194,6 +197,13 @@ export class DocumentosAdminService {
   async descartar(documento: DocumentoPdf): Promise<void> {
     await this.sesion.pedir('DELETE', `/items/documentos/${documento.id}`);
     await this.borrarSiNadieLoUsa(documento.archivo.id);
+    await this.borrarResaltado(documento);
+  }
+
+  /** La copia resaltada es solo de este documento: se borra con él. */
+  private async borrarResaltado(documento: DocumentoPdf): Promise<void> {
+    const id = documento.archivo_resaltado?.id;
+    if (id) await this.sesion.pedir('DELETE', `/files/${id}`);
   }
 
   /**

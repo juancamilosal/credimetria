@@ -26,6 +26,9 @@
 //   paginaVigente: { url, leer, pantallazo, clic?, navegador? } si el banco
 //     también muestra la tasa en una página que se actualiza antes que el PDF:
 //     se prefiere el PDF, salvo que la página rija desde una fecha más nueva.
+//   ancla: dónde empieza el producto en el PDF, para resaltar sus cifras
+//     (comun/resaltar.mjs) cuando el nombre de siempre ("libranza", "libre
+//     inversión") aparece en varias partes.
 //   elegir(enlaces) → de los enlaces encontrados con `enlace`, la dirección
 //     del PDF más nuevo (si no, el del mes más reciente en el nombre).
 //   buscar(fuente, hoy) → direcciones posibles del PDF, la más nueva primero.
@@ -786,6 +789,9 @@ Object.assign(REGLAS, {
   },
 
   "bancien:libranza": {
+    // La página 8 repite la tasa en un resumen; se resalta la de la página
+    // de libranza.
+    ancla: /cr[eé]dito de libranza/i,
     // Bancien S.A. (marca Ban100). "Tarifario tasas B100" (8 páginas),
     // embebido en /tasas-y-tarifas (el nombre del archivo puede cambiar: se
     // busca ahí). Página "Crédito de Libranza", recuadro "Tasa de Interés":

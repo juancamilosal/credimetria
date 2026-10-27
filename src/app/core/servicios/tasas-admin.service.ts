@@ -36,6 +36,7 @@ const CAMPOS_TASA = [
   'documento.vigente_desde',
   'documento.archivo.id',
   'documento.archivo.filename_download',
+  'documento.archivo_resaltado.id',
 ].join(',');
 
 const DECIMALES = [

@@ -30,3 +30,12 @@ export async function subirArchivo(datos, nombre, tipo, titulo) {
   formulario.append("file", new Blob([datos], { type: tipo }), nombre);
   return (await directus("POST", "/files", formulario)).id;
 }
+
+/** Un archivo guardado en Directus, como Buffer. */
+export async function bajarArchivo(id) {
+  const r = await fetch(`${DIRECTUS}/assets/${id}`, {
+    headers: { Authorization: `Bearer ${process.env.DIRECTUS_TOKEN}` },
+  });
+  if (!r.ok) throw new Error(`GET /assets/${id} → ${r.status}`);
+  return Buffer.from(await r.arrayBuffer());
+}

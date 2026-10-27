@@ -480,3 +480,15 @@ blockquote {
     margin-left: 52px;
   }
 }
+
+.nota.resaltado::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border-radius: 2px;
+  background: #8fdc8f;
+  border: 1px solid #1aa61a;
+  vertical-align: -1px;
+}

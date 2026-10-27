@@ -11,6 +11,8 @@ export interface DocumentoPdf {
     filename_download: string | null;
     filesize: number | null;
   };
+  /** Copia con las cifras de la tasa resaltadas en verde (la hace el robot). */
+  archivo_resaltado?: { id: string } | null;
   estado: EstadoDocumento;
   vigente_desde: string | null;
   origen: 'manual' | 'robot' | null;
