@@ -34,6 +34,10 @@ crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
 - **Cada cuánto:** una vez por semana (la Superfinanciera publica cortes
   semanales con unos días de retraso).
 - **Probar sin guardar:** `node robots/promedio-sfc.mjs --sin-guardar`.
+- **Créditos:** cada fila guarda `creditos`, cuántos créditos hay detrás del
+  promedio en las 4 semanas. Es **interno** (el Lector web no lo lee y no
+  sale en la página); con menos de 100, las notas dicen "Pocos créditos: el
+  promedio es poco confiable".
 - **Un producto:** `--producto libre-inversion` o `--producto libranza`. En
   Coolify cada producto es una tarea aparte (cada una con sus 15 minutos).
 

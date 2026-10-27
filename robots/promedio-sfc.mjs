@@ -31,6 +31,11 @@ const PRODUCTOS = {
 };
 /** Nombre de cada producto para el correo. */
 const NOMBRES = { "libre-inversion": "Libre inversión", libranza: "Libranza" };
+/**
+ * Con menos créditos que esto en las 4 semanas, el promedio es poco
+ * confiable: se anota en las notas (dato interno, no sale en la página).
+ */
+const POCOS_CREDITOS = 100;
 /** Salto (en puntos) que se avisa en las notas para revisarlo. */
 const SALTO = 2;
 
@@ -248,11 +253,14 @@ async function main() {
         (f) => f.tipo_entidad === tipo && f.codigo_entidad === codigo,
       );
       const m = suyas.reduce((s, f) => s + Number(f.m), 0);
+      const creditos = Math.round(
+        suyas.reduce((s, f) => s + Number(f.n ?? 0), 0),
+      );
       const tasa = m
         ? +(suyas.reduce((s, f) => s + Number(f.tm), 0) / m).toFixed(2)
         : null;
       console.log(
-        `${e.codigo.padEnd(16)} ${producto}  ${tasa ?? "sin reporte"}${tasa ? " % E.A." : ""}  (${suyas.length} semanas)`,
+        `${e.codigo.padEnd(16)} ${producto}  ${tasa ?? "sin reporte"}${tasa ? " % E.A." : ""}  (${suyas.length} semanas, ${creditos} créditos)`,
       );
       if (soloMostrar) continue;
 
@@ -281,6 +289,8 @@ async function main() {
         respaldo,
         consulta_url: consultas.get(`${producto}:${e.codigo}`),
         actualizada: new Date().toISOString(),
+        // Interno: cuántos créditos hay detrás del promedio.
+        creditos,
         ...(tasa === null
           ? {
               estado: "sin_reporte",
@@ -290,7 +300,10 @@ async function main() {
               tasa_ea: tasa,
               estado: "al_dia",
               notas:
-                `Promedio ponderado por monto de ${suyas.length} semanas al ${corte}.` +
+                `Promedio ponderado por monto de ${suyas.length} semanas al ${corte} (${creditos} créditos).` +
+                (creditos < POCOS_CREDITOS
+                  ? ` Pocos créditos: el promedio es poco confiable.`
+                  : "") +
                 (salto
                   ? ` REVISAR: cambió de ${antes} % a ${tasa} % (más de ${SALTO} puntos).`
                   : ""),
