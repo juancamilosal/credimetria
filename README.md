@@ -19,15 +19,15 @@ Siguen el documento "Credimetría · Pantallas a desarrollar en Angular" y el
 diseño "Credimetría · Marca y página web", con una paleta más sobria que la
 morada y oro del diseño (ver abajo).
 
-| Ruta                 | Pantalla          | Qué hace                                                                                                                                                              |
-| -------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                                      |
-| `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas                        |
-| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                       |
-| `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                               |
-| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                                       |
-| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                                              |
-| `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                                              |
+| Ruta                 | Pantalla          | Qué hace                                                                                                                                                                            |
+| -------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                                                    |
+| `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas                                      |
+| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                                     |
+| `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                                             |
+| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                                                     |
+| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                                                            |
+| `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                                                            |
 | `/admin/tasas`       | Configuración     | Solo administradores de Directus: por banco, la tasa publicada y la que espera aprobación, cada una con su PDF; comparar los PDF, editar, aprobar y cargar PDF o pantallazos nuevos |
 
 - **Ranking como en Excel** (`paginas/ranking/` y
@@ -40,8 +40,9 @@ morada y oro del diseño (ver abajo).
   por" y "Tipo de entidad". Todo queda en la dirección
   (`?producto=…&tipo=…&monto=…&plazo=…&orden=diferencia-desc`, con
   `Location.replaceState`, sin navegar, para que la pantalla no suba) y "Quiero
-  esta" lleva el monto a la asesoría. Las cifras de cada fila van en la
-  misma línea (`vertical-align: baseline`) y los logos miden 40 px de alto.
+  esta" lleva el monto a la asesoría. Cada banco es una tarjeta (`border-spacing`
+  de 10 px, borde verde en la mejor tasa y azul al pasar el mouse). Las
+  cifras de cada fila van en la misma línea (`vertical-align: baseline`) y los logos miden 40 px de alto.
   Si las tasas no vinieron con la página, la tabla y las tarjetas muestran
   un esqueleto (`TasasService.cargando`) mientras llegan de `/api/tasas`;
   en el servidor la página se arma ya con las tasas.

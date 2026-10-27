@@ -1,7 +1,4 @@
 .tabla-caja {
-  background: var(--cm-blanco);
-  border: 1px solid var(--cm-linea);
-  border-radius: var(--cm-r-tarjeta);
   /* Visible para que el menú del filtro no quede cortado */
   overflow: visible;
 }
@@ -14,14 +11,16 @@
 
 table {
   width: 100%;
-  border-collapse: collapse;
+  /* Cada banco es una tarjeta: filas separadas por 10 px */
+  border-collapse: separate;
+  border-spacing: 0 10px;
   font-size: 15px;
   min-width: 720px;
 }
 
 caption {
   text-align: left;
-  padding: 16px 20px 0;
+  padding: 0 4px 2px;
   font-weight: 700;
   font-size: 17px;
 }
@@ -38,7 +37,9 @@ th {
 
 td {
   padding: 15px 14px;
-  border-top: 1px solid var(--cm-linea-suave);
+  background: var(--cm-blanco);
+  border-top: 1px solid var(--cm-linea);
+  border-bottom: 1px solid var(--cm-linea);
   /* La cifra principal de cada columna queda en la misma línea, aunque
      debajo vengan "a 28,59 %", el enlace o los intereses. */
   vertical-align: baseline;
@@ -317,6 +318,29 @@ th[aria-sort="descending"] .flecha {
   display: block;
   font-family: var(--cm-f-texto, inherit);
   font-size: 12px;
+}
+
+td:first-child {
+  border-left: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-tarjeta) 0 0 var(--cm-r-tarjeta);
+}
+
+td:last-child {
+  border-right: 1px solid var(--cm-linea);
+  border-radius: 0 var(--cm-r-tarjeta) var(--cm-r-tarjeta) 0;
+}
+
+/* La mejor tasa con borde verde; al pasar el mouse, borde azul */
+tr.primera td {
+  border-color: var(--cm-ahorro-600);
+}
+
+tbody tr:hover td {
+  border-color: var(--cm-enlace);
+}
+
+tr.cargando:hover td {
+  border-color: var(--cm-linea);
 }
 
 /* Esqueleto mientras llegan las tasas */

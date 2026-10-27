@@ -162,7 +162,7 @@
         }
       } @else {
         @for (fila of vista(); track fila.entidad) {
-          <tr>
+          <tr [class.primera]="fila.puesto === 1 && marcarMejor()">
             <td class="pos">{{ fila.puesto }}</td>
             <td>
               <span class="nombre">
