@@ -420,7 +420,7 @@ async function revisarFuente(fuente) {
           ...valores,
           hasta_origen: sinMaxima ? "usura" : "entidad",
           frase: tasa.frase,
-          notas: `Leída por el robot el ${cuando()}.${tasa.soloMaxima ? " El banco solo publica la tasa máxima (no hay desde)." : ""}${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
+          notas: `Leída por el robot el ${cuando()}${tasa.soloMaxima ? " El banco solo publica la tasa máxima (no hay desde)." : ""}${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
         }
       : {
           notas: `El robot no pudo leer la tasa (${cuando()}): ${problemas.join(" ")} Llénala mirando el PDF.`,
