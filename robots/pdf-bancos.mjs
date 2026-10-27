@@ -188,6 +188,12 @@ async function revisarFuente(fuente) {
     };
   // Las fuentes de tipo página solo se revisan en bancos sin PDF.
   if ((fuente.tipo === "pagina") !== Boolean(regla.pagina)) return {};
+  // Banco que se revisa siempre a mano (Lulo): no se abre su página, solo
+  // va en el recordatorio.
+  if (regla.manual) {
+    console.log(`${nombre}: se revisa a mano (no se abre su página).`);
+    return { manual: await recordatorio(fuente, nombre) };
+  }
 
   const ahora = new Date().toISOString();
   const sinCambios = async (url, marca) => {

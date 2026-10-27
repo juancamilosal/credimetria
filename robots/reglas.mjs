@@ -17,6 +17,9 @@
 //     para subir a mano el del mes.
 //   navegador: true si la página se arma con JavaScript y el texto solo se ve
 //     abriéndola con Chromium.
+//   manual: true si el robot ni lo intenta (Lulo): solo va en el
+//     recordatorio (los lunes, o a diario si no tiene ninguna tasa) y la tasa
+//     se carga a mano en /admin/tasas.
 //   bloquea: true si el banco rechaza descargas desde servidores (403 aun con
 //     navegador) o su página no le muestra las tasas al servidor. Se sigue intentando, pero el aviso llega solo los lunes:
 //     ese PDF se revisa y se sube a mano en /admin/tasas.
@@ -406,12 +409,15 @@ export const REGLAS = {
   "lulo-bank": {
     // No publica PDF: página legal "Tasas y tarifas del crédito" con un solo
     // rango "Desde … M.V - … EA hasta … M.V - … EA". La página se arma con
-    // JavaScript (el HTML no trae las tasas): se lee con el navegador. Desde
-    // el VPS ni el navegador recibe las tasas (26 caracteres, oct 2026): queda
-    // en el recordatorio de los lunes y se carga a mano.
+    // JavaScript (el HTML no trae las tasas). Desde el VPS ni el navegador
+    // recibe las tasas (26 caracteres, oct 2026) y abrirla demoraba y hacía
+    // fallar la corrida: el robot ya no la abre (27 oct 2026). Va en el
+    // recordatorio y se carga a mano; `leer` queda para --probar con la página
+    // guardada.
     pagina: true,
     navegador: true,
     bloquea: true,
+    manual: true,
     pantallazo: "Tasas y tarifas del crédito",
     leer(texto) {
       // En el navegador cada línea puede quedar aparte: todo en una línea.

@@ -34,20 +34,32 @@ const soloMostrar = process.argv.includes("--sin-guardar");
 const TOKEN = hayToken();
 /** Lo que necesita que alguien lo mire (va por correo al final). */
 const revisar = [];
+/**
+ * Tiempo máximo para consultar datos.gov.co (la tarea de Coolify corta a los
+ * 15 minutos): lo que alcance a traer se guarda; los bancos que falten se
+ * dejan con su tasa anterior y van en el correo.
+ */
+const FIN = Date.now() + 11 * 60 * 1000;
 
 /** Consulta a datos.gov.co: 2 minutos de límite y hasta 3 intentos. */
 async function sfc(params) {
   const url = `${SFC}?${new URLSearchParams(params)}`;
   for (let intento = 1; ; intento++) {
     try {
-      const r = await fetch(url, { signal: AbortSignal.timeout(120_000) });
+      const queda = FIN - Date.now();
+      if (queda < 5_000) throw new Error("se acabó el tiempo de la corrida");
+      const r = await fetch(url, {
+        signal: AbortSignal.timeout(Math.min(120_000, queda)),
+      });
       if (!r.ok) throw new Error(`respondió ${r.status}`);
       return { url, filas: await r.json() };
     } catch (error) {
       // "fetch failed" esconde la causa real (conexión, DNS, certificado).
       const causa = error.cause?.code ?? error.cause?.message ?? error.message;
-      if (intento >= 3)
-        throw new Error(`datos.gov.co no respondió en 3 intentos: ${causa}`);
+      if (intento >= 3 || FIN - Date.now() < 20_000)
+        throw new Error(
+          `datos.gov.co no respondió (${intento} intentos): ${causa}`,
+        );
       console.log(
         `datos.gov.co no respondió (${causa}); reintento en ${15 * intento} s…`,
       );
@@ -90,25 +102,44 @@ async function main() {
   const nombresSfc = Object.values(PRODUCTOS);
   const todas = [];
   const consultas = new Map(); // codigo de la entidad → enlace de su consulta
+  // Si datos.gov.co no responde para un banco, se salta: los demás se
+  // guardan y ese conserva su tasa anterior.
+  const fallidos = new Set();
   for (const e of entidades) {
     const { tipo, codigo } = partir(e.codigo_sfc);
-    const { url, filas } = await sfc({
-      $select:
-        "nombre_entidad,fecha_corte,producto_de_cr_dito," +
-        "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
-        "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
-      $where:
-        `producto_de_cr_dito in(${nombresSfc.map((n) => `'${n}'`).join(",")}) ` +
-        `AND tipo_entidad='${tipo}' AND codigo_entidad='${codigo}' ` +
-        `AND fecha_corte >= '${hace}'`,
-      $group: "nombre_entidad,fecha_corte,producto_de_cr_dito",
-      $order: "fecha_corte",
-      $limit: "200",
-    });
+    let respuesta;
+    try {
+      respuesta = await sfc({
+        $select:
+          "nombre_entidad,fecha_corte,producto_de_cr_dito," +
+          "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
+          "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
+        $where:
+          `producto_de_cr_dito in(${nombresSfc.map((n) => `'${n}'`).join(",")}) ` +
+          `AND tipo_entidad='${tipo}' AND codigo_entidad='${codigo}' ` +
+          `AND fecha_corte >= '${hace}'`,
+        $group: "nombre_entidad,fecha_corte,producto_de_cr_dito",
+        $order: "fecha_corte",
+        $limit: "200",
+      });
+    } catch (error) {
+      console.log(`${e.codigo}: ${error.message}`);
+      fallidos.add(e.codigo);
+      revisar.push(
+        `${e.codigo}: ${error.message}; se dejó su promedio anterior.`,
+      );
+      continue;
+    }
+    const { url, filas } = respuesta;
     consultas.set(e.codigo, url);
     for (const f of filas)
       todas.push({ ...f, tipo_entidad: tipo, codigo_entidad: codigo });
   }
+
+  if (fallidos.size === entidades.length)
+    throw new Error(
+      `datos.gov.co no respondió para ningún banco (${[...revisar].join(" · ")})`,
+    );
 
   for (const [producto, nombreSfc] of Object.entries(PRODUCTOS)) {
     const recientes = todas.filter((f) => f.producto_de_cr_dito === nombreSfc);
@@ -158,6 +189,7 @@ async function main() {
     }
 
     for (const e of entidades) {
+      if (fallidos.has(e.codigo)) continue;
       const { tipo, codigo } = partir(e.codigo_sfc);
       const suyas = filas.filter(
         (f) => f.tipo_entidad === tipo && f.codigo_entidad === codigo,

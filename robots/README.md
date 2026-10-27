@@ -19,6 +19,10 @@ crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
   todos los bancos juntos pasaba de ~30 s y datos.gov.co cortaba la
   conexión. Cada consulta tiene 2 minutos de límite y hasta 3 intentos; cada
   banco guarda el enlace de su propia consulta.
+- **Si datos.gov.co no responde para un banco** (3 intentos), se salta: los
+  demás se guardan, ese conserva su promedio anterior y va en el correo. La
+  corrida consulta máximo 11 minutos (la tarea de Coolify corta a los 15) y
+  guarda lo que alcanzó a traer.
 - Si un banco no tiene un producto (p. ej. libranza en Lulo, Falabella o
   Davibank) y nunca tuvo promedio de él, no se crea fila ni se avisa.
 - **Guarda:** una fila por entidad y producto en `tasas_promedio`
@@ -63,7 +67,7 @@ Davivienda 22,71 % E.A.
 | Davibank        | Enlace `Tasas-y-productos-credito…pdf` en `davibank.com/tasas-y-tarifas` (antes Scotiabank Colpatria) | "Consumo Libre Inversión", fila "Corriente desde": E.A. desde y hasta (M.V. calculada); vigencia "mes de … (del día 1 al día 31)" |
 | Banco de Occidente | Dirección fija `/documents/d/guest/tasas-personas-bdo` (índice `/tarifas`)      | "Cupo línea Préstamo Personal", columna LIBRE INVERSIÓN: desde y hasta, M.V. y E.A. |
 | Banco Caja Social | Dirección fija `…/credito-consumo/Tasas-Credito-Libre-Destino.pdf` (índice `/informacion-corporativa/tasas-precios-y-comisiones/`) | Fila "Libre Inversión": E.A. y M.V. desde y hasta; vigencia "18-Jun-2026" (no mensual) |
-| Lulo Bank       | **No publica PDF**: página legal `/legals/doc-tasas-tarifas-credito` (fuente `pagina`). Se arma con JavaScript y **no le muestra las tasas al servidor** (ni con Chromium): recordatorio de los lunes | "Desde … M.V - … EA hasta … M.V - … EA"; vigencia "vigentes desde el …" |
+| Lulo Bank       | **No publica PDF**: página legal `/legals/doc-tasas-tarifas-credito` (fuente `pagina`). Se arma con JavaScript y **no le muestra las tasas al servidor** (ni con Chromium). Regla con `manual: true` (27 oct 2026): el robot **ya no abre su página**, solo lo pone en el recordatorio | "Desde … M.V - … EA hasta … M.V - … EA"; vigencia "vigentes desde el …" |
 | Bancoomeva      | "Cartelera Crediticia" mensual: el `descargar.php?idFile=<n>` con el número más alto en `/publicaciones/164289/tasas-de-credito/` | Página "Aplica para Clientes Bancoomeva" (no la de asociados): "Libre Inversión … Tasa desde % E.A"; hasta = usura |
 | Banco Serfinanza | `TASAS-1-DE-<MES>-DE-<AÑO>.pdf` más nuevo en `/servicio-al-cliente/tasas/` | Tabla "Libre Inversión" (no la de libranza): tasa fija por monto; desde = la más baja, hasta = la más alta |
 | Banco Finandina | `…/historial tasas y tarifas/tasas/tasas-<mes>-<año>.pdf` del mes actual (o el de la fuente; también la página de historial). **Y su página de tasas vigentes**, que se actualiza antes | "Préstamo para libre inversión Desde … NMV - Equivalente al … EA"; hasta = usura |
