@@ -1,7 +1,7 @@
 .hero {
   padding-block: 48px 120px;
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: 48px;
   align-items: center;
 }
@@ -26,8 +26,8 @@
 }
 
 .hero-foto {
-  aspect-ratio: 4 / 4.4;
-  max-height: 460px;
+  /* Foto horizontal: Credimetría en el portátil y en el celular */
+  aspect-ratio: 3 / 2;
   width: 100%;
   justify-self: end;
   border-radius: var(--cm-r-bloque);
@@ -417,8 +417,7 @@
   }
 
   .hero-foto {
-    aspect-ratio: 16 / 10;
-    max-height: 300px;
+    aspect-ratio: 3 / 2;
   }
 
   .oscuro {
