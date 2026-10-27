@@ -90,7 +90,9 @@ Davivienda 22,71 % E.A.
   **Banco Popular** no publica la tasa de Prestayá (su libranza; en su
   página solo está la tasa moratoria): fuente con `como_extraer` =
   `solo_promedio`, que el robot no revisa; la página lo muestra solo con el
-  promedio. Faltan: Occidente, Caja Social, y los nuevos Pichincha, GNB
+  promedio. **Banco de Occidente** tampoco la publica (en su PDF y su
+  página solo está el seguro "Cuota Protegida Libranza"): también
+  `solo_promedio`. Faltan: Caja Social, y los nuevos Pichincha, GNB
   Sudameris, Bancien y Banco Unión.
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
