@@ -737,6 +737,54 @@ Object.assign(REGLAS, {
     },
   },
 
+  "banco-pichincha:libranza": {
+    // "Tasas de colocación y captación" (Liferay: /documents/43928/45187/
+    // Tasas+de+colocación++y+captación_+(1).pdf/<uuid>?t=…), enlazado en
+    // /web/corporativo/tasas-y-tarifas. "Tasas de Crédito" → "Líneas de
+    // Consumo" → Libranza: Nuevo y Compra de cartera, desde y hasta (N.M.V. y
+    // E.A.). La libranza trae su propia vigencia ("Libranza. Tasa Vigente
+    // desde el 01 de julio de 2026"). Pichincha no reporta créditos de libre
+    // inversión a la Superfinanciera: solo libranza.
+    enlace:
+      /[^"'\s<>]*Tasas(?:\+|%20| )de(?:\+|%20| )colocaci[^"'\s<>]*\.pdf[^"'\s<>]*/gi,
+    leer(texto) {
+      const t = plano(texto);
+      const bloque = despuesDe(
+        t,
+        /Líneas de Consumo\s*\n\s*Libranza/,
+        'la tabla "Líneas de Consumo · Libranza"',
+      ).split(/Libre Inversión/)[0];
+      const vig = exigir(
+        bloque,
+        /Libranza\. Tasa Vigente desde el ([^\n]+)/,
+        'la vigencia "Libranza. Tasa Vigente desde el …"',
+      );
+      const filas = [
+        ...bloque.matchAll(
+          /(Nuevo|Compra de cartera) [^\n]*? ([\d.,]+)% ([\d.,]+)% ([\d.,]+)% ([\d.,]+)%/g,
+        ),
+      ];
+      if (!filas.length)
+        throw new ReglaRota(
+          'No encontré las filas "Nuevo" y "Compra de cartera" de libranza.',
+        );
+      const menor = filas.reduce((a, b) =>
+        numero(b[3]) < numero(a[3]) ? b : a,
+      );
+      const mayor = filas.reduce((a, b) =>
+        numero(b[5]) > numero(a[5]) ? b : a,
+      );
+      return {
+        mvDesde: numero(menor[2]),
+        eaDesde: numero(menor[3]),
+        mvHasta: numero(mayor[4]),
+        eaHasta: numero(mayor[5]),
+        vigencia: fecha(vig[1]),
+        frase: filas.map((f) => f[0].replace(/\s+/g, " ")).join(" · "),
+      };
+    },
+  },
+
   "gnb-sudameris:libranza": {
     // PDF fijo /ws/documentos?d=TASAS (3 páginas, todos los productos):
     // "CRÉDITO DE LIBRANZA* 24,60% E.A. 1,85% M.V." con la nota "*Se publica
