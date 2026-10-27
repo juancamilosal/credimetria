@@ -729,6 +729,37 @@ Object.assign(REGLAS, {
     },
   },
 
+  "banco-caja-social:libranza": {
+    // PDF aparte de dirección fija …/credito-consumo/Tasas-Libranzas.pdf (en
+    // la misma página que el de libre destino): filas "Libranza" y "Libranza
+    // Compra de Cartera", E.A. y M.V. desde y hasta. Vigencia "19-jun-2026".
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(t, /Vigentes a partir del ([^\n]+)/, "la vigencia");
+      const filas = [
+        ...t.matchAll(
+          /Libranza[^\n%]*? ([\d.,]+)% ([\d.,]+)% ([\d.,]+)% ([\d.,]+)%/g,
+        ),
+      ];
+      if (!filas.length)
+        throw new ReglaRota('No encontré las filas "Libranza" de la tabla.');
+      const menor = filas.reduce((a, b) =>
+        numero(b[1]) < numero(a[1]) ? b : a,
+      );
+      const mayor = filas.reduce((a, b) =>
+        numero(b[3]) > numero(a[3]) ? b : a,
+      );
+      return {
+        eaDesde: numero(menor[1]),
+        mvDesde: numero(menor[2]),
+        eaHasta: numero(mayor[3]),
+        mvHasta: numero(mayor[4]),
+        vigencia: fecha(vig[1]),
+        frase: filas.map((f) => f[0].trim()).join(" · "),
+      };
+    },
+  },
+
   "banco-de-bogota:libranza": {
     // Mismo PDF mensual. Tablas "LIBRANZAS … (Desde)" por pagaduría y plazo
     // (Tasa Mes, Tasa E.A.), al final del PDF; la primera fila de cada tabla

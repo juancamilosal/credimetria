@@ -86,14 +86,15 @@ Davivienda 22,71 % E.A.
 | Serfinanza      | El mismo                                    | "Libranza Libre Inversión" sin Grupo Olímpica: 18,02 % a 19,42 % E.A.       |
 | Finandina       | El mismo y su página de tasas vigentes      | Fila "Libranza Desde … NMV": 21,27 % E.A.                                   |
 | Bancoomeva      | La misma cartelera                          | Clientes, fila "Libre Inversion" de LIBRANZA: 23,58 % E.A.                  |
+| Caja Social     | **Aparte**: `…/credito-consumo/Tasas-Libranzas.pdf` (dirección fija) | Filas "Libranza" y "Libranza Compra de Cartera": 16,65 % a 28,05 % E.A.  |
 
   **Banco Popular** no publica la tasa de Prestayá (su libranza; en su
   página solo está la tasa moratoria): fuente con `como_extraer` =
   `solo_promedio`, que el robot no revisa; la página lo muestra solo con el
   promedio. **Banco de Occidente** tampoco la publica (en su PDF y su
   página solo está el seguro "Cuota Protegida Libranza"): también
-  `solo_promedio`. Faltan: Caja Social, y los nuevos Pichincha, GNB
-  Sudameris, Bancien y Banco Unión.
+  `solo_promedio`. Faltan los nuevos: Pichincha, GNB Sudameris, Bancien y
+  Banco Unión.
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
   lee la tabla del HTML de su página (sin navegador). Como la página cambia
