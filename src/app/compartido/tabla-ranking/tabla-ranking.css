@@ -218,8 +218,8 @@ th[aria-sort="descending"] .flecha {
 }
 
 .tarjeta .logo-mini img {
-  height: 24px;
-  max-width: 130px;
+  width: 120px;
+  height: 30px;
 }
 
 .tarjeta-top .pos {
@@ -285,10 +285,11 @@ th[aria-sort="descending"] .flecha {
 }
 
 .logo-mini img {
+  /* Misma caja para todos: los logos cortos (como Lulo) crecen hasta
+     llenarla y los alargados se ajustan al ancho */
   display: block;
-  height: 24px;
-  width: auto;
-  max-width: 120px;
+  width: 104px;
+  height: 28px;
   object-fit: contain;
 }
 

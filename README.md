@@ -313,6 +313,9 @@ en `public/imagenes/` y su entrada en `FOTOS`.
   En "Comparamos tasas de" (inicio) cada entidad sale con su logo en una
   cuadrícula de recuadros blancos del mismo tamaño
   (`TasasService.entidadesConLogo`).
+  Todos los logos van en una caja de ancho y alto fijos con `object-fit:
+contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
+  alargados.
 - **Las tasas vienen de Directus** (desde el 25 oct 2026, 5 bancos de
   prueba en libre inversión: AV Villas, Bancolombia, BBVA, Banco de Bogotá y
   Davivienda). `TasasService.cargar()` corre al arrancar

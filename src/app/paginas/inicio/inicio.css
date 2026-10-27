@@ -374,10 +374,11 @@
 }
 
 .entidades li.con-logo img {
+  /* Misma caja para todos: los logos cortos (como Lulo) crecen hasta
+     llenarla y los alargados se ajustan al ancho */
   display: block;
-  height: 30px;
-  width: auto;
-  max-width: 100%;
+  width: min(100%, 120px);
+  height: 40px;
   object-fit: contain;
 }
 
@@ -541,9 +542,10 @@
 }
 
 .logo img {
+  /* Misma caja para todos: los logos cortos (como Lulo) crecen hasta
+     llenarla y los alargados se ajustan al ancho */
   display: block;
-  height: 28px;
-  width: auto;
-  max-width: 160px;
+  width: 150px;
+  height: 36px;
   object-fit: contain;
 }
