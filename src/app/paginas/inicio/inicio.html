@@ -33,7 +33,8 @@
           Tasa efectiva anual que cobran en promedio, según la
           <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
             >{{ fuente.texto }} ↗</a
-          >, corte
+          >
+          (ponderado por monto, últimas 4 semanas), corte
           {{ corte().fecha | date: "d MMM y" : "UTC" }}
         </p>
       </div>

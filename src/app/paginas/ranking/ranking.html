@@ -89,7 +89,8 @@
     la
     <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
       >{{ fuente.texto }} ↗</a
-    >, corte
+    >
+    (ponderado por monto, últimas 4 semanas), corte
     {{ corte().fecha | date: "d MMM y" : "UTC" }}
     @if (corte().ejemplo) {
       <span class="etq etq-aviso">Datos de ejemplo</span>
@@ -134,8 +135,10 @@
       <b>Cobra en promedio</b>
       <span class="muted">
         El promedio de los créditos que la entidad desembolsó en las últimas 4
-        semanas, según el reporte que envía a la Superfinanciera. Con esta tasa
-        calculamos la cuota.
+        semanas, según el reporte que envía a la Superfinanciera, ponderado por
+        monto (un crédito grande pesa más que uno pequeño). Es lo que en
+        promedio cobró, no la tasa que te darán a ti. Con esta tasa calculamos
+        la cuota.
         <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
           >Ver los datos ↗</a
         >
