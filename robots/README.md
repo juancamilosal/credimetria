@@ -34,6 +34,8 @@ crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
 - **Cada cuánto:** una vez por semana (la Superfinanciera publica cortes
   semanales con unos días de retraso).
 - **Probar sin guardar:** `node robots/promedio-sfc.mjs --sin-guardar`.
+- **Un producto:** `--producto libre-inversion` o `--producto libranza`. En
+  Coolify cada producto es una tarea aparte (cada una con sus 15 minutos).
 
 Primer resultado guardado (corte 16 oct 2026, 4 semanas): AV Villas
 19,57 %, Bancolombia 21,03 %, BBVA 21,81 %, Banco de Bogotá 22,71 % y

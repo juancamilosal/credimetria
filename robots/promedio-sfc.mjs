@@ -10,6 +10,8 @@
 //   DIRECTUS_URL=https://credimetria-api.valkiriacode.com \
 //   DIRECTUS_TOKEN=<token del usuario robot> node robots/promedio-sfc.mjs
 //   node robots/promedio-sfc.mjs --sin-guardar   (solo muestra los promedios)
+//   node robots/promedio-sfc.mjs --producto libranza   (solo ese producto: así
+//                    cada producto es una tarea de Coolify con sus 15 minutos)
 //
 // Manda un correo (comun/aviso.mjs) si falla, si un banco no reportó o si
 // una tasa saltó más de 2 puntos.
@@ -31,6 +33,16 @@ const PRODUCTOS = {
 const SALTO = 2;
 
 const soloMostrar = process.argv.includes("--sin-guardar");
+const iProducto = process.argv.indexOf("--producto");
+const elegido = iProducto > 0 ? process.argv[iProducto + 1] : null;
+if (elegido && !PRODUCTOS[elegido])
+  throw new Error(
+    `Producto "${elegido}" desconocido: usa ${Object.keys(PRODUCTOS).join(" o ")}.`,
+  );
+/** Los productos de esta corrida: el de --producto o todos. */
+const AHORA = Object.entries(PRODUCTOS).filter(
+  ([producto]) => !elegido || producto === elegido,
+);
 const TOKEN = hayToken();
 /** Lo que necesita que alguien lo mire (va por correo al final). */
 const revisar = [];
@@ -98,7 +110,7 @@ async function main() {
   const todas = [];
   const consultas = new Map(); // "producto:entidad" → enlace de su consulta
   let pendientes = entidades.flatMap((e) =>
-    Object.entries(PRODUCTOS).map(([producto, nombreSfc]) => ({
+    AHORA.map(([producto, nombreSfc]) => ({
       e,
       producto,
       nombreSfc,
@@ -163,7 +175,7 @@ async function main() {
       `${clave.replace(":", " · ")}: datos.gov.co no respondió (${error}); se dejó su promedio anterior.`,
     );
 
-  for (const [producto, nombreSfc] of Object.entries(PRODUCTOS)) {
+  for (const [producto, nombreSfc] of AHORA) {
     const recientes = todas.filter((f) => f.producto_de_cr_dito === nombreSfc);
     const cortes = [...new Set(recientes.map((f) => f.fecha_corte))]
       .sort()
