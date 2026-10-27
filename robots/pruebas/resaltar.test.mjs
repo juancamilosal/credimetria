@@ -62,20 +62,21 @@ describe("resaltar la tasa en el PDF", () => {
     );
   });
 
-  it("une las palabras seguidas de una línea en un recuadro", () => {
-    const p = (x0, x1, linea) => ({ pagina: 0, linea, x0, x1, y0: 0, y1: 10 });
+  it("une las palabras seguidas de un renglón en un recuadro", () => {
+    const p = (x0, x1, y0) => ({ pagina: 0, x0, x1, y0, y1: y0 + 10 });
+    // La segunda palabra viene de otra línea del PDF pero en el mismo renglón.
     const r = recuadros([
-      p(0, 10, 1),
+      p(0, 10, 0),
+      p(100, 110, 0),
       p(12, 20, 1),
-      p(100, 110, 1),
-      p(0, 5, 2),
+      p(0, 5, 30),
     ]);
     assert.deepEqual(
-      r.map((x) => [x.x0, x.x1, x.linea]),
+      r.map((x) => [x.x0, x.x1, x.y0]),
       [
-        [0, 20, 1],
-        [100, 110, 1],
-        [0, 5, 2],
+        [0, 20, 0],
+        [100, 110, 0],
+        [0, 5, 30],
       ],
     );
   });

@@ -67,7 +67,8 @@ Davivienda 22,71 % E.A.
   recuadros verdes sobre las cifras de la tasa (desde y hasta, M.V. y
   E.A.), el título del producto o de la fila de donde salen y la fecha de
   la vigencia. Ubica las palabras con `pdftotext -bbox-layout` y dibuja los
-  recuadros con `pdf-lib`. Si una cifra se repite, elige el grupo más
+  recuadros con `pdf-lib`. Si el desde y el hasta salen de filas
+  distintas, resalta el nombre de cada fila. Si una cifra se repite, elige el grupo más
   compacto en la página (y, si empatan, el que va después del título del
   producto); una regla puede dar `ancla` cuando el nombre del producto sale
   en varias partes (Ban100: "Crédito de Libranza"). El original no se toca
@@ -111,7 +112,7 @@ Davivienda 22,71 % E.A.
 | AV Villas        | El mismo                                                                                                         | "Créditos de Consumo", fila LIBRANZA: 16,15 % a 28,59 % E.A.                                                                                       |
 | Bancolombia      | El mismo                                                                                                         | "…para las Libranzas", tasa fija de empleados y Fopep: 14,30 % a 28,57 %                                                                           |
 | Banco Agrario    | El mismo (semanal)                                                                                               | Tabla "Credito de Libranza" (sin convenios especiales): 19,30 % a 25,60 %                                                                          |
-| Serfinanza       | El mismo                                                                                                         | "Libranza Libre Inversión" sin Grupo Olímpica: 18,02 % a 19,42 % E.A.                                                                              |
+| Serfinanza       | El mismo                                                                                                         | "Libranza Libre Inversión", todas las filas (convenios, Grupo Olímpica y pensionados): 15,25 % a 19,42 % E.A.                                      |
 | Finandina        | El mismo y su página de tasas vigentes                                                                           | Fila "Libranza Desde … NMV": 21,27 % E.A.                                                                                                          |
 | Bancoomeva       | La misma cartelera                                                                                               | Clientes, fila "Libre Inversion" de LIBRANZA: 23,58 % E.A.                                                                                         |
 | Pichincha        | "Tasas de colocación y captación" (dirección Liferay que cambia): se busca en `/web/corporativo/tasas-y-tarifas` | "Líneas de Consumo · Libranza", Nuevo y Compra de cartera: 16,21 % a 28,59 % E.A.; vigencia propia de libranza (1 jul 2026)                        |

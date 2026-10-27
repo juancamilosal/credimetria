@@ -1073,9 +1073,9 @@ Object.assign(REGLAS, {
   },
 
   "banco-serfinanza:libranza": {
-    // Mismo PDF mensual. Tabla "Libranza Libre Inversión": convenios y
-    // pensionados por monto (M.V. y E.A.). Las de Grupo Olímpica son solo
-    // para sus empleados: no cuentan.
+    // Mismo PDF mensual. Tabla "Libranza Libre Inversión": todas las filas
+    // (convenios, Grupo Olímpica y pensionados, por monto; M.V. y E.A.):
+    // desde = la más baja, hasta = la más alta.
     ...REGLAS["banco-serfinanza"],
     leer(texto) {
       const t = plano(texto);
@@ -1097,7 +1097,7 @@ Object.assign(REGLAS, {
         ...tabla.matchAll(
           /(Libranzas? [^%]*?)(?:Desde )?([\d,]+)%[^%]*?(?:Desde )?([\d,]+)% E\.A\./g,
         ),
-      ].filter((f) => !/Olímpica/.test(f[1]));
+      ];
       if (!filas.length)
         throw new ReglaRota(
           'No encontré las filas de "Libranza Libre Inversión".',
@@ -1110,10 +1110,17 @@ Object.assign(REGLAS, {
         eaDesde: Math.min(...ea),
         eaHasta: Math.max(...ea),
         vigencia: fecha(vig[1]),
+        // "Libranzas Convenios hasta a $49MM 1,49% M.V. 19,42% E.A. · …"
         frase: filas
-          .map((f) => f[0].trim())
+          .map((f) => {
+            const fila = f[1]
+              .replace(/^.*\bPlazo\s*/, "")
+              .replace(/\s*(Hasta \d+ meses:.*|Tasa)\s*$/, "")
+              .trim();
+            return `${fila} ${f[2]}% M.V. ${f[3]}% E.A.`;
+          })
           .join(" · ")
-          .slice(0, 400),
+          .slice(0, 600),
       };
     },
   },

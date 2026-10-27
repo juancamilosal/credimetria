@@ -163,8 +163,8 @@ const LIBRANZA = {
   ],
   "banco-serfinanza": [
     "banco-serfinanza",
-    1.39,
-    18.02,
+    1.19,
+    15.25,
     1.49,
     19.42,
     "2026-10-01",

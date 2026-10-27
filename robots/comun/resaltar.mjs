@@ -147,7 +147,11 @@ function titulo(palabras, ancla, anclas, grupo) {
   const lejos = (i) => {
     const p = palabras[i];
     if (p.pagina !== cifras[0].pagina || p.y0 > abajo + 12) return Infinity;
-    return Math.max(0, arriba - p.y1) + Math.abs(p.x0 - izquierda) * 0.3;
+    // Mejor el de arriba o el del mismo renglón; el de abajo solo si no hay.
+    const debajo = p.y0 > arriba + 2 ? 1000 : 0;
+    return (
+      debajo + Math.max(0, arriba - p.y1) + Math.abs(p.x0 - izquierda) * 0.3
+    );
   };
   const a = anclas.reduce(
     (mejor, i) => (mejor === undefined || lejos(i) < lejos(mejor) ? i : mejor),
@@ -157,7 +161,33 @@ function titulo(palabras, ancla, anclas, grupo) {
   const linea = palabras
     .map((p, i) => (p.linea === palabras[a].linea ? i : -1))
     .filter((i) => i >= 0);
-  if (linea.length <= 8) return linea;
+  if (linea.length <= 8) {
+    // El nombre de la fila puede venir partido en dos líneas del PDF
+    // ("Libranzas Pensionados" + "Libranza hasta $49MM"): se suman las
+    // palabras del mismo renglón pegadas a él (no las de otras columnas).
+    const y = palabras[a].y0;
+    const juntas = new Set(linea);
+    let x0 = Math.min(...linea.map((i) => palabras[i].x0));
+    let x1 = Math.max(...linea.map((i) => palabras[i].x1));
+    for (let cambio = true; cambio; ) {
+      cambio = false;
+      palabras.forEach((p, i) => {
+        if (
+          !juntas.has(i) &&
+          p.pagina === palabras[a].pagina &&
+          Math.abs(p.y0 - y) < 3 &&
+          p.x1 > x0 - 15 &&
+          p.x0 < x1 + 15
+        ) {
+          juntas.add(i);
+          x0 = Math.min(x0, p.x0);
+          x1 = Math.max(x1, p.x1);
+          cambio = true;
+        }
+      });
+    }
+    return [...juntas];
+  }
   // Línea larga: solo las palabras que nombran el producto.
   for (const k of linea)
     for (let n = 1; n <= 3; n++) {
@@ -223,21 +253,50 @@ export function aResaltar(palabras, cifras, ancla, vigencia) {
   if (!mejor) return [];
   const elegidas = new Set([
     ...mejor.grupo,
-    ...titulo(palabras, ancla, anclas, mejor.grupo),
+    // El título de cada fila de donde sale una cifra (desde y hasta pueden
+    // ser de filas distintas).
+    ...filas(palabras, mejor.grupo).flatMap((fila) =>
+      titulo(palabras, ancla, anclas, fila),
+    ),
     ...fecha(palabras, vigencia, Math.min(...mejor.grupo)),
   ]);
   return palabras.filter((p, i) => elegidas.has(i));
 }
 
-/** Las palabras seguidas de una misma línea, en un solo recuadro. */
-export function recuadros(marcadas) {
+/** Las cifras agrupadas por fila (misma página y casi la misma altura). */
+function filas(palabras, grupo) {
   const lista = [];
-  for (const p of marcadas) {
+  for (const i of [...grupo].sort(
+    (a, b) =>
+      palabras[a].pagina - palabras[b].pagina ||
+      palabras[a].y0 - palabras[b].y0,
+  )) {
+    const p = palabras[i];
+    const fila = lista.find(
+      (f) =>
+        palabras[f[0]].pagina === p.pagina &&
+        Math.abs(palabras[f[0]].y0 - p.y0) < 4,
+    );
+    if (fila) fila.push(i);
+    else lista.push([i]);
+  }
+  return lista;
+}
+
+/** Las palabras seguidas de un mismo renglón, en un solo recuadro. */
+export function recuadros(marcadas) {
+  const orden = [...marcadas].sort(
+    (a, b) =>
+      a.pagina - b.pagina ||
+      (Math.abs(a.y0 - b.y0) < 3 ? a.x0 - b.x0 : a.y0 - b.y0),
+  );
+  const lista = [];
+  for (const p of orden) {
     const antes = lista.at(-1);
     if (
       antes &&
       antes.pagina === p.pagina &&
-      antes.linea === p.linea &&
+      Math.abs(antes.y0 - p.y0) < 3 &&
       p.x0 - antes.x1 < 15
     ) {
       antes.x1 = Math.max(antes.x1, p.x1);
