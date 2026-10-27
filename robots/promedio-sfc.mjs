@@ -41,30 +41,24 @@ const revisar = [];
  */
 const FIN = Date.now() + 11 * 60 * 1000;
 
-/** Consulta a datos.gov.co: 2 minutos de límite y hasta 3 intentos. */
-async function sfc(params) {
+/**
+ * Una consulta a datos.gov.co, con `espera` de límite (sin pasar del tiempo
+ * de la corrida). Los reintentos los hace `main`, al final de la ronda, para
+ * que un banco lento no frene a los demás.
+ */
+async function sfc(params, espera) {
   const url = `${SFC}?${new URLSearchParams(params)}`;
-  for (let intento = 1; ; intento++) {
-    try {
-      const queda = FIN - Date.now();
-      if (queda < 5_000) throw new Error("se acabó el tiempo de la corrida");
-      const r = await fetch(url, {
-        signal: AbortSignal.timeout(Math.min(120_000, queda)),
-      });
-      if (!r.ok) throw new Error(`respondió ${r.status}`);
-      return { url, filas: await r.json() };
-    } catch (error) {
-      // "fetch failed" esconde la causa real (conexión, DNS, certificado).
-      const causa = error.cause?.code ?? error.cause?.message ?? error.message;
-      if (intento >= 3 || FIN - Date.now() < 20_000)
-        throw new Error(
-          `datos.gov.co no respondió (${intento} intentos): ${causa}`,
-        );
-      console.log(
-        `datos.gov.co no respondió (${causa}); reintento en ${15 * intento} s…`,
-      );
-      await new Promise((listo) => setTimeout(listo, 15_000 * intento));
-    }
+  const queda = FIN - Date.now();
+  if (queda < 5_000) throw new Error("se acabó el tiempo de la corrida");
+  try {
+    const r = await fetch(url, {
+      signal: AbortSignal.timeout(Math.min(espera, queda)),
+    });
+    if (!r.ok) throw new Error(`respondió ${r.status}`);
+    return { url, filas: await r.json() };
+  } catch (error) {
+    // "fetch failed" esconde la causa real (conexión, DNS, certificado).
+    throw new Error(error.cause?.code ?? error.cause?.message ?? error.message);
   }
 }
 
@@ -96,49 +90,77 @@ async function main() {
   // muy lento en datos.gov.co y a veces no responde).
   const hace = new Date(Date.now() - 49 * 864e5).toISOString().slice(0, 10);
 
-  // Una consulta por banco (con todos los productos): sumar todos los bancos
-  // juntos tarda más de ~30 s y datos.gov.co corta la conexión; uno por uno
-  // tarda entre 4 y 10 s.
-  const nombresSfc = Object.values(PRODUCTOS);
+  // Una consulta por banco y producto (de 4 a 10 s cada una; sumar todos
+  // los bancos juntos, o pedir los dos productos a la vez a los bancos
+  // grandes, hacía que datos.gov.co cortara). Primero una ronda con 60 s por
+  // consulta; las que fallan se reintentan al final, con más tiempo, mientras
+  // quede tiempo de corrida. Las que no salen conservan su promedio anterior.
   const todas = [];
-  const consultas = new Map(); // codigo de la entidad → enlace de su consulta
-  // Si datos.gov.co no responde para un banco, se salta: los demás se
-  // guardan y ese conserva su tasa anterior.
-  const fallidos = new Set();
-  for (const e of entidades) {
-    const { tipo, codigo } = partir(e.codigo_sfc);
-    let respuesta;
-    try {
-      respuesta = await sfc({
-        $select:
-          "nombre_entidad,fecha_corte,producto_de_cr_dito," +
-          "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
-          "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
-        $where:
-          `producto_de_cr_dito in(${nombresSfc.map((n) => `'${n}'`).join(",")}) ` +
-          `AND tipo_entidad='${tipo}' AND codigo_entidad='${codigo}' ` +
-          `AND fecha_corte >= '${hace}'`,
-        $group: "nombre_entidad,fecha_corte,producto_de_cr_dito",
-        $order: "fecha_corte",
-        $limit: "200",
-      });
-    } catch (error) {
-      console.log(`${e.codigo}: ${error.message}`);
-      fallidos.add(e.codigo);
-      revisar.push(
-        `${e.codigo}: ${error.message}; se dejó su promedio anterior.`,
+  const consultas = new Map(); // "producto:entidad" → enlace de su consulta
+  let pendientes = entidades.flatMap((e) =>
+    Object.entries(PRODUCTOS).map(([producto, nombreSfc]) => ({
+      e,
+      producto,
+      nombreSfc,
+    })),
+  );
+  const errores = new Map(); // "producto:entidad" → último error
+  for (const [ronda, espera] of [
+    [1, 60_000],
+    [2, 100_000],
+    [3, 120_000],
+  ]) {
+    if (!pendientes.length || FIN - Date.now() < 10_000) break;
+    if (ronda > 1) {
+      console.log(
+        `Reintento ${ronda - 1} con ${pendientes.length} consultas que fallaron…`,
       );
-      continue;
+      await new Promise((listo) => setTimeout(listo, 10_000));
     }
-    const { url, filas } = respuesta;
-    consultas.set(e.codigo, url);
-    for (const f of filas)
-      todas.push({ ...f, tipo_entidad: tipo, codigo_entidad: codigo });
+    const fallaron = [];
+    for (const p of pendientes) {
+      const { tipo, codigo } = partir(p.e.codigo_sfc);
+      const clave = `${p.producto}:${p.e.codigo}`;
+      try {
+        const { url, filas } = await sfc(
+          {
+            $select:
+              "nombre_entidad,fecha_corte," +
+              "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
+              "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
+            $where:
+              `producto_de_cr_dito='${p.nombreSfc}' AND tipo_entidad='${tipo}' ` +
+              `AND codigo_entidad='${codigo}' AND fecha_corte >= '${hace}'`,
+            $group: "nombre_entidad,fecha_corte",
+            $order: "fecha_corte",
+            $limit: "100",
+          },
+          espera,
+        );
+        consultas.set(clave, url);
+        errores.delete(clave);
+        for (const f of filas)
+          todas.push({
+            ...f,
+            producto_de_cr_dito: p.nombreSfc,
+            tipo_entidad: tipo,
+            codigo_entidad: codigo,
+          });
+      } catch (error) {
+        console.log(`${clave}: datos.gov.co no respondió (${error.message})`);
+        errores.set(clave, error.message);
+        fallaron.push(p);
+      }
+    }
+    pendientes = fallaron;
   }
-
-  if (fallidos.size === entidades.length)
+  if (!consultas.size)
     throw new Error(
-      `datos.gov.co no respondió para ningún banco (${[...revisar].join(" · ")})`,
+      `datos.gov.co no respondió para ningún banco (${[...errores.values()][0] ?? "sin bancos"}).`,
+    );
+  for (const [clave, error] of errores)
+    revisar.push(
+      `${clave.replace(":", " · ")}: datos.gov.co no respondió (${error}); se dejó su promedio anterior.`,
     );
 
   for (const [producto, nombreSfc] of Object.entries(PRODUCTOS)) {
@@ -147,17 +169,21 @@ async function main() {
       .sort()
       .reverse()
       .slice(0, SEMANAS);
-    if (!cortes.length)
-      throw new Error(
-        `datos.gov.co no trajo datos de ${nombreSfc} desde ${hace}.`,
+    if (!cortes.length) {
+      revisar.push(
+        `${nombreSfc}: datos.gov.co no trajo datos desde ${hace}; no se actualizó ningún promedio de este producto.`,
       );
+      continue;
+    }
     const corte = cortes[0].slice(0, 10);
     const filas = recientes.filter((f) => cortes.includes(f.fecha_corte));
 
     // Respaldo: lo que respondió la Superfinanciera, con el enlace.
     const csv = [
       `# Fuente: Superintendencia Financiera de Colombia, formato 88, datos.gov.co qzsc-9esp`,
-      ...[...consultas].map(([codigo, url]) => `# Consulta ${codigo}:,${url}`),
+      ...[...consultas]
+        .filter(([clave]) => clave.startsWith(`${producto}:`))
+        .map(([clave, url]) => `# Consulta ${clave.split(":")[1]}:,${url}`),
       `# Promedio ponderado por monto = suma(tasa * monto) / suma(monto). Producto: ${nombreSfc}. Consultado el ${new Date().toISOString().slice(0, 10)}.`,
       "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte,tasa_ea_ponderada,monto_desembolsado,numero_creditos",
       ...filas.map((f) =>
@@ -189,7 +215,7 @@ async function main() {
     }
 
     for (const e of entidades) {
-      if (fallidos.has(e.codigo)) continue;
+      if (errores.has(`${producto}:${e.codigo}`)) continue;
       const { tipo, codigo } = partir(e.codigo_sfc);
       const suyas = filas.filter(
         (f) => f.tipo_entidad === tipo && f.codigo_entidad === codigo,
@@ -226,7 +252,7 @@ async function main() {
         producto,
         corte,
         respaldo,
-        consulta_url: consultas.get(e.codigo),
+        consulta_url: consultas.get(`${producto}:${e.codigo}`),
         actualizada: new Date().toISOString(),
         ...(tasa === null
           ? {

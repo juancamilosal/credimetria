@@ -19,10 +19,12 @@ crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
   todos los bancos juntos pasaba de ~30 s y datos.gov.co cortaba la
   conexión. Cada consulta tiene 2 minutos de límite y hasta 3 intentos; cada
   banco guarda el enlace de su propia consulta.
-- **Si datos.gov.co no responde para un banco** (3 intentos), se salta: los
-  demás se guardan, ese conserva su promedio anterior y va en el correo. La
-  corrida consulta máximo 11 minutos (la tarea de Coolify corta a los 15) y
-  guarda lo que alcanzó a traer.
+- **Una consulta por banco y producto**, con 60 s de límite. Las que
+  fallan (datos.gov.co se demora con los bancos grandes, como Bancolombia y
+  Davivienda) se **reintentan al final**, con más tiempo. Si aun así no
+  salen, ese banco conserva su promedio anterior y va en el correo; los demás
+  se guardan. La corrida consulta máximo 11 minutos (la tarea de Coolify corta
+  a los 15).
 - Si un banco no tiene un producto (p. ej. libranza en Lulo, Falabella o
   Davibank) y nunca tuvo promedio de él, no se crea fila ni se avisa.
 - **Guarda:** una fila por entidad y producto en `tasas_promedio`
