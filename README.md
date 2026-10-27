@@ -343,8 +343,8 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   Anuncia dice "hasta 24,60 % · solo publica la máxima". La diferencia queda
   en "—" y no lleva "★ Mejor tasa ★".
 - **Bancos que no publican su tasa** en un producto (fuente con
-  `como_extraer` = "Solo promedio", hoy Banco Popular y Banco de Occidente en libranza:
-  no publican la tasa): `/api/tasas` los agrega solo con el promedio de la
+  `como_extraer` = "Solo promedio", hoy Banco Popular, Banco de Occidente y Banco Unión
+  en libranza: no publican la tasa): `/api/tasas` los agrega solo con el promedio de la
   Superfinanciera. En el ranking dicen "No publica su tasa" en vez del rango,
   la diferencia queda en "—" y nunca llevan "★ Mejor tasa ★". El robot de los
   PDF no revisa esas fuentes. El Lector web necesita poder leer `entidad`,

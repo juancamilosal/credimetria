@@ -106,8 +106,8 @@ Davivienda 22,71 % E.A.
   `solo_promedio`, que el robot no revisa; la página lo muestra solo con el
   promedio. **Banco de Occidente** tampoco la publica (en su PDF y su
   página solo está el seguro "Cuota Protegida Libranza"): también
-  `solo_promedio`. Faltan los nuevos: Pichincha, GNB Sudameris, Bancien y
-  Banco Unión.
+  `solo_promedio`. **Banco Unión** tampoco la publica (sus documentos piden
+  captcha y no la traen): `solo_promedio`. Faltan: Pichincha y Bancien.
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
   lee la tabla del HTML de su página (sin navegador). Como la página cambia
