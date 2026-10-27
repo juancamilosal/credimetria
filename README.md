@@ -128,7 +128,10 @@ Directus. No está en el menú: se entra por `/admin`.
     **Editar** (con "Calcular E.A." y el PDF de donde sale) y **Comparar
     PDF**, que muestra el PDF actual y el nuevo lado a lado (se bajan con
     el token y se ven como blob dentro de la página). **Cargar PDF nuevo**
-    sube el PDF con su vigencia (si su huella SHA-256 ya existe, avisa) y
+    sube el PDF con su vigencia (si su huella SHA-256 ya existe para esa
+    fuente o para otro banco, avisa; si es el mismo PDF de otro producto del
+    banco, como Davivienda con libre inversión y libranza, lo reutiliza sin
+    subirlo otra vez) y
     crea la tasa por aprobar unida a él, lista para escribir los valores.
     Si el banco no publica PDF (fuente de tipo página, como Lulo o
     Popular), el botón es **Cargar pantallazo nuevo** y sube una imagen de

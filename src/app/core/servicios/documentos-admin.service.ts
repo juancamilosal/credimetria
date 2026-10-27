@@ -72,33 +72,56 @@ export class DocumentosAdminService {
     );
   }
 
-  /** Sube el PDF y lo deja como nuevo. Si ya existe uno igual, avisa. */
+  /**
+   * Sube el PDF y lo deja como nuevo. Si ya existe uno igual para esta
+   * fuente (o para otro banco), avisa. Si es el mismo PDF de otro producto
+   * del mismo banco (Davivienda trae libre inversión y libranza en uno), no
+   * lo sube otra vez: usa ese archivo para el documento de esta fuente.
+   */
   async cargar(
     fuente: number,
     archivo: File,
     vigenteDesde: string | null,
   ): Promise<DocumentoPdf> {
     const huella = await huellaArchivo(archivo);
-    const [repetido] = await this.sesion.pedir<DocumentoPdf[]>(
+    const repetidos = await this.sesion.pedir<DocumentoPdf[]>(
       'GET',
-      `/items/documentos?fields=${CAMPOS_DOCUMENTO}&filter[huella][_eq]=${huella}&limit=1`,
+      `/items/documentos?fields=${CAMPOS_DOCUMENTO}&filter[huella][_eq]=${huella}&limit=-1`,
     );
-    if (repetido) throw new DocumentoRepetido(repetido);
+    let archivoId: string | null = null;
+    if (repetidos.length) {
+      const deEsta = repetidos.find((d) => d.fuente === fuente);
+      if (deEsta) throw new DocumentoRepetido(deEsta);
+      // ¿De otro producto del mismo banco?
+      const ids = [fuente, ...repetidos.map((d) => d.fuente)].join(',');
+      const fuentes = await this.sesion.pedir<
+        { id: number; entidad: string }[]
+      >(
+        'GET',
+        `/items/fuentes?fields=id,entidad&filter[id][_in]=${ids}&limit=-1`,
+      );
+      const banco = fuentes.find((f) => f.id === fuente)?.entidad;
+      const mismoBanco = repetidos.find(
+        (d) => fuentes.find((f) => f.id === d.fuente)?.entidad === banco,
+      );
+      if (!banco || !mismoBanco) throw new DocumentoRepetido(repetidos[0]);
+      archivoId = mismoBanco.archivo.id;
+    }
 
-    const datos = new FormData();
-    datos.append('title', archivo.name);
-    datos.append('file', archivo, archivo.name);
-    const subido = await this.sesion.pedir<{ id: string }>(
-      'POST',
-      '/files',
-      datos,
-    );
+    if (!archivoId) {
+      const datos = new FormData();
+      datos.append('title', archivo.name);
+      datos.append('file', archivo, archivo.name);
+      archivoId = (
+        await this.sesion.pedir<{ id: string }>('POST', '/files', datos)
+      ).id;
+    }
     return this.sesion.pedir<DocumentoPdf>(
       'POST',
       `/items/documentos?fields=${CAMPOS_DOCUMENTO}`,
       {
         fuente,
-        archivo: subido.id,
+        archivo: archivoId,
         estado: 'nuevo',
         vigente_desde: vigenteDesde,
         origen: 'manual',
@@ -163,14 +186,26 @@ export class DocumentosAdminService {
       `/items/documentos/${documento.id}?fields=${CAMPOS_DOCUMENTO}`,
       { archivo: subido.id, huella },
     );
-    await this.sesion.pedir('DELETE', `/files/${documento.archivo.id}`);
+    await this.borrarSiNadieLoUsa(documento.archivo.id);
     return cambiado;
   }
 
   /** Quita un PDF nuevo que no sirve (el registro y el archivo). */
   async descartar(documento: DocumentoPdf): Promise<void> {
     await this.sesion.pedir('DELETE', `/items/documentos/${documento.id}`);
-    await this.sesion.pedir('DELETE', `/files/${documento.archivo.id}`);
+    await this.borrarSiNadieLoUsa(documento.archivo.id);
+  }
+
+  /**
+   * Borra el archivo solo si ningún otro documento lo usa: el mismo PDF puede
+   * ser de dos productos del banco (libre inversión y libranza).
+   */
+  private async borrarSiNadieLoUsa(archivo: string): Promise<void> {
+    const otros = await this.sesion.pedir<{ id: number }[]>(
+      'GET',
+      `/items/documentos?fields=id&filter[archivo][_eq]=${archivo}&limit=1`,
+    );
+    if (!otros.length) await this.sesion.pedir('DELETE', `/files/${archivo}`);
   }
 
   /**

@@ -70,6 +70,53 @@ describe('DocumentosAdminService', () => {
     expect(pedir).toHaveBeenCalledTimes(1);
   });
 
+  it('no acepta un PDF que ya es de otro banco', async () => {
+    pedir.and.callFake(async (_m: string, ruta: string) =>
+      ruta.startsWith('/items/documentos')
+        ? [doc({ fuente: 7 })]
+        : [
+            { id: 2, entidad: 'bbva' },
+            { id: 7, entidad: 'davivienda' },
+          ],
+    );
+    const pdf = new File(['%PDF-1'], 'otro.pdf');
+    await expectAsync(servicio.cargar(2, pdf, null)).toBeRejectedWith(
+      jasmine.any(DocumentoRepetido),
+    );
+  });
+
+  it('el mismo PDF de otro producto del banco se usa sin subirlo otra vez', async () => {
+    pedir.and.callFake(async (metodo: string, ruta: string) => {
+      if (metodo === 'GET' && ruta.startsWith('/items/documentos'))
+        return [
+          doc({
+            fuente: 11,
+            archivo: {
+              id: 'pdf-davivienda',
+              filename_download: 't.pdf',
+              filesize: 1,
+            },
+          }),
+        ];
+      if (metodo === 'GET')
+        return [
+          { id: 11, entidad: 'davivienda' },
+          { id: 25, entidad: 'davivienda' },
+        ];
+      return doc({ id: 43, fuente: 25 });
+    });
+    const pdf = new File(['%PDF-1'], 'davivienda.pdf');
+    const nuevo = await servicio.cargar(25, pdf, '2026-10-19');
+    expect(nuevo.id).toBe(43);
+    expect(
+      pedir.calls.allArgs().some(([, ruta]) => ruta === '/files'),
+    ).toBeFalse();
+    const [, , cuerpo] = pedir.calls.mostRecent().args;
+    expect(cuerpo).toEqual(
+      jasmine.objectContaining({ fuente: 25, archivo: 'pdf-davivienda' }),
+    );
+  });
+
   it('al usar el nuevo como actual, el actual pasa a anterior', async () => {
     pedir.and.resolveTo(undefined);
     await servicio.usarComoActual(
@@ -103,7 +150,22 @@ describe('DocumentosAdminService', () => {
       'GET /items/documentos',
       'POST /files',
       'PATCH /items/documentos/5',
+      'GET /items/documentos',
       'DELETE /files/f1',
+    ]);
+  });
+
+  it('al descartar no borra un archivo que usa otro producto', async () => {
+    pedir.and.callFake(async (metodo: string) =>
+      metodo === 'GET' ? [{ id: 8 }] : undefined,
+    );
+    await servicio.descartar(doc({ id: 5 }));
+    const llamadas = pedir.calls
+      .allArgs()
+      .map(([m, r]) => `${m} ${r.split('?')[0]}`);
+    expect(llamadas).toEqual([
+      'DELETE /items/documentos/5',
+      'GET /items/documentos',
     ]);
   });
 });
