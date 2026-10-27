@@ -222,8 +222,20 @@
   <section class="seccion" aria-labelledby="tituloEntidades">
     <h2 id="tituloEntidades" class="entidades-titulo">Comparamos tasas de</h2>
     <ul class="entidades">
-      @for (entidad of entidades(); track entidad) {
-        <li>{{ entidad }}</li>
+      @for (entidad of entidades(); track entidad.nombre) {
+        <li [class.con-logo]="entidad.logo">
+          @if (entidad.logo) {
+            <img
+              [src]="entidad.logo"
+              [alt]="entidad.nombre"
+              [title]="entidad.nombre"
+              height="30"
+              loading="lazy"
+            />
+          } @else {
+            {{ entidad.nombre }}
+          }
+        </li>
       }
     </ul>
   </section>

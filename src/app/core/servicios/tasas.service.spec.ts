@@ -1,6 +1,10 @@
-import { TASAS_DE_PRUEBA } from '../datos/tasas-prueba';
+import {
+  CORTE_PRUEBA,
+  TASAS_DE_PRUEBA,
+  TASAS_PRUEBA,
+} from '../datos/tasas-prueba';
 import { TestBed } from '@angular/core/testing';
-import { TasasService } from './tasas.service';
+import { TASAS_INICIALES, TasasService } from './tasas.service';
 
 describe('TasasService', () => {
   let servicio: TasasService;
@@ -34,5 +38,34 @@ describe('TasasService', () => {
     expect(servicio.esProducto('libranza')).toBeTrue();
     expect(servicio.esProducto('hipoteca')).toBeFalse();
     expect(servicio.esProducto(null)).toBeFalse();
+  });
+
+  it('lista cada entidad una vez, con su logo si lo tiene', () => {
+    TestBed.resetTestingModule();
+    const [a, b] = TASAS_PRUEBA;
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: TASAS_INICIALES,
+          useValue: {
+            corte: CORTE_PRUEBA,
+            tasas: [
+              { ...b, entidad: 'Zeta', logo: null },
+              { ...a, entidad: 'Alfa', logo: null },
+              {
+                ...a,
+                entidad: 'Alfa',
+                producto: 'libranza',
+                logo: '/api/logos/alfa',
+              },
+            ],
+          },
+        },
+      ],
+    });
+    expect(TestBed.inject(TasasService).entidadesConLogo()).toEqual([
+      { nombre: 'Alfa', logo: '/api/logos/alfa' },
+      { nombre: 'Zeta', logo: null },
+    ]);
   });
 });

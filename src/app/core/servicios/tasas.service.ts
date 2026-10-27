@@ -71,6 +71,17 @@ export class TasasService {
   readonly productos: InfoProducto[] = PRODUCTOS;
   readonly tipos: TipoEntidad[] = ['Banco', 'Cooperativa', 'Financiera'];
 
+  /** Las entidades que comparamos con su logo (si lo tienen), por nombre. */
+  readonly entidadesConLogo = computed(() => {
+    const logos = new Map<string, string | null>();
+    for (const t of this.todas()) {
+      if (!logos.get(t.entidad)) logos.set(t.entidad, t.logo ?? null);
+    }
+    return [...logos]
+      .map(([nombre, logo]) => ({ nombre, logo }))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+  });
+
   /** Nombres de todas las entidades que comparamos, en orden alfabético. */
   readonly listaEntidades = computed(() =>
     [...new Set(this.todas().map((t) => t.entidad))].sort((a, b) =>

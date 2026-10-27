@@ -64,7 +64,7 @@ export class Inicio {
   protected readonly hayUsura = computed(() =>
     this.mejores().some((t) => t.hastaUsura),
   );
-  protected readonly entidades = this.tasas.listaEntidades;
+  protected readonly entidades = this.tasas.entidadesConLogo;
   protected readonly fotos = FOTOS;
   protected readonly fuente = FUENTE_PROMEDIO;
   protected readonly ayudaDiferencia = AYUDA_DIFERENCIA;

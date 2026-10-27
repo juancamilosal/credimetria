@@ -307,6 +307,9 @@ en `public/imagenes/` y su entrada en `FOTOS`.
   para lectores de pantalla (`visualmente-oculto`). Si una entidad no tiene
   logo, se muestra el nombre. Por eso conviene subir logos que digan el
   nombre del banco.
+  En "Comparamos tasas de" (inicio) cada entidad sale con su logo en una
+  cuadrícula de recuadros blancos del mismo tamaño
+  (`TasasService.entidadesConLogo`).
 - **Las tasas vienen de Directus** (desde el 25 oct 2026, 5 bancos de
   prueba en libre inversión: AV Villas, Bancolombia, BBVA, Banco de Bogotá y
   Davivienda). `TasasService.cargar()` corre al arrancar

@@ -314,19 +314,37 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  /* Cuadrícula pareja: todos los recuadros del mismo tamaño */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
 }
 
 .entidades li {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  min-height: 64px;
   padding: 8px 14px;
   border: 1px solid var(--cm-linea);
-  border-radius: 999px;
+  border-radius: 12px;
   background: var(--cm-blanco);
   font-size: 14px;
   font-weight: 600;
   color: var(--cm-gris);
+}
+
+/* Con logo: recuadro blanco (también en modo oscuro, para que se vea) */
+.entidades li.con-logo {
+  background: #fff;
+}
+
+.entidades li.con-logo img {
+  display: block;
+  height: 30px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .pasos {
