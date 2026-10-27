@@ -154,6 +154,24 @@ async function leerPaginaVigente(cfg) {
   }
 }
 
+/** "27 oct 2026, 8:20 a. m." en hora de Colombia, para las notas. */
+function cuando(fecha = new Date()) {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("es-CO", {
+      timeZone: "America/Bogota",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    })
+      .formatToParts(fecha)
+      .map((x) => [x.type, x.value]),
+  );
+  return `${p.day} ${p.month.replace(".", "")} ${p.year}, ${p.hour}:${p.minute} ${p.dayPeriod.replace(/\s+/g, " ")}`;
+}
+
 /** "Bancolombia" o, si no es libre inversión, "Bancolombia (libranza)". */
 const nombreDe = (fuente) =>
   `${fuente.entidad?.nombre ?? fuente.entidad?.codigo}${fuente.producto && fuente.producto !== "libre-inversion" ? ` (${fuente.producto})` : ""}`;
@@ -396,10 +414,10 @@ async function revisarFuente(fuente) {
           ...valores,
           hasta_origen: sinMaxima ? "usura" : "entidad",
           frase: tasa.frase,
-          notas: `Leída por el robot.${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
+          notas: `Leída por el robot el ${cuando()}.${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
         }
       : {
-          notas: `El robot no pudo leer la tasa: ${problemas.join(" ")} Llénala mirando el PDF.`,
+          notas: `El robot no pudo leer la tasa (${cuando()}): ${problemas.join(" ")} Llénala mirando el PDF.`,
         }),
   });
   await directus("PATCH", `/items/fuentes/${fuente.id}`, {
