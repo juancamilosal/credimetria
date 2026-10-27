@@ -149,7 +149,9 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
 - **PDF o página de tasas vigentes** (regla con `paginaVigente`, hoy
   Finandina): el robot lee los dos. Se prefiere el **PDF**; si la página
   rige desde una fecha más nueva (el PDF del mes aún no sale), usa la
-  **página** con pantallazo. Cuando sale el PDF de esa fecha con las mismas
+  **página** con pantallazo (libre inversión y libranza fotografían la misma
+  tabla, que tiene las dos filas; antes de la foto se esconde lo que flota
+  encima, como la barra del banco y el aviso de cookies). Cuando sale el PDF de esa fecha con las mismas
   tasas, crea igual la tasa por aprobar para que la prueba quede con el PDF
   oficial. Cada tasa guarda de dónde salió (`enlace` y `enlace_es_pagina` en
   `tasas_publicadas`), y la web enlaza ahí.

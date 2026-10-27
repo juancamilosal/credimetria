@@ -1134,8 +1134,9 @@ Object.assign(REGLAS, {
     // Desde … NMV – Equivalente al … EA" (solo desde; hasta = usura).
     ...REGLAS["banco-finandina"],
     paginaVigente: {
+      // Misma tabla que libre inversión (tiene la fila "Libranza"); buscar
+      // "Libranza" encontraba primero el menú "Productos" de arriba.
       ...REGLAS["banco-finandina"].paginaVigente,
-      pantallazo: "Libranza",
       leer(texto) {
         const t = texto.replace(/\s+/g, " ");
         const vig = exigir(

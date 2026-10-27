@@ -64,6 +64,15 @@ export function pantallazo(url, texto, { clic } = {}) {
         .click({ timeout: 10_000 })
         .then(() => pagina.waitForTimeout(1_000))
         .catch(() => {});
+    // Lo que flota encima (barra del banco, aviso de cookies, botón de
+    // WhatsApp) tapaba la tabla en el pantallazo: se esconde.
+    await pagina.evaluate(() => {
+      for (const el of document.querySelectorAll("body *")) {
+        const posicion = getComputedStyle(el).position;
+        if (posicion === "fixed" || posicion === "sticky")
+          el.style.setProperty("visibility", "hidden", "important");
+      }
+    });
     // La tabla que tiene el texto o, si la página no usa tablas (Lulo), la
     // sección más cercana que no sea enorme.
     for (const etiqueta of ["table", "section", "article", "main"]) {
