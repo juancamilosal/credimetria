@@ -29,6 +29,8 @@ const PRODUCTOS = {
   "libre-inversion": "Libre inversión",
   libranza: "Libranza otros",
 };
+/** Nombre de cada producto para el correo. */
+const NOMBRES = { "libre-inversion": "Libre inversión", libranza: "Libranza" };
 /** Salto (en puntos) que se avisa en las notas para revisarlo. */
 const SALTO = 2;
 
@@ -46,6 +48,8 @@ const AHORA = Object.entries(PRODUCTOS).filter(
 const TOKEN = hayToken();
 /** Lo que necesita que alguien lo mire (va por correo al final). */
 const revisar = [];
+/** Producto → bancos cuyo promedio no se actualizó (para el asunto). */
+const sinActualizar = new Map();
 /**
  * Tiempo máximo para consultar datos.gov.co (la tarea de Coolify corta a los
  * 15 minutos): lo que alcance a traer se guarda; los bancos que falten se
@@ -94,7 +98,7 @@ async function main() {
         ]
       : await directus(
           "GET",
-          "/items/entidades?fields=codigo,codigo_sfc&filter[activa][_eq]=true&filter[codigo_sfc][_nnull]=true&limit=-1",
+          "/items/entidades?fields=codigo,nombre,codigo_sfc&filter[activa][_eq]=true&filter[codigo_sfc][_nnull]=true&limit=-1",
         );
 
   // Se piden las últimas 7 semanas y se usan las 4 más recientes con datos
@@ -170,10 +174,20 @@ async function main() {
     throw new Error(
       `datos.gov.co no respondió para ningún banco (${[...errores.values()][0] ?? "sin bancos"}).`,
     );
-  for (const [clave, error] of errores)
-    revisar.push(
-      `${clave.replace(":", " · ")}: datos.gov.co no respondió (${error}); se dejó su promedio anterior.`,
+  // Por producto: cuáles bancos no se actualizaron y por qué.
+  const nombreDe = (codigo) =>
+    entidades.find((e) => e.codigo === codigo)?.nombre ?? codigo;
+  for (const [producto] of AHORA) {
+    const fallaron = [...errores].filter(([clave]) =>
+      clave.startsWith(`${producto}:`),
     );
+    if (!fallaron.length) continue;
+    const bancos = fallaron.map(([clave]) => nombreDe(clave.split(":")[1]));
+    sinActualizar.set(NOMBRES[producto], bancos);
+    revisar.push(
+      `${NOMBRES[producto]}: no se actualizó el promedio de ${bancos.length === 1 ? "1 banco" : `${bancos.length} bancos`} (${bancos.join(", ")}) porque datos.gov.co no respondió (${[...new Set(fallaron.map(([, e]) => e))].join("; ")}). Conservan su promedio anterior.`,
+    );
+  }
 
   for (const [producto, nombreSfc] of AHORA) {
     const recientes = todas.filter((f) => f.producto_de_cr_dito === nombreSfc);
@@ -183,8 +197,9 @@ async function main() {
       .slice(0, SEMANAS);
     if (!cortes.length) {
       revisar.push(
-        `${nombreSfc}: datos.gov.co no trajo datos desde ${hace}; no se actualizó ningún promedio de este producto.`,
+        `${NOMBRES[producto]}: datos.gov.co no trajo datos desde ${hace}; no se actualizó ningún promedio de este producto.`,
       );
+      sinActualizar.set(NOMBRES[producto], ["todos"]);
       continue;
     }
     const corte = cortes[0].slice(0, 10);
@@ -253,11 +268,11 @@ async function main() {
         tasa !== null && antes !== null && Math.abs(tasa - antes) > SALTO;
       if (tasa === null)
         revisar.push(
-          `${e.codigo}: sin reporte en las ${SEMANAS} semanas al ${corte}; se dejó la tasa anterior.`,
+          `${NOMBRES[producto]} · ${e.nombre ?? e.codigo}: sin reporte en las ${SEMANAS} semanas al ${corte}; se dejó la tasa anterior.`,
         );
       if (salto)
         revisar.push(
-          `${e.codigo}: el promedio cambió de ${antes} % a ${tasa} % (más de ${SALTO} puntos).`,
+          `${NOMBRES[producto]} · ${e.nombre ?? e.codigo}: el promedio cambió de ${antes} % a ${tasa} % (más de ${SALTO} puntos).`,
         );
       const fila = {
         entidad: e.codigo,
@@ -288,13 +303,28 @@ async function main() {
   }
 }
 
+/** "Libre inversión y Libranza", con los productos de esta corrida. */
+const productosDeLaCorrida = () =>
+  AHORA.map(([producto]) => NOMBRES[producto]).join(" y ");
+
 main()
-  .then(() =>
-    revisar.length
-      ? avisar("El promedio de la Superfinanciera necesita revisión", revisar)
-      : undefined,
-  )
+  .then(() => {
+    if (!revisar.length) return;
+    // El asunto dice qué productos quedaron sin actualizar.
+    const asunto = sinActualizar.size
+      ? `Promedios sin actualizar: ${[...sinActualizar]
+          .map(([nombre, bancos]) =>
+            bancos[0] === "todos"
+              ? `${nombre} (todos)`
+              : `${nombre} (${bancos.length === 1 ? "1 banco" : `${bancos.length} bancos`})`,
+          )
+          .join(", ")}`
+      : `El promedio de ${productosDeLaCorrida()} necesita revisión`;
+    return avisar(asunto, revisar);
+  })
   .catch(async (error) => {
-    await avisar("El robot del promedio falló", [error.message]);
+    await avisar(`El robot del promedio de ${productosDeLaCorrida()} falló`, [
+      `No se actualizó ningún promedio de ${productosDeLaCorrida()}: ${error.message}`,
+    ]);
     process.exit(1);
   });
