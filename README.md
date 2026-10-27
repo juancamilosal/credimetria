@@ -268,15 +268,15 @@ Las fotos de la marca (generadas con Gemini) tienen los originales en
 WebP de 640 y 1280 px en `public/imagenes/` (de 13 a 100 KB cada una),
 mostradas con el componente `app-foto` y descritas en `core/datos/fotos.ts`.
 
-| Foto                          | Dónde                               |
-| ----------------------------- | ----------------------------------- |
-| `mujer-portatil-graficas`     | Portada del inicio                  |
-| `hombre-revisa-cuentas`       | Tarjeta de libre inversión (inicio) |
-| `docente-celular-salon`       | Tarjeta de libranza (inicio)        |
-| `joven-carro-nuevo`           | Tarjeta de vehículo (inicio)        |
-| `familia-vivienda-nueva`      | Tarjeta de vivienda (inicio)        |
-| `pareja-pensionados-tablet`   | Bloque de asesoría gratis (inicio)  |
-| `mujer-revisa-oferta-credito` | Cabecera del simulador              |
+| Foto                           | Dónde                               |
+| ------------------------------ | ----------------------------------- |
+| `mujer-portatil-graficas`      | Portada del inicio                  |
+| `hombre-revisa-papeles-cocina` | Tarjeta de libre inversión (inicio) |
+| `docente-celular-salon`        | Tarjeta de libranza (inicio)        |
+| `joven-carro-nuevo`            | Tarjeta de vehículo (inicio)        |
+| `familia-vivienda-nueva`       | Tarjeta de vivienda (inicio)        |
+| `pareja-pensionados-tablet`    | Bloque de asesoría gratis (inicio)  |
+| `mujer-revisa-oferta-credito`  | Cabecera del simulador              |
 
 Para agregar una foto: el original en `src/assets/`, las dos versiones WebP
 en `public/imagenes/` y su entrada en `FOTOS`.

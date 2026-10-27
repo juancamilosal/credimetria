@@ -76,7 +76,7 @@ export class Inicio {
         {
           id: 'libre-inversion',
           texto: 'Para lo que necesites, sin explicar en qué lo vas a usar.',
-          foto: FOTOS.hombreCuentas,
+          foto: FOTOS.hombrePapeles,
         },
         {
           id: 'libranza',

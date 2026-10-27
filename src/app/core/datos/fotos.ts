@@ -19,11 +19,11 @@ export const FOTOS = {
     ancho: 1280,
     alto: 853,
   },
-  hombreCuentas: {
-    nombre: 'hombre-revisa-cuentas',
-    alt: 'Hombre revisando los papeles de un crédito con una calculadora en el comedor',
+  hombrePapeles: {
+    nombre: 'hombre-revisa-papeles-cocina',
+    alt: 'Hombre pensativo revisando los papeles de un crédito en la mesa de la cocina',
     ancho: 1280,
-    alto: 956,
+    alto: 800,
   },
   docente: {
     nombre: 'docente-celular-salon',
