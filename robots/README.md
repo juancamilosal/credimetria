@@ -105,7 +105,11 @@ Davivienda 22,71 % E.A.
   porque la página que lo enlaza responde 403. Desde el día 2 de cada mes, si
   la última tasa guardada es de un mes anterior, el recordatorio sale **todos
   los días** hasta que se sube el PDF nuevo en `/admin/tasas` (Davivienda, que no
-  deja ver nada, sigue saliendo solo los lunes).
+  deja ver nada, sigue saliendo solo los lunes). **Excepción:** un banco que
+  se carga a mano y todavía no tiene **ninguna** tasa de ese producto (ni
+  publicada ni por aprobar, p. ej. Davivienda en libranza al abrir el
+  producto) sale en el recordatorio **todos los días** hasta que se cargue,
+  para que no se pase.
 - **PDF o página de tasas vigentes** (regla con `paginaVigente`, hoy
   Finandina): el robot lee los dos. Se prefiere el **PDF**; si la página
   rige desde una fecha más nueva (el PDF del mes aún no sale), usa la

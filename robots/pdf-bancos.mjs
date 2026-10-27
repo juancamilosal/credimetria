@@ -97,19 +97,28 @@ async function direcciones(fuente, regla, notas) {
 
 /**
  * Lo que va en el recordatorio de un banco que se revisa a mano: dónde ver
- * su PDF y cuál es el último que está guardado.
+ * su PDF y cuál es el último que está guardado. `sinTasa` si todavía no hay
+ * ninguna tasa de ese producto (ni publicada ni por aprobar): ese va a
+ * diario, no solo los lunes, para que no se pase.
  */
 async function recordatorio(fuente, nombre) {
-  const [ultimo] = await directus(
-    "GET",
-    `/items/documentos?filter[fuente][_eq]=${fuente.id}&sort=-vigente_desde,-date_created&limit=1&fields=vigente_desde,date_created`,
-  );
-  return [
-    `${nombre}`,
+  const [[ultimo], [tasa]] = await Promise.all([
+    directus(
+      "GET",
+      `/items/documentos?filter[fuente][_eq]=${fuente.id}&sort=-vigente_desde,-date_created&limit=1&fields=vigente_desde,date_created`,
+    ),
+    directus(
+      "GET",
+      `/items/tasas_publicadas?filter[fuente][_eq]=${fuente.id}&filter[estado][_in]=publicada,por_revisar&limit=1&fields=id`,
+    ),
+  ]);
+  const texto = [
+    `${nombre}${tasa ? "" : ": todavía no tiene ninguna tasa cargada"}`,
     `   ${fuente.tipo === "pagina" ? "Página de tasas" : "PDF de tasas"}: ${fuente.url}`,
     ...(fuente.url_indice ? [`   Página: ${fuente.url_indice}`] : []),
     `   Último guardado: ${ultimo ? `rige desde ${ultimo.vigente_desde ?? "—"} (subido el ${ultimo.date_created.slice(0, 10)})` : "ninguno"}`,
   ].join("\n");
+  return { texto, sinTasa: !tasa };
 }
 
 /**
@@ -445,7 +454,9 @@ async function main() {
       const r = await revisarFuente(fuente);
       if (r.nuevo) nuevos.push(r.nuevo);
       if (r.problema) problemas.push(r.problema);
-      if (r.manual) manuales.push(r.manual);
+      // Sin ninguna tasa cargada: a diario; si ya tiene, solo los lunes.
+      if (r.manual?.sinTasa) vencidos.push(r.manual.texto);
+      else if (r.manual) manuales.push(r.manual.texto);
       if (reglaDe(fuente.entidad?.codigo, fuente.producto)?.mensual) {
         const vencido = await pdfDelMes(fuente, nombreDe(fuente));
         if (vencido) {
@@ -470,7 +481,8 @@ async function main() {
   else console.log("Sin cambios.");
 
   // Recordatorio en un correo aparte: a diario los PDF mensuales vencidos
-  // (hasta que se sube el nuevo) y, los lunes, los bancos que bloquean.
+  // (hasta que se sube el nuevo) y los bancos a mano sin ninguna tasa; los
+  // lunes, los demás bancos que bloquean.
   const recordatorio = [...vencidos, ...(recordar ? manuales : [])];
   if (recordatorio.length)
     await avisar(
