@@ -15,7 +15,7 @@ export interface Foto {
 export const FOTOS = {
   portatilCelular: {
     nombre: 'portatil-celular-credimetria',
-    alt: 'Persona usando Credimetría en un portátil y en el celular sobre una mesa de madera',
+    alt: 'Portátil con el logo de Credimetría y celular con una gráfica en una mesa de madera',
     ancho: 1280,
     alto: 854,
   },

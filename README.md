@@ -258,9 +258,8 @@ WebP de 640 y 1280 px en `public/imagenes/` (de 13 a 100 KB cada una),
 mostradas con el componente `app-foto` y descritas en `core/datos/fotos.ts`.
 
 La portada es la excepción: es una foto de Unsplash (portátil y celular sobre
-una mesa) con la página de inicio de Credimetría puesta en las dos pantallas
-(capturas a 1440 px y a 390 px deformadas en perspectiva). Si cambia el
-inicio, se puede rehacer con capturas nuevas.
+una mesa) con el logo nuevo de Credimetría en la pantalla del portátil y una
+gráfica en la del celular, deformados en perspectiva.
 
 | Foto                           | Dónde                               |
 | ------------------------------ | ----------------------------------- |
