@@ -121,7 +121,8 @@ describe("reglas por banco", () => {
 
 /**
  * Libranza, de los mismos PDF de octubre de 2026 (BBVA tiene uno aparte, del
- * 4 de agosto): la tasa fija más baja de la tabla y la más alta si la publica.
+ * 4 de agosto): la más baja de todas las filas de libranza y la más alta si
+ * la publica.
  */
 const LIBRANZA = {
   bbva: ["bbva-libranza", 1.03, 13.14, null, null, "2026-08-04"],
@@ -152,11 +153,20 @@ const LIBRANZA = {
     28.59,
     "2026-10-01",
   ],
-  bancolombia: ["bancolombia", 1.12, 14.3, 2.12, 28.57, "2026-10-01"],
+  // La más baja es la variable de empleados (13,12 % E.A.; M.V. calculada).
+  bancolombia: [
+    "bancolombia",
+    mensual(13.12),
+    13.12,
+    2.12,
+    28.57,
+    "2026-10-01",
+  ],
   "banco-agrario": [
     "banco-agrario",
-    mensual(19.3),
-    19.3,
+    // Convenio Policía Nacional, pensionados.
+    mensual(19),
+    19,
     mensual(25.6),
     25.6,
     "2026-10-05",

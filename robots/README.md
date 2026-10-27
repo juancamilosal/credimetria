@@ -99,10 +99,11 @@ Davivienda 22,71 % E.A.
 | Banco Agrario      | PDF **semanal** `Tasas_colocaciones_del_<d><mes>_al_<d><mes>_<año>.pdf`: el que empieza más tarde                                                                                                                                                                                      | Página "Creditos de Consumo" (recursos propios): desde = "PERSONAL - LIBRE DESTINO", hasta = "CREDITO DIGITAL LIBRE INVERSIÓN"; vigencia "DEL … AL … DE …" de esa sección |
 | AV Villas          | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo                                                                                                                                                                                                            | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"                                                                                                         |
 
-- **Reglas de libranza** (`<banco>:libranza`). Desde = la tasa fija más
-  baja de la tabla de libranza (de todas las pagadurías y plazos); hasta = la
-  más alta si el banco la publica, si no la usura. Los convenios especiales
-  (Policía, Ministerio de Defensa, Grupo Olímpica) no cuentan.
+- **Reglas de libranza** (`<banco>:libranza`). Cuentan **todas** las filas
+  de libranza que publica el banco (pagadurías, plazos, convenios especiales
+  como Policía, Ministerio de Defensa o Grupo Olímpica, compra de cartera,
+  tasa fija y variable): desde = la más baja; hasta = la más alta si el
+  banco la publica, si no (solo publica tasas "desde") la usura.
 
 | Banco            | PDF                                                                                                              | Qué lee (oct 2026)                                                                                                                                 |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -110,8 +111,8 @@ Davivienda 22,71 % E.A.
 | Banco de Bogotá  | El mismo                                                                                                         | Tablas "LIBRANZAS … (Desde)" por pagaduría y plazo: 16,70 % E.A.                                                                                   |
 | Davivienda       | El mismo (se carga a mano)                                                                                       | Página "Créditos de Libranza", CrediExpress Fijo Libranza: 16,76 % E.A.                                                                            |
 | AV Villas        | El mismo                                                                                                         | "Créditos de Consumo", fila LIBRANZA: 16,15 % a 28,59 % E.A.                                                                                       |
-| Bancolombia      | El mismo                                                                                                         | "…para las Libranzas", tasa fija de empleados y Fopep: 14,30 % a 28,57 %                                                                           |
-| Banco Agrario    | El mismo (semanal)                                                                                               | Tabla "Credito de Libranza" (sin convenios especiales): 19,30 % a 25,60 %                                                                          |
+| Bancolombia      | El mismo                                                                                                         | "…para las Libranzas", empleados y Fopep, fija y variable: 13,12 % (variable) a 28,57 %                                                            |
+| Banco Agrario    | El mismo (semanal)                                                                                               | Tablas "Credito de Libranza" y "Libranza Convenios Especiales": 19,00 % a 25,60 %                                                                  |
 | Serfinanza       | El mismo                                                                                                         | "Libranza Libre Inversión", todas las filas (convenios, Grupo Olímpica y pensionados): 15,25 % a 19,42 % E.A.                                      |
 | Finandina        | El mismo y su página de tasas vigentes                                                                           | Fila "Libranza Desde … NMV": 21,27 % E.A.                                                                                                          |
 | Bancoomeva       | La misma cartelera                                                                                               | Clientes, fila "Libre Inversion" de LIBRANZA: 23,58 % E.A.                                                                                         |

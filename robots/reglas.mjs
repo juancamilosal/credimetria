@@ -992,7 +992,8 @@ Object.assign(REGLAS, {
   "bancolombia:libranza": {
     // Mismo PDF. "…tasas vigentes a partir del <fecha>, para las Libranzas":
     // Empleados y Fopep, cada una con tasa fija (M.V. y E.A.) y variable (IBR
-    // + puntos, solo E.A.). Se usan las fijas: las E.A. que cuadran con su M.V.
+    // + puntos, solo E.A.). Cuentan todas: desde = la E.A. más baja (si es
+    // de una variable, su M.V. se calcula), hasta = la más alta.
     ...REGLAS.bancolombia,
     leer(texto) {
       const t = plano(texto);
@@ -1019,15 +1020,17 @@ Object.assign(REGLAS, {
         ea.reduce((a, b) =>
           Math.abs(b - efectiva(m)) < Math.abs(a - efectiva(m)) ? b : a,
         );
-      const mvDesde = Math.min(...mv.map((m) => numero(m[1])));
+      const fijaDesde = Math.min(...mv.map((m) => numero(m[1])));
       const mvHasta = Math.max(...mv.map((m) => numero(m[2])));
+      const eaDesde = Math.min(...ea);
+      const eaHasta = Math.max(...ea);
       return {
-        mvDesde,
-        eaDesde: suEa(mvDesde),
-        mvHasta,
-        eaHasta: suEa(mvHasta),
+        mvDesde: eaDesde === suEa(fijaDesde) ? fijaDesde : mensual(eaDesde),
+        eaDesde,
+        mvHasta: eaHasta === suEa(mvHasta) ? mvHasta : mensual(eaHasta),
+        eaHasta,
         vigencia: fecha(vig[1]),
-        frase: `Libranza tasa fija (empleados y Fopep): ${mv.map((m) => m[0]).join(" · ")}`,
+        frase: `Libranza (empleados y Fopep): tasa fija ${mv.map((m) => m[0]).join(" · ")}; E.A. fija y variable (IBR): ${ea.map((x) => `${x}%`).join(", ")}`,
       };
     },
   },
@@ -1035,8 +1038,9 @@ Object.assign(REGLAS, {
   "banco-agrario:libranza": {
     // Mismo PDF semanal. Tabla "Credito de Libranza" (empleados y
     // pensionados, sector público y privado, libre inversión, retanqueo y
-    // compra de cartera) en E.A. por plazo; los "Convenios Especiales" de
-    // abajo no cuentan.
+    // compra de cartera) en E.A. por plazo, y la de "Libranza Convenios
+    // Especiales" (Policía, Ministerio de Defensa): cuentan todas, hasta los
+    // créditos de vivienda.
     ...REGLAS["banco-agrario"],
     leer(texto) {
       const t = plano(texto);
@@ -1053,8 +1057,8 @@ Object.assign(REGLAS, {
           'No encontré la fecha "DEL … AL … DE … DE …" antes de libranza.',
         );
       const [, dia, mes, año] = fechas.at(-1);
-      const tabla = t.slice(i).split(/Libranza Convenios Especiales/)[0];
-      const tasas = [...tabla.matchAll(/(\d{2},\d{2})%/g)].map((m) =>
+      const tabla = t.slice(i).split(/Créditos de Vivienda/)[0];
+      const tasas = [...tabla.matchAll(/(\d{2}[.,]\d{2})%/g)].map((m) =>
         numero(m[1]),
       );
       if (!tasas.length)
@@ -1067,7 +1071,7 @@ Object.assign(REGLAS, {
         eaHasta,
         mvHasta: mensual(eaHasta),
         vigencia: fecha(`${dia} de ${mes.toLowerCase()} de ${año}`),
-        frase: `Crédito de libranza (empleados y pensionados): de ${eaDesde} % a ${eaHasta} % E.A.`,
+        frase: `Crédito de libranza (empleados y pensionados, con los convenios especiales): de ${eaDesde} % a ${eaHasta} % E.A.`,
       };
     },
   },
