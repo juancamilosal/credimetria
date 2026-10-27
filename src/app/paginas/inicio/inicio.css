@@ -26,7 +26,7 @@
 }
 
 .hero-foto {
-  /* Foto horizontal: Credimetría en el portátil y en el celular */
+  /* Foto horizontal */
   aspect-ratio: 3 / 2;
   width: 100%;
   justify-self: end;
