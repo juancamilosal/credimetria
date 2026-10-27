@@ -2,7 +2,9 @@
 // cambió, lo guarda en Directus con la tasa leída por aprobar.
 //
 // Para cada fuente activa de tipo PDF (colección `fuentes`), o de tipo página
-// en los bancos que no publican PDF (regla con `pagina`):
+// en los bancos que no publican PDF (regla con `pagina`). Cada fuente es un
+// banco y un producto (libre inversión, libranza) con su regla; si dos
+// productos salen del mismo PDF, el archivo se guarda una sola vez:
 //   1. Busca el PDF con la regla del banco (reglas.mjs) y lo baja.
 //   2. Si la huella SHA-256 es la misma de la última vez, no hace nada. Si
 //      el PDF cambió pero las tasas leídas son las mismas de la publicada (o
@@ -23,7 +25,8 @@
 //   DIRECTUS_TOKEN=<token del robot> node robots/pdf-bancos.mjs
 //   node robots/pdf-bancos.mjs --sin-guardar     (revisa sin escribir nada)
 //   node robots/pdf-bancos.mjs --probar bbva archivo.pdf   (solo la regla;
-//                    también acepta la página guardada: archivo.html)
+//                    también acepta la página guardada: archivo.html; para
+//                    otro producto: --probar bbva:libranza archivo.pdf)
 //   --hoy 2026-11-03   simula esa fecha (probar recordatorios, con
 //                    --sin-guardar)
 //   --recordatorio   manda hoy el recordatorio de los bancos que bloquean
@@ -38,7 +41,7 @@ import {
   masReciente,
   mesVencido,
   mismasTasas,
-  REGLAS,
+  reglaDe,
   revisar,
 } from "./reglas.mjs";
 
@@ -62,11 +65,7 @@ const recordar =
   process.argv.includes("--recordatorio") || HOY.getDay() === DIA_RECORDATORIO;
 
 /** Lee el texto (del PDF o de la página) con la regla del banco. */
-function leerTexto(banco, texto) {
-  const regla = REGLAS[banco];
-  if (!regla && fuente.tipo === "pagina") return {};
-  if (!regla)
-    return { tasa: null, problemas: [`No hay regla para "${banco}".`] };
+function leerTexto(regla, texto) {
   try {
     const tasa = regla.leer(texto);
     return { tasa, problemas: revisar(tasa, USURA) };
@@ -146,11 +145,15 @@ async function leerPaginaVigente(cfg) {
   }
 }
 
+/** "Bancolombia" o, si no es libre inversión, "Bancolombia (libranza)". */
+const nombreDe = (fuente) =>
+  `${fuente.entidad?.nombre ?? fuente.entidad?.codigo}${fuente.producto && fuente.producto !== "libre-inversion" ? ` (${fuente.producto})` : ""}`;
+
 /** Revisa una fuente; devuelve qué pasó para el correo. */
 async function revisarFuente(fuente) {
   const banco = fuente.entidad?.codigo;
-  const nombre = fuente.entidad?.nombre ?? banco;
-  const regla = REGLAS[banco];
+  const nombre = nombreDe(fuente);
+  const regla = reglaDe(banco, fuente.producto);
   if (!regla && fuente.tipo === "pagina") return {};
   if (!regla)
     return {
@@ -169,12 +172,14 @@ async function revisarFuente(fuente) {
       });
     return {};
   };
+  // Ya visto para esta fuente: el mismo PDF puede ser nuevo para libranza
+  // aunque ya se guardó para libre inversión.
   const yaVisto = async (marca) =>
     marca === fuente.ultimo_hash ||
     (
       await directus(
         "GET",
-        `/items/documentos?filter[huella][_eq]=${marca}&fields=id&limit=1`,
+        `/items/documentos?filter[huella][_eq]=${marca}&filter[fuente][_eq]=${fuente.id}&fields=id&limit=1`,
       )
     ).length > 0;
 
@@ -196,7 +201,7 @@ async function revisarFuente(fuente) {
         problema: `${nombre}: no pude abrir su página de tasas (${url} → ${error.message}).`,
       };
     }
-    ({ tasa, problemas } = leerTexto(banco, texto));
+    ({ tasa, problemas } = leerTexto(regla, texto));
     // Página que no le muestra las tasas al servidor (Lulo): al recordatorio
     // de los lunes en vez de un aviso diario de regla rota.
     if (!tasa && regla.bloquea) {
@@ -248,7 +253,7 @@ async function revisarFuente(fuente) {
       };
     }
     const delPdf =
-      datos && vigente ? leerTexto(banco, await textoPdf(datos)) : null;
+      datos && vigente ? leerTexto(regla, await textoPdf(datos)) : null;
     if (
       vigente?.tasa &&
       (!delPdf?.tasa ||
@@ -279,7 +284,7 @@ async function revisarFuente(fuente) {
         console.log(`${nombre}: sin cambios.`);
         return sinCambios(url, marca);
       }
-      ({ tasa, problemas } = delPdf ?? leerTexto(banco, await textoPdf(datos)));
+      ({ tasa, problemas } = delPdf ?? leerTexto(regla, await textoPdf(datos)));
       prueba = async () => ({
         datos,
         tipo: "application/pdf",
@@ -332,12 +337,20 @@ async function revisarFuente(fuente) {
       : { nuevo: `${nombre}: ${queEs} (sin guardar, --sin-guardar).` };
 
   const copia = await prueba();
-  const archivo = await subirArchivo(
-    copia.datos,
-    `${banco}-${(tasa?.vigencia ?? ahora).slice(0, 10)}.${copia.extension}`,
-    copia.tipo,
-    `${nombre} · tasas · ${tasa?.vigencia ?? "revisado " + ahora.slice(0, 10)}`,
+  // Si el mismo archivo ya está guardado para otro producto del banco (un
+  // solo PDF con libre inversión y libranza), se usa ese y no se sube otra vez.
+  const [mismo] = await directus(
+    "GET",
+    `/items/documentos?filter[huella][_eq]=${marca}&fields=archivo&limit=1`,
   );
+  const archivo =
+    mismo?.archivo ??
+    (await subirArchivo(
+      copia.datos,
+      `${banco}-${(tasa?.vigencia ?? ahora).slice(0, 10)}.${copia.extension}`,
+      copia.tipo,
+      `${fuente.entidad?.nombre ?? banco} · tasas · ${tasa?.vigencia ?? "revisado " + ahora.slice(0, 10)}`,
+    ));
   const documento = await directus("POST", "/items/documentos", {
     fuente: fuente.id,
     archivo,
@@ -401,10 +414,13 @@ async function main() {
   // Probar solo la regla con un PDF del disco.
   const i = process.argv.indexOf("--probar");
   if (i > 0) {
-    const [banco, archivo] = process.argv.slice(i + 1);
+    const [clave, archivo] = process.argv.slice(i + 1);
+    const [banco, producto] = clave.split(":");
+    const regla = reglaDe(banco, producto);
+    if (!regla) throw new Error(`No hay regla para "${clave}".`);
     const contenido = await readFile(archivo);
     const resultado = leerTexto(
-      banco,
+      regla,
       /\.html?$/i.test(archivo)
         ? textoHtml(contenido.toString("utf8"))
         : await textoPdf(contenido),
@@ -429,17 +445,15 @@ async function main() {
       if (r.nuevo) nuevos.push(r.nuevo);
       if (r.problema) problemas.push(r.problema);
       if (r.manual) manuales.push(r.manual);
-      if (REGLAS[fuente.entidad?.codigo]?.mensual) {
-        const vencido = await pdfDelMes(fuente, fuente.entidad.nombre);
+      if (reglaDe(fuente.entidad?.codigo, fuente.producto)?.mensual) {
+        const vencido = await pdfDelMes(fuente, nombreDe(fuente));
         if (vencido) {
           console.log(vencido.split("\n")[0]);
           vencidos.push(vencido);
         }
       }
     } catch (error) {
-      problemas.push(
-        `${fuente.entidad?.nombre ?? fuente.id}: error inesperado: ${error.message}`,
-      );
+      problemas.push(`${nombreDe(fuente)}: error inesperado: ${error.message}`);
     }
   }
   if (problemas.length)

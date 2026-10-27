@@ -1,5 +1,10 @@
 // Reglas por banco del robot de los PDF: dónde está el PDF de tasas y cómo
-// leer de su texto (pdftotext -layout) la tasa de libre inversión.
+// leer de su texto (pdftotext -layout) la tasa de cada producto.
+//
+// La regla de libre inversión va con el código del banco ("bbva") y la de
+// los demás productos con "<banco>:<producto>" ("bbva:libranza"); ver
+// `reglaDe`. Si dos productos salen del mismo PDF, la de libranza copia la
+// forma de buscarlo de la de libre inversión y solo cambia `leer`.
 //
 // Cada regla tiene:
 //   pagina: true si el banco no publica PDF y la tasa está en su página web
@@ -682,6 +687,359 @@ export const REGLAS = {
     },
   },
 };
+
+/**
+ * Libranza: la Superfinanciera la reporta junta ("Libranza otros"), así que
+ * no se separa por tipo de cliente. Desde = la tasa fija más baja de la
+ * tabla de libranza del banco (pensionados, docentes, empleados…); hasta =
+ * la más alta si el banco la publica, si no la usura. Los convenios
+ * especiales (Policía, Grupo Olímpica…) no cuentan: no son para cualquiera.
+ */
+Object.assign(REGLAS, {
+  "bbva:libranza": {
+    // PDF aparte de dirección fija (DO-01-tasas-libranza.pdf): "Tasas desde"
+    // por segmento (pensionados y otros), en E.A. y M.V.
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(
+        t,
+        /VIGENTES DESDE (\d{1,2} DE \p{L}+ DE \d{4})/u,
+        'la fecha "VIGENTES DESDE …"',
+      );
+      const filas = [
+        ...despuesDe(t, /Crédito de Libranza/, 'la tabla "Crédito de Libranza"')
+          .split(/\* Las tasas/)[0]
+          .matchAll(/destinos ([\d.,]+)% ([\d.,]+)%/g),
+      ];
+      if (!filas.length)
+        throw new ReglaRota(
+          'No encontré las tasas por segmento de "Crédito de Libranza".',
+        );
+      const menor = filas.reduce((a, b) =>
+        numero(b[1]) < numero(a[1]) ? b : a,
+      );
+      return {
+        eaDesde: numero(menor[1]),
+        mvDesde: numero(menor[2]),
+        eaHasta: null,
+        mvHasta: null,
+        vigencia: fecha(vig[1]),
+        frase: filas.map((f) => f[0]).join(" · "),
+      };
+    },
+  },
+
+  "banco-de-bogota:libranza": {
+    // Mismo PDF mensual. Tablas "LIBRANZAS … (Desde)" por pagaduría y plazo
+    // (Tasa Mes, Tasa E.A.), al final del PDF; la primera fila de cada tabla
+    // ("Hasta 36 meses") queda antes de su título.
+    ...REGLAS["banco-de-bogota"],
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(t, /Vigentes desde ([^\n]+)/, "la vigencia");
+      const i = t.search(/LIBRANZAS EMPRESAS PRIVADAS/);
+      if (i < 0)
+        throw new ReglaRota(
+          'No encontré las tablas "LIBRANZAS … (Desde)" en el PDF.',
+        );
+      const inicio = t.lastIndexOf("Línea Plazo Tasa Mes Tasa E.A.", i);
+      const fin = t.indexOf("\f", i);
+      const bloque = t.slice(
+        inicio < 0 ? i : inicio,
+        fin < 0 ? undefined : fin,
+      );
+      const filas = [...bloque.matchAll(/([\d.]+)% ([\d.]+)%/g)];
+      const menor = filas.reduce((a, b) =>
+        numero(b[2]) < numero(a[2]) ? b : a,
+      );
+      return {
+        mvDesde: numero(menor[1]),
+        eaDesde: numero(menor[2]),
+        mvHasta: null,
+        eaHasta: null,
+        vigencia: fecha(vig[1]),
+        frase: `Libranzas (desde, la más baja de todas las pagadurías y plazos): ${menor[0]}`,
+      };
+    },
+  },
+
+  "davivienda:libranza": {
+    // Mismo PDF (se carga a mano). Página "Créditos de Libranza": CrediExpress
+    // Fijo Libranza (móvil y tradicional) y Cx Rotativo, "TASAS DESDE" M.V. y
+    // E.A.; la vigencia está en el encabezado de esa página.
+    ...REGLAS.davivienda,
+    leer(texto) {
+      const t = plano(texto);
+      const i = t.search(/Créditos de Libranza/);
+      if (i < 0)
+        throw new ReglaRota('No encontré la página "Créditos de Libranza".');
+      const vigencias = [
+        ...t.slice(0, i).matchAll(/Vigente a partir del ([^\n]+)/g),
+      ];
+      if (!vigencias.length)
+        throw new ReglaRota(
+          "No encontré la vigencia de la página de libranza.",
+        );
+      const tabla = t.slice(i).split(/\n Mora /)[0];
+      const filas = [...tabla.matchAll(/([\d,]+)% ([\d,]+)%/g)];
+      if (!filas.length)
+        throw new ReglaRota("No encontré las tasas de la tabla de libranza.");
+      const menor = filas.reduce((a, b) =>
+        numero(b[2]) < numero(a[2]) ? b : a,
+      );
+      return {
+        mvDesde: numero(menor[1]),
+        eaDesde: numero(menor[2]),
+        mvHasta: null,
+        eaHasta: null,
+        vigencia: fecha(vigencias.at(-1)[1]),
+        frase: tabla.replace(/\s+/g, " ").trim().slice(0, 400),
+      };
+    },
+  },
+
+  "av-villas:libranza": {
+    // Mismo PDF. "Créditos de Consumo" → fila LIBRANZA: Desde y Hasta en E.A.
+    // (la M.V. se calcula). En el texto, el "Desde" queda antes de "LIBRANZA".
+    ...REGLAS["av-villas"],
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(t, /A partir del ([^\n]+)/, "la vigencia");
+      const m = exigir(
+        t,
+        /Desde ([\d,]+)% E\.A\.[^\n]*\n ?LIBRANZA\n ?Hasta ([\d,]+)% E\.A\./,
+        'la fila "LIBRANZA" (Desde … Hasta …)',
+      );
+      const eaDesde = numero(m[1]);
+      const eaHasta = numero(m[2]);
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: mensual(eaHasta),
+        vigencia: fecha(vig[1]),
+        frase: `Libranza: desde ${m[1]}% E.A. hasta ${m[2]}% E.A.`,
+      };
+    },
+  },
+
+  "bancolombia:libranza": {
+    // Mismo PDF. "…tasas vigentes a partir del <fecha>, para las Libranzas":
+    // Empleados y Fopep, cada una con tasa fija (M.V. y E.A.) y variable (IBR
+    // + puntos, solo E.A.). Se usan las fijas: las E.A. que cuadran con su M.V.
+    ...REGLAS.bancolombia,
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(
+        t,
+        /vigentes a partir del ([^,\n]+), para\s*\n?\s*las Libranzas/,
+        "la vigencia de las libranzas",
+      );
+      const bloque = despuesDe(
+        t,
+        /para\s*\n?\s*las Libranzas/,
+        'el texto "para las Libranzas"',
+      ).split(/A continuación/)[0];
+      const mv = [
+        ...bloque.matchAll(/([\d.]+)% Mes Vencida ([\d.]+)% Mes Vencida/g),
+      ];
+      const ea = [...bloque.matchAll(/([\d.]+)% Efectiva Anual/g)].map((m) =>
+        numero(m[1]),
+      );
+      if (!mv.length || !ea.length)
+        throw new ReglaRota("No encontré las tasas fijas de libranza.");
+      // La E.A. publicada que corresponde a una M.V.
+      const suEa = (m) =>
+        ea.reduce((a, b) =>
+          Math.abs(b - efectiva(m)) < Math.abs(a - efectiva(m)) ? b : a,
+        );
+      const mvDesde = Math.min(...mv.map((m) => numero(m[1])));
+      const mvHasta = Math.max(...mv.map((m) => numero(m[2])));
+      return {
+        mvDesde,
+        eaDesde: suEa(mvDesde),
+        mvHasta,
+        eaHasta: suEa(mvHasta),
+        vigencia: fecha(vig[1]),
+        frase: `Libranza tasa fija (empleados y Fopep): ${mv.map((m) => m[0]).join(" · ")}`,
+      };
+    },
+  },
+
+  "banco-agrario:libranza": {
+    // Mismo PDF semanal. Tabla "Credito de Libranza" (empleados y
+    // pensionados, sector público y privado, libre inversión, retanqueo y
+    // compra de cartera) en E.A. por plazo; los "Convenios Especiales" de
+    // abajo no cuentan.
+    ...REGLAS["banco-agrario"],
+    leer(texto) {
+      const t = plano(texto);
+      const i = t.search(/Credito de Libranza/);
+      if (i < 0)
+        throw new ReglaRota('No encontré la tabla "Credito de Libranza".');
+      const fechas = [
+        ...t
+          .slice(0, i)
+          .matchAll(/DEL (\d{1,2}) AL \d{1,2} DE (\p{L}+) DE (\d{4})/gu),
+      ];
+      if (!fechas.length)
+        throw new ReglaRota(
+          'No encontré la fecha "DEL … AL … DE … DE …" antes de libranza.',
+        );
+      const [, dia, mes, año] = fechas.at(-1);
+      const tabla = t.slice(i).split(/Libranza Convenios Especiales/)[0];
+      const tasas = [...tabla.matchAll(/(\d{2},\d{2})%/g)].map((m) =>
+        numero(m[1]),
+      );
+      if (!tasas.length)
+        throw new ReglaRota("No encontré las tasas de la tabla de libranza.");
+      const eaDesde = Math.min(...tasas);
+      const eaHasta = Math.max(...tasas);
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: mensual(eaHasta),
+        vigencia: fecha(`${dia} de ${mes.toLowerCase()} de ${año}`),
+        frase: `Crédito de libranza (empleados y pensionados): de ${eaDesde} % a ${eaHasta} % E.A.`,
+      };
+    },
+  },
+
+  "banco-serfinanza:libranza": {
+    // Mismo PDF mensual. Tabla "Libranza Libre Inversión": convenios y
+    // pensionados por monto (M.V. y E.A.). Las de Grupo Olímpica son solo
+    // para sus empleados: no cuentan.
+    ...REGLAS["banco-serfinanza"],
+    leer(texto) {
+      const t = plano(texto);
+      const desde = despuesDe(
+        t,
+        /Libranza Libre Inversión Tasa M\.V\./,
+        'la tabla "Libranza Libre Inversión"',
+      );
+      const fin = desde.search(/\*Vigencia de tasas/);
+      const tabla = (
+        fin > 0 ? desde.slice(0, fin) : desde.slice(0, 1500)
+      ).replace(/\s+/g, " ");
+      const vig = exigir(
+        desde,
+        /Vigencia de tasas a partir del ([^\n]+)/,
+        "la vigencia de libranza",
+      );
+      const filas = [
+        ...tabla.matchAll(
+          /(Libranzas? [^%]*?)(?:Desde )?([\d,]+)%[^%]*?(?:Desde )?([\d,]+)% E\.A\./g,
+        ),
+      ].filter((f) => !/Olímpica/.test(f[1]));
+      if (!filas.length)
+        throw new ReglaRota(
+          'No encontré las filas de "Libranza Libre Inversión".',
+        );
+      const mv = filas.map((f) => numero(f[2]));
+      const ea = filas.map((f) => numero(f[3]));
+      return {
+        mvDesde: Math.min(...mv),
+        mvHasta: Math.max(...mv),
+        eaDesde: Math.min(...ea),
+        eaHasta: Math.max(...ea),
+        vigencia: fecha(vig[1]),
+        frase: filas
+          .map((f) => f[0].trim())
+          .join(" · ")
+          .slice(0, 400),
+      };
+    },
+  },
+
+  "banco-finandina:libranza": {
+    // Mismo PDF mensual y misma página de tasas vigentes: fila "Libranza
+    // Desde … NMV – Equivalente al … EA" (solo desde; hasta = usura).
+    ...REGLAS["banco-finandina"],
+    paginaVigente: {
+      ...REGLAS["banco-finandina"].paginaVigente,
+      pantallazo: "Libranza",
+      leer(texto) {
+        const t = texto.replace(/\s+/g, " ");
+        const vig = exigir(
+          t,
+          /Las tasas aplican a partir del (\d{1,2} de \p{L}+ de \d{4})/u,
+          'la fecha "Las tasas aplican a partir del …"',
+        );
+        return finandinaLibranza(t, fecha(vig[1]));
+      },
+    },
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(
+        t,
+        /Tasas vigentes (\p{L}+) (\d{4})/u,
+        "el mes de las tasas vigentes",
+      );
+      return finandinaLibranza(t, fecha(`1 de ${vig[1]} de ${vig[2]}`));
+    },
+  },
+
+  "bancoomeva:libranza": {
+    // Misma cartelera mensual, página de clientes: fila "Libre Inversion" de
+    // LIBRANZA ("Tasa desde" E.A.; hasta = usura).
+    ...REGLAS.bancoomeva,
+    leer(texto) {
+      const t = plano(texto);
+      const clientes = despuesDe(
+        t,
+        /Aplica para Clientes Bancoomeva/,
+        'la página "Aplica para Clientes Bancoomeva"',
+      );
+      const vig = exigir(
+        clientes,
+        /Vigentes mes de (\d{1,2}) al \d{1,2} (\p{L}+) (\d{4})/u,
+        "la vigencia del mes",
+      );
+      const m = exigir(
+        clientes,
+        /Libre Inversi[oó]n [^\n]*? ([\d,]+) ?% E\.A\s*\n ?LIBRANZA/,
+        'la fila "Libre Inversión" de LIBRANZA',
+      );
+      const eaDesde = numero(m[1]);
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta: null,
+        mvHasta: null,
+        vigencia: fecha(`${vig[1]} de ${vig[2]} de ${vig[3]}`),
+        frase: `Libranza: ${m[0].replace(/\s+/g, " ")}`,
+      };
+    },
+  },
+});
+
+/** Fila "Libranza Desde … NMV – Equivalente al … EA" de Finandina. */
+function finandinaLibranza(t, vigencia) {
+  const m = exigir(
+    t,
+    /Libranza Desde ([\d.,]+)% NMV . Equivalente al ([\d.,]+)% EA/,
+    'la fila "Libranza"',
+  );
+  return {
+    mvDesde: numero(m[1]),
+    eaDesde: numero(m[2]),
+    mvHasta: null,
+    eaHasta: null,
+    vigencia,
+    frase: m[0],
+  };
+}
+
+/**
+ * La regla de un banco para un producto: la de libre inversión es la del
+ * código del banco y la de los demás, "<banco>:<producto>".
+ */
+export function reglaDe(banco, producto = "libre-inversion") {
+  return REGLAS[
+    producto === "libre-inversion" ? banco : `${banco}:${producto}`
+  ];
+}
 
 /** E.A. → M.V. (en %), con 4 decimales, para bancos que solo publican E.A. */
 export const mensual = (ea) =>

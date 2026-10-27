@@ -19,8 +19,14 @@ import { directus, hayToken } from "./comun/directus.mjs";
 
 const SFC = "https://www.datos.gov.co/resource/qzsc-9esp.json";
 const SEMANAS = 4;
-/** Producto de Credimetría → producto de crédito en el formato 88. */
-const PRODUCTOS = { "libre-inversion": "Libre inversión" };
+/**
+ * Producto de Credimetría → producto de crédito en el formato 88. La
+ * libranza viene junta ("Libranza otros"): no se separa por tipo de cliente.
+ */
+const PRODUCTOS = {
+  "libre-inversion": "Libre inversión",
+  libranza: "Libranza otros",
+};
 /** Salto (en puntos) que se avisa en las notas para revisarlo. */
 const SALTO = 2;
 
@@ -78,29 +84,34 @@ async function main() {
   // muy lento en datos.gov.co y a veces no responde).
   const hace = new Date(Date.now() - 49 * 864e5).toISOString().slice(0, 10);
 
+  // Una consulta por banco (con todos los productos): sumar todos los bancos
+  // juntos tarda más de ~30 s y datos.gov.co corta la conexión; uno por uno
+  // tarda entre 4 y 10 s.
+  const nombresSfc = Object.values(PRODUCTOS);
+  const todas = [];
+  const consultas = new Map(); // codigo de la entidad → enlace de su consulta
+  for (const e of entidades) {
+    const { tipo, codigo } = partir(e.codigo_sfc);
+    const { url, filas } = await sfc({
+      $select:
+        "nombre_entidad,fecha_corte,producto_de_cr_dito," +
+        "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
+        "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
+      $where:
+        `producto_de_cr_dito in(${nombresSfc.map((n) => `'${n}'`).join(",")}) ` +
+        `AND tipo_entidad='${tipo}' AND codigo_entidad='${codigo}' ` +
+        `AND fecha_corte >= '${hace}'`,
+      $group: "nombre_entidad,fecha_corte,producto_de_cr_dito",
+      $order: "fecha_corte",
+      $limit: "200",
+    });
+    consultas.set(e.codigo, url);
+    for (const f of filas)
+      todas.push({ ...f, tipo_entidad: tipo, codigo_entidad: codigo });
+  }
+
   for (const [producto, nombreSfc] of Object.entries(PRODUCTOS)) {
-    // Una consulta por banco: sumar todos juntos tarda más de ~30 s y
-    // datos.gov.co corta la conexión; uno por uno tarda entre 4 y 10 s.
-    const recientes = [];
-    const consultas = new Map(); // codigo de la entidad → enlace de su consulta
-    for (const e of entidades) {
-      const { tipo, codigo } = partir(e.codigo_sfc);
-      const { url, filas } = await sfc({
-        $select:
-          "nombre_entidad,fecha_corte," +
-          "sum(tasa_efectiva_promedio*montos_desembolsados) as tm," +
-          "sum(montos_desembolsados) as m,sum(numero_de_creditos) as n",
-        $where:
-          `producto_de_cr_dito='${nombreSfc}' AND tipo_entidad='${tipo}' ` +
-          `AND codigo_entidad='${codigo}' AND fecha_corte >= '${hace}'`,
-        $group: "nombre_entidad,fecha_corte",
-        $order: "fecha_corte",
-        $limit: "100",
-      });
-      consultas.set(e.codigo, url);
-      for (const f of filas)
-        recientes.push({ ...f, tipo_entidad: tipo, codigo_entidad: codigo });
-    }
+    const recientes = todas.filter((f) => f.producto_de_cr_dito === nombreSfc);
     const cortes = [...new Set(recientes.map((f) => f.fecha_corte))]
       .sort()
       .reverse()
@@ -164,6 +175,9 @@ async function main() {
         "GET",
         `/items/tasas_promedio?filter[entidad][_eq]=${e.codigo}&filter[producto][_eq]=${producto}&fields=id,tasa_ea&limit=1`,
       );
+      // Banco que no tiene este producto (p. ej. libranza en Lulo): si nunca
+      // tuvo promedio, no se crea fila ni se avisa.
+      if (tasa === null && !actual) continue;
       const antes = actual?.tasa_ea == null ? null : Number(actual.tasa_ea);
       const salto =
         tasa !== null && antes !== null && Math.abs(tasa - antes) > SALTO;

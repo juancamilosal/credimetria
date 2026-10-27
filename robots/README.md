@@ -12,15 +12,15 @@ crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
   últimos dos meses"). El histórico está en `w9zh-vetq`.
 - **Cómo:** por entidad (`entidades.codigo_sfc`, tipo-código: Bogotá 1-1,
   Bancolombia 1-7, BBVA 1-13, Davivienda 1-39, AV Villas 1-49) y producto
-  (`Libre inversión`), promedio ponderado por monto de las últimas 4
-  semanas. Hace **una consulta por banco** (4 a 10 s cada una): sumar todos
-  juntos pasaba de ~30 s y datos.gov.co cortaba la conexión. Cada consulta
-  tiene 2 minutos de límite y hasta 3 intentos; cada banco guarda el enlace
-  de su propia consulta.
-- **Pendiente al abrir otro producto:** en vez de una consulta por banco y
-  producto (20 bancos × 5 productos = 100 consultas, ~10 min), pedir por
-  banco todos los productos a la vez, agrupando por producto y semana (20
-  consultas, ~3–4 min). Todos los productos están en el mismo conjunto.
+  (`Libre inversión` y `Libranza otros`: la Superfinanciera reporta la
+  libranza junta, sin separar pensionados, docentes o empleados), promedio
+  ponderado por monto de las últimas 4 semanas. Hace **una consulta por
+  banco con todos los productos** (agrupada por producto y semana): sumar
+  todos los bancos juntos pasaba de ~30 s y datos.gov.co cortaba la
+  conexión. Cada consulta tiene 2 minutos de límite y hasta 3 intentos; cada
+  banco guarda el enlace de su propia consulta.
+- Si un banco no tiene un producto (p. ej. libranza en Lulo, Falabella o
+  Davibank) y nunca tuvo promedio de él, no se crea fila ni se avisa.
 - **Guarda:** una fila por entidad y producto en `tasas_promedio`
   (sobrescribe, sin historial, sin aprobación), con la fecha de corte, el
   CSV de respaldo y el enlace de la consulta. Avisa en las notas si una
@@ -41,8 +41,15 @@ Davivienda 22,71 % E.A.
   revisión. Si el PDF cambió pero las tasas leídas son **las mismas** de la
   publicada (o de una que ya espera aprobación), tampoco crea nada: solo
   anota la huella nueva. Así no hay que aprobar lo que no cambió. Si es nuevo: lo sube a `documentos` (origen `robot`), lee la
-  tasa de libre inversión y crea la tasa **por aprobar** unida al PDF. Nunca
+  tasa del producto de la fuente y crea la tasa **por aprobar** unida al PDF. Nunca
   publica: siempre se aprueba en `/admin/tasas`.
+- **Un banco, varios productos:** cada fuente es un banco y un producto. La
+  regla de libre inversión es `REGLAS["bbva"]` y la de libranza
+  `REGLAS["bbva:libranza"]` (`reglaDe(banco, producto)`). Si los dos salen
+  del mismo PDF, la de libranza copia cómo se busca y solo cambia `leer`; la
+  huella se revisa **por fuente** (el PDF puede ser nuevo para libranza
+  aunque ya esté guardado para libre inversión) y el archivo se sube **una
+  sola vez** (el documento de libranza usa el mismo archivo).
 - **Reglas por banco** (texto de `pdftotext -layout`):
 
 | Banco           | Dónde está el PDF                                                               | Qué lee                                                                    |
@@ -62,6 +69,26 @@ Davivienda 22,71 % E.A.
 | Banco Finandina | `…/historial tasas y tarifas/tasas/tasas-<mes>-<año>.pdf` del mes actual (o el de la fuente; también la página de historial). **Y su página de tasas vigentes**, que se actualiza antes | "Préstamo para libre inversión Desde … NMV - Equivalente al … EA"; hasta = usura |
 | Banco Agrario   | PDF **semanal** `Tasas_colocaciones_del_<d><mes>_al_<d><mes>_<año>.pdf`: el que empieza más tarde | Página "Creditos de Consumo" (recursos propios): desde = "PERSONAL - LIBRE DESTINO", hasta = "CREDITO DIGITAL LIBRE INVERSIÓN"; vigencia "DEL … AL … DE …" de esa sección |
 | AV Villas       | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo     | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"          |
+
+- **Reglas de libranza** (`<banco>:libranza`). Desde = la tasa fija más
+  baja de la tabla de libranza (de todas las pagadurías y plazos); hasta = la
+  más alta si el banco la publica, si no la usura. Los convenios especiales
+  (Policía, Ministerio de Defensa, Grupo Olímpica) no cuentan.
+
+| Banco           | PDF                                         | Qué lee (oct 2026)                                                          |
+| --------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
+| BBVA            | **Aparte**: `…/libranzas/DO-01-tasas-libranza.pdf` (dirección fija) | "Crédito de Libranza", tasas desde por segmento: 13,14 % E.A. (pensionados) |
+| Banco de Bogotá | El mismo                                    | Tablas "LIBRANZAS … (Desde)" por pagaduría y plazo: 16,70 % E.A.            |
+| Davivienda      | El mismo (se carga a mano)                  | Página "Créditos de Libranza", CrediExpress Fijo Libranza: 16,76 % E.A.     |
+| AV Villas       | El mismo                                    | "Créditos de Consumo", fila LIBRANZA: 16,15 % a 28,59 % E.A.                |
+| Bancolombia     | El mismo                                    | "…para las Libranzas", tasa fija de empleados y Fopep: 14,30 % a 28,57 %    |
+| Banco Agrario   | El mismo (semanal)                          | Tabla "Credito de Libranza" (sin convenios especiales): 19,30 % a 25,60 %   |
+| Serfinanza      | El mismo                                    | "Libranza Libre Inversión" sin Grupo Olímpica: 18,02 % a 19,42 % E.A.       |
+| Finandina       | El mismo y su página de tasas vigentes      | Fila "Libranza Desde … NMV": 21,27 % E.A.                                   |
+| Bancoomeva      | La misma cartelera                          | Clientes, fila "Libre Inversion" de LIBRANZA: 23,58 % E.A.                  |
+
+  Faltan (no la traen en el PDF que se baja): Popular, Occidente, Caja
+  Social, y los nuevos Pichincha, GNB Sudameris, Bancien y Banco Unión.
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
   lee la tabla del HTML de su página (sin navegador). Como la página cambia

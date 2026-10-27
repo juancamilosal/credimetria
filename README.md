@@ -212,8 +212,11 @@ con `USURA_CONSUMO` (no se ofrece en vivienda).
 En `robots/` (ver `robots/README.md`): dónde busca cada robot y qué guarda.
 `robots/promedio-sfc.mjs` actualiza `tasas_promedio` desde la
 Superfinanciera (`--sin-guardar` para solo verlo). `robots/pdf-bancos.mjs`
-revisa el PDF de cada banco con reglas por banco (`robots/reglas.mjs`): si
-cambió, lo guarda y deja la tasa leída por aprobar en `/admin/tasas`. Ambos
+revisa el PDF de cada banco con reglas por banco y producto
+(`robots/reglas.mjs`; libre inversión y libranza, que muchas veces salen del
+mismo PDF): si cambió, lo guarda y deja la tasa leída por aprobar en
+`/admin/tasas`. La libranza va junta, sin separar por tipo de cliente, como
+la reporta la Superfinanciera. Ambos
 mandan correo si algo falla o si hay algo que aprobar. Corren en Coolify con
 `robots/Dockerfile` (pasos en `robots/README.md`). Pruebas: `cd robots &&
 npm test`.

@@ -12,6 +12,7 @@ import {
   mesVencido,
   mismasTasas,
   REGLAS,
+  reglaDe,
   revisar,
 } from "../reglas.mjs";
 
@@ -114,6 +115,86 @@ describe("reglas por banco", () => {
     assert.throws(
       () => REGLAS.bancolombia.leer("Un PDF distinto"),
       /No encontré la vigencia de libre inversión/,
+    );
+  });
+});
+
+/**
+ * Libranza, de los mismos PDF de octubre de 2026 (BBVA tiene uno aparte, del
+ * 4 de agosto): la tasa fija más baja de la tabla y la más alta si la publica.
+ */
+const LIBRANZA = {
+  bbva: ["bbva-libranza", 1.03, 13.14, null, null, "2026-08-04"],
+  "banco-de-bogota": ["banco-de-bogota", 1.3, 16.7, null, null, "2026-10-01"],
+  davivienda: ["davivienda", 1.3, 16.76, null, null, "2026-10-19"],
+  "av-villas": [
+    "av-villas",
+    mensual(16.15),
+    16.15,
+    mensual(28.59),
+    28.59,
+    "2026-10-01",
+  ],
+  bancolombia: ["bancolombia", 1.12, 14.3, 2.12, 28.57, "2026-10-01"],
+  "banco-agrario": [
+    "banco-agrario",
+    mensual(19.3),
+    19.3,
+    mensual(25.6),
+    25.6,
+    "2026-10-05",
+  ],
+  "banco-serfinanza": [
+    "banco-serfinanza",
+    1.39,
+    18.02,
+    1.49,
+    19.42,
+    "2026-10-01",
+  ],
+  "banco-finandina": ["banco-finandina", 1.62, 21.27, null, null, "2026-09-01"],
+  bancoomeva: ["bancoomeva", mensual(23.58), 23.58, null, null, "2026-10-01"],
+};
+
+describe("reglas de libranza", () => {
+  for (const [
+    banco,
+    [archivo, mvDesde, eaDesde, mvHasta, eaHasta, vigencia],
+  ] of Object.entries(LIBRANZA)) {
+    it(`${banco}: lee la tasa de libranza`, () => {
+      const t = reglaDe(banco, "libranza").leer(texto(archivo));
+      assert.deepEqual(
+        [t.mvDesde, t.eaDesde, t.mvHasta, t.eaHasta, t.vigencia],
+        [mvDesde, eaDesde, mvHasta, eaHasta, vigencia],
+      );
+      assert.deepEqual(revisar(t, USURA), []);
+      assert.ok(t.frase);
+    });
+  }
+
+  it("busca el PDF igual que la regla de libre inversión del banco", () => {
+    const hoy = new Date("2026-11-03T12:00:00");
+    const fuente = { url: "https://x/tasas.pdf" };
+    assert.deepEqual(
+      reglaDe("banco-de-bogota", "libranza").buscar(fuente, hoy),
+      REGLAS["banco-de-bogota"].buscar(fuente, hoy),
+    );
+    assert.equal(reglaDe("davivienda", "libranza").bloquea, true);
+    assert.equal(reglaDe("bbva"), REGLAS.bbva);
+    assert.equal(reglaDe("lulo-bank", "libranza"), undefined);
+  });
+
+  it("finandina: lee libranza en su página de tasas vigentes", () => {
+    const html = readFileSync(
+      new URL("./textos/banco-finandina-vigentes.html", import.meta.url),
+      "utf8",
+    );
+    const t = reglaDe("banco-finandina", "libranza").paginaVigente.leer(
+      textoHtml(html),
+    );
+    assert.deepEqual(
+      [t.mvDesde, t.eaDesde, t.vigencia],
+      [1.62, 21.27, "2026-10-01"],
     );
   });
 });
