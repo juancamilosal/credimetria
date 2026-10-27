@@ -45,13 +45,15 @@
     <ol class="bancos">
       @for (banco of mejores(); track banco.entidad; let i = $index) {
         <li class="banco" [class.primero]="i === 0">
+          @if (i === 0) {
+            <span class="destacado cinta"
+              ><span class="estrella" aria-hidden="true">★</span> Mejor tasa
+              <span class="estrella" aria-hidden="true">★</span></span
+            >
+          }
           <div class="banco-cabeza">
             <span class="puesto cifra">#{{ i + 1 }}</span>
-            @if (i === 0) {
-              <span class="etq etq-ahorro">Mejor tasa</span>
-            } @else {
-              <span class="nota">{{ banco.tipo }}</span>
-            }
+            <span class="nota">{{ banco.tipo }}</span>
           </div>
 
           <div class="marca">
@@ -80,6 +82,11 @@
               >de intereses {{ banco.total - monto | pesos }}</span
             >
           </p>
+          @if (i === 0 && mejores()[1]; as segundo) {
+            <p class="ahorro">
+              {{ segundo.total - banco.total | pesos }} menos que con el #2
+            </p>
+          }
 
           <dl class="detalle">
             <div>

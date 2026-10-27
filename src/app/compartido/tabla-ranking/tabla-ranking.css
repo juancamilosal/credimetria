@@ -176,10 +176,6 @@ th[aria-sort="descending"] .flecha {
   font-weight: 500;
 }
 
-.mejor {
-  margin-left: 8px;
-}
-
 .quiero {
   font-weight: 700;
   white-space: nowrap;
@@ -331,8 +327,33 @@ td:last-child {
 }
 
 /* La mejor tasa con borde verde; al pasar el mouse, borde azul */
+/* La mejor tasa: fila verde suave con la pestaña "Mejor tasa" en la esquina */
 tr.primera td {
   border-color: var(--cm-ahorro-600);
+  background: var(--cm-ahorro-100);
+  padding-top: 38px;
+}
+
+tr.primera td:first-child,
+.tarjeta.primera {
+  position: relative;
+}
+
+.esquina {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: var(--cm-r-tarjeta) 0 10px 0;
+}
+
+.primera .real {
+  color: var(--cm-ahorro-700);
+}
+
+.tarjeta.primera {
+  border-color: var(--cm-ahorro-600);
+  background: var(--cm-ahorro-100);
+  padding-top: 40px;
 }
 
 tbody tr:hover td {

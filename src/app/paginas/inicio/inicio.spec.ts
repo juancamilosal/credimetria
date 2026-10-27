@@ -39,7 +39,7 @@ describe('Inicio', () => {
       .slice(0, 3)
       .map((t) => t.entidad);
     expect(nombres).toEqual(esperados);
-    expect(html.querySelector('.primero .etq-ahorro')?.textContent).toContain(
+    expect(html.querySelector('.primero .destacado')?.textContent).toContain(
       'Mejor tasa',
     );
     // Cada tarjeta trae lo que cobra, la cuota de ejemplo y el rango.

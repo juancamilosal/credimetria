@@ -96,13 +96,47 @@
   box-shadow: 0 1px 2px rgb(15 27 42 / 0.04);
 }
 
+.banco {
+  position: relative;
+}
+
+/* La mejor tasa: borde verde, sombra suave y la cinta sobre el borde */
 .primero {
   border: 2px solid var(--cm-ahorro-600);
   background: linear-gradient(
     180deg,
     var(--cm-ahorro-100) 0%,
-    var(--cm-blanco) 42%
+    var(--cm-blanco) 38%
   );
+  box-shadow: 0 14px 32px -18px rgb(22 130 84 / 0.55);
+}
+
+.cinta {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 5px 14px;
+  border-radius: 999px;
+  box-shadow: 0 4px 10px -4px rgb(22 130 84 / 0.6);
+}
+
+.primero .puesto {
+  background: var(--cm-ahorro-100);
+  color: var(--cm-ahorro-700);
+  font-weight: 700;
+}
+
+.primero .cobra strong {
+  color: var(--cm-ahorro-700);
+}
+
+.ahorro {
+  margin: -6px 0 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cm-ahorro-700);
 }
 
 .banco-cabeza {

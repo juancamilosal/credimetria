@@ -354,3 +354,25 @@ button {
     transition: none !important;
   }
 }
+
+/* Pestaña "★ Mejor tasa ★" (ranking e inicio): verde con estrellas doradas */
+.destacado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: var(--cm-ahorro-600);
+  color: var(--cm-blanco);
+  font-family: var(--cm-f-texto);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.destacado .estrella {
+  color: #f6c343;
+  font-size: 13px;
+}

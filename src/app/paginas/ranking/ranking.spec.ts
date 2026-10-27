@@ -68,10 +68,12 @@ describe('Ranking', () => {
     expect(entidades()[0]).toBe('AV Villas');
     expect(entidades()[1]).toBe('Banco de Bogotá');
     // El # sigue siendo el puesto por tasa real.
-    expect(html.querySelector('tbody tr .pos')?.textContent?.trim()).toBe('1');
-    expect(html.querySelectorAll('tbody tr .pos')[1].textContent?.trim()).toBe(
-      '7',
-    );
+    expect(
+      html.querySelector('tbody tr .pos .numero')?.textContent?.trim(),
+    ).toBe('1');
+    expect(
+      html.querySelectorAll('tbody tr .pos .numero')[1].textContent?.trim(),
+    ).toBe('7');
   });
 
   it('guarda el orden en la dirección sin navegar (la pantalla no sube)', () => {
@@ -161,5 +163,14 @@ describe('Ranking', () => {
     expect(entidades()).toEqual([]);
     expect(html.querySelector('caption')!.textContent).toContain('cargando');
     expect(html.textContent).not.toContain('Todavía no tenemos tasas');
+  });
+
+  it('marca la primera fila con la pestaña "Mejor tasa"', () => {
+    const primera = html.querySelector('tbody tr')!;
+    expect(primera.classList).toContain('primera');
+    expect(primera.querySelector('.destacado')?.textContent).toContain(
+      'Mejor tasa',
+    );
+    expect(html.querySelectorAll('tbody .destacado').length).toBe(1);
   });
 });

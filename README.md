@@ -41,7 +41,10 @@ morada y oro del diseño (ver abajo).
   (`?producto=…&tipo=…&monto=…&plazo=…&orden=diferencia-desc`, con
   `Location.replaceState`, sin navegar, para que la pantalla no suba) y "Quiero
   esta" lleva el monto a la asesoría. Cada banco es una tarjeta (`border-spacing`
-  de 10 px, borde verde en la mejor tasa y azul al pasar el mouse). Las
+  de 10 px, azul al pasar el mouse). La mejor tasa va en verde suave con la
+  pestaña "★ Mejor tasa ★" en la esquina (clase global `.destacado`, la
+  misma que lleva la tarjeta #1 del inicio, que además dice cuánto menos se
+  paga que con el #2). Las
   cifras de cada fila van en la misma línea (`vertical-align: baseline`) y los logos miden 40 px de alto.
   Si las tasas no vinieron con la página, la tabla y las tarjetas muestran
   un esqueleto (`TasasService.cargando`) mientras llegan de `/api/tasas`;
