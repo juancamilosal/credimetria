@@ -222,4 +222,42 @@ describe('Ranking', () => {
     expect(h.querySelector('tbody tr .numero')?.textContent?.trim()).toBe('1');
     expect(h.querySelectorAll('tbody .destacado').length).toBe(0);
   });
+
+  it('al banco que solo publica la máxima le dice "hasta … solo publica la máxima"', () => {
+    TestBed.resetTestingModule();
+    const [a] = TASAS_PRUEBA.filter((t) => t.producto === 'libranza');
+    TestBed.configureTestingModule({
+      imports: [Ranking],
+      providers: [
+        provideRouter([]),
+        provideLocationMocks(),
+        {
+          provide: TASAS_INICIALES,
+          useValue: {
+            corte: CORTE_PRUEBA,
+            tasas: [
+              {
+                ...a,
+                entidad: 'GNB Sudameris',
+                tasaReal: 19.12,
+                tasaAnunciada: null,
+                tasaHasta: 24.6,
+              },
+            ],
+          },
+        },
+      ],
+    });
+    const f = TestBed.createComponent(Ranking);
+    f.detectChanges();
+    const h: HTMLElement = f.nativeElement;
+    const select = h.querySelector<HTMLSelectElement>('#rkProducto')!;
+    select.value = 'libranza';
+    select.dispatchEvent(new Event('change'));
+    f.detectChanges();
+    const celda = h.querySelectorAll('tbody tr td')[3];
+    expect(celda.textContent).toContain('hasta 24,60 %');
+    expect(celda.textContent).toContain('solo publica la máxima');
+    expect(celda.textContent).not.toContain('No publica su tasa');
+  });
 });

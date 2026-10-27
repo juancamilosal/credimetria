@@ -96,14 +96,17 @@
             <div>
               <dt>Anuncia</dt>
               <dd class="cifra">
-                @if (banco.tasaAnunciada === null) {
-                  <span class="no-publica">No publica su tasa</span>
-                } @else {
+                @if (banco.tasaAnunciada !== null) {
                   {{ banco.tasaAnunciada | tasa }}
-                }
-                @if (banco.tasaHasta) {
-                  a {{ banco.tasaHasta | tasa
-                  }}{{ banco.hastaUsura ? "*" : "" }}
+                  @if (banco.tasaHasta) {
+                    a {{ banco.tasaHasta | tasa
+                    }}{{ banco.hastaUsura ? "*" : "" }}
+                  }
+                } @else if (banco.tasaHasta) {
+                  hasta {{ banco.tasaHasta | tasa }}
+                  <span class="no-publica">solo publica la máxima</span>
+                } @else {
+                  <span class="no-publica">No publica su tasa</span>
                 }
               </dd>
             </div>

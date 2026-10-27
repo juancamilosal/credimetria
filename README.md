@@ -338,6 +338,10 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   minutos y, si Directus falla, sigue con la última. Al armar la página en
   el servidor, las tasas van dentro de ella (`TransferState`): el navegador
   no las vuelve a pedir y nunca ve Directus ni el token.
+- **Bancos que solo publican la máxima** (GNB Sudameris en libranza: "se
+  publica la tasa más alta"): la tasa se guarda sin desde y la columna
+  Anuncia dice "hasta 24,60 % · solo publica la máxima". La diferencia queda
+  en "—" y no lleva "★ Mejor tasa ★".
 - **Bancos que no publican su tasa** en un producto (fuente con
   `como_extraer` = "Solo promedio", hoy Banco Popular y Banco de Occidente en libranza:
   no publican la tasa): `/api/tasas` los agrega solo con el promedio de la

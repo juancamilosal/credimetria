@@ -185,12 +185,15 @@
             </td>
             <td class="muted">{{ fila.tipo }}</td>
             <td class="der cifra muted">
-              @if (fila.tasaAnunciada === null) {
-                <span class="no-publica">No publica su tasa</span>
-              } @else {
+              @if (fila.tasaAnunciada !== null) {
                 {{ fila.tasaAnunciada | tasa }}
+              } @else if (fila.tasaHasta) {
+                hasta {{ fila.tasaHasta | tasa }}
+                <span class="no-publica hasta">solo publica la máxima</span>
+              } @else {
+                <span class="no-publica">No publica su tasa</span>
               }
-              @if (fila.tasaHasta) {
+              @if (fila.tasaHasta && fila.tasaAnunciada !== null) {
                 <span class="hasta"
                   >a {{ fila.tasaHasta | tasa
                   }}{{ fila.hastaUsura ? "*" : "" }}</span
@@ -296,13 +299,16 @@
           <div>
             <span class="nota">Anuncia</span>
             <span class="cifra muted">
-              @if (fila.tasaAnunciada === null) {
-                <span class="no-publica">No publica su tasa</span>
-              } @else {
+              @if (fila.tasaAnunciada !== null) {
                 {{ fila.tasaAnunciada | tasa }}
-              }
-              @if (fila.tasaHasta) {
-                a {{ fila.tasaHasta | tasa }}{{ fila.hastaUsura ? "*" : "" }}
+                @if (fila.tasaHasta) {
+                  a {{ fila.tasaHasta | tasa }}{{ fila.hastaUsura ? "*" : "" }}
+                }
+              } @else if (fila.tasaHasta) {
+                hasta {{ fila.tasaHasta | tasa }}
+                <span class="no-publica">solo publica la máxima</span>
+              } @else {
+                <span class="no-publica">No publica su tasa</span>
               }
             </span>
             @if (fila.pdf) {

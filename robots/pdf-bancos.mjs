@@ -420,7 +420,7 @@ async function revisarFuente(fuente) {
           ...valores,
           hasta_origen: sinMaxima ? "usura" : "entidad",
           frase: tasa.frase,
-          notas: `Leída por el robot el ${cuando()}.${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
+          notas: `Leída por el robot el ${cuando()}.${tasa.soloMaxima ? " El banco solo publica la tasa máxima (no hay desde)." : ""}${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
         }
       : {
           notas: `El robot no pudo leer la tasa (${cuando()}): ${problemas.join(" ")} Llénala mirando el PDF.`,
@@ -436,7 +436,7 @@ async function revisarFuente(fuente) {
 
   return leida
     ? {
-        nuevo: `${nombre}: ${queEs} (rige desde ${tasa.vigencia}). Leí ${tasa.mvDesde} % a ${sinMaxima ? USURA.mv + " % (usura)" : tasa.mvHasta + " %"} M.V.; está por aprobar.`,
+        nuevo: `${nombre}: ${queEs} (rige desde ${tasa.vigencia}). Leí ${tasa.soloMaxima ? `hasta ${tasa.mvHasta} % M.V. (solo publica la máxima)` : `${tasa.mvDesde} % a ${sinMaxima ? USURA.mv + " % (usura)" : tasa.mvHasta + " %"} M.V.`}; está por aprobar.`,
       }
     : {
         problema: `${nombre}: ${queEs} guardado, pero no pude leer la tasa: ${problemas.join(" ")} Quedó por aprobar sin valores.`,

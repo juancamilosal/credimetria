@@ -32,6 +32,8 @@
 //     Por defecto la de la fuente; `enlace` la busca en la página índice.
 //   leer(texto) → { mvDesde, eaDesde, mvHasta, eaHasta, vigencia, frase }.
 //     Hasta en null si el banco no publica máxima (el robot pone la usura).
+//     Si solo publica la máxima (GNB en libranza), desde en null y
+//     `soloMaxima: true`: la página dice "hasta …, solo publica la máxima".
 //     Si el PDF cambió de forma y no encuentra los datos, lanza un error que
 //     le llega por correo al administrador.
 
@@ -735,6 +737,39 @@ Object.assign(REGLAS, {
     },
   },
 
+  "gnb-sudameris:libranza": {
+    // PDF fijo /ws/documentos?d=TASAS (3 páginas, todos los productos):
+    // "CRÉDITO DE LIBRANZA* 24,60% E.A. 1,85% M.V." con la nota "*Se publica
+    // la tasa más alta". Solo publica la máxima: no hay desde.
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(
+        t,
+        /TASAS VIGENTES DESDE\s*\n?\s*(\p{L}+ \d{1,2} DE \d{4})/u,
+        'la fecha "TASAS VIGENTES DESDE …"',
+      );
+      const m = exigir(
+        t,
+        /LIBRANZA\*? ([\d.,]+)% E\.A\. ([\d.,]+)% M\.V\./,
+        'la fila "CRÉDITO DE LIBRANZA"',
+      );
+      exigir(
+        t,
+        /Se publica la tasa más alta/,
+        'la nota "Se publica la tasa más alta"',
+      );
+      return {
+        soloMaxima: true,
+        mvDesde: null,
+        eaDesde: null,
+        eaHasta: numero(m[1]),
+        mvHasta: numero(m[2]),
+        vigencia: fecha(vig[1].toLowerCase()),
+        frase: `Crédito de libranza ${m[1]}% E.A. ${m[2]}% M.V. (se publica la tasa más alta)`,
+      };
+    },
+  },
+
   "banco-caja-social:libranza": {
     // PDF aparte de dirección fija …/credito-consumo/Tasas-Libranzas.pdf (en
     // la misma página que el de libre destino): filas "Libranza" y "Libranza
@@ -1092,7 +1127,12 @@ export const efectiva = (mv) => ((1 + mv / 100) ** 12 - 1) * 100;
 export function revisar(t, usura) {
   const problemas = [];
   const ok = (v) => typeof v === "number" && Number.isFinite(v);
-  if (!ok(t.mvDesde) || !ok(t.eaDesde)) problemas.push("No leí la tasa desde.");
+  if (t.soloMaxima) {
+    // Solo publica la máxima: no hay desde, pero la hasta es obligatoria.
+    if (t.eaHasta === null || t.eaHasta === undefined)
+      problemas.push("No leí la tasa máxima.");
+  } else if (!ok(t.mvDesde) || !ok(t.eaDesde))
+    problemas.push("No leí la tasa desde.");
   else {
     if (t.eaDesde > usura.tasa + 0.01)
       problemas.push(
@@ -1155,9 +1195,12 @@ export function mismasTasas(leida, guardada) {
   const campos = ["valor_desde", "valor_hasta", "ea_desde", "ea_hasta"];
   return campos.every(
     (c) =>
-      guardada[c] !== null &&
-      guardada[c] !== undefined &&
-      Math.abs(Number(guardada[c]) - leida[c]) < 0.0001,
+      // Sin desde (solo publica la máxima): igual si la guardada tampoco tiene.
+      (leida[c] === null &&
+        (guardada[c] === null || guardada[c] === undefined)) ||
+      (guardada[c] !== null &&
+        guardada[c] !== undefined &&
+        Math.abs(Number(guardada[c]) - leida[c]) < 0.0001),
   );
 }
 

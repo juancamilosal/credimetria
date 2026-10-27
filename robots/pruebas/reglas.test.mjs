@@ -192,6 +192,36 @@ describe("reglas de libranza", () => {
     assert.equal(reglaDe("lulo-bank", "libranza"), undefined);
   });
 
+  it("gnb-sudameris: solo publica la máxima (sin desde)", () => {
+    const t = reglaDe("gnb-sudameris", "libranza").leer(texto("gnb-sudameris"));
+    assert.deepEqual(
+      [t.soloMaxima, t.mvDesde, t.eaDesde, t.mvHasta, t.eaHasta, t.vigencia],
+      [true, null, null, 1.85, 24.6, "2026-10-02"],
+    );
+    assert.deepEqual(revisar(t, USURA), []);
+    // Lo leído sin desde es igual a lo guardado sin desde.
+    assert.ok(
+      mismasTasas(
+        {
+          valor_desde: null,
+          valor_hasta: 1.85,
+          ea_desde: null,
+          ea_hasta: 24.6,
+        },
+        {
+          valor_desde: null,
+          valor_hasta: "1.8500",
+          ea_desde: null,
+          ea_hasta: "24.6000",
+        },
+      ),
+    );
+    // Sin la máxima, sí es un problema.
+    assert.deepEqual(revisar({ ...t, eaHasta: null, mvHasta: null }, USURA), [
+      "No leí la tasa máxima.",
+    ]);
+  });
+
   it("finandina: lee libranza en su página de tasas vigentes", () => {
     const html = readFileSync(
       new URL("./textos/banco-finandina-vigentes.html", import.meta.url),

@@ -98,6 +98,7 @@ Davivienda 22,71 % E.A.
 | Serfinanza      | El mismo                                    | "Libranza Libre Inversión" sin Grupo Olímpica: 18,02 % a 19,42 % E.A.       |
 | Finandina       | El mismo y su página de tasas vigentes      | Fila "Libranza Desde … NMV": 21,27 % E.A.                                   |
 | Bancoomeva      | La misma cartelera                          | Clientes, fila "Libre Inversion" de LIBRANZA: 23,58 % E.A.                  |
+| GNB Sudameris   | Dirección fija `/ws/documentos?d=TASAS` (todos los productos) | "CRÉDITO DE LIBRANZA* 24,60 % E.A.": **solo publica la máxima** (`soloMaxima`, sin desde); la página dice "hasta 24,60 %, solo publica la máxima" |
 | Caja Social     | **Aparte**: `…/credito-consumo/Tasas-Libranzas.pdf` (dirección fija) | Filas "Libranza" y "Libranza Compra de Cartera": 16,65 % a 28,05 % E.A.  |
 
   **Banco Popular** no publica la tasa de Prestayá (su libranza; en su

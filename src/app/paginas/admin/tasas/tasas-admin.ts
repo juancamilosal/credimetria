@@ -248,8 +248,12 @@ export class TasasAdmin implements OnInit, OnDestroy {
 
   /** "1,30 % a 2,13 % M.V." o "desde 1,10 % N.M.V." */
   protected publica(t: TasaAdmin): string {
-    if (t.valor_desde === null) return 'Sin escribir';
     const unidad = t.unidad ? ' ' + UNIDAD_TEXTO[t.unidad] : '';
+    // Banco que solo publica la máxima (GNB en libranza).
+    if (t.valor_desde === null)
+      return t.valor_hasta === null
+        ? 'Sin escribir'
+        : `hasta ${formatoTasa(t.valor_hasta)}${unidad} (solo publica la máxima)`;
     return t.valor_hasta === null
       ? `desde ${formatoTasa(t.valor_desde)}${unidad}`
       : `${formatoTasa(t.valor_desde)} a ${formatoTasa(t.valor_hasta)}${unidad}`;
