@@ -343,6 +343,10 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   PDF no revisa esas fuentes. El Lector web necesita poder leer `entidad`,
   `producto`, `como_extraer` y `estado` de `fuentes`; si no puede, la página
   sigue sin esos bancos.
+- **`/api/estado`** (diagnóstico, sin datos sensibles): commit desplegado
+  (`SOURCE_COMMIT` de Coolify), hace cuánto leyó Directus, cuántas tasas hay
+  por producto y si pudo leer los bancos "solo promedio" (con el error de
+  Directus si no).
 - **Variables del servidor** (Coolify): `DIRECTUS_TOKEN` (token del "Lector
   web", obligatorio) y `DIRECTUS_URL` (opcional). Sin el token, la página
   sale sin tasas.

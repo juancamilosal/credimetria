@@ -19,7 +19,14 @@ async function pedir(ruta) {
   const r = await fetch(DIRECTUS + ruta, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!r.ok) throw new Error(`Directus ${r.status} en ${ruta.split("?")[0]}`);
+  if (!r.ok) {
+    // El mensaje de Directus (p. ej. "You don't have permission…") ayuda a
+    // saber qué pasó; nunca trae el token.
+    const detalle = (await r.text().catch(() => "")).slice(0, 200);
+    throw new Error(
+      `Directus ${r.status} en ${ruta.split("?")[0]}${detalle ? `: ${detalle}` : ""}`,
+    );
+  }
   return r;
 }
 
@@ -31,15 +38,21 @@ const numero = (v) => (v === null || v === undefined ? null : Number(v));
  * promedio de la Superfinanciera. Si no se pueden leer, la página sigue sin
  * ellos.
  */
+/** Cómo salió la última lectura de los bancos sin tasa (para /api/estado). */
+let estadoSinTasa = { ok: null, bancos: 0, error: null };
+
 async function soloPromedio() {
   try {
     const r = await pedir(
       "/items/fuentes?filter[como_extraer][_eq]=solo_promedio&filter[estado][_eq]=activa&limit=-1" +
         "&fields=producto,entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,entidad.activa",
     );
-    return (await r.json()).data;
+    const datos = (await r.json()).data;
+    estadoSinTasa = { ok: true, bancos: datos.length, error: null };
+    return datos;
   } catch (error) {
     console.error("No se pudieron leer los bancos sin tasa:", error.message);
+    estadoSinTasa = { ok: false, bancos: 0, error: error.message };
     return [];
   }
 }
@@ -166,6 +179,27 @@ export async function logoEntidad(codigo) {
 
 /** Rutas /api/tasas y /api/logos/<entidad> para un servidor Express. */
 export function rutasTasas(app) {
+  // Diagnóstico sin datos sensibles: qué versión corre y qué leyó.
+  app.get("/api/estado", async (_req, res) => {
+    res.set("Cache-Control", "no-store");
+    try {
+      const datos = await tasasPublicas();
+      const porProducto = {};
+      for (const t of datos.tasas)
+        porProducto[t.producto] = (porProducto[t.producto] ?? 0) + 1;
+      res.json({
+        version: process.env.SOURCE_COMMIT ?? process.env.COMMIT ?? null,
+        leidoHace: guardado
+          ? `${Math.round((Date.now() - guardado.en) / 1000)} s`
+          : null,
+        tasasPorProducto: porProducto,
+        sinTasa: estadoSinTasa,
+      });
+    } catch (error) {
+      res.status(503).json({ error: error.message, sinTasa: estadoSinTasa });
+    }
+  });
+
   app.get("/api/tasas", async (_req, res) => {
     try {
       res.set("Cache-Control", "public, max-age=300");
