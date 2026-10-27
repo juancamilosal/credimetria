@@ -181,7 +181,7 @@
             <section class="columna nueva" aria-label="Por aprobar">
               <h3>Por aprobar</h3>
               @for (t of c.porAprobar; track t.id) {
-                @if (editando() === t.id) {
+                @if (editando() === t.id && !comparando()) {
                   <ng-container
                     *ngTemplateOutlet="
                       formulario;
@@ -368,21 +368,82 @@
         Cerrar
       </button>
     </div>
-    <div class="comparar-pdfs">
-      <section>
-        <h3>{{ cmp.izquierda?.titulo ?? "PDF actual" }}</h3>
+    <div class="comparar-cuerpo">
+      <div class="comparar-pdfs" [class.solo]="!cmp.izquierda?.url">
         @if (cmp.izquierda?.url; as url) {
-          <iframe [src]="url" title="PDF actual"></iframe>
-        } @else {
-          <p class="vacio">Todavía no hay un PDF actual para comparar.</p>
+          <section>
+            <h3>{{ cmp.izquierda!.titulo }}</h3>
+            <iframe [src]="url" title="PDF actual"></iframe>
+          </section>
         }
-      </section>
-      <section>
-        <h3>{{ cmp.derecha.titulo }}</h3>
-        @if (cmp.derecha.url; as url) {
-          <iframe [src]="url" title="PDF por aprobar"></iframe>
-        }
-      </section>
+        <section>
+          <h3>
+            {{ cmp.derecha.titulo }}
+            @if (!cmp.izquierda?.url) {
+              <span class="sin-actual">
+                · todavía no hay un PDF actual para comparar</span
+              >
+            }
+          </h3>
+          @if (cmp.derecha.url; as url) {
+            <iframe [src]="url" title="PDF por aprobar"></iframe>
+          }
+        </section>
+      </div>
+      @if (comparada(); as cm) {
+        <section
+          class="comparar-tasa columna nueva"
+          aria-label="Tasa por aprobar"
+        >
+          <h3>Por aprobar</h3>
+          @if (error()) {
+            <p class="aviso-error" role="alert">{{ error() }}</p>
+          }
+          @if (editando() === cm.t.id) {
+            <ng-container
+              *ngTemplateOutlet="
+                formulario;
+                context: { $implicit: cm.c, id: cm.t.id }
+              "
+            />
+          } @else {
+            <ng-container
+              *ngTemplateOutlet="
+                bloque;
+                context: { $implicit: cm.t, base: cm.c.publicada }
+              "
+            />
+            <div class="acciones">
+              <button
+                type="button"
+                class="btn btn-principal"
+                [disabled]="
+                  ocupado() === cm.c.clave || cm.t.valor_desde === null
+                "
+                (click)="aprobar(cm.c, cm.t)"
+              >
+                Aprobar
+              </button>
+              <button
+                type="button"
+                class="btn btn-borde"
+                [disabled]="ocupado() === cm.c.clave"
+                (click)="rechazar(cm.c, cm.t)"
+              >
+                Rechazar
+              </button>
+              <button
+                type="button"
+                class="btn btn-claro"
+                [disabled]="ocupado() === cm.c.clave"
+                (click)="editar(cm.t)"
+              >
+                Editar
+              </button>
+            </div>
+          }
+        </section>
+      }
     </div>
   </div>
 }

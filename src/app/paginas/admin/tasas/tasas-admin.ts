@@ -80,6 +80,9 @@ interface TarjetaTasa {
 /** Lo que se ve al comparar los dos PDF. */
 interface Comparacion {
   titulo: string;
+  /** Tarjeta y tasa por aprobar, para aprobarla sin cerrar la comparación. */
+  clave: string;
+  tasa: number;
   izquierda: { titulo: string; url: SafeResourceUrl | null } | null;
   derecha: { titulo: string; url: SafeResourceUrl | null };
 }
@@ -128,6 +131,13 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected readonly direccionesEn = signal<string | null>(null);
   protected readonly ocupado = signal<string | null>(null);
   protected readonly comparando = signal<Comparacion | null>(null);
+  /** La tarjeta y la tasa que se comparan, siempre con sus datos al día. */
+  protected readonly comparada = computed(() => {
+    const cmp = this.comparando();
+    const c = cmp && this.tarjetas().find((x) => x.clave === cmp.clave);
+    const t = c?.porAprobar.find((x) => x.id === cmp!.tasa);
+    return c && t ? { c, t } : null;
+  });
   /** Tasa cuyo PDF se pidió eliminar y espera el segundo toque. */
   protected readonly confirmandoBorrar = signal<number | null>(null);
   private enlacesBlob: string[] = [];
@@ -330,6 +340,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
         );
       }
       this.aviso.set(`Tasa de ${c.entidad.nombre} aprobada y publicada.`);
+      this.cerrarComparacionDe(t.id);
     });
   }
 
@@ -337,6 +348,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
     await this.trabajar(c.clave, async () => {
       this.reemplazar(await this.admin.cambiarEstado(t.id, 'rechazada'));
       this.aviso.set(`Tasa de ${c.entidad.nombre} rechazada.`);
+      this.cerrarComparacionDe(t.id);
     });
   }
 
@@ -600,6 +612,8 @@ export class TasasAdmin implements OnInit, OnDestroy {
           : 'sin vigencia';
       this.comparando.set({
         titulo: `${c.entidad.nombre} · ${this.nombreProducto(c.producto)}`,
+        clave: c.clave,
+        tasa: t.id,
         izquierda:
           actual && izq
             ? {
@@ -617,7 +631,13 @@ export class TasasAdmin implements OnInit, OnDestroy {
 
   protected cerrarComparacion(): void {
     this.comparando.set(null);
+    this.editando.set(null);
     this.soltarBlobs();
+  }
+
+  /** Aprobada o rechazada la tasa que se comparaba, ya no hay qué comparar. */
+  private cerrarComparacionDe(id: number): void {
+    if (this.comparando()?.tasa === id) this.cerrarComparacion();
   }
 
   private async enlaceBlob(id: string): Promise<SafeResourceUrl> {

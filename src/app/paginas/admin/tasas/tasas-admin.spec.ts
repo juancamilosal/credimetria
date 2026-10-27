@@ -250,6 +250,29 @@ describe('TasasAdmin', () => {
     expect(html.querySelector('.comparar')).toBeNull();
   });
 
+  it('aprueba desde la comparación sin cerrarla antes', async () => {
+    await crear();
+    admin.aprobar.and.resolveTo({ ...porAprobar, estado: 'publicada' });
+    boton(html.querySelector('.banco')!, 'Comparar PDF').click();
+    await esperar();
+    const tasa = html.querySelector(
+      '.comparar [aria-label="Tasa por aprobar"]',
+    )!;
+    expect(tasa.textContent).toContain('1,77 % a 2,12 % M.V.');
+    boton(tasa, 'Editar').click();
+    fixture.detectChanges();
+    expect(tasa.querySelector('form')).not.toBeNull();
+    // El formulario no se repite detrás, en la tarjeta.
+    expect(html.querySelectorAll('form.formulario').length).toBe(1);
+    boton(tasa, 'Cancelar').click();
+    fixture.detectChanges();
+    boton(tasa, 'Aprobar').click();
+    await esperar();
+    expect(admin.aprobar.calls.mostRecent().args[0].id).toBe(2);
+    expect(html.querySelector('.comparar')).toBeNull();
+    expect(html.textContent).toContain('aprobada y publicada');
+  });
+
   it('carga un PDF nuevo y abre la tasa unida a él para escribir los valores', async () => {
     await crear();
     const subido = documento({

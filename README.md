@@ -127,7 +127,11 @@ Directus. No está en el menú: se entra por `/admin`.
     publicada (mín. ▲ +1,05 pts) y los botones **Aprobar**, **Rechazar**,
     **Editar** (con "Calcular E.A." y el PDF de donde sale) y **Comparar
     PDF**, que muestra el PDF actual y el nuevo lado a lado (se bajan con
-    el token y se ven como blob dentro de la página). **Cargar PDF nuevo**
+    el token y se ven como blob dentro de la página; si aún no hay PDF
+    actual, el nuevo ocupa todo el ancho). Al lado de los PDF va la misma
+    tasa por aprobar con **Aprobar**, **Rechazar** y **Editar**, para
+    revisarla y aprobarla sin cerrar la comparación (al aprobar o rechazar,
+    se cierra sola). **Cargar PDF nuevo**
     sube el PDF con su vigencia (si su huella SHA-256 ya existe para esa
     fuente o para otro banco, avisa; si es el mismo PDF de otro producto del
     banco, como Davivienda con libre inversión y libranza, lo reutiliza sin
