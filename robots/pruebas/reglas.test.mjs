@@ -125,6 +125,7 @@ describe("reglas por banco", () => {
  */
 const LIBRANZA = {
   bbva: ["bbva-libranza", 1.03, 13.14, null, null, "2026-08-04"],
+  bancien: ["bancien", 1.5, 19.56, 2.1176, 28.59, "2026-10-01"],
   "banco-pichincha": [
     "banco-pichincha",
     1.26,

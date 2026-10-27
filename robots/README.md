@@ -99,6 +99,7 @@ Davivienda 22,71 % E.A.
 | Finandina       | El mismo y su página de tasas vigentes      | Fila "Libranza Desde … NMV": 21,27 % E.A.                                   |
 | Bancoomeva      | La misma cartelera                          | Clientes, fila "Libre Inversion" de LIBRANZA: 23,58 % E.A.                  |
 | Pichincha       | "Tasas de colocación y captación" (dirección Liferay que cambia): se busca en `/web/corporativo/tasas-y-tarifas` | "Líneas de Consumo · Libranza", Nuevo y Compra de cartera: 16,21 % a 28,59 % E.A.; vigencia propia de libranza (1 jul 2026) |
+| Bancien (Ban100) | "Tarifario tasas B100": se busca en `/tasas-y-tarifas` | Página "Crédito de Libranza", Tasa de Interés: 1,50 % a 2,1176 % M.V. (19,56 % a 28,59 % E.A.) |
 | GNB Sudameris   | Dirección fija `/ws/documentos?d=TASAS` (todos los productos) | "CRÉDITO DE LIBRANZA* 24,60 % E.A.": **solo publica la máxima** (`soloMaxima`, sin desde); la página dice "hasta 24,60 %, solo publica la máxima" |
 | Caja Social     | **Aparte**: `…/credito-consumo/Tasas-Libranzas.pdf` (dirección fija) | Filas "Libranza" y "Libranza Compra de Cartera": 16,65 % a 28,05 % E.A.  |
 
@@ -108,7 +109,7 @@ Davivienda 22,71 % E.A.
   promedio. **Banco de Occidente** tampoco la publica (en su PDF y su
   página solo está el seguro "Cuota Protegida Libranza"): también
   `solo_promedio`. **Banco Unión** tampoco la publica (sus documentos piden
-  captcha y no la traen): `solo_promedio`. Falta: Bancien.
+  captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que reportan libranza.
 
 - **Bancos sin PDF** (regla con `pagina: true`, hoy Banco Popular): el robot
   lee la tabla del HTML de su página (sin navegador). Como la página cambia

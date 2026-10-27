@@ -785,6 +785,46 @@ Object.assign(REGLAS, {
     },
   },
 
+  "bancien:libranza": {
+    // Bancien S.A. (marca Ban100). "Tarifario tasas B100" (8 páginas),
+    // embebido en /tasas-y-tarifas (el nombre del archivo puede cambiar: se
+    // busca ahí). Página "Crédito de Libranza", recuadro "Tasa de Interés":
+    // Desde … M.V.* / … E.A.* y Hasta … M.V.* / … E.A.*; "*Tasa vigente a
+    // partir del 01 de octubre de 2026".
+    enlace: /[^"'\s<>()]*Tarifario[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
+    leer(texto) {
+      const t = plano(texto);
+      const bloque = despuesDe(
+        t,
+        /Crédito de Libranza/,
+        'la página "Crédito de Libranza"',
+      ).split(/Microcrédito/)[0];
+      const mv = exigir(
+        bloque,
+        /([\d.,]+)% M\.V\.\* ([\d.,]+)% M\.V\.\*/,
+        'las tasas "Desde … M.V. / Hasta … M.V." de libranza',
+      );
+      const ea = exigir(
+        bloque,
+        /([\d.,]+)% E\.A\.\* ([\d.,]+)% E\.A\.\*/,
+        'las tasas "Desde … E.A. / Hasta … E.A." de libranza',
+      );
+      const vig = exigir(
+        bloque,
+        /Tasa vigente a partir del (\d{1,2} de \p{L}+ de \d{4})/u,
+        'la fecha "Tasa vigente a partir del …"',
+      );
+      return {
+        mvDesde: numero(mv[1]),
+        mvHasta: numero(mv[2]),
+        eaDesde: numero(ea[1]),
+        eaHasta: numero(ea[2]),
+        vigencia: fecha(vig[1]),
+        frase: `Crédito de libranza: desde ${mv[1]}% M.V. (${ea[1]}% E.A.) hasta ${mv[2]}% M.V. (${ea[2]}% E.A.)`,
+      };
+    },
+  },
+
   "gnb-sudameris:libranza": {
     // PDF fijo /ws/documentos?d=TASAS (3 páginas, todos los productos):
     // "CRÉDITO DE LIBRANZA* 24,60% E.A. 1,85% M.V." con la nota "*Se publica
