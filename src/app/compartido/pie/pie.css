@@ -15,8 +15,20 @@ footer {
   color: var(--cm-gris);
 }
 
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.marca app-logo {
+  --tamano-nombre: 18px;
+}
+
 nav {
   display: flex;
+  align-items: center;
   gap: 20px;
   flex-wrap: wrap;
 }

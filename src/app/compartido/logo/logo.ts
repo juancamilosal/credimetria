@@ -1,44 +1,53 @@
 import { Component, input } from '@angular/core';
+import { ICONO } from './trazos';
 
-/** Marca de Credimetría: cuadrado azul con barras blancas que crecen. */
+/**
+ * Marca de Credimetría: la C de medidor con dos barras y el nombre en dos
+ * colores ("Credi" azul, "metría" verde). Los colores salen de
+ * `--cm-logo-azul` y `--cm-logo-verde`, que cambian en modo oscuro.
+ */
 @Component({
   selector: 'app-logo',
   template: `
     <svg
-      [attr.width]="tamano()"
       [attr.height]="tamano()"
-      viewBox="0 0 34 34"
+      [attr.width]="(tamano() * icono.ancho) / icono.alto"
+      [attr.viewBox]="'0 0 ' + icono.ancho + ' ' + icono.alto"
       aria-hidden="true"
     >
-      <rect
-        x="1"
-        y="1"
-        width="32"
-        height="32"
-        rx="8"
-        fill="var(--cm-marca-700)"
+      <path
+        fill="var(--cm-logo-azul)"
+        fill-rule="evenodd"
+        [attr.d]="icono.azul"
       />
       <path
-        d="M7 24h20M9 24v-4M13 24v-7M17 24v-10M21 24v-6M25 24v-3"
-        stroke="#FFFFFF"
-        stroke-width="2.2"
-        stroke-linecap="round"
-        fill="none"
+        fill="var(--cm-logo-verde)"
+        fill-rule="evenodd"
+        [attr.d]="icono.verde"
       />
     </svg>
-    <span>Credimetría</span>
+    <span class="nombre">Credi<span class="verde">metría</span></span>
   `,
   styles: `
     :host {
       display: inline-flex;
       align-items: center;
       gap: 10px;
+    }
+    .nombre {
+      color: var(--cm-logo-azul);
       font-weight: 800;
-      font-size: 21px;
-      letter-spacing: -0.02em;
+      font-size: var(--tamano-nombre, 22px);
+      letter-spacing: -0.035em;
+      line-height: 1;
+    }
+    .verde {
+      color: var(--cm-logo-verde);
     }
   `,
 })
 export class Logo {
+  /** Alto del ícono en píxeles. */
   readonly tamano = input(34);
+  protected readonly icono = ICONO;
 }

@@ -41,6 +41,9 @@
 
   --cm-r-campo: 10px;
   --cm-r-boton: 10px;
+  /* Colores del logo (los de la imagen original) */
+  --cm-logo-azul: #0f3252;
+  --cm-logo-verde: #187d55;
   --cm-r-tarjeta: 14px;
   --cm-r-bloque: 18px;
   --cm-ancho: 1200px;
@@ -48,6 +51,8 @@
 }
 
 :root[data-theme="dark"] {
+  --cm-logo-azul: #ffffff;
+  --cm-logo-verde: #3fc38a;
   --cm-marca-700: #2f7fd0;
   --cm-marca-600: #7db5ee;
   --cm-marca-100: #14263b;

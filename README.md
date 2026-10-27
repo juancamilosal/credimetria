@@ -250,6 +250,17 @@ colores a mano. La paleta es sobria a propósito:
   entre la tasa anunciada y la cobrada.
 - Fuentes: Plus Jakarta Sans para el texto e IBM Plex Mono para las cifras.
 
+## Logo
+
+La marca es una C de medidor con dos barras (azul `#0f3252` y verde
+`#187d55`) y el nombre en dos colores: "Credi" azul y "metría" verde, en
+Plus Jakarta Sans 800. En la página la dibuja `compartido/logo/` en SVG (los
+trazos están en `logo/trazos.ts`) con `--cm-logo-azul` y `--cm-logo-verde`,
+que en modo oscuro pasan a blanco y verde claro; sale en el encabezado y en el
+pie. `public/favicon.svg` y `favicon.ico` son el ícono solo. Las versiones para
+otros usos (horizontal, dos colores, con lema, vertical, analítica, fondo
+oscuro e ícono en PNG transparente y SVG) están en `src/assets/marca/`.
+
 ## Fotos
 
 Las fotos de la marca (generadas con Gemini) tienen los originales en

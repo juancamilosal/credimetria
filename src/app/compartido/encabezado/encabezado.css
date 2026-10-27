@@ -10,6 +10,7 @@
 .marca {
   color: var(--cm-tinta);
   text-decoration: none;
+  --tamano-nombre: 25px;
 }
 
 nav {

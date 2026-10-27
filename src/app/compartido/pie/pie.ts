@@ -1,10 +1,11 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TasasService } from '../../core/servicios/tasas.service';
+import { Logo } from '../logo/logo';
 
 @Component({
   selector: 'app-pie',
-  imports: [RouterLink],
+  imports: [RouterLink, Logo],
   templateUrl: './pie.html',
   styleUrl: './pie.css',
 })
