@@ -587,12 +587,25 @@ export class TasasAdmin implements OnInit, OnDestroy {
           this.vigencia || null,
         );
         this.documentos.update((lista) => [documento, ...lista]);
-        const tasa = await this.admin.crearDesdeDocumento(fuente, documento);
-        this.tasas.update((lista) => [tasa, ...lista]);
+        // No se borra lo que ya está escrito: si hay una tasa por aprobar,
+        // el archivo se le une; si no, la nueva copia la publicada.
+        const pendiente = c.porAprobar[0];
+        const tasa = pendiente
+          ? await this.admin.unirDocumento(pendiente, documento)
+          : await this.admin.crearDesdeDocumento(
+              fuente,
+              documento,
+              c.publicada,
+            );
+        if (pendiente) this.reemplazar(tasa);
+        else this.tasas.update((lista) => [tasa, ...lista]);
         this.cargandoEn.set(null);
         this.editar(tasa);
+        const cargado = `${que[0].toUpperCase() + que.slice(1)} de ${c.entidad.nombre} cargado.`;
         this.aviso.set(
-          `${que[0].toUpperCase() + que.slice(1)} de ${c.entidad.nombre} cargado. Escribe las tasas que trae y apruébalas.`,
+          pendiente || c.publicada
+            ? `${cargado} Las tasas quedaron como estaban: revisa que el archivo diga lo mismo y apruébalas.`
+            : `${cargado} Escribe las tasas que trae y apruébalas.`,
         );
       } catch (error) {
         if (!(error instanceof DocumentoRepetido)) throw error;

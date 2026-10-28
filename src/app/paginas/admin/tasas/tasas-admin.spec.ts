@@ -125,6 +125,7 @@ describe('TasasAdmin', () => {
       'guardar',
       'aprobar',
       'crearDesdeDocumento',
+      'unirDocumento',
       'eliminar',
       'restaurar',
     ]);
@@ -297,45 +298,66 @@ describe('TasasAdmin', () => {
     expect(html.textContent).toContain('aprobada y publicada');
   });
 
-  it('carga un PDF nuevo y abre la tasa unida a él para escribir los valores', async () => {
-    await crear();
-    const subido = documento({
-      id: 12,
-      estado: 'nuevo',
-      archivo: { id: 'f12', filename_download: 'nov.pdf', filesize: 1 },
-    });
-    docs.cargar.and.resolveTo(subido);
-    admin.crearDesdeDocumento.and.resolveTo(
-      tasa({
-        id: 3,
-        estado: 'por_revisar',
-        valor_desde: null,
-        valor_hasta: null,
-        ea_desde: null,
-        ea_hasta: null,
-        documento: {
-          id: 12,
-          estado: 'nuevo',
-          vigente_desde: null,
-          archivo: { id: 'f12', filename_download: 'nov.pdf' },
-        },
-      }),
-    );
-    const bbva = html.querySelector('.banco')!;
+  /** Elige y carga un PDF en la primera tarjeta. */
+  async function cargarEn(bbva: Element, pdf: File) {
     boton(bbva, 'Cargar PDF nuevo').click();
     fixture.detectChanges();
     const campo = bbva.querySelector<HTMLInputElement>(
       '.carga input[type="file"]',
     )!;
-    const pdf = new File(['%PDF'], 'nov.pdf', { type: 'application/pdf' });
     Object.defineProperty(campo, 'files', { value: [pdf] });
     campo.dispatchEvent(new Event('change'));
     bbva.querySelector<HTMLFormElement>('.carga')!.requestSubmit();
     await esperar();
+  }
+
+  const subido = documento({
+    id: 12,
+    estado: 'nuevo',
+    vigente_desde: null,
+    archivo: { id: 'f12', filename_download: 'nov.pdf', filesize: 1 },
+  });
+  const docSubido = {
+    id: 12,
+    estado: 'nuevo' as const,
+    vigente_desde: null,
+    archivo: { id: 'f12', filename_download: 'nov.pdf' },
+  };
+
+  it('carga un PDF y lo une a la tasa por aprobar sin borrar sus valores', async () => {
+    await crear();
+    docs.cargar.and.resolveTo(subido);
+    admin.unirDocumento.and.resolveTo({ ...porAprobar, documento: docSubido });
+    const bbva = html.querySelector('.banco')!;
+    const pdf = new File(['%PDF'], 'nov.pdf', { type: 'application/pdf' });
+    await cargarEn(bbva, pdf);
     expect(docs.cargar).toHaveBeenCalledWith(2, pdf, null);
-    expect(admin.crearDesdeDocumento).toHaveBeenCalledWith(fuentes[1], subido);
+    expect(admin.unirDocumento).toHaveBeenCalledWith(porAprobar, subido);
+    expect(admin.crearDesdeDocumento).not.toHaveBeenCalled();
+    // El formulario abre con los valores que ya tenía y el PDF nuevo.
     expect(bbva.querySelector<HTMLSelectElement>('#tfDocumento')!.value).toBe(
       '12',
+    );
+    expect(bbva.querySelector<HTMLInputElement>('#tfDesde')!.value).toBe(
+      '1,77',
+    );
+    expect(html.textContent).toContain('Las tasas quedaron como estaban');
+  });
+
+  it('sin tasa por aprobar, la nueva copia los valores de la publicada', async () => {
+    await crearCon([publicada]);
+    docs.cargar.and.resolveTo(subido);
+    admin.crearDesdeDocumento.and.resolveTo(
+      tasa({ id: 3, estado: 'por_revisar', documento: docSubido }),
+    );
+    await cargarEn(
+      html.querySelector('.banco')!,
+      new File(['%PDF'], 'nov.pdf', { type: 'application/pdf' }),
+    );
+    expect(admin.crearDesdeDocumento).toHaveBeenCalledWith(
+      fuentes[1],
+      subido,
+      publicada,
     );
   });
 
@@ -441,7 +463,11 @@ describe('TasasAdmin', () => {
     davivienda.querySelector<HTMLFormElement>('.carga')!.requestSubmit();
     await esperar();
     expect(docs.cargar).toHaveBeenCalledWith(5, imagen, null);
-    expect(admin.crearDesdeDocumento).toHaveBeenCalledWith(pagina, subido);
+    expect(admin.crearDesdeDocumento).toHaveBeenCalledWith(
+      pagina,
+      subido,
+      null,
+    );
   });
 
   it('deja al final los bancos sin nada por aprobar', async () => {

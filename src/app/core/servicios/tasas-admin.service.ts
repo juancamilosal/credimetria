@@ -142,12 +142,14 @@ export class TasasAdminService {
   }
 
   /**
-   * Tasa por aprobar unida a un PDF (o pantallazo) recién cargado; los
-   * valores se llenan después. El enlace del sitio lleva a la fuente.
+   * Tasa por aprobar unida a un PDF (o pantallazo) recién cargado. Si hay
+   * una tasa publicada (`base`), copia sus valores para no escribirlos de
+   * nuevo; si no, se llenan después. El enlace del sitio lleva a la fuente.
    */
   crearDesdeDocumento(
     fuente: FuenteAdmin,
     documento: DocumentoPdf,
+    base: TasaAdmin | null = null,
   ): Promise<TasaAdmin> {
     return this.escribir('POST', '/items/tasas_publicadas', {
       fuente: fuente.id,
@@ -156,9 +158,35 @@ export class TasasAdminService {
       documento: documento.id,
       enlace: fuente.url,
       enlace_es_pagina: fuente.tipo === 'pagina',
-      vigente_desde: documento.vigente_desde,
-      unidad: 'MV',
+      vigente_desde: documento.vigente_desde ?? base?.vigente_desde ?? null,
+      unidad: base?.unidad ?? 'MV',
       estado: 'por_revisar',
+      ...(base && {
+        valor_desde: base.valor_desde,
+        valor_hasta: base.valor_hasta,
+        ea_desde: base.ea_desde,
+        ea_hasta: base.ea_hasta,
+        hasta_origen: base.hasta_origen,
+        tipo_tasa: base.tipo_tasa,
+        sistema_amortizacion: base.sistema_amortizacion,
+        frase: base.frase,
+        notas:
+          'Valores copiados de la tasa publicada al cargar el archivo: revisa que sigan iguales.',
+      }),
+    });
+  }
+
+  /**
+   * Une un PDF (o pantallazo) recién cargado a la tasa que ya espera
+   * aprobación, sin tocar sus valores. La vigencia cambia solo si se escribió
+   * al cargar.
+   */
+  unirDocumento(tasa: TasaAdmin, documento: DocumentoPdf): Promise<TasaAdmin> {
+    return this.escribir('PATCH', `/items/tasas_publicadas/${tasa.id}`, {
+      documento: documento.id,
+      ...(documento.vigente_desde && {
+        vigente_desde: documento.vigente_desde,
+      }),
     });
   }
 
