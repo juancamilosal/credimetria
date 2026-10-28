@@ -221,14 +221,21 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
 3. **Variables:** `DIRECTUS_TOKEN` (del Robot), `DIRECTUS_URL`
    (opcional), `SMTP_HOST`, `SMTP_PUERTO`, `SMTP_USUARIO`, `SMTP_CLAVE`,
    `AVISO_PARA` y `AVISO_DE` (opcional).
-4. **Tareas programadas** (hora de Colombia):
-   - `node pdf-bancos.mjs` todos los días a las 7:13 (`13 7 * * *`).
-   - `node promedio-sfc.mjs` los martes a las 7:23 (`23 7 * * 2`).
-   - Vivienda, **una tarea por producto** (como libranza: cada una con sus
-     15 minutos), los martes en Coolify (UTC): `--producto vivienda-vis`
-     (`3 13 * * 2`), `--producto vivienda-no-vis` (`23 13 * * 2`),
-     `--producto leasing-vis` (`43 13 * * 2`) y `--producto leasing-no-vis`
-     (`3 14 * * 2`), 20 minutos aparte después de los de consumo.
+4. **Tareas programadas**, de madrugada para que al empezar el día todo
+   esté al día (Coolify usa UTC: Colombia + 5 horas), 20 minutos aparte
+   para que nunca corran dos a la vez y cada una con timeout de 900:
+
+   | Tarea                                                       | Hora Colombia | Cron (UTC)   |
+   | ----------------------------------------------------------- | ------------- | ------------ |
+   | `node pdf-bancos.mjs` (todos los días)                      | 3:13 a. m.    | `13 8 * * *` |
+   | `node promedio-sfc.mjs --producto libre-inversion` (martes) | 3:23 a. m.    | `23 8 * * 2` |
+   | `node promedio-sfc.mjs --producto libranza` (martes)        | 3:43 a. m.    | `43 8 * * 2` |
+   | `node promedio-sfc.mjs --producto vivienda-vis` (martes)    | 4:03 a. m.    | `3 9 * * 2`  |
+   | `node promedio-sfc.mjs --producto vivienda-no-vis` (martes) | 4:23 a. m.    | `23 9 * * 2` |
+   | `node promedio-sfc.mjs --producto leasing-vis` (martes)     | 4:43 a. m.    | `43 9 * * 2` |
+   | `node promedio-sfc.mjs --producto leasing-no-vis` (martes)  | 5:03 a. m.    | `3 10 * * 2` |
+
+   Una tarea por producto (como libranza): cada una con sus 15 minutos.
 
 ## Probar en local
 
