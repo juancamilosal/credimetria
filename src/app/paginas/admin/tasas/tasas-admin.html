@@ -239,7 +239,9 @@
                 >
                   <div class="campo">
                     <label [for]="'pdf-' + c.clave">{{
-                      c.pdf ? "PDF nuevo" : "Pantallazo de la página"
+                      c.pdf
+                        ? "PDF nuevo"
+                        : "Página guardada como PDF (o pantallazo)"
                     }}</label>
                     <input
                       [id]="'pdf-' + c.clave"
@@ -247,7 +249,7 @@
                       [accept]="
                         c.pdf
                           ? 'application/pdf,.pdf'
-                          : 'image/png,image/jpeg,image/webp'
+                          : 'application/pdf,.pdf,image/png,image/jpeg,image/webp'
                       "
                       (change)="elegirArchivo($event)"
                     />
@@ -283,12 +285,15 @@
                   class="btn btn-claro cargar"
                   (click)="abrirCarga(c)"
                 >
-                  {{ c.pdf ? "Cargar PDF nuevo" : "Cargar pantallazo nuevo" }}
+                  {{
+                    c.pdf ? "Cargar PDF nuevo" : "Cargar página o pantallazo"
+                  }}
                 </button>
                 @if (!c.pdf) {
                   <p class="nota">
-                    No publica PDF: carga un pantallazo de su página con la tasa
-                    y la fecha.
+                    No publica PDF: guarda su página como PDF (Imprimir →
+                    Guardar como PDF) y cárgala; así las tasas se leen solas. Un
+                    pantallazo también sirve, pero las tasas se escriben a mano.
                   </p>
                 }
               }

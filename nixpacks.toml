@@ -1,0 +1,5 @@
+# Coolify construye la página con Nixpacks. `pdftotext` (poppler-utils) lee
+# los PDF que se cargan a mano en /admin/tasas (servidor/leer-pdf.mjs), con
+# las mismas reglas del robot.
+[phases.setup]
+aptPkgs = ["...", "poppler-utils"]

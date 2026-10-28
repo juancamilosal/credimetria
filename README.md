@@ -147,8 +147,18 @@ Directus. No está en el menú: se entra por `/admin`.
     con los valores de la publicada (o vacía si no hay), y abre el
     formulario para revisarla.
     Si el banco no publica PDF (fuente de tipo página, como Lulo o
-    Popular), el botón es **Cargar pantallazo nuevo** y sube una imagen de
-    su página; la tasa creada enlaza a la página en el sitio.
+    Popular), el botón es **Cargar página o pantallazo**: mejor la página
+    guardada como PDF (Imprimir → Guardar como PDF) que una imagen; la tasa
+    creada enlaza a la página en el sitio.
+  - **Lectura al cargar** (`servidor/leer-pdf.mjs`, `POST /api/admin/leer`):
+    un PDF cargado a mano (Davivienda, Falabella, la página de Lulo) se lee
+    al momento en el servidor de la página con **las mismas reglas del robot**
+    (`robots/reglas.mjs` y `pdftotext -layout`). El formulario se abre lleno
+    (desde, hasta o usura, vigencia y frase) y el PDF queda con su copia
+    resaltada en verde; no se guarda nada hasta revisar y tocar Guardar. Si
+    la regla no puede leerlo, lo dice y se escriben a mano. Solo para
+    administradores: el servidor revisa con Directus que el token tenga
+    acceso de administrador. Un pantallazo (imagen) no se lee.
   - Los bancos con algo por aprobar salen primero; al final, los que no
     tienen nada (los que toca cargar a mano).
   - La **tasa publicada** se puede corregir si se aprobó por error:
@@ -369,6 +379,9 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   (`SOURCE_COMMIT` de Coolify), hace cuánto leyó Directus, cuántas tasas hay
   por producto y si pudo leer los bancos "solo promedio" (con el error de
   Directus si no).
+- **`pdftotext` en el servidor** (paquete `poppler-utils`, en
+  `nixpacks.toml`): lo usa la lectura de los PDF cargados a mano. Sin él,
+  cargar funciona igual pero las tasas se escriben a mano.
 - **Variables del servidor** (Coolify): `DIRECTUS_TOKEN` (token del "Lector
   web", obligatorio) y `DIRECTUS_URL` (opcional). Sin el token, la página
   sale sin tasas.

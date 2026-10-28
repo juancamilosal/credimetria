@@ -19,6 +19,7 @@ import {
 import { Producto } from '../../../core/modelos/tasa';
 import {
   CambiosTasa,
+  LecturaPdf,
   SistemaTasa,
   TasaAdmin,
   TipoTasa,
@@ -380,6 +381,50 @@ export class TasasAdmin implements OnInit, OnDestroy {
     this.editando.set(t.id);
   }
 
+  /** Pone en el formulario lo que leyó el servidor del PDF cargado. */
+  private llenarConLectura(t: NonNullable<LecturaPdf['tasa']>): void {
+    this.form.patchValue({
+      unidad: t.unidad,
+      valor_desde: escribirDecimal(t.valor_desde),
+      valor_hasta: escribirDecimal(t.valor_hasta),
+      ea_desde: escribirDecimal(t.ea_desde),
+      ea_hasta: escribirDecimal(t.ea_hasta),
+      hasta_origen: t.hasta_origen,
+      ...(t.vigente_desde && { vigente_desde: t.vigente_desde }),
+      ...(t.frase && { frase: t.frase }),
+      notas: `Leída del PDF cargado a mano.${t.usura_mes ? ` El banco no publica máxima: hasta = usura de ${t.usura_mes}.` : ''}`,
+    });
+  }
+
+  /** Guarda la copia con la tasa resaltada y la une al PDF cargado. */
+  private async unirResaltado(
+    documento: DocumentoPdf,
+    lectura: LecturaPdf,
+  ): Promise<void> {
+    try {
+      const cambiado = await this.docs.guardarResaltado(
+        documento,
+        lectura.resaltado!,
+      );
+      const resaltado = cambiado.archivo_resaltado ?? null;
+      this.documentos.update((lista) =>
+        lista.map((d) => (d.id === cambiado.id ? cambiado : d)),
+      );
+      this.tasas.update((lista) =>
+        lista.map((x) =>
+          x.documento?.id === cambiado.id
+            ? {
+                ...x,
+                documento: { ...x.documento, archivo_resaltado: resaltado },
+              }
+            : x,
+        ),
+      );
+    } catch {
+      // Sin copia resaltada se ve el original.
+    }
+  }
+
   /** Con la tasa mensual escrita, llena la E.A. */
   protected calcularEa(): void {
     const { unidad, valor_desde, valor_hasta } = this.form.getRawValue();
@@ -573,12 +618,16 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected async cargarPdf(c: TarjetaTasa): Promise<void> {
     const fuente = c.carga;
     if (!fuente) return;
-    const que = fuente.tipo === 'pdf' ? 'PDF' : 'pantallazo';
     if (!this.archivo) {
-      this.error.set(`Elige el ${que} que quieres cargar.`);
+      this.error.set(
+        `Elige el ${fuente.tipo === 'pdf' ? 'PDF' : 'archivo'} que quieres cargar.`,
+      );
       return;
     }
     const archivo = this.archivo;
+    const esPdf =
+      archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name);
+    const que = esPdf ? 'PDF' : 'pantallazo';
     await this.trabajar(c.clave, async () => {
       try {
         const documento = await this.docs.cargar(
@@ -602,10 +651,25 @@ export class TasasAdmin implements OnInit, OnDestroy {
         this.cargandoEn.set(null);
         this.editar(tasa);
         const cargado = `${que[0].toUpperCase() + que.slice(1)} de ${c.entidad.nombre} cargado.`;
-        this.aviso.set(
+        // Un PDF se lee al momento con las reglas del robot y llena el
+        // formulario (no se guarda hasta que se revise).
+        const lectura = esPdf
+          ? await this.admin
+              .leerPdf(c.entidad.codigo, c.producto, archivo)
+              .catch(() => null)
+          : null;
+        if (lectura?.tasa) this.llenarConLectura(lectura.tasa);
+        if (lectura?.resaltado) await this.unirResaltado(documento, lectura);
+        const sigue =
           pendiente || c.publicada
-            ? `${cargado} Las tasas quedaron como estaban: revisa que el archivo diga lo mismo y apruébalas.`
-            : `${cargado} Escribe las tasas que trae y apruébalas.`,
+            ? 'Las tasas quedaron como estaban: revisa que el archivo diga lo mismo y apruébalas.'
+            : 'Escribe las tasas que trae y apruébalas.';
+        this.aviso.set(
+          lectura?.tasa
+            ? `${cargado} Leí sus tasas y llené el formulario${lectura.problemas.length ? `, pero revisa: ${lectura.problemas.join(' ')}` : ''}. Revisa, guarda y apruébalas.`
+            : lectura
+              ? `${cargado} No pude leer sus tasas (${lectura.problemas.join(' ')}). ${sigue}`
+              : `${cargado} ${sigue}`,
         );
       } catch (error) {
         if (!(error instanceof DocumentoRepetido)) throw error;

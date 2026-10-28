@@ -146,6 +146,35 @@ export class DocumentosAdminService {
     });
   }
 
+  /** Sube la copia con la tasa resaltada (base64) y la une al documento. */
+  async guardarResaltado(
+    documento: DocumentoPdf,
+    base64: string,
+  ): Promise<DocumentoPdf> {
+    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    const nombre = (documento.archivo.filename_download ?? 'tasas.pdf').replace(
+      /\.pdf$/i,
+      '',
+    );
+    const datos = new FormData();
+    datos.append('title', `${nombre} · resaltado`);
+    datos.append(
+      'file',
+      new Blob([bytes], { type: 'application/pdf' }),
+      `${nombre}-resaltado.pdf`,
+    );
+    const subido = await this.sesion.pedir<{ id: string }>(
+      'POST',
+      '/files',
+      datos,
+    );
+    return this.sesion.pedir<DocumentoPdf>(
+      'PATCH',
+      `/items/documentos/${documento.id}?fields=${CAMPOS_DOCUMENTO}`,
+      { archivo_resaltado: subido.id },
+    );
+  }
+
   /** Corrige la vigencia de un PDF cargado. */
   cambiarVigencia(
     id: number,

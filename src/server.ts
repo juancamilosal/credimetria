@@ -6,6 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { rutasLeerPdf } from '../servidor/leer-pdf.mjs';
 import { rutasTasas } from '../servidor/tasas.mjs';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
@@ -28,6 +29,12 @@ const angularApp = new AngularNodeAppEngine({
  * ve Directus ni el token.
  */
 rutasTasas(app);
+
+/**
+ * /api/admin/leer: lee al momento el PDF que un administrador carga a mano en
+ * /admin/tasas, con las mismas reglas del robot (necesita `pdftotext`).
+ */
+rutasLeerPdf(app);
 
 /**
  * Serve static files from /browser
