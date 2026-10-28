@@ -1224,6 +1224,10 @@ function finandinaLibranza(t, vigencia) {
 // UVR, remodelación ni programas especiales). No les aplica la usura de
 // consumo: si el banco no publica el "hasta", queda vacío.
 
+/** AAAA-MM-DD de hoy en Colombia. */
+export const hoyEnColombia = () =>
+  new Date().toLocaleDateString("sv-SE", { timeZone: "America/Bogota" });
+
 /** "vivienda-no-vis" → { leasing: false, noVis: true } */
 const tipoVivienda = (producto) => ({
   leasing: producto.startsWith("leasing"),
@@ -1433,6 +1437,47 @@ function viviendaAvVillas(producto) {
   };
 }
 
+/**
+ * Bancolombia: no publica vivienda en PDF; está en su página "Crédito
+ * hipotecario para comprar vivienda", tabla "Tasas para vivienda en pesos"
+ * (VIS y NO VIS, "Tasa política … DESDE", E.A. y M.V.; sin leasing). La
+ * página se arma con JavaScript: se lee con el navegador y la prueba es un
+ * pantallazo de la tabla. No dice desde cuándo rige.
+ */
+function viviendaBancolombia(producto) {
+  const { noVis } = tipoVivienda(producto);
+  return {
+    pagina: true,
+    navegador: true,
+    pantallazo: "Tasas para vivienda en pesos",
+    ancla: /Tasas para vivienda en pesos/,
+    leer(texto) {
+      const t = texto.replace(/\s+/g, " ");
+      const tabla = despuesDe(
+        t,
+        /Tasas para vivienda en pesos/,
+        'la tabla "Tasas para vivienda en pesos"',
+      ).slice(0, 1500);
+      const m = exigir(
+        tabla,
+        noVis
+          ? /\(NO VIS\) ([\d.,]+)% ([\d.,]+)%/
+          : /\(VIS\) ([\d.,]+)% ([\d.,]+)%/,
+        `la fila ${noVis ? "NO VIS" : "VIS"} de "Tasas para vivienda en pesos"`,
+      );
+      return {
+        eaDesde: numero(m[1]),
+        mvDesde: numero(m[2]),
+        eaHasta: null,
+        mvHasta: null,
+        // La página no dice desde cuándo rige: la fecha en que se leyó.
+        vigencia: hoyEnColombia(),
+        frase: `Tasas para vivienda en pesos · ${noVis ? "NO VIS" : "VIS"}: desde ${m[1]}% E.A. (${m[2]}% M.V.); la página no dice desde cuándo rige (fecha de lectura)`,
+      };
+    },
+  };
+}
+
 for (const producto of [
   "vivienda-vis",
   "vivienda-no-vis",
@@ -1441,8 +1486,10 @@ for (const producto of [
 ]) {
   REGLAS[`davivienda:${producto}`] = viviendaDavivienda(producto);
   REGLAS[`davibank:${producto}`] = viviendaDavibank(producto);
-  if (!producto.startsWith("leasing"))
+  if (!producto.startsWith("leasing")) {
     REGLAS[`banco-agrario:${producto}`] = viviendaAgrario(producto);
+    REGLAS[`bancolombia:${producto}`] = viviendaBancolombia(producto);
+  }
   if (producto !== "leasing-vis")
     REGLAS[`av-villas:${producto}`] = viviendaAvVillas(producto);
 }

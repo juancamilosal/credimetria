@@ -7,6 +7,7 @@ import { describe, it } from "node:test";
 import { textoHtml } from "../comun/pdf.mjs";
 import {
   fecha,
+  hoyEnColombia,
   masReciente,
   mensual,
   mesVencido,
@@ -535,6 +536,28 @@ const VIVIENDA = [
     mensual(16.25),
     16.25,
     "2026-10-01",
+  ],
+  // Página web (no PDF): no dice desde cuándo rige, la vigencia es el día en
+  // que se lee.
+  [
+    "bancolombia",
+    "vivienda-vis",
+    "bancolombia-vivienda",
+    1.127,
+    14.4,
+    null,
+    null,
+    hoyEnColombia(),
+  ],
+  [
+    "bancolombia",
+    "vivienda-no-vis",
+    "bancolombia-vivienda",
+    1.135,
+    14.5,
+    null,
+    null,
+    hoyEnColombia(),
   ],
 ];
 
