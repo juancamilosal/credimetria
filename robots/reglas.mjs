@@ -1781,6 +1781,45 @@ const serfinanzaVivienda = {
 };
 
 /**
+ * Banco Popular: en la misma página de tasas, la tabla "Casayá" trae
+ * "Crédito Hipotecario" y "Leasing Habitacional" con una tasa E.A. por plazo
+ * ("Tasa hasta 15 años" y "Tasa hasta 20 años"). Desde = la más baja y
+ * hasta = la más alta. No separa VIS y No VIS: va en los dos. La tabla no
+ * dice desde cuándo rige: vigencia = día de lectura. No reporta vivienda a
+ * la Superfinanciera (sale con "Sin reporte").
+ */
+function viviendaPopular(producto) {
+  const { leasing } = tipoVivienda(producto);
+  const fila = leasing ? "Leasing Habitacional" : "Crédito Hipotecario";
+  return {
+    ...REGLAS["banco-popular"],
+    pantallazo: "Casayá",
+    ancla: /Casayá/,
+    leer(texto) {
+      const t = texto.replace(/\s+/g, " ");
+      const tabla = despuesDe(t, /Casayá/, 'la tabla "Casayá"').slice(0, 1200);
+      const m = exigir(
+        tabla,
+        new RegExp(`${fila} ([\\d,]+) ?% ([\\d,]+) ?%`),
+        `la fila "${fila}" de Casayá`,
+      );
+      const tasas = [numero(m[1]), numero(m[2])];
+      const eaDesde = Math.min(...tasas);
+      const eaHasta = Math.max(...tasas);
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: mensual(eaHasta),
+        // La tabla no dice desde cuándo rige: la fecha en que se leyó.
+        vigencia: hoyEnColombia(),
+        frase: `Casayá · ${fila}: ${m[1]}% hasta 15 años y ${m[2]}% hasta 20 años (E.A.; no separa VIS y No VIS)`,
+      };
+    },
+  };
+}
+
+/**
  * Banco de Bogotá: el mismo PDF mensual trae "TASAS DE COLOCACIÓN PORTAFOLIO
  * DE VIVIENDA" con solo la tasa máxima ("Hasta", no financiado o usado y
  * financiado; E.A.): CRÉDITO NO VIS, CRÉDITO VIS O VIP y LEASING
@@ -1875,6 +1914,7 @@ for (const producto of [
   }
   REGLAS[`banco-de-occidente:${producto}`] = viviendaOccidente(producto);
   REGLAS[`bbva:${producto}`] = viviendaBbva(producto);
+  REGLAS[`banco-popular:${producto}`] = viviendaPopular(producto);
   if (producto !== "leasing-vis")
     REGLAS[`av-villas:${producto}`] = viviendaAvVillas(producto);
 }
