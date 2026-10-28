@@ -148,8 +148,6 @@ export class TasasAdmin implements OnInit, OnDestroy {
   });
   /** Tasa cuyo PDF se pidió eliminar y espera el segundo toque. */
   protected readonly confirmandoBorrar = signal<number | null>(null);
-  /** Tasa por aprobar que se pidió rechazar y espera el segundo toque. */
-  protected readonly confirmandoRechazo = signal<number | null>(null);
   private enlacesBlob: string[] = [];
   private archivo: File | null = null;
   private vigencia = '';
@@ -360,40 +358,6 @@ export class TasasAdmin implements OnInit, OnDestroy {
         );
       }
       this.aviso.set(`Tasa de ${c.entidad.nombre} aprobada y publicada.`);
-      this.cerrarComparacionDe(t.id);
-    });
-  }
-
-  /**
-   * Rechazar borra la tasa (es un error: no se guarda) y su archivo, si no es
-   * el actual y ninguna otra tasa lo usa. Pide un segundo toque. El robot no
-   * la vuelve a crear: la fuente guarda la huella del último PDF que revisó.
-   */
-  protected async rechazar(c: TarjetaTasa, t: TasaAdmin): Promise<void> {
-    if (this.confirmandoRechazo() !== t.id) {
-      this.confirmandoRechazo.set(t.id);
-      return;
-    }
-    const documento = this.documentoDe(t);
-    const borrarArchivo =
-      documento &&
-      documento.estado !== 'actual' &&
-      !this.tasas().some(
-        (x) => x.id !== t.id && x.documento?.id === documento.id,
-      );
-    await this.trabajar(c.clave, async () => {
-      await this.admin.eliminar(t.id);
-      if (borrarArchivo) await this.docs.descartar(documento);
-      this.tasas.update((lista) => lista.filter((x) => x.id !== t.id));
-      if (borrarArchivo)
-        this.documentos.update((lista) =>
-          lista.filter((d) => d.id !== documento.id),
-        );
-      this.confirmandoRechazo.set(null);
-      if (this.editando() === t.id) this.editando.set(null);
-      this.aviso.set(
-        `Tasa de ${c.entidad.nombre} rechazada y borrada${borrarArchivo ? ' con su archivo' : ''}.`,
-      );
       this.cerrarComparacionDe(t.id);
     });
   }
@@ -695,7 +659,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
     this.soltarBlobs();
   }
 
-  /** Aprobada o rechazada la tasa que se comparaba, ya no hay qué comparar. */
+  /** Aprobada la tasa que se comparaba, ya no hay qué comparar. */
   private cerrarComparacionDe(id: number): void {
     if (this.comparando()?.tasa === id) this.cerrarComparacion();
   }

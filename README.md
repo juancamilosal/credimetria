@@ -130,16 +130,13 @@ Directus. No está en el menú: se entra por `/admin`.
     resaltada se borra (era del anterior).
   - **Por aprobar**: la tasa nueva con su PDF, lo que cambia frente a la
     publicada (mín. ▲ +1,05 pts) y los botones **Aprobar** (pide al menos
-    el desde o el hasta: GNB en libranza solo publica la máxima), **Rechazar**
-    (pide un segundo toque y **borra** la tasa y su archivo, si no es el
-    actual y ninguna otra tasa lo usa: lo rechazado no se guarda; el robot no
-    la vuelve a crear porque la fuente guarda la huella del último PDF),
+    el desde o el hasta: GNB en libranza solo publica la máxima),
     **Editar** (con "Calcular E.A." y el PDF de donde sale) y **Comparar
     PDF**, que muestra el PDF actual y el nuevo lado a lado (se bajan con
     el token y se ven como blob dentro de la página; si aún no hay PDF
     actual, el nuevo ocupa todo el ancho). Al lado de los PDF va la misma
-    tasa por aprobar con **Aprobar**, **Rechazar** y **Editar**, para
-    revisarla y aprobarla sin cerrar la comparación (al aprobar o rechazar,
+    tasa por aprobar con **Aprobar** y **Editar**, para
+    revisarla y aprobarla sin cerrar la comparación (al aprobar,
     se cierra sola). **Cargar PDF nuevo**
     sube el PDF con su vigencia (si su huella SHA-256 ya existe para esa
     fuente o para otro banco, avisa; si es el mismo PDF de otro producto del
@@ -160,12 +157,14 @@ Directus. No está en el menú: se entra por `/admin`.
     (borra el anterior; avisa si ya existe en otro registro) y **Eliminar
     tasa y PDF** (con un segundo toque) borra las dos; si había una tasa
     anterior, vuelve a quedar publicada con su PDF como actual. Por aprobar
-    se corrige con Editar o se rechaza.
+    no se rechaza: se corrige con **Editar** o **Cargar PDF nuevo** (que
+    conserva los valores) y se aprueba.
   - La frase del PDF, las notas y quién aprobó van ocultas en **"Ver más
     detalle"**, para que la tarjeta muestre solo lo principal.
   - **Aprobar** deja la tasa publicada y su PDF como actual; la tasa que
     estaba publicada y el PDF anterior pasan a `anterior`. Nada se borra:
-    "Ver anteriores" muestra las anteriores y rechazadas con su PDF.
+    "Ver anteriores" muestra las anteriores con su PDF (y las rechazadas de
+    antes, cuando existía el botón Rechazar).
   - Filtros: todos los bancos o solo los que tienen algo por aprobar, y
     producto. La cabecera con "Salir" está en `paginas/admin/cabecera/`.
   - `/admin/pdf` (la pestaña que hubo antes) lleva a esta pantalla.

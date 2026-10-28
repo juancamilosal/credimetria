@@ -492,10 +492,3 @@ blockquote {
   border: 1px solid #1aa61a;
   vertical-align: -1px;
 }
-
-/* Rechazar borra la tasa: el segundo toque se ve en rojo. */
-.btn.confirmar {
-  color: var(--cm-error);
-  border-color: var(--cm-error);
-  background: var(--cm-error-100);
-}
