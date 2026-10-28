@@ -224,9 +224,11 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
 4. **Tareas programadas** (hora de Colombia):
    - `node pdf-bancos.mjs` todos los días a las 7:13 (`13 7 * * *`).
    - `node promedio-sfc.mjs` los martes a las 7:23 (`23 7 * * 2`).
-   - Vivienda: `node promedio-sfc.mjs --producto hipotecario` y
-     `node promedio-sfc.mjs --producto leasing`, los martes (en Coolify, que
-     usa UTC: `3 13 * * 2` y `23 13 * * 2`, después de los de consumo).
+   - Vivienda, **una tarea por producto** (como libranza: cada una con sus
+     15 minutos), los martes en Coolify (UTC): `--producto vivienda-vis`
+     (`3 13 * * 2`), `--producto vivienda-no-vis` (`23 13 * * 2`),
+     `--producto leasing-vis` (`43 13 * * 2`) y `--producto leasing-no-vis`
+     (`3 14 * * 2`), 20 minutos aparte después de los de consumo.
 
 ## Probar en local
 
