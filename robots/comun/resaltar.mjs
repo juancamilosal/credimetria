@@ -8,6 +8,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { BlendMode, PDFDocument, rgb } from "pdf-lib";
+import { PDFTOTEXT } from "./pdf.mjs";
 
 /** Dónde empieza cada producto en un PDF con varios. */
 const ANCLAS = {
@@ -313,7 +314,7 @@ async function cajas(datos) {
     const archivo = join(carpeta, "tasas.pdf");
     await writeFile(archivo, datos);
     const { stdout } = await promisify(execFile)(
-      "pdftotext",
+      PDFTOTEXT(),
       ["-bbox-layout", "-enc", "UTF-8", archivo, "-"],
       { maxBuffer: 100 * 1024 * 1024 },
     );

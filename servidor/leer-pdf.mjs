@@ -80,7 +80,7 @@ export function rutasLeerPdf(app) {
             leida: false,
             problemas: [
               error.code === "ENOENT"
-                ? "el servidor de la página no tiene pdftotext instalado (poppler-utils)."
+                ? "el servidor de la página no encuentra pdftotext: instálalo (poppler-utils) o pon su ruta en la variable PDFTOTEXT, y reinicia el servidor."
                 : error.message,
             ],
           });

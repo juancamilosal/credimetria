@@ -383,7 +383,10 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   Directus si no).
 - **`pdftotext` en el servidor** (paquete `poppler-utils`): lo usa la
   lectura de los PDF cargados a mano. Sin él, cargar funciona igual pero las
-  tasas se escriben a mano (el aviso dice que falta). La página se construye
+  tasas se escriben a mano (el aviso dice que falta). En local (`npm
+start`) hay que instalarlo (Windows: `winget install
+oschwartz10612.Poppler`) y abrir una terminal nueva; si aun así no lo
+  encuentra, su ruta va en `.env` como `PDFTOTEXT=C:\…\pdftotext.exe`. La página se construye
   con el **`Dockerfile`** de la raíz (Build Pack "Dockerfile" en Coolify):
   construye la página con Node 22, instala `poppler-utils` y arranca
   `dist/credimetria/server/server.mjs` en el puerto 4000. `nixpacks.toml`

@@ -39,6 +39,13 @@ export async function bajarPdf(url) {
   return datos;
 }
 
+/**
+ * El programa `pdftotext`. Si no está en el PATH (en Windows, una terminal
+ * abierta antes de instalarlo no lo ve), la variable PDFTOTEXT da su ruta
+ * completa, p. ej. C:\\…\\poppler\\Library\\bin\\pdftotext.exe.
+ */
+export const PDFTOTEXT = () => process.env.PDFTOTEXT || "pdftotext";
+
 export const huella = (datos) =>
   createHash("sha256").update(datos).digest("hex");
 
@@ -49,7 +56,7 @@ export async function textoPdf(datos) {
     const archivo = join(carpeta, "tasas.pdf");
     await writeFile(archivo, datos);
     const { stdout } = await promisify(execFile)(
-      "pdftotext",
+      PDFTOTEXT(),
       ["-layout", "-enc", "UTF-8", archivo, "-"],
       { maxBuffer: 50 * 1024 * 1024 },
     );
