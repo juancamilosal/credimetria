@@ -1,0 +1,33 @@
+Tasas
+Crédito Hipotecario FNA
+Cesantías - UVR
+Desde	Hasta	UVR +
+› 0 SMMLV	2 SMMLV	5,00 %
+› 2 SMMLV	4 SMMLV	7,60 %
+› 4 SMMLV	-	8,10 %
+Cesantías - Pesos
+Desde	Hasta	Tasa E.A
+› 0 SMMLV	2 SMMLV	10,00 %
+› 2 SMMLV	4 SMMLV	12,10 %
+› 4 SMMLV	-	12,60 %
+AVC - UVR
+Desde	Hasta	UVR +
+› 0 SMMLV	2 SMMLV	7,50 %
+› 2 SMMLV	4 SMMLV	8,10 %
+› 4 SMMLV	-	8,60 %
+AVC - Pesos
+Desde	Hasta	Tasa E.A
+› 0 SMMLV	2 SMMLV	11,50 %
+› 2 SMMLV	4 SMMLV	13,10 %
+› 4 SMMLV	-	13,60 %
+Leasing Habitacional FNA
+Cesantías - Pesos
+Desde	Hasta	Tasa E.A
+› 0 SMMLV	2 SMMLV	9,50 %
+› 2 SMMLV	4 SMMLV	11,60 %
+› 4 SMMLV	-	12,10 %
+AVC - Pesos
+Desde	Hasta	Tasa E.A
+› 0 SMMLV	2 SMMLV	11,00 %
+› 2 SMMLV	4 SMMLV	12,60 %
+› 4 SMMLV	-	13,10 %

@@ -1637,6 +1637,59 @@ function viviendaBbva(producto) {
 }
 
 /**
+ * Fondo Nacional del Ahorro: no publica PDF. Página de transparencia
+ * "Tasas" con tablas "Crédito Hipotecario FNA" y "Leasing Habitacional FNA",
+ * cada una por tipo de ahorro (Cesantías o AVC) y moneda (Pesos o UVR), con
+ * una tasa E.A. por rango de ingresos (0 a 2, 2 a 4 y más de 4 SMMLV).
+ * Desde = la más baja de las tablas en pesos; hasta = la más alta. No
+ * separa VIS y No VIS: el hipotecario va en los dos y el leasing solo en No
+ * VIS (es el que reporta a la Superfinanciera). La página no dice desde
+ * cuándo rige: vigencia = día de lectura.
+ */
+function viviendaFna(producto) {
+  const { leasing } = tipoVivienda(producto);
+  const titulo = leasing
+    ? "Leasing Habitacional FNA"
+    : "Crédito Hipotecario FNA";
+  return {
+    pagina: true,
+    navegador: true,
+    pantallazo: titulo,
+    ancla: new RegExp(titulo),
+    leer(texto) {
+      const t = texto.replace(/\s+/g, " ");
+      // La sección llega hasta el título de la otra (o hasta el final).
+      const seccion = despuesDe(t, new RegExp(titulo), `la sección "${titulo}"`)
+        .slice(titulo.length)
+        .split(/(?:Crédito Hipotecario|Leasing Habitacional) FNA/)[0];
+      const tablas = [
+        ...seccion.matchAll(
+          /(Cesantías|AVC) [-–] Pesos(.*?)(?=(?:Cesantías|AVC) [-–] (?:Pesos|UVR)|$)/g,
+        ),
+      ];
+      if (!tablas.length)
+        throw new ReglaRota(`No encontré las tablas en pesos de "${titulo}".`);
+      const tasas = tablas.flatMap((m) =>
+        [...m[2].matchAll(/(\d{1,2},\d{1,2}) ?%/g)].map((x) => numero(x[1])),
+      );
+      if (!tasas.length)
+        throw new ReglaRota(`No encontré tasas en pesos en "${titulo}".`);
+      const eaDesde = Math.min(...tasas);
+      const eaHasta = Math.max(...tasas);
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: mensual(eaHasta),
+        // La página no dice desde cuándo rige: la fecha en que se leyó.
+        vigencia: hoyEnColombia(),
+        frase: `${titulo} · ${tablas.map((m) => `${m[1]} - Pesos: ${[...m[2].matchAll(/(\d{1,2},\d{1,2}) ?%/g)].map((x) => x[1] + "%").join(", ")}`).join(" · ")} (E.A. según ingresos en SMMLV; la página no dice desde cuándo rige)`,
+      };
+    },
+  };
+}
+
+/**
  * Banco de Bogotá: el mismo PDF mensual trae "TASAS DE COLOCACIÓN PORTAFOLIO
  * DE VIVIENDA" con solo la tasa máxima ("Hasta", no financiado o usado y
  * financiado; E.A.): CRÉDITO NO VIS, CRÉDITO VIS O VIP y LEASING
@@ -1736,6 +1789,9 @@ for (const producto of [
 delete REGLAS["davibank:leasing-vis"];
 REGLAS["banco-de-bogota:leasing-no-vis"] = viviendaBogota("leasing-no-vis");
 REGLAS["bancolombia:leasing-no-vis"] = bancolombiaLeasing;
+REGLAS["fna:vivienda-vis"] = viviendaFna("vivienda-vis");
+REGLAS["fna:vivienda-no-vis"] = viviendaFna("vivienda-no-vis");
+REGLAS["fna:leasing-no-vis"] = viviendaFna("leasing-no-vis");
 
 /**
  * La regla de un banco para un producto: la de libre inversión es la del
