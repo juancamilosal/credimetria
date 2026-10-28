@@ -31,3 +31,7 @@ Desde	Hasta	Tasa E.A
 › 0 SMMLV	2 SMMLV	11,00 %
 › 2 SMMLV	4 SMMLV	12,60 %
 › 4 SMMLV	-	13,10 %
+Otra sección de la página
+Desde	Hasta	Tasa E.A
+› 0 SMMLV	2 SMMLV	7,00 %
+› 2 SMMLV	-	11,50 %

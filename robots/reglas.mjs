@@ -1669,9 +1669,15 @@ function viviendaFna(producto) {
       ];
       if (!tablas.length)
         throw new ReglaRota(`No encontré las tablas en pesos de "${titulo}".`);
-      const tasas = tablas.flatMap((m) =>
-        [...m[2].matchAll(/(\d{1,2},\d{1,2}) ?%/g)].map((x) => numero(x[1])),
+      // Cada tabla tiene tres filas (0 a 2, 2 a 4 y más de 4 SMMLV): después
+      // de la última tabla la página sigue con otras secciones que también
+      // traen porcentajes, así que solo cuentan los tres primeros.
+      const filas = tablas.map((m) =>
+        [...m[2].matchAll(/(\d{1,2},\d{1,2}) ?%/g)]
+          .slice(0, 3)
+          .map((x) => x[1]),
       );
+      const tasas = filas.flat().map(numero);
       if (!tasas.length)
         throw new ReglaRota(`No encontré tasas en pesos en "${titulo}".`);
       const eaDesde = Math.min(...tasas);
@@ -1683,7 +1689,7 @@ function viviendaFna(producto) {
         mvHasta: mensual(eaHasta),
         // La página no dice desde cuándo rige: la fecha en que se leyó.
         vigencia: hoyEnColombia(),
-        frase: `${titulo} · ${tablas.map((m) => `${m[1]} - Pesos: ${[...m[2].matchAll(/(\d{1,2},\d{1,2}) ?%/g)].map((x) => x[1] + "%").join(", ")}`).join(" · ")} (E.A. según ingresos en SMMLV; la página no dice desde cuándo rige)`,
+        frase: `${titulo} · ${tablas.map((m, i) => `${m[1]} - Pesos: ${filas[i].map((x) => x + "%").join(", ")}`).join(" · ")} (E.A. según ingresos en SMMLV; la página no dice desde cuándo rige)`,
       };
     },
   };
