@@ -361,6 +361,16 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   publica la tasa más alta"): la tasa se guarda sin desde y la columna
   Anuncia dice "hasta 24,60 % · solo publica la máxima". La diferencia queda
   en "—" y no lleva "★ Mejor tasa ★".
+- **Vivienda** (`vivienda-vis`, `vivienda-no-vis`, `leasing-vis`,
+  `leasing-no-vis`; `VIVIENDA` y `esVivienda` en `core/datos/tasas.ts`):
+  crédito hipotecario y leasing habitacional, VIS y No VIS, solo en pesos.
+  No les aplica la usura de consumo: si la entidad no publica el "hasta", no
+  se muestra (el tope legal de vivienda no se publica como un número y no se
+  inventa). Mientras se cargan sus tasas publicadas, `/api/tasas` agrega a
+  las entidades con promedio y `anunciaPendiente`: la columna Anuncia dice
+  "Por cargar". En el ranking la cuota de vivienda se calcula con
+  $150.000.000 a 240 meses (consumo: $20.000.000 a 48). El Fondo Nacional
+  del Ahorro es tipo "Fondo".
 - **Bancos que no publican su tasa** en un producto (fuente con
   `como_extraer` = "Solo promedio", hoy Banco Popular, Banco de Occidente y Banco Unión
   en libranza: no publican la tasa): `/api/tasas` los agrega solo con el promedio de la

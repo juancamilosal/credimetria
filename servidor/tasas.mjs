@@ -41,6 +41,14 @@ async function pedir(ruta) {
   return r;
 }
 
+/** Productos de vivienda (pesos): hipotecario y leasing, VIS y No VIS. */
+const VIVIENDA = [
+  "vivienda-vis",
+  "vivienda-no-vis",
+  "leasing-vis",
+  "leasing-no-vis",
+];
+
 const numero = (v) => (v === null || v === undefined ? null : Number(v));
 
 /**
@@ -69,17 +77,25 @@ async function soloPromedio() {
 }
 
 async function leer() {
-  const [publicadas, promedios, sinTasa] = await Promise.all([
-    pedir(
-      "/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1" +
-        "&fields=producto,ea_desde,ea_hasta,hasta_origen,vigente_desde,enlace,enlace_es_pagina," +
-        "entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,fuente.*",
-    ).then((r) => r.json()),
-    pedir(
-      "/items/tasas_promedio?limit=-1&fields=entidad,producto,tasa_ea,corte",
-    ).then((r) => r.json()),
-    soloPromedio(),
-  ]);
+  const [publicadas, promedios, sinTasa, entidadesVivienda] = await Promise.all(
+    [
+      pedir(
+        "/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1" +
+          "&fields=producto,ea_desde,ea_hasta,hasta_origen,vigente_desde,enlace,enlace_es_pagina," +
+          "entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,fuente.*",
+      ).then((r) => r.json()),
+      pedir(
+        "/items/tasas_promedio?limit=-1&fields=entidad,producto,tasa_ea,corte",
+      ).then((r) => r.json()),
+      soloPromedio(),
+      pedir(
+        "/items/entidades?filter[activa][_eq]=true&limit=-1&fields=codigo,nombre,tipo,logo,activa",
+      )
+        .then((r) => r.json())
+        .then((r) => r.data)
+        .catch(() => []),
+    ],
+  );
   const idsLogo = new Map();
   const tasas = [];
   for (const p of publicadas.data) {
@@ -134,6 +150,36 @@ async function leer() {
       enPagina: false,
       logo: e.logo ? `/api/logos/${e.codigo}` : null,
     });
+  }
+  // Vivienda: mientras se cargan sus tasas publicadas, las entidades salen
+  // con su promedio y "Por cargar" en la tasa que anuncian.
+  if (entidadesVivienda.length) {
+    for (const x of promedios.data) {
+      if (!VIVIENDA.includes(x.producto)) continue;
+      const e = entidadesVivienda.find((y) => y.codigo === x.entidad);
+      if (!e?.activa) continue;
+      if (
+        tasas.some((t) => t.entidad === e.nombre && t.producto === x.producto)
+      )
+        continue;
+      const real = numero(x.tasa_ea);
+      if (real === null) continue;
+      if (e.logo) idsLogo.set(e.codigo, e.logo);
+      tasas.push({
+        entidad: e.nombre,
+        tipo: e.tipo,
+        producto: x.producto,
+        tasaReal: real,
+        tasaAnunciada: null,
+        anunciaPendiente: true,
+        tasaHasta: null,
+        hastaUsura: false,
+        vigencia: null,
+        pdf: null,
+        enPagina: false,
+        logo: e.logo ? `/api/logos/${e.codigo}` : null,
+      });
+    }
   }
   const cortes = promedios.data
     .map((x) => x.corte)

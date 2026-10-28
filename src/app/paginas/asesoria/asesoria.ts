@@ -40,7 +40,10 @@ const ORDEN_PRODUCTOS: Producto[] = [
   'libranza',
   'libre-inversion',
   'vehiculo',
-  'vivienda',
+  'vivienda-vis',
+  'vivienda-no-vis',
+  'leasing-vis',
+  'leasing-no-vis',
 ];
 
 /** El monto es opcional; si lo escribe, que sea de al menos $1.000.000. */

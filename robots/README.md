@@ -40,6 +40,18 @@ crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
   promedio es poco confiable".
 - **Un producto:** `--producto libre-inversion` o `--producto libranza`. En
   Coolify cada producto es una tarea aparte (cada una con sus 15 minutos).
+  También varios con comas, o un grupo: `--producto hipotecario`
+  (`vivienda-vis,vivienda-no-vis`) y `--producto leasing`
+  (`leasing-vis,leasing-no-vis`).
+- **Vivienda** (28 oct 2026): solo **adquisición en pesos**, como la separa
+  la Superfinanciera: `vivienda-vis` ("Adquisición de vivienda vis
+  (colocación en pesos)"), `vivienda-no-vis`, `leasing-vis` y
+  `leasing-no-vis` ("Adquisición leasing habitacional … (colocación en
+  pesos)"). Sin UVR (su tasa es lo que se suma a la UVR, no comparable),
+  construcción ni vivienda de empleados. Incluye al **Fondo Nacional del
+  Ahorro** (`fna`, código 22-8, tipo "Fondo"). Primer corte (16 oct 2026):
+  VIS 12 entidades (FNA 11,46 % el más bajo), No VIS 12 (FNA 12,45 %),
+  leasing VIS 3 y leasing No VIS 6.
 
 Primer resultado guardado (corte 16 oct 2026, 4 semanas): AV Villas
 19,57 %, Bancolombia 21,03 %, BBVA 21,81 %, Banco de Bogotá 22,71 % y
@@ -212,6 +224,9 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
 4. **Tareas programadas** (hora de Colombia):
    - `node pdf-bancos.mjs` todos los días a las 7:13 (`13 7 * * *`).
    - `node promedio-sfc.mjs` los martes a las 7:23 (`23 7 * * 2`).
+   - Vivienda: `node promedio-sfc.mjs --producto hipotecario` y
+     `node promedio-sfc.mjs --producto leasing`, los martes (en Coolify, que
+     usa UTC: `3 13 * * 2` y `23 13 * * 2`, después de los de consumo).
 
 ## Probar en local
 

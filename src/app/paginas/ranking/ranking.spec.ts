@@ -186,6 +186,31 @@ describe('Ranking', () => {
     );
   });
 
+  it('en vivienda, sin tasa cargada todavía dice "Por cargar"', () => {
+    (
+      fixture.componentInstance as unknown as {
+        producto: { set(p: string): void };
+      }
+    ).producto.set('leasing-no-vis');
+    fixture.detectChanges();
+    expect(html.querySelector('caption')?.textContent).toContain(
+      'Leasing habitacional No VIS · 2 entidades',
+    );
+    expect(entidades()).toEqual(['Banco de Occidente', 'Davivienda']);
+    expect(html.querySelector('tbody .no-publica')?.textContent).toContain(
+      'Por cargar',
+    );
+    expect(html.textContent).not.toContain('No publica su tasa');
+  });
+
+  it('en vivienda la cuota se calcula con $150.000.000 a 240 meses', () => {
+    const select = html.querySelector<HTMLSelectElement>('select')!;
+    select.value = 'vivienda-no-vis';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(html.textContent).toContain('$150.000.000 a 240 meses');
+  });
+
   it('no destaca como "Mejor tasa" a un banco que no publica su tasa', () => {
     TestBed.resetTestingModule();
     const [a, b] = TASAS_PRUEBA.filter((t) => t.producto === 'libranza');

@@ -69,7 +69,12 @@ export class TasasService {
   readonly sinConexion = signal(false);
 
   readonly productos: InfoProducto[] = PRODUCTOS;
-  readonly tipos: TipoEntidad[] = ['Banco', 'Cooperativa', 'Financiera'];
+  readonly tipos: TipoEntidad[] = [
+    'Banco',
+    'Cooperativa',
+    'Financiera',
+    'Fondo',
+  ];
 
   /** Las entidades que comparamos con su logo (si lo tienen), por nombre. */
   readonly entidadesConLogo = computed(() => {

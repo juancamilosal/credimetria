@@ -90,8 +90,9 @@ export class Inicio {
           foto: FOTOS.jovenCarro,
         },
         {
-          id: 'vivienda',
-          texto: 'Para comprar casa o apartamento a largo plazo.',
+          id: 'vivienda-no-vis',
+          texto:
+            'Para comprar casa o apartamento a largo plazo: VIS, No VIS y leasing habitacional.',
           foto: FOTOS.familiaVivienda,
         },
       ] as const

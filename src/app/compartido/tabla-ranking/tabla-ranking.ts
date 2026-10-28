@@ -17,6 +17,9 @@ import { PesosPipe, PuntosPipe, TasaPipe } from '../pipes/formato';
 /** Monto y plazo con los que se calcula la cuota estimada si no llegan otros. */
 export const MONTO_RANKING = 20_000_000;
 export const PLAZO_RANKING = 48;
+/** En vivienda, la cuota se calcula con un apartamento a 20 años. */
+export const MONTO_VIVIENDA = 150_000_000;
+export const PLAZO_VIVIENDA = 240;
 
 /** Valor del filtro de tipo que muestra todas las entidades. */
 export const TODAS = 'Todas';

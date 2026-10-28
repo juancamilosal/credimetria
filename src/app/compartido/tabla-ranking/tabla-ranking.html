@@ -190,6 +190,8 @@
               } @else if (fila.tasaHasta) {
                 hasta {{ fila.tasaHasta | tasa }}
                 <span class="no-publica hasta">solo publica la máxima</span>
+              } @else if (fila.anunciaPendiente) {
+                <span class="no-publica">Por cargar</span>
               } @else {
                 <span class="no-publica">No publica su tasa</span>
               }
@@ -307,6 +309,8 @@
               } @else if (fila.tasaHasta) {
                 hasta {{ fila.tasaHasta | tasa }}
                 <span class="no-publica">solo publica la máxima</span>
+              } @else if (fila.anunciaPendiente) {
+                <span class="no-publica">Por cargar</span>
               } @else {
                 <span class="no-publica">No publica su tasa</span>
               }

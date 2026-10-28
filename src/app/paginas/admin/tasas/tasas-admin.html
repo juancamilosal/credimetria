@@ -634,7 +634,7 @@
         <option value="usura">Tope de usura</option>
       </select>
     </div>
-    @if (c.producto !== "vivienda") {
+    @if (!esVivienda(c.producto)) {
       <div class="campo calcular">
         <button type="button" class="btn btn-claro" (click)="usarUsura()">
           Usar tope de usura ({{ usura.tasa | tasa }})

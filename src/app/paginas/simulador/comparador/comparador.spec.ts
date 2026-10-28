@@ -45,7 +45,7 @@ describe('Comparador', () => {
   it('arranca con la que más cobra contra la que menos y sigue al producto', () => {
     expect(fixture.componentInstance.entidadA()).toBe('Banco de Bogotá');
     expect(fixture.componentInstance.entidadB()).toBe('AV Villas');
-    fixture.componentRef.setInput('producto', 'vivienda');
+    fixture.componentRef.setInput('producto', 'vivienda-no-vis');
     fixture.detectChanges();
     expect(fixture.componentInstance.entidadB()).toBe(
       'Fondo Nacional del Ahorro',

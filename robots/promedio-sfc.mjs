@@ -11,7 +11,10 @@
 //   DIRECTUS_TOKEN=<token del usuario robot> node robots/promedio-sfc.mjs
 //   node robots/promedio-sfc.mjs --sin-guardar   (solo muestra los promedios)
 //   node robots/promedio-sfc.mjs --producto libranza   (solo ese producto: así
-//                    cada producto es una tarea de Coolify con sus 15 minutos)
+//                    cada producto es una tarea de Coolify con sus 15 minutos;
+//                    también varios con comas o un grupo: hipotecario =
+//                    vivienda-vis,vivienda-no-vis; leasing = leasing-vis,
+//                    leasing-no-vis)
 //
 // Manda un correo (comun/aviso.mjs) si falla, si un banco no reportó o si
 // una tasa saltó más de 2 puntos.
@@ -24,13 +27,27 @@ const SEMANAS = 4;
 /**
  * Producto de Credimetría → producto de crédito en el formato 88. La
  * libranza viene junta ("Libranza otros"): no se separa por tipo de cliente.
+ * Vivienda: solo adquisición en pesos (sin UVR, construcción ni empleados);
+ * la Superfinanciera separa hipotecario y leasing, VIS y No VIS.
  */
 const PRODUCTOS = {
   "libre-inversion": "Libre inversión",
   libranza: "Libranza otros",
+  "vivienda-vis": "Adquisición de vivienda vis (colocación en pesos)",
+  "vivienda-no-vis": "Adquisición de vivienda no vis (colocación en pesos)",
+  "leasing-vis": "Adquisición leasing habitacional vis (colocación en pesos)",
+  "leasing-no-vis":
+    "Adquisición leasing habitacional no vis (colocación en pesos)",
 };
 /** Nombre de cada producto para el correo. */
-const NOMBRES = { "libre-inversion": "Libre inversión", libranza: "Libranza" };
+const NOMBRES = {
+  "libre-inversion": "Libre inversión",
+  libranza: "Libranza",
+  "vivienda-vis": "Vivienda VIS",
+  "vivienda-no-vis": "Vivienda No VIS",
+  "leasing-vis": "Leasing habitacional VIS",
+  "leasing-no-vis": "Leasing habitacional No VIS",
+};
 /**
  * Con menos créditos que esto en las 4 semanas, el promedio es poco
  * confiable: se anota en las notas (dato interno, no sale en la página).
@@ -41,14 +58,26 @@ const SALTO = 2;
 
 const soloMostrar = process.argv.includes("--sin-guardar");
 const iProducto = process.argv.indexOf("--producto");
-const elegido = iProducto > 0 ? process.argv[iProducto + 1] : null;
-if (elegido && !PRODUCTOS[elegido])
-  throw new Error(
-    `Producto "${elegido}" desconocido: usa ${Object.keys(PRODUCTOS).join(" o ")}.`,
-  );
-/** Los productos de esta corrida: el de --producto o todos. */
+/** Grupos que se piden juntos en una sola tarea. */
+const GRUPOS = {
+  hipotecario: ["vivienda-vis", "vivienda-no-vis"],
+  leasing: ["leasing-vis", "leasing-no-vis"],
+};
+/** Los de --producto (uno, varios separados por coma o un grupo). */
+const elegidos =
+  iProducto > 0
+    ? process.argv[iProducto + 1]
+        .split(",")
+        .flatMap((p) => GRUPOS[p.trim()] ?? [p.trim()])
+    : null;
+for (const p of elegidos ?? [])
+  if (!PRODUCTOS[p])
+    throw new Error(
+      `Producto "${p}" desconocido: usa ${[...Object.keys(PRODUCTOS), ...Object.keys(GRUPOS)].join(", ")}.`,
+    );
+/** Los productos de esta corrida: los de --producto o todos. */
 const AHORA = Object.entries(PRODUCTOS).filter(
-  ([producto]) => !elegido || producto === elegido,
+  ([producto]) => !elegidos || elegidos.includes(producto),
 );
 const TOKEN = hayToken();
 /** Lo que necesita que alguien lo mire (va por correo al final). */

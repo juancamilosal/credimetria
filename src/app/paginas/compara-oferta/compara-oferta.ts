@@ -20,7 +20,7 @@ import {
   PesosPipe,
   TasaPipe,
 } from '../../compartido/pipes/formato';
-import { USURA_CONSUMO } from '../../core/datos/tasas';
+import { esVivienda, USURA_CONSUMO } from '../../core/datos/tasas';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
@@ -309,7 +309,7 @@ export class ComparaOferta {
   private mostrarResultado(ejemplo = false): void {
     const datos = this.datos as DatosOferta;
     // La usura de consumo no aplica a vivienda, que tiene su propio límite.
-    const usura = datos.producto === 'vivienda' ? null : USURA_CONSUMO.tasa;
+    const usura = esVivienda(datos.producto) ? null : USURA_CONSUMO.tasa;
     const resultado = calcularOferta(
       datos,
       this.tasas.mejor(datos.producto),

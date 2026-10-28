@@ -36,7 +36,7 @@ import {
 } from '../../../core/servicios/sesion-admin.service';
 import { TasasAdminService } from '../../../core/servicios/tasas-admin.service';
 import { TasasService } from '../../../core/servicios/tasas.service';
-import { USURA_CONSUMO } from '../../../core/datos/tasas';
+import { esVivienda, USURA_CONSUMO } from '../../../core/datos/tasas';
 import {
   efectivaAnualDeMensual,
   tasaMensual,
@@ -396,6 +396,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
   }
 
   protected readonly usura = USURA_CONSUMO;
+  protected readonly esVivienda = esVivienda;
 
   /**
    * La entidad no publica máxima: el "hasta" es el tope legal de usura del

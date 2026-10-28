@@ -13,18 +13,28 @@ import { formatoPesos, PesosPipe } from '../../compartido/pipes/formato';
 import {
   ColumnaRanking,
   MONTO_RANKING,
+  MONTO_VIVIENDA,
   ORDEN_REAL,
   OrdenRanking,
   PLAZO_RANKING,
+  PLAZO_VIVIENDA,
   TablaRanking,
   TODAS,
 } from '../../compartido/tabla-ranking/tabla-ranking';
 import { Producto, TipoEntidad } from '../../core/modelos/tasa';
-import { FUENTE_PROMEDIO } from '../../core/datos/tasas';
+import { esVivienda, FUENTE_PROMEDIO } from '../../core/datos/tasas';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { leerNumero } from '../../core/utilidades/credito';
 
 const PLAZOS = [12, 24, 36, 48, 60, 72, 120, 180, 240];
+
+/** Monto y plazo con que se calcula la cuota si la persona no los cambia. */
+function porDefecto(producto: Producto): { monto: number; plazo: number } {
+  // Vivienda: un apartamento a 20 años; consumo: $20.000.000 a 48 meses.
+  return esVivienda(producto)
+    ? { monto: MONTO_VIVIENDA, plazo: PLAZO_VIVIENDA }
+    : { monto: MONTO_RANKING, plazo: PLAZO_RANKING };
+}
 
 /** Opciones de orden para el celular, donde no se ven los títulos de la tabla. */
 const ORDENES: { texto: string; orden: OrdenRanking }[] = [
@@ -88,9 +98,9 @@ export class Ranking {
   protected readonly montoTexto = signal(formatoPesos(MONTO_RANKING).slice(1));
   protected readonly plazo = signal(PLAZO_RANKING);
 
-  /** Monto para la cuota; si el campo queda vacío, el de siempre. */
+  /** Monto para la cuota; si el campo queda vacío, el del producto. */
   protected readonly monto = computed(
-    () => leerNumero(this.montoTexto()) || MONTO_RANKING,
+    () => leerNumero(this.montoTexto()) || porDefecto(this.producto()).monto,
   );
   protected readonly filas = computed(() =>
     this.tasas.ranking(
@@ -127,8 +137,14 @@ export class Ranking {
       const queryParams = {
         producto: this.producto(),
         tipo: this.tipo() === TODAS ? null : this.tipo(),
-        monto: this.monto() === MONTO_RANKING ? null : this.monto(),
-        plazo: this.plazo() === PLAZO_RANKING ? null : this.plazo(),
+        monto:
+          this.monto() === porDefecto(this.producto()).monto
+            ? null
+            : this.monto(),
+        plazo:
+          this.plazo() === porDefecto(this.producto()).plazo
+            ? null
+            : this.plazo(),
         orden:
           columna === ORDEN_REAL.columna && dir === ORDEN_REAL.dir
             ? null
@@ -145,7 +161,16 @@ export class Ranking {
   }
 
   protected cambiarProducto(valor: string): void {
-    if (this.tasas.esProducto(valor)) this.producto.set(valor);
+    if (!this.tasas.esProducto(valor)) return;
+    // Si el monto y el plazo son los del producto anterior, pasan a los del
+    // nuevo (de libre inversión a vivienda cambian mucho).
+    const antes = porDefecto(this.producto());
+    const despues = porDefecto(valor);
+    if (this.monto() === antes.monto && this.plazo() === antes.plazo) {
+      this.montoTexto.set(formatoPesos(despues.monto).slice(1));
+      this.plazo.set(despues.plazo);
+    }
+    this.producto.set(valor);
   }
 
   protected elegirOrden(indice: string): void {
@@ -163,8 +188,11 @@ export class Ranking {
 
     if (this.tasas.esProducto(producto)) this.producto.set(producto);
     if (tipo && this.tipos.includes(tipo)) this.tipo.set(tipo);
-    if (monto > 0) this.montoTexto.set(formatoPesos(monto).slice(1));
-    if (PLAZOS.includes(plazo)) this.plazo.set(plazo);
+    const defecto = porDefecto(this.producto());
+    this.montoTexto.set(
+      formatoPesos(monto > 0 ? monto : defecto.monto).slice(1),
+    );
+    this.plazo.set(PLAZOS.includes(plazo) ? plazo : defecto.plazo);
     if (
       COLUMNAS.includes(columna as ColumnaRanking) &&
       (dir === 'asc' || dir === 'desc')

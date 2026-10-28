@@ -4,9 +4,12 @@ export type Producto =
   | 'libranza'
   | 'compra-cartera'
   | 'vehiculo'
-  | 'vivienda';
+  | 'vivienda-vis'
+  | 'vivienda-no-vis'
+  | 'leasing-vis'
+  | 'leasing-no-vis';
 
-export type TipoEntidad = 'Banco' | 'Cooperativa' | 'Financiera';
+export type TipoEntidad = 'Banco' | 'Cooperativa' | 'Financiera' | 'Fondo';
 
 /** Tasa de una entidad para un producto, en efectivo anual (E.A.). */
 export interface TasaEntidad {
@@ -17,6 +20,11 @@ export interface TasaEntidad {
   tasaReal: number;
   /** Tasa "desde" que anuncia la entidad en su PDF; `null` si no la publica. */
   tasaAnunciada: number | null;
+  /**
+   * Aún no se cargó la tasa que anuncia (vivienda, mientras se arman sus
+   * reglas): solo hay promedio, pero no es que la entidad no la publique.
+   */
+  anunciaPendiente?: boolean;
   /** Tasa "hasta" del PDF (o el tope de usura si la entidad no la publica). */
   tasaHasta?: number | null;
   /** El "hasta" es el tope de usura, no un dato de la entidad. */
