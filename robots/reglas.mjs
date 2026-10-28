@@ -34,7 +34,10 @@
 //   buscar(fuente, hoy) → direcciones posibles del PDF, la más nueva primero.
 //     Por defecto la de la fuente; `enlace` la busca en la página índice.
 //   leer(texto) → { mvDesde, eaDesde, mvHasta, eaHasta, vigencia, frase }.
-//     Hasta en null si el banco no publica máxima (el robot pone la usura).
+//     Hasta en null si el banco no publica máxima (el robot pone la usura):
+//     solo hay hasta propio si el PDF o la página lo dice ("Hasta", "Tasa
+//     máxima"); una lista de tasas por segmento, monto o plazo sin eso
+//     (Serfinanza, Agrario) da desde = la más baja y hasta = usura.
 //     Si solo publica la máxima (GNB en libranza), desde en null y
 //     `soloMaxima: true`: la página dice "hasta …, solo publica la máxima".
 //     Si el PDF cambió de forma y no encuentra los datos, lanza un error que
@@ -524,11 +527,12 @@ export const REGLAS = {
       );
       const mv = filas.map((f) => numero(f[1]));
       const ea = filas.map((f) => numero(f[2]));
+      // Tasas fijas por monto, sin "hasta" ni "máxima": hasta = usura.
       return {
         mvDesde: Math.min(...mv),
-        mvHasta: Math.max(...mv),
+        mvHasta: null,
         eaDesde: Math.min(...ea),
-        eaHasta: Math.max(...ea),
+        eaHasta: null,
         vigencia: fecha(vig[1]),
         frase: filas.map((f) => f[0]).join(" · "),
       };
@@ -648,18 +652,22 @@ export const REGLAS = {
       const digital = consumo.match(
         /CREDITO DIGITAL LIBRE INVERSI[OÓ]N [^\n]*? ([\d.,]+)%/,
       );
-      const eaDesde = numero(oficina[1]);
-      const eaHasta = digital ? numero(digital[1]) : null;
+      // Una tasa por canal, sin "hasta" ni "máxima": desde = la más baja,
+      // hasta = usura.
+      const eaDesde = Math.min(
+        numero(oficina[1]),
+        ...(digital ? [numero(digital[1])] : []),
+      );
       return {
         eaDesde,
         mvDesde: mensual(eaDesde),
-        eaHasta,
-        mvHasta: eaHasta === null ? null : mensual(eaHasta),
+        eaHasta: null,
+        mvHasta: null,
         vigencia: fecha(`${dia} de ${mes.toLowerCase()} de ${año}`),
         frase:
-          `${eaDesde} % E.A. Personal - Libre destino (oficina)` +
+          `${oficina[1]} % E.A. Personal - Libre destino (oficina)` +
           (digital
-            ? ` · ${eaHasta} % E.A. Crédito digital libre inversión`
+            ? ` · ${digital[1]} % E.A. Crédito digital libre inversión`
             : ""),
       };
     },
@@ -1063,15 +1071,15 @@ Object.assign(REGLAS, {
       );
       if (!tasas.length)
         throw new ReglaRota("No encontré las tasas de la tabla de libranza.");
+      // Tasas por plazo, sin "hasta" ni "máxima": hasta = usura.
       const eaDesde = Math.min(...tasas);
-      const eaHasta = Math.max(...tasas);
       return {
         eaDesde,
         mvDesde: mensual(eaDesde),
-        eaHasta,
-        mvHasta: mensual(eaHasta),
+        eaHasta: null,
+        mvHasta: null,
         vigencia: fecha(`${dia} de ${mes.toLowerCase()} de ${año}`),
-        frase: `Crédito de libranza (empleados y pensionados, con los convenios especiales): de ${eaDesde} % a ${eaHasta} % E.A.`,
+        frase: `Crédito de libranza (empleados y pensionados, con los convenios especiales): de ${eaDesde} % a ${Math.max(...tasas)} % E.A. por plazo y sector`,
       };
     },
   },
@@ -1079,7 +1087,7 @@ Object.assign(REGLAS, {
   "banco-serfinanza:libranza": {
     // Mismo PDF mensual. Tabla "Libranza Libre Inversión": todas las filas
     // (convenios, Grupo Olímpica y pensionados, por monto; M.V. y E.A.):
-    // desde = la más baja, hasta = la más alta.
+    // desde = la más baja; no publica máxima, hasta = usura.
     ...REGLAS["banco-serfinanza"],
     leer(texto) {
       const t = plano(texto);
@@ -1108,11 +1116,12 @@ Object.assign(REGLAS, {
         );
       const mv = filas.map((f) => numero(f[2]));
       const ea = filas.map((f) => numero(f[3]));
+      // Tasas fijas por segmento, sin "hasta" ni "máxima": hasta = usura.
       return {
         mvDesde: Math.min(...mv),
-        mvHasta: Math.max(...mv),
+        mvHasta: null,
         eaDesde: Math.min(...ea),
-        eaHasta: Math.max(...ea),
+        eaHasta: null,
         vigencia: fecha(vig[1]),
         // "Libranzas Convenios hasta a $49MM 1,49% M.V. 19,42% E.A. · …"
         frase: filas
