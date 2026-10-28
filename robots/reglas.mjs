@@ -1562,6 +1562,81 @@ function viviendaOccidente(producto) {
 }
 
 /**
+ * BBVA: PDF aparte DO-11-TASAS-VIVIENDA.pdf ("TASAS DE INTERÉS LINEAS DE
+ * VIVIENDA", vigente desde el día que dice arriba). Trae "Tasas desde" E.A. y
+ * M.V. por línea (tradicional, proyectos financiados, residentes en el
+ * exterior, sostenible…), con el beneficio de cuenta de nómina (sin nómina,
+ * +150 a +180 pbs). Crédito Hipotecario: VIS - Pesos y NO VIS - Pesos (las
+ * tablas UVR no cuentan); Leasing Habitacional: NO VIS - Pesos y VIS -
+ * Pesos. Desde = la más baja de las filas en pesos; no publica hasta.
+ * Remodelación y uso mixto no cuentan.
+ */
+function viviendaBbva(producto) {
+  const { leasing, noVis } = tipoVivienda(producto);
+  return {
+    ...REGLAS.bbva,
+    // La dirección se busca en la página de tasas y tarifas (url_indice).
+    enlace: /[^"'\s]*DO-11-TASAS-VIVIENDA\.pdf/gi,
+    ancla: leasing ? /Leasing Habitacional/ : /Crédito Hipotecario/,
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(
+        t,
+        /VIGENTE DESDE (\p{L}+ \d{1,2} DE \d{4})/u,
+        'la fecha "VIGENTE DESDE …"',
+      );
+      const i = t.search(/\n ?Leasing Habitacional\n/);
+      const j = t.search(/\n ?Remodelación\n/);
+      if (i < 0 || j < i)
+        throw new ReglaRota(
+          'No encontré las secciones "Leasing Habitacional" y "Remodelación".',
+        );
+      const seccion = leasing
+        ? t.slice(i, j)
+        : despuesDe(
+            t.slice(0, i),
+            /Crédito Hipotecario/,
+            'la sección "Crédito Hipotecario"',
+          );
+      const k = seccion.search(/(?:^|\n) ?NO VIS - Pesos/);
+      if (k < 0) throw new ReglaRota('No encontré la tabla "NO VIS - Pesos".');
+      let tabla;
+      if (leasing) {
+        // Leasing: primero NO VIS - Pesos y después VIS - Pesos.
+        const v = seccion.slice(k).search(/\n ?VIS - Pesos/);
+        if (v < 0) throw new ReglaRota('No encontré la tabla "VIS - Pesos".');
+        tabla = noVis ? seccion.slice(k, k + v) : seccion.slice(k + v);
+      } else {
+        // Hipotecario: VIS - Pesos, VIS - UVR, NO VIS - Pesos y su tabla UVR.
+        tabla = noVis
+          ? seccion.slice(k).split(/Cuota integral: UVR/i)[0]
+          : despuesDe(
+              seccion.slice(0, k),
+              /VIS - Pesos/,
+              'la tabla "VIS - Pesos"',
+            ).split(/VIS - UVR/)[0];
+      }
+      const filas = [...tabla.matchAll(/([\d,]+)% +([\d,]+)%/g)];
+      if (!filas.length)
+        throw new ReglaRota(
+          `No encontré tasas en pesos de ${leasing ? "leasing" : "hipotecario"} ${noVis ? "NO VIS" : "VIS"}.`,
+        );
+      const menor = filas.reduce((a, b) =>
+        numero(b[1]) < numero(a[1]) ? b : a,
+      );
+      return {
+        eaDesde: numero(menor[1]),
+        mvDesde: numero(menor[2]),
+        eaHasta: null,
+        mvHasta: null,
+        vigencia: fecha(vig[1]),
+        frase: `${leasing ? "Leasing Habitacional" : "Crédito Hipotecario"} · ${noVis ? "NO VIS" : "VIS"} - Pesos: desde ${menor[1]}% E.A. (${menor[2]}% M.V.), la más baja de ${filas.length} líneas (con cuenta de nómina; no publica hasta)`,
+      };
+    },
+  };
+}
+
+/**
  * Banco de Bogotá: el mismo PDF mensual trae "TASAS DE COLOCACIÓN PORTAFOLIO
  * DE VIVIENDA" con solo la tasa máxima ("Hasta", no financiado o usado y
  * financiado; E.A.): CRÉDITO NO VIS, CRÉDITO VIS O VIP y LEASING
@@ -1654,6 +1729,7 @@ for (const producto of [
     REGLAS[`banco-caja-social:${producto}`] = viviendaCajaSocial(producto);
   }
   REGLAS[`banco-de-occidente:${producto}`] = viviendaOccidente(producto);
+  REGLAS[`bbva:${producto}`] = viviendaBbva(producto);
   if (producto !== "leasing-vis")
     REGLAS[`av-villas:${producto}`] = viviendaAvVillas(producto);
 }
