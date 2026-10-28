@@ -373,7 +373,8 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   habitacional** y **VIS | No VIS** (el producto y la dirección siguen
   siendo `vivienda-vis`, `leasing-no-vis`…). La cuota de vivienda se calcula con
   $150.000.000 a 240 meses (consumo: $20.000.000 a 48). El Fondo Nacional
-  del Ahorro es tipo "Fondo".
+  del Ahorro es tipo "Fondo". Una tasa de vivienda publicada sin promedio
+  de la Superfinanciera (p. ej. AV Villas en leasing) no sale en el ranking.
 - **Bancos que no publican su tasa** en un producto (fuente con
   `como_extraer` = "Solo promedio", hoy Banco Popular, Banco de Occidente y Banco Unión
   en libranza: no publican la tasa): `/api/tasas` los agrega solo con el promedio de la

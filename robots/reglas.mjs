@@ -1218,6 +1218,236 @@ function finandinaLibranza(t, vigencia) {
   };
 }
 
+// --- Vivienda (adquisición en pesos) -------------------------------------
+// Productos `vivienda-vis`, `vivienda-no-vis` (crédito hipotecario),
+// `leasing-vis` y `leasing-no-vis` (leasing habitacional). Solo pesos (sin
+// UVR, remodelación ni programas especiales). No les aplica la usura de
+// consumo: si el banco no publica el "hasta", queda vacío.
+
+/** "vivienda-no-vis" → { leasing: false, noVis: true } */
+const tipoVivienda = (producto) => ({
+  leasing: producto.startsWith("leasing"),
+  noVis: producto.endsWith("-no-vis"),
+});
+
+/**
+ * Davivienda: "FINANCIACIÓN DE VIVIENDA", tablas "Crédito Hipotecario" y
+ * "Leasing Habitacional" con filas VIS y NO VIS, "DESDE" en pesos (E.A. y
+ * M.V.); vigencia "Vigente a partir del …" de esa página.
+ */
+function viviendaDavivienda(producto) {
+  const { leasing, noVis } = tipoVivienda(producto);
+  return {
+    ...REGLAS.davivienda,
+    ancla: leasing ? /Leasing Habitacional/ : /Crédito Hipotecario/,
+    leer(texto) {
+      const t = plano(texto);
+      const pagina = despuesDe(
+        t,
+        /FINANCIACIÓN DE VIVIENDA/,
+        'la página "FINANCIACIÓN DE VIVIENDA"',
+      ).split(/OTROS PRODUCTOS/)[0];
+      const [hipotecario, deLeasing] = pagina.split(/Leasing Habitacional/);
+      if (deLeasing === undefined)
+        throw new ReglaRota('No encontré la tabla "Leasing Habitacional".');
+      const tabla = leasing ? deLeasing : hipotecario;
+      const m = exigir(
+        tabla,
+        noVis
+          ? /NO VIS ([\d,]+)% ([\d,]+)%/
+          : /(?:^|\n) ?VIS ([\d,]+)% ([\d,]+)%/,
+        `la fila ${noVis ? "NO VIS" : "VIS"} de "${leasing ? "Leasing Habitacional" : "Crédito Hipotecario"}"`,
+      );
+      // "Vigente a partir del 01 de Noviembre 20…": el año puede quedar
+      // cortado en el texto; se toma el de "Fecha de Actualización … de 2026".
+      const vig = exigir(
+        pagina,
+        /Vigente a partir del (\d{1,2}) de (\p{L}+)(?: de)? ?(\d{4})?/u,
+        "la vigencia de vivienda",
+      );
+      const año =
+        vig[3] ??
+        exigir(
+          t,
+          /Fecha de Actualización \p{L}+ \d{1,2} de (\d{4})/u,
+          "el año de actualización",
+        )[1];
+      return {
+        eaDesde: numero(m[1]),
+        mvDesde: numero(m[2]),
+        eaHasta: null,
+        mvHasta: null,
+        vigencia: fecha(`${vig[1]} de ${vig[2].toLowerCase()} de ${año}`),
+        frase: `${leasing ? "Leasing Habitacional" : "Crédito Hipotecario"} · ${m[0].trim()} (desde, pesos E.A. y M.V.)`,
+      };
+    },
+  };
+}
+
+/**
+ * Banco Agrario: "Créditos de Vivienda", "CRÉDITO HIPOTECARIO PARA
+ * VIVIENDA" con VIS y NO VIS en UVR y PESOS E.A. (sin leasing). No cuentan
+ * remodelación, Findeter ni el programa "Colombia Reconstruye".
+ */
+function viviendaAgrario(producto) {
+  const { noVis } = tipoVivienda(producto);
+  return {
+    ...REGLAS["banco-agrario"],
+    ancla: /CRÉDITO HIPOTECARIO PARA VIVIENDA/,
+    leer(texto) {
+      const t = plano(texto);
+      const i = t.search(/Créditos de Vivienda/);
+      if (i < 0)
+        throw new ReglaRota('No encontré la tabla "Créditos de Vivienda".');
+      const fechas = [
+        ...t
+          .slice(0, i)
+          .matchAll(/DEL (\d{1,2}) AL \d{1,2} DE (\p{L}+) DE (\d{4})/gu),
+      ];
+      if (!fechas.length)
+        throw new ReglaRota(
+          'No encontré la fecha "DEL … AL … DE … DE …" antes de vivienda.',
+        );
+      const [, dia, mes, año] = fechas.at(-1);
+      // La primera fila VIS y la primera NO VIS son las del hipotecario (las
+      // siguientes, de remodelación).
+      const tabla = t.slice(i).split(/CREDITO REMODELACION/)[0];
+      const m = exigir(
+        tabla,
+        noVis
+          ? /NO VIS UVR \+ [\d.,]+% ([\d.,]+)%/
+          : /(?:^|\n) ?VIS UVR \+ [\d.,]+% ([\d.,]+)%/,
+        `la fila ${noVis ? "NO VIS" : "VIS"} de "CRÉDITO HIPOTECARIO PARA VIVIENDA"`,
+      );
+      const eaDesde = numero(m[1]);
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta: null,
+        mvHasta: null,
+        vigencia: fecha(`${dia} de ${mes.toLowerCase()} de ${año}`),
+        frase: `Crédito hipotecario para vivienda ${noVis ? "NO VIS" : "VIS"}: ${m[1]}% E.A. en pesos`,
+      };
+    },
+  };
+}
+
+/**
+ * Davibank: "Crédito Hipotecario y leasing habitacional", columnas "Tasa
+ * E.A" y "Tasa E.A Hasta": adquisición en pesos VIS (solo desde) y NO VIS
+ * (desde y hasta); "CREDITOS LEASING HABITACIONAL EN PESOS" sin separar VIS
+ * (va en leasing No VIS: es lo que Davibank reporta a la Superfinanciera).
+ */
+function viviendaDavibank(producto) {
+  const { leasing, noVis } = tipoVivienda(producto);
+  return {
+    ...REGLAS.davibank,
+    ancla: /Hipotecario y leasing habitacional/,
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(
+        t,
+        /Vigentes mes de (\p{L}+) \(del día (\d{1,2}) al día \d{1,2}\) (\d{4})/u,
+        "la vigencia del mes",
+      );
+      const bloque = despuesDe(
+        t,
+        /Crédito Hipotecario y leasing habitacional/,
+        'la tabla "Crédito Hipotecario y leasing habitacional"',
+      );
+      const fila = leasing
+        ? /CREDITOS LEASING HABITACIONAL EN PESOS[ *]*([\d,]+)%(?: ([\d,]+)%)?/
+        : noVis
+          ? /ADQUISICIÓN EN PESOS NO VIS ([\d,]+)%(?: ([\d,]+)%)?/
+          : /ADQUISICIÓN EN PESOS \(VIS\) ([\d,]+)%(?: ([\d,]+)%)?/;
+      const m = exigir(bloque, fila, "la fila de vivienda en pesos");
+      const eaDesde = numero(m[1]);
+      const eaHasta = m[2] ? numero(m[2]) : null;
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: eaHasta === null ? null : mensual(eaHasta),
+        vigencia: fecha(`${vig[2]} de ${vig[1]} de ${vig[3]}`),
+        frase: m[0],
+      };
+    },
+  };
+}
+
+/**
+ * AV Villas: la página de vivienda va en dos columnas: "Créditos
+ * Hipotecarios" a la izquierda y "Leasing Habitacional" (solo NO VIS) a la
+ * derecha; se separan por la posición del título de la derecha. Filas VIS y
+ * NO VIS en pesos E.A. de todas sus tablas (con beneficio de reducción de
+ * tasa y digital): desde = la más baja, hasta = la más alta que publica como
+ * "Hasta". No cuentan las filas en UVR, remodelación, libre inversión con
+ * garantía ni "inmuebles diferentes de vivienda".
+ */
+function viviendaAvVillas(producto) {
+  const { leasing, noVis } = tipoVivienda(producto);
+  return {
+    ...REGLAS["av-villas"],
+    ancla: leasing ? /Leasing Habitacional/ : /Créditos Hipotecarios/,
+    leer(texto) {
+      const vig = exigir(plano(texto), /A partir del ([^\n]+)/, "la vigencia");
+      const lineas = texto.split("\n");
+      const titulo = lineas.find(
+        (l) =>
+          /Créditos Hipotecarios/.test(l) && /Leasing Habitacional/.test(l),
+      );
+      const columna = titulo
+        ? titulo.indexOf("Leasing Habitacional") - 2
+        : Infinity;
+      const lado = lineas
+        .map((l) => (leasing ? l.slice(columna) : l.slice(0, columna)))
+        .join("\n");
+      const desde = leasing ? /Leasing Habitacional/ : /Créditos Hipotecarios/;
+      const bloque = despuesDe(
+        plano(lado),
+        desde,
+        `la tabla "${leasing ? "Leasing Habitacional" : "Créditos Hipotecarios"}"`,
+      ).split(
+        /Crédito inmuebles diferentes de vivienda|Libre inversión persona natural|Remodelación vivienda/,
+      )[0];
+      const fila = noVis
+        ? /NO VIS ([\d,]+)% ?E\.A\.?(?: ([\d,]+)% ?E\.A)?/g
+        : /(?:^|\n) ?VIS ([\d,]+)% ?E\.A\.?(?: ([\d,]+)% ?E\.A)?/g;
+      const filas = [...bloque.matchAll(fila)];
+      if (!filas.length)
+        throw new ReglaRota(
+          `No encontré las filas ${noVis ? "NO VIS" : "VIS"} en pesos (E.A.) de "${leasing ? "Leasing Habitacional" : "Créditos Hipotecarios"}".`,
+        );
+      const eaDesde = Math.min(...filas.map((f) => numero(f[1])));
+      const hastas = filas.filter((f) => f[2]).map((f) => numero(f[2]));
+      const eaHasta = hastas.length ? Math.max(...hastas) : null;
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: eaHasta === null ? null : mensual(eaHasta),
+        vigencia: fecha(vig[1]),
+        frase: `${leasing ? "Leasing Habitacional" : "Créditos Hipotecarios"} en pesos ${noVis ? "NO VIS" : "VIS"}: ${filas.map((f) => f[0].trim()).join(" · ")}`,
+      };
+    },
+  };
+}
+
+for (const producto of [
+  "vivienda-vis",
+  "vivienda-no-vis",
+  "leasing-vis",
+  "leasing-no-vis",
+]) {
+  REGLAS[`davivienda:${producto}`] = viviendaDavivienda(producto);
+  REGLAS[`davibank:${producto}`] = viviendaDavibank(producto);
+  if (!producto.startsWith("leasing"))
+    REGLAS[`banco-agrario:${producto}`] = viviendaAgrario(producto);
+  if (producto !== "leasing-vis")
+    REGLAS[`av-villas:${producto}`] = viviendaAvVillas(producto);
+}
+delete REGLAS["davibank:leasing-vis"];
+
 /**
  * La regla de un banco para un producto: la de libre inversión es la del
  * código del banco y la de los demás, "<banco>:<producto>".

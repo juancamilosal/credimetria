@@ -409,3 +409,151 @@ describe("mesVencido", () => {
     assert.equal(mesVencido("2025-12-01", new Date(2026, 0, 3)), true);
   });
 });
+
+/**
+ * Vivienda (adquisición en pesos), de los mismos PDF de octubre de 2026. Sin
+ * "hasta" publicado queda en null (no se usa la usura de consumo).
+ */
+const VIVIENDA = [
+  [
+    "davivienda",
+    "vivienda-vis",
+    "davivienda",
+    1.12,
+    14.3,
+    null,
+    null,
+    "2026-11-01",
+  ],
+  [
+    "davivienda",
+    "vivienda-no-vis",
+    "davivienda",
+    1.12,
+    14.35,
+    null,
+    null,
+    "2026-11-01",
+  ],
+  [
+    "davivienda",
+    "leasing-vis",
+    "davivienda",
+    1.08,
+    13.8,
+    null,
+    null,
+    "2026-11-01",
+  ],
+  [
+    "davivienda",
+    "leasing-no-vis",
+    "davivienda",
+    1.09,
+    13.95,
+    null,
+    null,
+    "2026-11-01",
+  ],
+  [
+    "banco-agrario",
+    "vivienda-vis",
+    "banco-agrario",
+    mensual(14.7),
+    14.7,
+    null,
+    null,
+    "2026-10-05",
+  ],
+  [
+    "banco-agrario",
+    "vivienda-no-vis",
+    "banco-agrario",
+    mensual(15.2),
+    15.2,
+    null,
+    null,
+    "2026-10-05",
+  ],
+  [
+    "davibank",
+    "vivienda-vis",
+    "davibank",
+    mensual(14.39),
+    14.39,
+    null,
+    null,
+    "2026-10-01",
+  ],
+  [
+    "davibank",
+    "vivienda-no-vis",
+    "davibank",
+    mensual(15.57),
+    15.57,
+    mensual(15.7),
+    15.7,
+    "2026-10-01",
+  ],
+  [
+    "davibank",
+    "leasing-no-vis",
+    "davibank",
+    mensual(15.57),
+    15.57,
+    mensual(15.7),
+    15.7,
+    "2026-10-01",
+  ],
+  // Dos columnas: hipotecario a la izquierda, leasing (solo No VIS) a la derecha.
+  [
+    "av-villas",
+    "vivienda-vis",
+    "av-villas",
+    mensual(13),
+    13,
+    mensual(15.45),
+    15.45,
+    "2026-10-01",
+  ],
+  [
+    "av-villas",
+    "vivienda-no-vis",
+    "av-villas",
+    mensual(13.5),
+    13.5,
+    mensual(16.5),
+    16.5,
+    "2026-10-01",
+  ],
+  [
+    "av-villas",
+    "leasing-no-vis",
+    "av-villas",
+    mensual(15.5),
+    15.5,
+    mensual(16.25),
+    16.25,
+    "2026-10-01",
+  ],
+];
+
+describe("reglas de vivienda", () => {
+  for (const [banco, producto, archivo, ...esperado] of VIVIENDA) {
+    it(`${banco}: lee ${producto}`, () => {
+      const t = reglaDe(banco, producto).leer(texto(archivo));
+      assert.deepEqual(
+        [t.mvDesde, t.eaDesde, t.mvHasta, t.eaHasta, t.vigencia],
+        esperado,
+      );
+      assert.deepEqual(revisar(t, USURA), []);
+      assert.ok(t.frase);
+    });
+  }
+
+  it("sin leasing VIS en Davibank, AV Villas y Agrario", () => {
+    assert.equal(reglaDe("davibank", "leasing-vis"), undefined);
+    assert.equal(reglaDe("av-villas", "leasing-vis"), undefined);
+    assert.equal(reglaDe("banco-agrario", "leasing-no-vis"), undefined);
+  });
+});

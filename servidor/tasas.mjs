@@ -105,6 +105,11 @@ async function leer() {
       (x) => x.entidad === p.entidad.codigo && x.producto === p.producto,
     );
     const desde = numero(p.ea_desde);
+    // En vivienda, sin promedio de la Superfinanciera (p. ej. AV Villas en
+    // leasing, que publica tasa pero no reporta créditos) no hay cómo
+    // ordenarla por lo que de verdad cobra: no sale.
+    if (VIVIENDA.includes(p.producto) && numero(promedio?.tasa_ea) === null)
+      continue;
     const real = numero(promedio?.tasa_ea) ?? desde;
     if (real === null) continue;
     tasas.push({

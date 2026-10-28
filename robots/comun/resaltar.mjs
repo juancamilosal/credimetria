@@ -14,6 +14,10 @@ import { PDFTOTEXT } from "./pdf.mjs";
 const ANCLAS = {
   "libre-inversion": /libre\s*(inversi|destino)/i,
   libranza: /libranza/i,
+  "vivienda-vis": /hipotecari|vivienda/i,
+  "vivienda-no-vis": /hipotecari|vivienda/i,
+  "leasing-vis": /leasing habitacional/i,
+  "leasing-no-vis": /leasing habitacional/i,
 };
 
 const ENTIDADES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };

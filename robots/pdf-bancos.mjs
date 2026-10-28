@@ -330,7 +330,10 @@ async function revisarFuente(fuente) {
   }
 
   const leida = tasa && !problemas.length;
-  const sinMaxima = leida && tasa.eaHasta === null;
+  // En vivienda no aplica la usura de consumo: sin máxima publicada, el
+  // "hasta" queda vacío.
+  const vivienda = /^(vivienda|leasing)-/.test(fuente.producto);
+  const sinMaxima = leida && tasa.eaHasta === null && !vivienda;
   const valores = leida && {
     valor_desde: tasa.mvDesde,
     valor_hasta: sinMaxima ? USURA.mv : tasa.mvHasta,
@@ -444,7 +447,11 @@ async function revisarFuente(fuente) {
     ...(leida
       ? {
           ...valores,
-          hasta_origen: sinMaxima ? "usura" : "entidad",
+          hasta_origen: sinMaxima
+            ? "usura"
+            : tasa.eaHasta === null
+              ? null
+              : "entidad",
           frase: tasa.frase,
           notas: `Leída por el robot el ${cuando()}${tasa.soloMaxima ? " El banco solo publica la tasa máxima (no hay desde)." : ""}${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
         }
@@ -462,7 +469,7 @@ async function revisarFuente(fuente) {
 
   return leida
     ? {
-        nuevo: `${nombre}: ${queEs} (rige desde ${tasa.vigencia}). Leí ${tasa.soloMaxima ? `hasta ${tasa.mvHasta} % M.V. (solo publica la máxima)` : `${tasa.mvDesde} % a ${sinMaxima ? USURA.mv + " % (usura)" : tasa.mvHasta + " %"} M.V.`}; está por aprobar.`,
+        nuevo: `${nombre}: ${queEs} (rige desde ${tasa.vigencia}). Leí ${tasa.soloMaxima ? `hasta ${tasa.mvHasta} % M.V. (solo publica la máxima)` : `${tasa.mvDesde} %${sinMaxima ? ` a ${USURA.mv} % (usura)` : tasa.mvHasta === null ? " (solo desde)" : ` a ${tasa.mvHasta} %`} M.V.`}; está por aprobar.`,
       }
     : {
         problema: `${nombre}: ${queEs} guardado, pero no pude leer la tasa: ${problemas.join(" ")} Quedó por aprobar sin valores.`,

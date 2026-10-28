@@ -111,6 +111,20 @@ Davivienda 22,71 % E.A.
 | Banco Agrario      | PDF **semanal** `Tasas_colocaciones_del_<d><mes>_al_<d><mes>_<año>.pdf`: el que empieza más tarde                                                                                                                                                                                      | Página "Creditos de Consumo" (recursos propios): desde = la más baja de "PERSONAL - LIBRE DESTINO" y "CREDITO DIGITAL LIBRE INVERSIÓN", hasta = usura; vigencia "DEL … AL … DE …" de esa sección |
 | AV Villas          | Dirección de la fuente; si tiene `url_indice`, el "Tasas Activas" más nuevo                                                                                                                                                                                                            | "TASAS CONSUMO LIBRE INVERSIÓN": "Desde … ( … M.V. )" y "Hasta …"                                                                                                                                |
 
+- **Reglas de vivienda** (`<banco>:vivienda-vis`, `vivienda-no-vis`,
+  `leasing-vis`, `leasing-no-vis`; adquisición en pesos, sin UVR,
+  remodelación ni programas especiales). Usan el mismo PDF de libre
+  inversión. Desde = la más baja de las filas en pesos; hasta = la que el
+  banco publica como "Hasta"; si no la publica, **queda vacío** (en vivienda
+  no aplica la usura de consumo):
+
+| Banco         | Qué lee (oct 2026)                                                                                                                                                                                                                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Davivienda    | "FINANCIACIÓN DE VIVIENDA": Crédito Hipotecario y Leasing Habitacional, filas VIS y NO VIS "DESDE" en pesos (E.A. y M.V.); vigencia "Vigente a partir del …" (el año, de "Fecha de Actualización")                                                             |
+| Banco Agrario | "Créditos de Vivienda", "CRÉDITO HIPOTECARIO PARA VIVIENDA" VIS 14,70 % y NO VIS 15,20 % (pesos E.A.); sin leasing. No cuentan remodelación, Findeter ni "Colombia Reconstruye"                                                                                |
+| Davibank      | Adquisición en pesos VIS 14,39 % (solo desde) y NO VIS 15,57 % a 15,70 %; "Leasing habitacional en pesos" 15,57 % a 15,70 % (va en leasing No VIS)                                                                                                             |
+| AV Villas     | Página en dos columnas (se separan por la posición del título "Leasing Habitacional"): Créditos Hipotecarios VIS 13,00 % a 15,45 % y NO VIS 13,50 % a 16,50 % (todas sus tablas en pesos, también digital); Leasing Habitacional solo NO VIS 15,50 % a 16,25 % |
+
 - **Reglas de libranza** (`<banco>:libranza`). Cuentan **todas** las filas
   de libranza que publica el banco (pagadurías, plazos, convenios especiales
   como Policía, Ministerio de Defensa o Grupo Olímpica, compra de cartera,
