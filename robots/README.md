@@ -254,7 +254,10 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
 
    | Tarea                                                       | Hora Colombia | Cron (UTC)   |
    | ----------------------------------------------------------- | ------------- | ------------ |
-   | `node pdf-bancos.mjs` (todos los días)                      | 3:13 a. m.    | `13 8 * * *` |
+   | `node pdf-bancos.mjs --producto libre-inversion` (diaria)   | 1:53 a. m.    | `53 6 * * *` |
+   | `node pdf-bancos.mjs --producto libranza` (diaria)          | 2:13 a. m.    | `13 7 * * *` |
+   | `node pdf-bancos.mjs --producto hipotecario` (diaria)       | 2:33 a. m.    | `33 7 * * *` |
+   | `node pdf-bancos.mjs --producto leasing` (diaria)           | 2:53 a. m.    | `53 7 * * *` |
    | `node promedio-sfc.mjs --producto libre-inversion` (martes) | 3:23 a. m.    | `23 8 * * 2` |
    | `node promedio-sfc.mjs --producto libranza` (martes)        | 3:43 a. m.    | `43 8 * * 2` |
    | `node promedio-sfc.mjs --producto vivienda-vis` (martes)    | 4:03 a. m.    | `3 9 * * 2`  |
@@ -262,7 +265,12 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
    | `node promedio-sfc.mjs --producto leasing-vis` (martes)     | 4:43 a. m.    | `43 9 * * 2` |
    | `node promedio-sfc.mjs --producto leasing-no-vis` (martes)  | 5:03 a. m.    | `3 10 * * 2` |
 
-   Una tarea por producto (como libranza): cada una con sus 15 minutos.
+   Una tarea por producto, también en el robot de los PDF: cada una con sus
+   15 minutos. Dentro de una corrida, el mismo PDF o la misma página (VIS y
+   No VIS, o libre inversión y libranza) se baja, se lee y se fotografía una
+   sola vez. Sin `--producto`, el robot revisa todas las fuentes (sirve para
+   probar, pero puede pasar de los 15 minutos). Un producto nuevo necesita su
+   propia tarea.
 
 ## Probar en local
 
@@ -272,3 +280,6 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
   guardados resaltaría)
 - `DIRECTUS_TOKEN=… node robots/pdf-bancos.mjs --sin-guardar` (revisa sin
   escribir; necesita `pdftotext`)
+- `… pdf-bancos.mjs --sin-guardar --producto hipotecario --solo bbva,fna`
+  (solo ese producto o grupo: `hipotecario`, `leasing`, `vivienda`, o
+  productos separados por coma; y solo esas entidades)

@@ -32,12 +32,16 @@
 //                    --sin-guardar)
 //   --recordatorio   manda hoy el recordatorio de los bancos que bloquean
 //                    (normalmente sale los lunes)
+//   --producto libranza   solo las fuentes de ese producto: uno, varios
+//                    separados por coma o un grupo (hipotecario, leasing,
+//                    vivienda). Cada producto es una tarea aparte en Coolify.
+//   --solo bbva,fna  solo esas entidades (códigos separados por coma)
 
 import { readFile } from "node:fs/promises";
 import { avisar } from "./comun/aviso.mjs";
 import { directus, hayToken, subirArchivo } from "./comun/directus.mjs";
-import { pantallazo, textoConNavegador } from "./comun/pantallazo.mjs";
-import { bajarPdf, huella, pagina, textoHtml, textoPdf } from "./comun/pdf.mjs";
+import * as navegador from "./comun/pantallazo.mjs";
+import * as pdf from "./comun/pdf.mjs";
 import { resaltarPdf } from "./comun/resaltar.mjs";
 import {
   masReciente,
@@ -59,6 +63,63 @@ const soloMirar = process.argv.includes("--sin-guardar");
 const iHoy = process.argv.indexOf("--hoy");
 const HOY =
   iHoy > 0 ? new Date(`${process.argv[iHoy + 1]}T12:00:00`) : new Date();
+/**
+ * Guarda el resultado durante la corrida: el mismo PDF o la misma página
+ * sirve a varios productos del banco (libre inversión, libranza, VIS y No
+ * VIS…) y se baja, se lee o se fotografía una sola vez. Si falla, se olvida
+ * para que la próxima fuente lo intente de nuevo.
+ */
+function unaVez(fn) {
+  const hechos = new Map();
+  return (...args) => {
+    const clave = JSON.stringify(
+      args.map((a) => (Buffer.isBuffer(a) ? pdf.huella(a) : a)),
+    );
+    if (!hechos.has(clave))
+      hechos.set(
+        clave,
+        fn(...args).catch((error) => {
+          hechos.delete(clave);
+          throw error;
+        }),
+      );
+    return hechos.get(clave);
+  };
+}
+const { huella, textoHtml } = pdf;
+const bajarPdf = unaVez(pdf.bajarPdf);
+const pagina = unaVez(pdf.pagina);
+const textoPdf = unaVez(pdf.textoPdf);
+const textoConNavegador = unaVez(navegador.textoConNavegador);
+const pantallazo = unaVez(navegador.pantallazo);
+
+/** Grupos que acepta --producto. */
+const GRUPOS = {
+  hipotecario: ["vivienda-vis", "vivienda-no-vis"],
+  leasing: ["leasing-vis", "leasing-no-vis"],
+  vivienda: [
+    "vivienda-vis",
+    "vivienda-no-vis",
+    "leasing-vis",
+    "leasing-no-vis",
+  ],
+};
+/** Los valores de --producto o --solo (separados por coma); null si no está. */
+function opcion(nombre) {
+  const i = process.argv.indexOf(nombre);
+  if (i < 0) return null;
+  const valor = process.argv[i + 1];
+  if (!valor || valor.startsWith("--"))
+    throw new Error(`Falta el valor de ${nombre}.`);
+  return valor
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+const soloProductos =
+  opcion("--producto")?.flatMap((p) => GRUPOS[p] ?? [p]) ?? null;
+const soloEntidades = opcion("--solo");
+
 /** Día del recordatorio de los bancos que se revisan a mano (1 = lunes). */
 const DIA_RECORDATORIO = 1;
 // Los bancos que bloquean van los lunes; los PDF mensuales vencidos, a diario
@@ -496,12 +557,25 @@ async function main() {
   }
 
   if (!hayToken()) throw new Error("Falta DIRECTUS_TOKEN.");
-  const fuentes = await directus(
-    "GET",
-    // Las de "solo_promedio" (el banco no publica su tasa) no se revisan.
-    "/items/fuentes?filter[tipo][_in]=pdf,pagina&filter[estado][_eq]=activa&filter[como_extraer][_neq]=solo_promedio&limit=-1" +
-      "&fields=id,tipo,producto,url,url_indice,ultimo_hash,entidad.codigo,entidad.nombre",
+  const fuentes = (
+    await directus(
+      "GET",
+      // Las de "solo_promedio" (el banco no publica su tasa) no se revisan.
+      "/items/fuentes?filter[tipo][_in]=pdf,pagina&filter[estado][_eq]=activa&filter[como_extraer][_neq]=solo_promedio&limit=-1" +
+        "&fields=id,tipo,producto,url,url_indice,ultimo_hash,entidad.codigo,entidad.nombre",
+    )
+  ).filter(
+    (f) =>
+      (!soloProductos || soloProductos.includes(f.producto)) &&
+      (!soloEntidades || soloEntidades.includes(f.entidad?.codigo)),
   );
+  if (soloProductos || soloEntidades)
+    console.log(
+      `Reviso ${fuentes.length} fuentes` +
+        (soloProductos ? ` de ${soloProductos.join(", ")}` : "") +
+        (soloEntidades ? ` de ${soloEntidades.join(", ")}` : "") +
+        ".",
+    );
   const nuevos = [];
   const problemas = [];
   const manuales = [];
