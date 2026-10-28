@@ -141,7 +141,9 @@ Directus. No está en el menú: se entra por `/admin`.
     sube el PDF con su vigencia (si su huella SHA-256 ya existe para esa
     fuente o para otro banco, avisa; si es el mismo PDF de otro producto del
     banco, como Davivienda con libre inversión y libranza, lo reutiliza sin
-    subirlo otra vez) **sin borrar lo que ya está escrito**: si hay una tasa
+    subirlo otra vez; si es el mismo que ya está cargado en esa tarjeta, lo
+    vuelve a usar y a leer, para actualizar la tasa) **sin borrar lo que ya
+    está escrito**: si hay una tasa
     por aprobar, el archivo se le une y conserva sus valores (la vigencia
     cambia solo si se escribió al cargar); si no, crea la tasa por aprobar
     con los valores de la publicada (o vacía si no hay), y abre el

@@ -168,11 +168,14 @@ export class DocumentosAdminService {
       '/files',
       datos,
     );
-    return this.sesion.pedir<DocumentoPdf>(
+    const cambiado = await this.sesion.pedir<DocumentoPdf>(
       'PATCH',
       `/items/documentos/${documento.id}?fields=${CAMPOS_DOCUMENTO}`,
       { archivo_resaltado: subido.id },
     );
+    // Al volver a leer un PDF ya cargado, la copia anterior sobra.
+    await this.borrarResaltado(documento);
+    return cambiado;
   }
 
   /** Corrige la vigencia de un PDF cargado. */

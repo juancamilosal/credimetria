@@ -630,17 +630,33 @@ export class TasasAdmin implements OnInit, OnDestroy {
     const que = esPdf ? 'PDF' : 'pantallazo';
     await this.trabajar(c.clave, async () => {
       try {
-        const documento = await this.docs.cargar(
-          fuente.id,
-          archivo,
-          this.vigencia || null,
-        );
-        this.documentos.update((lista) => [documento, ...lista]);
+        // Si ese mismo archivo ya está cargado en esta tarjeta, se usa el
+        // que hay y se vuelve a leer (para actualizar la tasa).
+        let documento: DocumentoPdf;
+        let yaEstaba = false;
+        try {
+          documento = await this.docs.cargar(
+            fuente.id,
+            archivo,
+            this.vigencia || null,
+          );
+          this.documentos.update((lista) => [documento, ...lista]);
+        } catch (error) {
+          if (
+            !(error instanceof DocumentoRepetido) ||
+            error.existente.fuente !== fuente.id
+          )
+            throw error;
+          documento = error.existente;
+          yaEstaba = true;
+        }
         // No se borra lo que ya está escrito: si hay una tasa por aprobar,
         // el archivo se le une; si no, la nueva copia la publicada.
         const pendiente = c.porAprobar[0];
         const tasa = pendiente
-          ? await this.admin.unirDocumento(pendiente, documento)
+          ? pendiente.documento?.id === documento.id
+            ? pendiente
+            : await this.admin.unirDocumento(pendiente, documento)
           : await this.admin.crearDesdeDocumento(
               fuente,
               documento,
@@ -650,7 +666,9 @@ export class TasasAdmin implements OnInit, OnDestroy {
         else this.tasas.update((lista) => [tasa, ...lista]);
         this.cargandoEn.set(null);
         this.editar(tasa);
-        const cargado = `${que[0].toUpperCase() + que.slice(1)} de ${c.entidad.nombre} cargado.`;
+        const cargado = yaEstaba
+          ? `Ese ${que} de ${c.entidad.nombre} ya estaba cargado: lo volví a usar.`
+          : `${que[0].toUpperCase() + que.slice(1)} de ${c.entidad.nombre} cargado.`;
         // Un PDF se lee al momento con las reglas del robot y llena el
         // formulario (no se guarda hasta que se revise).
         const lectura = esPdf

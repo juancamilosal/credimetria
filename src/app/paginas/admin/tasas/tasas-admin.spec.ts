@@ -5,7 +5,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { DocumentoPdf, FuenteAdmin } from '../../../core/modelos/documento';
 import { TasaAdmin } from '../../../core/modelos/tasa-admin';
-import { DocumentosAdminService } from '../../../core/servicios/documentos-admin.service';
+import {
+  DocumentoRepetido,
+  DocumentosAdminService,
+} from '../../../core/servicios/documentos-admin.service';
 import { SesionAdmin } from '../../../core/servicios/sesion-admin.service';
 import { TasasAdminService } from '../../../core/servicios/tasas-admin.service';
 import { leerDecimal, TasasAdmin } from './tasas-admin';
@@ -387,6 +390,31 @@ describe('TasasAdmin', () => {
     expect(html.textContent).toContain('Leí sus tasas y llené el formulario');
     // No guarda solo: espera a que se revise.
     expect(admin.guardar).not.toHaveBeenCalled();
+  });
+
+  it('si el PDF ya estaba cargado en la tarjeta, lo vuelve a usar y a leer', async () => {
+    await crear();
+    // El mismo PDF que ya tiene la tasa por aprobar (documento 11).
+    docs.cargar.and.rejectWith(new DocumentoRepetido(docNuevo));
+    const pdf = new File(['%PDF'], 'oct.pdf', { type: 'application/pdf' });
+    await cargarEn(html.querySelector('.banco')!, pdf);
+    expect(admin.unirDocumento).not.toHaveBeenCalled();
+    expect(admin.crearDesdeDocumento).not.toHaveBeenCalled();
+    expect(admin.leerPdf).toHaveBeenCalledWith('bbva', 'libre-inversion', pdf);
+    expect(html.textContent).toContain('ya estaba cargado: lo volví a usar');
+    expect(html.textContent).not.toContain('No se cargó de nuevo');
+  });
+
+  it('un PDF repetido de otro banco sigue sin cargarse', async () => {
+    await crear();
+    docs.cargar.and.rejectWith(
+      new DocumentoRepetido(documento({ id: 50, fuente: 99 })),
+    );
+    await cargarEn(
+      html.querySelector('.banco')!,
+      new File(['%PDF'], 'otro.pdf', { type: 'application/pdf' }),
+    );
+    expect(html.textContent).toContain('No se cargó de nuevo');
   });
 
   it('sin tasa por aprobar, la nueva copia los valores de la publicada', async () => {
