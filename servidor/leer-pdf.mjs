@@ -76,7 +76,14 @@ export function rutasLeerPdf(app) {
         try {
           tasa = regla.leer(await textoPdf(datos));
         } catch (error) {
-          return res.json({ leida: false, problemas: [error.message] });
+          return res.json({
+            leida: false,
+            problemas: [
+              error.code === "ENOENT"
+                ? "el servidor de la página no tiene pdftotext instalado (poppler-utils)."
+                : error.message,
+            ],
+          });
         }
         const problemas = revisar(tasa, USURA);
         const leida = tasaLeida(tasa);

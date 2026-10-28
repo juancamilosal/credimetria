@@ -381,9 +381,13 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   (`SOURCE_COMMIT` de Coolify), hace cuánto leyó Directus, cuántas tasas hay
   por producto y si pudo leer los bancos "solo promedio" (con el error de
   Directus si no).
-- **`pdftotext` en el servidor** (paquete `poppler-utils`, en
-  `nixpacks.toml`): lo usa la lectura de los PDF cargados a mano. Sin él,
-  cargar funciona igual pero las tasas se escriben a mano.
+- **`pdftotext` en el servidor** (paquete `poppler-utils`): lo usa la
+  lectura de los PDF cargados a mano. Sin él, cargar funciona igual pero las
+  tasas se escriben a mano (el aviso dice que falta). La página se construye
+  con el **`Dockerfile`** de la raíz (Build Pack "Dockerfile" en Coolify):
+  construye la página con Node 22, instala `poppler-utils` y arranca
+  `dist/credimetria/server/server.mjs` en el puerto 4000. `nixpacks.toml`
+  queda por si se vuelve a Nixpacks.
 - **Variables del servidor** (Coolify): `DIRECTUS_TOKEN` (token del "Lector
   web", obligatorio) y `DIRECTUS_URL` (opcional). Sin el token, la página
   sale sin tasas.
