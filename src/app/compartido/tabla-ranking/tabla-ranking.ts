@@ -99,7 +99,9 @@ export class TablaRanking {
         ...t,
         puesto: i + 1,
         diferencia:
-          t.tasaAnunciada === null ? null : t.tasaReal - t.tasaAnunciada,
+          t.tasaAnunciada === null || t.sinReporte
+            ? null
+            : t.tasaReal - t.tasaAnunciada,
         cuota,
         total: Math.round(cuota) * this.plazo(),
       };
@@ -108,8 +110,9 @@ export class TablaRanking {
     const { columna, dir } = this.orden();
     const signo = dir === 'asc' ? 1 : -1;
     return [...filas].sort((a, b) => {
-      const x = a[columna];
-      const y = b[columna];
+      // Sin reporte, el promedio es "—": va al final como los vacíos.
+      const x = columna === 'tasaReal' && a.sinReporte ? null : a[columna];
+      const y = columna === 'tasaReal' && b.sinReporte ? null : b[columna];
       // Los vacíos ("—") van siempre al final.
       if (x === null) return y === null ? 0 : 1;
       if (y === null) return -1;
@@ -123,11 +126,15 @@ export class TablaRanking {
 
   /**
    * La fila lleva "★ Mejor tasa ★": la primera, si se marca y si el banco
-   * publica su tasa (uno que solo tiene promedio no se destaca).
+   * publica su tasa y reporta a la Superfinanciera (uno que solo tiene
+   * promedio, o solo su tasa publicada, no se destaca).
    */
   protected esMejor(fila: FilaVista): boolean {
     return (
-      fila.puesto === 1 && this.marcarMejor() && fila.tasaAnunciada !== null
+      fila.puesto === 1 &&
+      this.marcarMejor() &&
+      fila.tasaAnunciada !== null &&
+      !fila.sinReporte
     );
   }
 

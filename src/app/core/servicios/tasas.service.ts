@@ -124,19 +124,27 @@ export class TasasService {
 
   /**
    * Entidades de un producto ordenadas por la tasa que cobran, de menor a
-   * mayor. El orden nunca depende de quién paga publicidad.
+   * mayor; las que no reportan a la Superfinanciera, al final. El orden
+   * nunca depende de quién paga publicidad.
    */
   ranking(producto: Producto, tipo: TipoEntidad | null = null): TasaEntidad[] {
     return this.todas()
       .filter(
         (t) => t.producto === producto && (tipo === null || t.tipo === tipo),
       )
-      .sort((a, b) => a.tasaReal - b.tasaReal);
+      .sort(
+        (a, b) =>
+          Number(!!a.sinReporte) - Number(!!b.sinReporte) ||
+          a.tasaReal - b.tasaReal,
+      );
   }
 
-  /** La entidad que menos cobra para un producto. */
+  /**
+   * La entidad que menos cobra para un producto (entre las que reportan a la
+   * Superfinanciera).
+   */
   mejor(producto: Producto): TasaEntidad | undefined {
-    return this.ranking(producto)[0];
+    return this.ranking(producto).find((t) => !t.sinReporte);
   }
 
   /** Nombres de todas las entidades que comparamos, en orden alfabético. */

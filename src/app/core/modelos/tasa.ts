@@ -25,6 +25,12 @@ export interface TasaEntidad {
    * reglas): solo hay promedio, pero no es que la entidad no la publique.
    */
   anunciaPendiente?: boolean;
+  /**
+   * La entidad no reporta este producto a la Superfinanciera (vivienda, p. ej.
+   * leasing de Bancolombia): `tasaReal` es la que publica, la columna del
+   * promedio dice "Sin reporte" y va al final del ranking.
+   */
+  sinReporte?: boolean;
   /** Tasa "hasta" del PDF (o el tope de usura si la entidad no la publica). */
   tasaHasta?: number | null;
   /** El "hasta" es el tope de usura, no un dato de la entidad. */

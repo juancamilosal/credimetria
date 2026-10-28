@@ -258,6 +258,16 @@ export const TASAS_PRUEBA: TasaEntidad[] = [
     tasaAnunciada: null,
     anunciaPendiente: true,
   },
+  // Publica su tasa pero no reporta leasing a la Superfinanciera: aunque
+  // anuncia menos, va al final.
+  {
+    entidad: 'Bancolombia',
+    tipo: 'Banco',
+    producto: 'leasing-no-vis',
+    tasaReal: 13.5,
+    tasaAnunciada: 13.5,
+    sinReporte: true,
+  },
 ];
 
 /** Proveedor para las pruebas: TasasService usa estas tasas. */

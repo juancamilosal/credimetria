@@ -105,18 +105,23 @@ async function leer() {
       (x) => x.entidad === p.entidad.codigo && x.producto === p.producto,
     );
     const desde = numero(p.ea_desde);
-    // En vivienda, sin promedio de la Superfinanciera (p. ej. AV Villas en
-    // leasing, que publica tasa pero no reporta créditos) no hay cómo
-    // ordenarla por lo que de verdad cobra: no sale.
-    if (VIVIENDA.includes(p.producto) && numero(promedio?.tasa_ea) === null)
-      continue;
-    const real = numero(promedio?.tasa_ea) ?? desde;
+    // En vivienda, sin promedio de la Superfinanciera (p. ej. Bancolombia o
+    // AV Villas en leasing, que lo ofrecen pero no reportan créditos) sale
+    // igual, con "Sin reporte" y al final: mejor mostrar que lo ofrece. Se
+    // calcula con la tasa que publica.
+    const sinReporte =
+      VIVIENDA.includes(p.producto) && numero(promedio?.tasa_ea) === null;
+    const real =
+      numero(promedio?.tasa_ea) ??
+      desde ??
+      (sinReporte ? numero(p.ea_hasta) : null);
     if (real === null) continue;
     tasas.push({
       entidad: p.entidad.nombre,
       tipo: p.entidad.tipo,
       producto: p.producto,
       tasaReal: real,
+      ...(sinReporte ? { sinReporte: true } : {}),
       tasaAnunciada: desde,
       tasaHasta: numero(p.ea_hasta),
       hastaUsura: p.hasta_origen === "usura",

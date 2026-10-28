@@ -216,7 +216,13 @@
                 >
               }
             </td>
-            <td class="der cifra real">{{ fila.tasaReal | tasa }}</td>
+            <td class="der cifra real">
+              @if (fila.sinReporte) {
+                <span class="no-publica">Sin reporte</span>
+              } @else {
+                {{ fila.tasaReal | tasa }}
+              }
+            </td>
             <td class="der">
               @if (fila.diferencia !== null) {
                 <span class="etq etq-aviso">{{
@@ -332,7 +338,11 @@
           </div>
           <div>
             <span class="nota">Cobra en promedio</span>
-            <span class="cifra real">{{ fila.tasaReal | tasa }}</span>
+            @if (fila.sinReporte) {
+              <span class="no-publica">Sin reporte</span>
+            } @else {
+              <span class="cifra real">{{ fila.tasaReal | tasa }}</span>
+            }
           </div>
           @if (fila.diferencia !== null) {
             <div class="dif">

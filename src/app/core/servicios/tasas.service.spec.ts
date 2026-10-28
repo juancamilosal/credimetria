@@ -16,10 +16,17 @@ describe('TasasService', () => {
 
   it('ordena cada producto de menor a mayor tasa real', () => {
     for (const { id } of servicio.productos) {
-      const tasas = servicio.ranking(id).map((t) => t.tasaReal);
-      expect(tasas.length).toBeGreaterThan(0);
+      const ranking = servicio.ranking(id);
+      expect(ranking.length).toBeGreaterThan(0);
+      const tasas = ranking.filter((t) => !t.sinReporte).map((t) => t.tasaReal);
       expect(tasas).toEqual([...tasas].sort((a, b) => a - b));
     }
+  });
+
+  it('las entidades sin reporte a la Superfinanciera van al final', () => {
+    const ranking = servicio.ranking('leasing-no-vis');
+    expect(ranking.at(-1)?.sinReporte).toBeTrue();
+    expect(servicio.mejor('leasing-no-vis')?.sinReporte).toBeFalsy();
   });
 
   it('filtra por tipo de entidad', () => {

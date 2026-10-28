@@ -1479,6 +1479,41 @@ function viviendaBancolombia(producto) {
 }
 
 /**
+ * Bancolombia, leasing habitacional (no familiar): página "Leasing
+ * habitacional", tabla "Tasas para vivienda" con una sola fila "Más de
+ * $262,635,750 Millones" (No VIS), E.A. y M.V. DESDE. No reporta leasing a la
+ * Superfinanciera: en la página sale con "Sin reporte" en el promedio.
+ */
+const bancolombiaLeasing = {
+  pagina: true,
+  navegador: true,
+  pantallazo: "Tasas para vivienda",
+  ancla: /Tasas para vivienda/,
+  leer(texto) {
+    const t = texto.replace(/\s+/g, " ");
+    const tabla = despuesDe(
+      t,
+      /Tasas para vivienda/,
+      'la tabla "Tasas para vivienda"',
+    ).slice(0, 1500);
+    const m = exigir(
+      tabla,
+      /Más de \$[\d.,]+ Millones ([\d.,]+)% ([\d.,]+)%/i,
+      'la fila "Más de … Millones" de "Tasas para vivienda"',
+    );
+    return {
+      eaDesde: numero(m[1]),
+      mvDesde: numero(m[2]),
+      eaHasta: null,
+      mvHasta: null,
+      // La página no dice desde cuándo rige: la fecha en que se leyó.
+      vigencia: hoyEnColombia(),
+      frase: `Leasing habitacional · Tasas para vivienda · ${m[0]} (E.A. y M.V. DESDE); la página no dice desde cuándo rige (fecha de lectura)`,
+    };
+  },
+};
+
+/**
  * Banco de Bogotá: el mismo PDF mensual trae "TASAS DE COLOCACIÓN PORTAFOLIO
  * DE VIVIENDA" con solo la tasa máxima ("Hasta", no financiado o usado y
  * financiado; E.A.): CRÉDITO NO VIS, CRÉDITO VIS O VIP y LEASING
@@ -1575,6 +1610,7 @@ for (const producto of [
 }
 delete REGLAS["davibank:leasing-vis"];
 REGLAS["banco-de-bogota:leasing-no-vis"] = viviendaBogota("leasing-no-vis");
+REGLAS["bancolombia:leasing-no-vis"] = bancolombiaLeasing;
 
 /**
  * La regla de un banco para un producto: la de libre inversión es la del

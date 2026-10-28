@@ -194,13 +194,35 @@ describe('Ranking', () => {
     ).producto.set('leasing-no-vis');
     fixture.detectChanges();
     expect(html.querySelector('caption')?.textContent).toContain(
-      'Leasing habitacional No VIS · 2 entidades',
+      'Leasing habitacional No VIS · 3 entidades',
     );
-    expect(entidades()).toEqual(['Banco de Occidente', 'Davivienda']);
+    expect(entidades()).toEqual([
+      'Banco de Occidente',
+      'Davivienda',
+      'Bancolombia',
+    ]);
     expect(html.querySelector('tbody .no-publica')?.textContent).toContain(
       'Por cargar',
     );
     expect(html.textContent).not.toContain('No publica su tasa');
+  });
+
+  it('en vivienda, la entidad que no reporta a la Superfinanciera dice "Sin reporte" y va al final', () => {
+    (
+      fixture.componentInstance as unknown as {
+        producto: { set(p: string): void };
+      }
+    ).producto.set('leasing-no-vis');
+    fixture.detectChanges();
+    const filas = [...html.querySelectorAll('tbody tr')];
+    const ultima = filas.at(-1)!;
+    expect(ultima.textContent).toContain('Bancolombia');
+    expect(ultima.textContent).toContain('13,50');
+    expect(ultima.querySelector('.real')?.textContent).toContain('Sin reporte');
+    expect(ultima.classList).not.toContain('primera');
+    expect(TestBed.inject(TasasService).mejor('leasing-no-vis')?.entidad).toBe(
+      'Banco de Occidente',
+    );
   });
 
   it('en vivienda la cuota se calcula con $150.000.000 a 240 meses', () => {
@@ -235,7 +257,7 @@ describe('Ranking', () => {
     // Leasing conserva No VIS.
     tocar(boton('Leasing habitacional'));
     expect(html.querySelector('caption')?.textContent).toContain(
-      'Leasing habitacional No VIS · 2 entidades',
+      'Leasing habitacional No VIS · 3 entidades',
     );
     tocar(boton('VIS'));
     expect(html.querySelector('caption')?.textContent).toContain(
