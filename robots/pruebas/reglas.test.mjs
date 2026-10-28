@@ -722,6 +722,16 @@ const VIVIENDA = [
     "2026-10-01",
   ],
   [
+    "banco-serfinanza",
+    "vivienda-no-vis",
+    "banco-serfinanza",
+    1.21,
+    15.47,
+    null,
+    null,
+    "2026-10-01",
+  ],
+  [
     "banco-caja-social",
     "vivienda-vis",
     "banco-caja-social-vivienda",
@@ -764,5 +774,6 @@ describe("reglas de vivienda", () => {
     assert.equal(reglaDe("bancolombia", "leasing-vis"), undefined);
     assert.equal(reglaDe("fna", "leasing-vis"), undefined);
     assert.equal(reglaDe("bancoomeva", "leasing-no-vis"), undefined);
+    assert.equal(reglaDe("banco-serfinanza", "vivienda-vis"), undefined);
   });
 });

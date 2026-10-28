@@ -1736,6 +1736,51 @@ function viviendaBancoomeva(producto) {
 }
 
 /**
+ * Banco Serfinanza: el mismo PDF mensual trae en "Financiación" la tabla
+ * "Crédito de Vivienda No VIS" con "Vivienda No Vis Nueva desde" y "Usada
+ * desde" (M.V. y E.A.). Desde = la más baja; no publica hasta, VIS ni
+ * leasing habitacional (su "Leasing IBR + …" es de empresas).
+ */
+const serfinanzaVivienda = {
+  ...REGLAS["banco-serfinanza"],
+  ancla: /Crédito de Vivienda No VIS/,
+  leer(texto) {
+    const t = plano(texto);
+    const tabla = despuesDe(
+      t,
+      /Crédito de Vivienda No VIS Tasa M\.V/,
+      'la tabla "Crédito de Vivienda No VIS"',
+    ).slice(0, 1200);
+    const filas = [
+      ...tabla.matchAll(
+        /Vivienda No Vis (Nueva|Usada) desde\s+([\d,]+)%\s+([\d,]+)%/gi,
+      ),
+    ];
+    if (!filas.length)
+      throw new ReglaRota(
+        'No encontré las filas "Vivienda No Vis Nueva/Usada desde".',
+      );
+    const menor = filas.reduce((a, b) => (numero(b[3]) < numero(a[3]) ? b : a));
+    // La vigencia más cercana antes de la tabla (cada hoja trae la suya).
+    const vigencias = [
+      ...t
+        .slice(0, t.search(/Crédito de Vivienda No VIS Tasa M\.V/))
+        .matchAll(/Vigencia de tasas a partir del ([^\n]+)/g),
+    ];
+    if (!vigencias.length)
+      throw new ReglaRota("No encontré la vigencia antes de vivienda.");
+    return {
+      eaDesde: numero(menor[3]),
+      mvDesde: numero(menor[2]),
+      eaHasta: null,
+      mvHasta: null,
+      vigencia: fecha(vigencias.at(-1)[1]),
+      frase: `Crédito de Vivienda No VIS · ${filas.map((m) => `${m[1]} desde ${m[3]}% E.A. (${m[2]}% M.V.)`).join(" · ")} (no publica hasta)`,
+    };
+  },
+};
+
+/**
  * Banco de Bogotá: el mismo PDF mensual trae "TASAS DE COLOCACIÓN PORTAFOLIO
  * DE VIVIENDA" con solo la tasa máxima ("Hasta", no financiado o usado y
  * financiado; E.A.): CRÉDITO NO VIS, CRÉDITO VIS O VIP y LEASING
@@ -1836,6 +1881,7 @@ for (const producto of [
 delete REGLAS["davibank:leasing-vis"];
 REGLAS["banco-de-bogota:leasing-no-vis"] = viviendaBogota("leasing-no-vis");
 REGLAS["bancolombia:leasing-no-vis"] = bancolombiaLeasing;
+REGLAS["banco-serfinanza:vivienda-no-vis"] = serfinanzaVivienda;
 REGLAS["fna:vivienda-vis"] = viviendaFna("vivienda-vis");
 REGLAS["fna:vivienda-no-vis"] = viviendaFna("vivienda-no-vis");
 REGLAS["fna:leasing-no-vis"] = viviendaFna("leasing-no-vis");
