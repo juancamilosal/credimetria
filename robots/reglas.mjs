@@ -1690,6 +1690,52 @@ function viviendaFna(producto) {
 }
 
 /**
+ * Bancoomeva: la misma "Cartelera Crediticia" (página de clientes) trae en
+ * VIVIENDA las filas "VIS Pesos" (dos, por tope de 150 o 135 SMMLV) y "No
+ * VIS Pesos", con "Tasa desde % E.A". Las de UVR, remodelación y
+ * construcción no cuentan; no publica hasta ni leasing.
+ */
+function viviendaBancoomeva(producto) {
+  const { noVis } = tipoVivienda(producto);
+  return {
+    ...REGLAS.bancoomeva,
+    ancla: /VIVIENDA/,
+    leer(texto) {
+      const t = plano(texto);
+      const clientes = despuesDe(
+        t,
+        /Aplica para Clientes Bancoomeva/,
+        'la página "Aplica para Clientes Bancoomeva"',
+      ).split(/Aplica para Clientes Asociados/)[0];
+      const vig = exigir(
+        clientes,
+        /Vigentes mes de (\d{1,2}) al \d{1,2} (\p{L}+) (\d{4})/u,
+        "la vigencia del mes",
+      );
+      const fila = noVis ? "No VIS Pesos" : "VIS Pesos";
+      const filas = [
+        ...clientes.matchAll(
+          noVis
+            ? /No VIS Pesos [^\n]*? ([\d,]+) ?% E\.A/g
+            : /(?:^|\n) ?VIS Pesos [^\n]*? ([\d,]+) ?% E\.A/g,
+        ),
+      ];
+      if (!filas.length)
+        throw new ReglaRota(`No encontré la fila "${fila}" de vivienda.`);
+      const eaDesde = Math.min(...filas.map((m) => numero(m[1])));
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta: null,
+        mvHasta: null,
+        vigencia: fecha(`${vig[1]} de ${vig[2]} de ${vig[3]}`),
+        frase: `Vivienda · ${fila}: desde ${filas.map((m) => m[1] + "%").join(", ")} E.A. (clientes Bancoomeva; no publica hasta)`,
+      };
+    },
+  };
+}
+
+/**
  * Banco de Bogotá: el mismo PDF mensual trae "TASAS DE COLOCACIÓN PORTAFOLIO
  * DE VIVIENDA" con solo la tasa máxima ("Hasta", no financiado o usado y
  * financiado; E.A.): CRÉDITO NO VIS, CRÉDITO VIS O VIP y LEASING
@@ -1780,6 +1826,7 @@ for (const producto of [
     REGLAS[`bancolombia:${producto}`] = viviendaBancolombia(producto);
     REGLAS[`banco-de-bogota:${producto}`] = viviendaBogota(producto);
     REGLAS[`banco-caja-social:${producto}`] = viviendaCajaSocial(producto);
+    REGLAS[`bancoomeva:${producto}`] = viviendaBancoomeva(producto);
   }
   REGLAS[`banco-de-occidente:${producto}`] = viviendaOccidente(producto);
   REGLAS[`bbva:${producto}`] = viviendaBbva(producto);

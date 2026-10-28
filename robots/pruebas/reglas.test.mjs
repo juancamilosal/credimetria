@@ -702,6 +702,26 @@ const VIVIENDA = [
     hoyEnColombia(),
   ],
   [
+    "bancoomeva",
+    "vivienda-vis",
+    "bancoomeva",
+    mensual(15.12),
+    15.12,
+    null,
+    null,
+    "2026-10-01",
+  ],
+  [
+    "bancoomeva",
+    "vivienda-no-vis",
+    "bancoomeva",
+    mensual(16.35),
+    16.35,
+    null,
+    null,
+    "2026-10-01",
+  ],
+  [
     "banco-caja-social",
     "vivienda-vis",
     "banco-caja-social-vivienda",
@@ -743,5 +763,6 @@ describe("reglas de vivienda", () => {
     assert.equal(reglaDe("banco-caja-social", "leasing-no-vis"), undefined);
     assert.equal(reglaDe("bancolombia", "leasing-vis"), undefined);
     assert.equal(reglaDe("fna", "leasing-vis"), undefined);
+    assert.equal(reglaDe("bancoomeva", "leasing-no-vis"), undefined);
   });
 });
