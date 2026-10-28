@@ -130,7 +130,10 @@ Directus. No está en el menú: se entra por `/admin`.
     resaltada se borra (era del anterior).
   - **Por aprobar**: la tasa nueva con su PDF, lo que cambia frente a la
     publicada (mín. ▲ +1,05 pts) y los botones **Aprobar** (pide al menos
-    el desde o el hasta: GNB en libranza solo publica la máxima), **Rechazar**,
+    el desde o el hasta: GNB en libranza solo publica la máxima), **Rechazar**
+    (pide un segundo toque y **borra** la tasa y su archivo, si no es el
+    actual y ninguna otra tasa lo usa: lo rechazado no se guarda; el robot no
+    la vuelve a crear porque la fuente guarda la huella del último PDF),
     **Editar** (con "Calcular E.A." y el PDF de donde sale) y **Comparar
     PDF**, que muestra el PDF actual y el nuevo lado a lado (se bajan con
     el token y se ven como blob dentro de la página; si aún no hay PDF

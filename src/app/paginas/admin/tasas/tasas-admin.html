@@ -208,9 +208,15 @@
                       type="button"
                       class="btn btn-borde"
                       [disabled]="ocupado() === c.clave"
+                      [class.confirmar]="confirmandoRechazo() === t.id"
                       (click)="rechazar(c, t)"
+                      (blur)="confirmandoRechazo.set(null)"
                     >
-                      Rechazar
+                      {{
+                        confirmandoRechazo() === t.id
+                          ? "¿Seguro? Toca otra vez para borrarla"
+                          : "Rechazar"
+                      }}
                     </button>
                     <button
                       type="button"
@@ -424,9 +430,15 @@
                 type="button"
                 class="btn btn-borde"
                 [disabled]="ocupado() === cm.c.clave"
+                [class.confirmar]="confirmandoRechazo() === cm.t.id"
                 (click)="rechazar(cm.c, cm.t)"
+                (blur)="confirmandoRechazo.set(null)"
               >
-                Rechazar
+                {{
+                  confirmandoRechazo() === cm.t.id
+                    ? "¿Seguro? Toca otra vez para borrarla"
+                    : "Rechazar"
+                }}
               </button>
               <button
                 type="button"

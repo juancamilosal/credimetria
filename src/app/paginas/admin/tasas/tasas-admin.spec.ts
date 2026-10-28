@@ -500,6 +500,24 @@ describe('TasasAdmin', () => {
     expect(boton(nueva, 'Aprobar').disabled).toBeTrue();
   });
 
+  it('rechazar pide un segundo toque y borra la tasa con su PDF', async () => {
+    await crear();
+    const bbva = html.querySelector('.banco')!;
+    boton(bbva, 'Rechazar').click();
+    fixture.detectChanges();
+    expect(admin.eliminar).not.toHaveBeenCalled();
+    boton(bbva, '¿Seguro?').click();
+    await esperar();
+    expect(admin.eliminar).toHaveBeenCalledWith(2);
+    expect(docs.descartar).toHaveBeenCalledWith(
+      jasmine.objectContaining({ id: 11 }),
+    );
+    expect(
+      bbva.querySelector('[aria-label="Por aprobar"]')!.textContent,
+    ).toContain('Nada por aprobar');
+    expect(html.textContent).toContain('rechazada y borrada con su archivo');
+  });
+
   it('deja al final los bancos sin nada por aprobar', async () => {
     await crearCon([
       tasa({
