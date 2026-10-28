@@ -77,8 +77,8 @@ async function soloPromedio() {
 }
 
 async function leer() {
-  const [publicadas, promedios, sinTasa, entidadesVivienda] = await Promise.all(
-    [
+  const [publicadas, promedios, sinTasa, entidadesVivienda, fuentesVivienda] =
+    await Promise.all([
       pedir(
         "/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1" +
           "&fields=producto,ea_desde,ea_hasta,hasta_origen,vigente_desde,enlace,enlace_es_pagina," +
@@ -94,8 +94,13 @@ async function leer() {
         .then((r) => r.json())
         .then((r) => r.data)
         .catch(() => []),
-    ],
-  );
+      pedir(
+        `/items/fuentes?filter[estado][_eq]=activa&filter[producto][_in]=${VIVIENDA.join(",")}&limit=-1&fields=entidad,producto`,
+      )
+        .then((r) => r.json())
+        .then((r) => r.data)
+        .catch(() => []),
+    ]);
   const idsLogo = new Map();
   const tasas = [];
   for (const p of publicadas.data) {
@@ -161,13 +166,21 @@ async function leer() {
       logo: e.logo ? `/api/logos/${e.codigo}` : null,
     });
   }
-  // Vivienda: mientras se cargan sus tasas publicadas, las entidades salen
-  // con su promedio y "Por cargar" en la tasa que anuncian.
+  // Vivienda: mientras se aprueban sus tasas publicadas, las entidades con
+  // fuente salen con su promedio y "Por cargar" en la tasa que anuncian. Las
+  // que no tienen fuente (p. ej. Banco Unión, que no publica vivienda) no
+  // salen.
   if (entidadesVivienda.length) {
     for (const x of promedios.data) {
       if (!VIVIENDA.includes(x.producto)) continue;
       const e = entidadesVivienda.find((y) => y.codigo === x.entidad);
       if (!e?.activa) continue;
+      if (
+        !fuentesVivienda.some(
+          (f) => f.entidad === x.entidad && f.producto === x.producto,
+        )
+      )
+        continue;
       if (
         tasas.some((t) => t.entidad === e.nombre && t.producto === x.producto)
       )

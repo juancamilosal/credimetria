@@ -366,9 +366,10 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   crédito hipotecario y leasing habitacional, VIS y No VIS, solo en pesos.
   No les aplica la usura de consumo: si la entidad no publica el "hasta", no
   se muestra (el tope legal de vivienda no se publica como un número y no se
-  inventa). Mientras se cargan sus tasas publicadas, `/api/tasas` agrega a
-  las entidades con promedio y `anunciaPendiente`: la columna Anuncia dice
-  "Por cargar". En el ranking, vivienda es **una sola opción** del selector
+  inventa). Mientras se aprueban sus tasas publicadas, `/api/tasas` agrega a
+  las entidades con promedio **y fuente de ese producto** con `anunciaPendiente`: la columna Anuncia dice
+  "Por cargar". Una entidad con promedio pero sin fuente (p. ej. Banco
+  Unión, que no publica tasas de vivienda) no sale. En el ranking, vivienda es **una sola opción** del selector
   y debajo hay dos filtros aparte: **Crédito hipotecario | Leasing
   habitacional** y **VIS | No VIS** (el producto y la dirección siguen
   siendo `vivienda-vis`, `leasing-no-vis`…). La cuota de vivienda se calcula con
