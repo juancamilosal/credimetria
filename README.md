@@ -368,7 +368,10 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   se muestra (el tope legal de vivienda no se publica como un número y no se
   inventa). Mientras se cargan sus tasas publicadas, `/api/tasas` agrega a
   las entidades con promedio y `anunciaPendiente`: la columna Anuncia dice
-  "Por cargar". En el ranking la cuota de vivienda se calcula con
+  "Por cargar". En el ranking, vivienda es **una sola opción** del selector
+  y debajo hay dos filtros aparte: **Crédito hipotecario | Leasing
+  habitacional** y **VIS | No VIS** (el producto y la dirección siguen
+  siendo `vivienda-vis`, `leasing-no-vis`…). La cuota de vivienda se calcula con
   $150.000.000 a 240 meses (consumo: $20.000.000 a 48). El Fondo Nacional
   del Ahorro es tipo "Fondo".
 - **Bancos que no publican su tasa** en un producto (fuente con

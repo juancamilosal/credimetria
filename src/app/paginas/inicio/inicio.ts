@@ -91,6 +91,7 @@ export class Inicio {
         },
         {
           id: 'vivienda-no-vis',
+          titulo: 'Vivienda',
           texto:
             'Para comprar casa o apartamento a largo plazo: VIS, No VIS y leasing habitacional.',
           foto: FOTOS.familiaVivienda,
@@ -99,7 +100,7 @@ export class Inicio {
     ).map((p) => ({
       ...p,
       id: p.id as Producto,
-      titulo: this.tasas.nombre(p.id),
+      titulo: 'titulo' in p ? p.titulo : this.tasas.nombre(p.id),
       mejor: this.tasas.mejor(p.id),
     })),
   );

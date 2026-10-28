@@ -160,6 +160,50 @@ export class Ranking {
     });
   }
 
+  /**
+   * En el selector, vivienda es una sola opción; debajo se elige con dos
+   * filtros aparte: crédito hipotecario o leasing habitacional, y VIS o No
+   * VIS (la Superfinanciera los reporta por separado).
+   */
+  protected readonly opciones = [
+    ...this.productos.filter((p) => !esVivienda(p.id)),
+    { id: 'vivienda', nombre: 'Vivienda' },
+  ];
+  protected readonly esVivienda = esVivienda;
+  /** La opción del selector que corresponde al producto. */
+  protected readonly opcion = computed(() =>
+    esVivienda(this.producto()) ? 'vivienda' : this.producto(),
+  );
+  protected readonly modalidad = computed<'hipotecario' | 'leasing'>(() =>
+    this.producto().startsWith('leasing') ? 'leasing' : 'hipotecario',
+  );
+  protected readonly vis = computed<'vis' | 'no-vis'>(() =>
+    this.producto().endsWith('-no-vis') ? 'no-vis' : 'vis',
+  );
+
+  protected elegirOpcion(valor: string): void {
+    this.cambiarProducto(
+      valor === 'vivienda'
+        ? this.vivienda(this.modalidad(), this.vis())
+        : valor,
+    );
+  }
+
+  protected elegirModalidad(modalidad: 'hipotecario' | 'leasing'): void {
+    this.cambiarProducto(this.vivienda(modalidad, this.vis()));
+  }
+
+  protected elegirVis(vis: 'vis' | 'no-vis'): void {
+    this.cambiarProducto(this.vivienda(this.modalidad(), vis));
+  }
+
+  private vivienda(
+    modalidad: 'hipotecario' | 'leasing',
+    vis: 'vis' | 'no-vis',
+  ): Producto {
+    return `${modalidad === 'leasing' ? 'leasing' : 'vivienda'}-${vis}`;
+  }
+
   protected cambiarProducto(valor: string): void {
     if (!this.tasas.esProducto(valor)) return;
     // Si el monto y el plazo son los del producto anterior, pasan a los del

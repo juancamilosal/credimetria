@@ -205,10 +205,42 @@ describe('Ranking', () => {
 
   it('en vivienda la cuota se calcula con $150.000.000 a 240 meses', () => {
     const select = html.querySelector<HTMLSelectElement>('select')!;
-    select.value = 'vivienda-no-vis';
+    select.value = 'vivienda';
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
     expect(html.textContent).toContain('$150.000.000 a 240 meses');
+  });
+
+  it('vivienda se filtra por crédito hipotecario o leasing, y VIS o No VIS', () => {
+    const select = html.querySelector<HTMLSelectElement>('select')!;
+    const opciones = [...select.options].map((o) => o.textContent!.trim());
+    expect(opciones).toContain('Vivienda');
+    expect(opciones.join()).not.toContain('Leasing');
+    expect(html.querySelector('.segmento')).toBeNull();
+    select.value = 'vivienda';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(html.querySelector('caption')?.textContent).toContain(
+      'Crédito hipotecario VIS · 2 entidades',
+    );
+    const boton = (texto: string) =>
+      [...html.querySelectorAll<HTMLButtonElement>('.segmento button')].find(
+        (b) => b.textContent!.trim() === texto,
+      )!;
+    expect(boton('VIS').getAttribute('aria-pressed')).toBe('true');
+    tocar(boton('No VIS'));
+    expect(html.querySelector('caption')?.textContent).toContain(
+      'Crédito hipotecario No VIS · 5 entidades',
+    );
+    // Leasing conserva No VIS.
+    tocar(boton('Leasing habitacional'));
+    expect(html.querySelector('caption')?.textContent).toContain(
+      'Leasing habitacional No VIS · 2 entidades',
+    );
+    tocar(boton('VIS'));
+    expect(html.querySelector('caption')?.textContent).toContain(
+      'Leasing habitacional VIS · 1 entidad',
+    );
   });
 
   it('no destaca como "Mejor tasa" a un banco que no publica su tasa', () => {

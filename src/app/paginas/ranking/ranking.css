@@ -40,6 +40,51 @@
   display: none;
 }
 
+/* VIS / No VIS en crédito hipotecario y leasing habitacional */
+.vis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 16px;
+}
+
+.vis .nota {
+  margin: 0;
+  max-width: 560px;
+}
+
+.segmento {
+  display: inline-flex;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--cm-linea);
+  border-radius: 999px;
+  background: var(--cm-campo);
+}
+
+.segmento button {
+  min-width: 96px;
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cm-tinta);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.segmento button.activo {
+  background: var(--cm-bloque);
+  color: #fff;
+}
+
+.segmento button:focus-visible {
+  outline: 3px solid var(--cm-marca-100);
+  outline-offset: 2px;
+}
+
 .ayuda {
   margin: 14px 0 12px;
 }

@@ -6,8 +6,8 @@ export const PRODUCTOS: InfoProducto[] = [
   { id: 'libranza', nombre: 'Libranza' },
   { id: 'compra-cartera', nombre: 'Compra de cartera' },
   { id: 'vehiculo', nombre: 'Vehículo' },
-  { id: 'vivienda-vis', nombre: 'Vivienda VIS' },
-  { id: 'vivienda-no-vis', nombre: 'Vivienda No VIS' },
+  { id: 'vivienda-vis', nombre: 'Crédito hipotecario VIS' },
+  { id: 'vivienda-no-vis', nombre: 'Crédito hipotecario No VIS' },
   { id: 'leasing-vis', nombre: 'Leasing habitacional VIS' },
   { id: 'leasing-no-vis', nombre: 'Leasing habitacional No VIS' },
 ];
