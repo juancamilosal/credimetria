@@ -1514,6 +1514,54 @@ const bancolombiaLeasing = {
 };
 
 /**
+ * Banco de Occidente: el mismo PDF de tasas para personas trae "Tasas
+ * Vivienda" con CRÉDITO HIPOTECARIO y LEASING HABITACIONAL, cada uno con
+ * desde y hasta E.A. No separa VIS y No VIS: la misma tasa va en los dos
+ * (la Superfinanciera sí tiene sus reportes de cada uno).
+ */
+function viviendaOccidente(producto) {
+  const { leasing } = tipoVivienda(producto);
+  return {
+    ...REGLAS["banco-de-occidente"],
+    ancla: /Tasas Vivienda/,
+    leer(texto) {
+      const t = plano(texto);
+      const bloque = despuesDe(
+        t,
+        /Tasas Vivienda/,
+        'la tabla "Tasas Vivienda"',
+      ).slice(0, 1500);
+      exigir(
+        bloque,
+        /CRÉDITO HIPOTECARIO LEASING HABITACIONAL/,
+        'los títulos "CRÉDITO HIPOTECARIO" y "LEASING HABITACIONAL"',
+      );
+      const m = exigir(
+        bloque,
+        /([\d,]+)% ([\d,]+)% ([\d,]+)% ([\d,]+)%/,
+        "la fila de tasas E.A. (hipotecario y leasing, desde y hasta)",
+      );
+      const vig = exigir(
+        bloque,
+        /Vigencia del (\d{1,2}) al \d{1,2} de ([^\n]+)/,
+        "la vigencia de vivienda",
+      );
+      const [desde, hasta] = leasing ? [m[3], m[4]] : [m[1], m[2]];
+      const eaDesde = numero(desde);
+      const eaHasta = numero(hasta);
+      return {
+        eaDesde,
+        mvDesde: mensual(eaDesde),
+        eaHasta,
+        mvHasta: mensual(eaHasta),
+        vigencia: fecha(`${vig[1]} de ${vig[2]}`),
+        frase: `Tasas Vivienda · ${leasing ? "Leasing habitacional" : "Crédito hipotecario"}: desde ${desde}% hasta ${hasta}% E.A. (no separa VIS y No VIS)`,
+      };
+    },
+  };
+}
+
+/**
  * Banco de Bogotá: el mismo PDF mensual trae "TASAS DE COLOCACIÓN PORTAFOLIO
  * DE VIVIENDA" con solo la tasa máxima ("Hasta", no financiado o usado y
  * financiado; E.A.): CRÉDITO NO VIS, CRÉDITO VIS O VIP y LEASING
@@ -1605,6 +1653,7 @@ for (const producto of [
     REGLAS[`banco-de-bogota:${producto}`] = viviendaBogota(producto);
     REGLAS[`banco-caja-social:${producto}`] = viviendaCajaSocial(producto);
   }
+  REGLAS[`banco-de-occidente:${producto}`] = viviendaOccidente(producto);
   if (producto !== "leasing-vis")
     REGLAS[`av-villas:${producto}`] = viviendaAvVillas(producto);
 }
