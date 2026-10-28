@@ -129,7 +129,6 @@ describe('TasasAdmin', () => {
       'aprobar',
       'crearDesdeDocumento',
       'unirDocumento',
-      'leerPdf',
       'eliminar',
       'restaurar',
     ]);
@@ -144,11 +143,9 @@ describe('TasasAdmin', () => {
         'editarFuente',
         'reemplazarArchivo',
         'descartar',
-        'guardarResaltado',
         'cambiarVigencia',
       ],
     );
-    admin.leerPdf.and.resolveTo({ leida: false, problemas: ['Sin regla.'] });
     admin.listar.and.resolveTo(lista);
     docs.entidades.and.resolveTo([
       BBVA,
@@ -350,48 +347,6 @@ describe('TasasAdmin', () => {
     expect(html.textContent).toContain('Las tasas quedaron como estaban');
   });
 
-  it('lee el PDF cargado y llena el formulario con lo leído', async () => {
-    await crear();
-    docs.cargar.and.resolveTo(subido);
-    admin.unirDocumento.and.resolveTo({ ...porAprobar, documento: docSubido });
-    admin.leerPdf.and.resolveTo({
-      leida: true,
-      problemas: [],
-      tasa: {
-        unidad: 'MV',
-        valor_desde: 1.3,
-        valor_hasta: 2.118,
-        ea_desde: 16.76,
-        ea_hasta: 28.59,
-        hasta_origen: 'usura',
-        vigente_desde: '2026-10-19',
-        frase: 'Créditos de Libranza 1,30%',
-        solo_maxima: false,
-        usura_mes: 'octubre de 2026',
-      },
-      resaltado: btoa('%PDF resaltado'),
-    });
-    docs.guardarResaltado.and.resolveTo({
-      ...subido,
-      archivo_resaltado: { id: 'r12' },
-    });
-    const bbva = html.querySelector('.banco')!;
-    const pdf = new File(['%PDF'], 'nov.pdf', { type: 'application/pdf' });
-    await cargarEn(bbva, pdf);
-    expect(admin.leerPdf).toHaveBeenCalledWith('bbva', 'libre-inversion', pdf);
-    expect(bbva.querySelector<HTMLInputElement>('#tfDesde')!.value).toBe('1,3');
-    expect(bbva.querySelector<HTMLInputElement>('#tfHasta')!.value).toBe(
-      '2,118',
-    );
-    expect(docs.guardarResaltado).toHaveBeenCalledWith(
-      subido,
-      btoa('%PDF resaltado'),
-    );
-    expect(html.textContent).toContain('Leí sus tasas y llené el formulario');
-    // No guarda solo: espera a que se revise.
-    expect(admin.guardar).not.toHaveBeenCalled();
-  });
-
   it('si el PDF ya estaba cargado en la tarjeta, lo vuelve a usar y a leer', async () => {
     await crear();
     // El mismo PDF que ya tiene la tasa por aprobar (documento 11).
@@ -400,7 +355,6 @@ describe('TasasAdmin', () => {
     await cargarEn(html.querySelector('.banco')!, pdf);
     expect(admin.unirDocumento).not.toHaveBeenCalled();
     expect(admin.crearDesdeDocumento).not.toHaveBeenCalled();
-    expect(admin.leerPdf).toHaveBeenCalledWith('bbva', 'libre-inversion', pdf);
     expect(html.textContent).toContain('ya estaba cargado: lo volví a usar');
     expect(html.textContent).not.toContain('No se cargó de nuevo');
   });

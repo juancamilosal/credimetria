@@ -161,32 +161,6 @@ export class SesionAdmin {
     }
   }
 
-  /**
-   * Llama a un servicio de esta misma página (no a Directus) con el token de
-   * la sesión, que el servidor revisa con Directus. Si venció, lo renueva una
-   * vez y reintenta.
-   */
-  async pedirPagina<T>(ruta: string, cuerpo: Blob): Promise<T> {
-    const llamar = () =>
-      firstValueFrom(
-        this.http.post<T>(ruta, cuerpo, {
-          headers: {
-            'Content-Type': cuerpo.type || 'application/octet-stream',
-            ...(this.acceso ? { Authorization: `Bearer ${this.acceso}` } : {}),
-          },
-        }),
-      );
-    try {
-      return await llamar();
-    } catch (error) {
-      if (!(error instanceof HttpErrorResponse) || error.status !== 401) {
-        throw error;
-      }
-      await this.renovar();
-      return llamar();
-    }
-  }
-
   /** Llama a Directus con el token; si venció, lo renueva una vez y reintenta. */
   async pedir<T>(
     metodo: 'GET' | 'POST' | 'PATCH' | 'DELETE',

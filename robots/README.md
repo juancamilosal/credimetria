@@ -76,10 +76,6 @@ Davivienda 22,71 % E.A.
   varios productos, cada uno tiene su propia copia resaltada. Si no
   encuentra las cifras, no hay copia y se ve el original. `/admin/tasas`
   abre y compara la copia, con un enlace al original.
-- **PDF cargados a mano:** la página los lee al momento con estas mismas
-  reglas (`servidor/leer-pdf.mjs`), así que un cambio en `reglas.mjs` sirve
-  para los dos; después de cambiar una regla hay que hacer redeploy de la
-  página y de los robots.
 - **PDF ya guardados** (`resaltar.mjs`): resalta los documentos sin copia
   que ya tienen la tasa escrita (los anteriores a esta función o los
   subidos a mano). `--sin-guardar` solo dice qué haría.

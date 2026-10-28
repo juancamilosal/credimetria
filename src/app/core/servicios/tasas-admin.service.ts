@@ -1,11 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { DocumentoPdf, FuenteAdmin } from '../modelos/documento';
-import {
-  CambiosTasa,
-  EstadoTasa,
-  LecturaPdf,
-  TasaAdmin,
-} from '../modelos/tasa-admin';
+import { CambiosTasa, EstadoTasa, TasaAdmin } from '../modelos/tasa-admin';
 import { SesionAdmin } from './sesion-admin.service';
 
 const CAMPOS_TASA = [
@@ -193,20 +188,6 @@ export class TasasAdminService {
         vigente_desde: documento.vigente_desde,
       }),
     });
-  }
-
-  /**
-   * Lee un PDF cargado a mano con las reglas del robot, en el servidor de la
-   * página. No guarda nada: los valores van al formulario para revisarlos.
-   */
-  leerPdf(banco: string, producto: string, archivo: File): Promise<LecturaPdf> {
-    const params = new URLSearchParams({ banco, producto });
-    return this.sesion.pedirPagina<LecturaPdf>(
-      `/api/admin/leer?${params}`,
-      archivo.type === 'application/pdf'
-        ? archivo
-        : new Blob([archivo], { type: 'application/pdf' }),
-    );
   }
 
   private async escribir(

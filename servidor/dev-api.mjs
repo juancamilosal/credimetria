@@ -1,4 +1,4 @@
-// Para `npm start` (sin SSR): sirve /api/tasas, /api/logos y /api/admin/leer en el puerto
+// Para `npm start` (sin SSR): sirve /api/tasas y /api/logos en el puerto
 // 4300; el servidor de desarrollo de Angular los reenvía (proxy.conf.json).
 // El token va en el archivo .env (no se sube al repositorio).
 import express from "express";
@@ -9,11 +9,9 @@ try {
   // Sin .env: se usan las variables del sistema.
 }
 const { rutasTasas } = await import("./tasas.mjs");
-const { rutasLeerPdf } = await import("./leer-pdf.mjs");
 
 const app = express();
 rutasTasas(app);
-rutasLeerPdf(app);
 app.listen(4300, () => {
   if (!process.env.DIRECTUS_TOKEN) {
     console.warn("Falta DIRECTUS_TOKEN en .env: la página saldrá sin tasas.");

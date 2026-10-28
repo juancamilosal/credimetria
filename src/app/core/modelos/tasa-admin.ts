@@ -74,26 +74,3 @@ export const UNIDADES_TASA: { id: UnidadTasa; texto: string }[] = [
   { id: 'NMV', texto: 'N.M.V.' },
   { id: 'EA', texto: 'E.A.' },
 ];
-
-/**
- * Lo que leyó el servidor de un PDF cargado a mano (/api/admin/leer), con
- * las mismas reglas del robot. `resaltado`: la copia con la tasa en verde,
- * en base64.
- */
-export interface LecturaPdf {
-  leida: boolean;
-  problemas: string[];
-  tasa?: {
-    unidad: UnidadTasa;
-    valor_desde: number | null;
-    valor_hasta: number | null;
-    ea_desde: number | null;
-    ea_hasta: number | null;
-    hasta_origen: 'entidad' | 'usura';
-    vigente_desde: string | null;
-    frase: string | null;
-    solo_maxima: boolean;
-    usura_mes: string | null;
-  };
-  resaltado?: string | null;
-}
