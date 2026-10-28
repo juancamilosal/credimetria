@@ -26,7 +26,10 @@ crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
   se guardan. La corrida consulta máximo 11 minutos (la tarea de Coolify corta
   a los 15).
 - Si un banco no tiene un producto (p. ej. libranza en Lulo, Falabella o
-  Davibank) y nunca tuvo promedio de él, no se crea fila ni se avisa.
+  Davibank) y nunca tuvo promedio de él, no se crea fila ni se avisa. Si
+  **empieza a reportarlo** (p. ej. Banco de Bogotá en leasing VIS, que hoy
+  solo reporta No VIS), se crea su promedio y el correo avisa para revisar si
+  publica su tasa y agregarle la fuente.
 - **Guarda:** una fila por entidad y producto en `tasas_promedio`
   (sobrescribe, sin historial, sin aprobación), con la fecha de corte, el
   CSV de respaldo y el enlace de la consulta. Avisa en las notas si una

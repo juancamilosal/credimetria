@@ -311,6 +311,13 @@ async function main() {
         revisar.push(
           `${NOMBRES[producto]} · ${e.nombre ?? e.codigo}: el promedio cambió de ${antes} % a ${tasa} % (más de ${SALTO} puntos).`,
         );
+      // Primera vez que reporta este producto (p. ej. Banco de Bogotá en
+      // leasing VIS): sale en el ranking con su promedio y falta la tasa que
+      // anuncia.
+      if (tasa !== null && !actual)
+        revisar.push(
+          `${NOMBRES[producto]} · ${e.nombre ?? e.codigo}: empezó a reportar créditos (${creditos} en ${SEMANAS} semanas, promedio ${tasa} %). Ya sale en el ranking; revisa si publica su tasa para este producto y agrégale la fuente.`,
+        );
       const fila = {
         entidad: e.codigo,
         producto,
