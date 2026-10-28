@@ -279,6 +279,14 @@ export class TasasAdmin implements OnInit, OnDestroy {
       : `${formatoTasa(t.valor_desde)} a ${formatoTasa(t.valor_hasta)}${unidad}`;
   }
 
+  /**
+   * Sin tasas escritas no se puede aprobar. Basta el desde o el hasta: hay
+   * bancos que solo publican la máxima (GNB en libranza).
+   */
+  protected sinValores(t: TasaAdmin): boolean {
+    return t.valor_desde === null && t.valor_hasta === null;
+  }
+
   /** Cambio frente a la publicada: "▲ +0,03 pts", "▼ −1,20 pts" o "". */
   protected cambio(nueva: number | null, antes: number | null | undefined) {
     if (nueva === null || antes === null || antes === undefined) return '';

@@ -199,9 +199,7 @@
                     <button
                       type="button"
                       class="btn btn-principal"
-                      [disabled]="
-                        ocupado() === c.clave || t.valor_desde === null
-                      "
+                      [disabled]="ocupado() === c.clave || sinValores(t)"
                       (click)="aprobar(c, t)"
                     >
                       Aprobar
@@ -417,9 +415,7 @@
               <button
                 type="button"
                 class="btn btn-principal"
-                [disabled]="
-                  ocupado() === cm.c.clave || cm.t.valor_desde === null
-                "
+                [disabled]="ocupado() === cm.c.clave || sinValores(cm.t)"
                 (click)="aprobar(cm.c, cm.t)"
               >
                 Aprobar
@@ -457,9 +453,13 @@
     <div>
       <dt>Efectiva anual</dt>
       <dd class="cifra">
-        {{ t.ea_desde | tasa }}
-        @if (t.ea_hasta !== null) {
-          a {{ t.ea_hasta | tasa }}
+        @if (t.ea_desde === null && t.ea_hasta !== null) {
+          hasta {{ t.ea_hasta | tasa }}
+        } @else {
+          {{ t.ea_desde | tasa }}
+          @if (t.ea_hasta !== null) {
+            a {{ t.ea_hasta | tasa }}
+          }
         }
       </dd>
       @if (t.hasta_origen === "usura") {

@@ -470,6 +470,36 @@ describe('TasasAdmin', () => {
     );
   });
 
+  it('aprueba una tasa que solo tiene la máxima (GNB en libranza)', async () => {
+    await crearCon([
+      {
+        ...porAprobar,
+        valor_desde: null,
+        ea_desde: null,
+        valor_hasta: 1.85,
+        ea_hasta: 24.6,
+      },
+    ]);
+    const nueva = html.querySelector('[aria-label="Por aprobar"]')!;
+    expect(nueva.textContent).toContain('hasta 24,60 %');
+    expect(nueva.textContent).not.toContain('—');
+    expect(boton(nueva, 'Aprobar').disabled).toBeFalse();
+  });
+
+  it('no deja aprobar una tasa sin valores', async () => {
+    await crearCon([
+      {
+        ...porAprobar,
+        valor_desde: null,
+        ea_desde: null,
+        valor_hasta: null,
+        ea_hasta: null,
+      },
+    ]);
+    const nueva = html.querySelector('[aria-label="Por aprobar"]')!;
+    expect(boton(nueva, 'Aprobar').disabled).toBeTrue();
+  });
+
   it('deja al final los bancos sin nada por aprobar', async () => {
     await crearCon([
       tasa({
