@@ -537,6 +537,37 @@ const VIVIENDA = [
     16.25,
     "2026-10-01",
   ],
+  // Solo publica la máxima (como GNB en libranza): sin desde.
+  [
+    "banco-de-bogota",
+    "vivienda-vis",
+    "banco-de-bogota",
+    null,
+    null,
+    mensual(16.64),
+    16.64,
+    "2026-10-01",
+  ],
+  [
+    "banco-de-bogota",
+    "vivienda-no-vis",
+    "banco-de-bogota",
+    null,
+    null,
+    mensual(18.34),
+    18.34,
+    "2026-10-01",
+  ],
+  [
+    "banco-de-bogota",
+    "leasing-no-vis",
+    "banco-de-bogota",
+    null,
+    null,
+    mensual(18.34),
+    18.34,
+    "2026-10-01",
+  ],
   // Página web (no PDF): no dice desde cuándo rige, la vigencia es el día en
   // que se lee.
   [

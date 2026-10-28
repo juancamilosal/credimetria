@@ -1478,6 +1478,50 @@ function viviendaBancolombia(producto) {
   };
 }
 
+/**
+ * Banco de Bogotá: el mismo PDF mensual trae "TASAS DE COLOCACIÓN PORTAFOLIO
+ * DE VIVIENDA" con solo la tasa máxima ("Hasta", no financiado o usado y
+ * financiado; E.A.): CRÉDITO NO VIS, CRÉDITO VIS O VIP y LEASING
+ * HABITACIONAL (va en leasing No VIS: es el que reporta). Como GNB en
+ * libranza: `soloMaxima`, sin desde. No cuentan las filas en UVR.
+ */
+function viviendaBogota(producto) {
+  const { leasing, noVis } = tipoVivienda(producto);
+  const fila = leasing
+    ? "LEASING HABITACIONAL"
+    : noVis
+      ? "CRÉDITO NO VIS"
+      : "CRÉDITO VIS O VIP";
+  return {
+    ...REGLAS["banco-de-bogota"],
+    ancla: /PORTAFOLIO DE VIVIENDA/,
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(t, /Vigentes desde ([^\n]+)/, "la vigencia");
+      const bloque = despuesDe(
+        t,
+        /TASAS DE COLOCACIÓN PORTAFOLIO DE VIVIENDA/,
+        'la tabla "TASAS DE COLOCACIÓN PORTAFOLIO DE VIVIENDA"',
+      ).split(/Tasas en términos efectivo anual/)[0];
+      const m = exigir(
+        bloque,
+        new RegExp(`(?:^|\\n) ?${fila}[ \\d]* ([\\d.,]+)% ([\\d.,]+)%`),
+        `la fila "${fila}"`,
+      );
+      const eaHasta = Math.max(numero(m[1]), numero(m[2]));
+      return {
+        soloMaxima: true,
+        mvDesde: null,
+        eaDesde: null,
+        eaHasta,
+        mvHasta: mensual(eaHasta),
+        vigencia: fecha(vig[1]),
+        frase: `Portafolio de vivienda · ${m[0].trim()} (solo publica la tasa máxima, E.A.)`,
+      };
+    },
+  };
+}
+
 for (const producto of [
   "vivienda-vis",
   "vivienda-no-vis",
@@ -1489,11 +1533,13 @@ for (const producto of [
   if (!producto.startsWith("leasing")) {
     REGLAS[`banco-agrario:${producto}`] = viviendaAgrario(producto);
     REGLAS[`bancolombia:${producto}`] = viviendaBancolombia(producto);
+    REGLAS[`banco-de-bogota:${producto}`] = viviendaBogota(producto);
   }
   if (producto !== "leasing-vis")
     REGLAS[`av-villas:${producto}`] = viviendaAvVillas(producto);
 }
 delete REGLAS["davibank:leasing-vis"];
+REGLAS["banco-de-bogota:leasing-no-vis"] = viviendaBogota("leasing-no-vis");
 
 /**
  * La regla de un banco para un producto: la de libre inversión es la del
