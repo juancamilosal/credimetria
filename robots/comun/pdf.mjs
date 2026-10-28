@@ -42,7 +42,7 @@ export async function bajarPdf(url) {
 export const huella = (datos) =>
   createHash("sha256").update(datos).digest("hex");
 
-/** Texto del PDF con `pdftotext -layout` (paquete poppler-utils). */
+/** Texto del PDF con `pdftotext -layout` (paquete poppler-utils), siempre en UTF-8 (en Windows sale en otra codificación si no se pide). */
 export async function textoPdf(datos) {
   const carpeta = await mkdtemp(join(tmpdir(), "robot-pdf-"));
   try {
@@ -50,7 +50,7 @@ export async function textoPdf(datos) {
     await writeFile(archivo, datos);
     const { stdout } = await promisify(execFile)(
       "pdftotext",
-      ["-layout", archivo, "-"],
+      ["-layout", "-enc", "UTF-8", archivo, "-"],
       { maxBuffer: 50 * 1024 * 1024 },
     );
     return stdout;

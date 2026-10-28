@@ -314,7 +314,7 @@ async function cajas(datos) {
     await writeFile(archivo, datos);
     const { stdout } = await promisify(execFile)(
       "pdftotext",
-      ["-bbox-layout", archivo, "-"],
+      ["-bbox-layout", "-enc", "UTF-8", archivo, "-"],
       { maxBuffer: 100 * 1024 * 1024 },
     );
     return palabrasDe(stdout);
