@@ -1522,6 +1522,40 @@ function viviendaBogota(producto) {
   };
 }
 
+function viviendaCajaSocial(producto) {
+  const { noVis } = tipoVivienda(producto);
+  return {
+    ...REGLAS["banco-caja-social"],
+    // PDF aparte "Tasas-Credito-Vivienda.pdf" (una página, "Tasas de Interés
+    // Crédito Hipotecario"), en la sección "Créditos de vivienda" de la página
+    // de tasas, precios y comisiones. Fila VIS o NO VIS: pesos E.A. y M.V.
+    // desde, UVR desde, pesos E.A. y M.V. hasta y UVR hasta (sin leasing).
+    // La dirección se busca en la página de tasas (url_indice).
+    enlace: /[^"'\s]*Tasas-Credito-Vivienda\.pdf/gi,
+    ancla: /Adquisición de vivienda/,
+    leer(texto) {
+      const t = plano(texto);
+      const vig = exigir(t, /Vigentes a partir del ([^\n]+)/, "la vigencia");
+      const fila = noVis ? "NO VIS" : "VIS";
+      const m = exigir(
+        t,
+        new RegExp(
+          `(?:^|\\n) ?${fila} ([\\d.,]+)% ([\\d.,]+)% .*?\\+ UVR .*?\\+ UVR ([\\d.,]+)% ([\\d.,]+)%`,
+        ),
+        `la fila "${fila}" de "Adquisición de vivienda"`,
+      );
+      return {
+        eaDesde: numero(m[1]),
+        mvDesde: numero(m[2]),
+        eaHasta: numero(m[3]),
+        mvHasta: numero(m[4]),
+        vigencia: fecha(vig[1]),
+        frase: `Adquisición de vivienda ${fila} en pesos: desde ${m[1]}% E.A. (${m[2]}% M.V.) hasta ${m[3]}% E.A. (${m[4]}% M.V.)`,
+      };
+    },
+  };
+}
+
 for (const producto of [
   "vivienda-vis",
   "vivienda-no-vis",
@@ -1534,6 +1568,7 @@ for (const producto of [
     REGLAS[`banco-agrario:${producto}`] = viviendaAgrario(producto);
     REGLAS[`bancolombia:${producto}`] = viviendaBancolombia(producto);
     REGLAS[`banco-de-bogota:${producto}`] = viviendaBogota(producto);
+    REGLAS[`banco-caja-social:${producto}`] = viviendaCajaSocial(producto);
   }
   if (producto !== "leasing-vis")
     REGLAS[`av-villas:${producto}`] = viviendaAvVillas(producto);

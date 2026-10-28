@@ -590,6 +590,26 @@ const VIVIENDA = [
     null,
     hoyEnColombia(),
   ],
+  [
+    "banco-caja-social",
+    "vivienda-vis",
+    "banco-caja-social-vivienda",
+    1.08,
+    13.75,
+    1.27,
+    16.3,
+    "2026-07-17",
+  ],
+  [
+    "banco-caja-social",
+    "vivienda-no-vis",
+    "banco-caja-social-vivienda",
+    1.12,
+    14.35,
+    1.37,
+    17.8,
+    "2026-07-17",
+  ],
 ];
 
 describe("reglas de vivienda", () => {
@@ -609,5 +629,6 @@ describe("reglas de vivienda", () => {
     assert.equal(reglaDe("davibank", "leasing-vis"), undefined);
     assert.equal(reglaDe("av-villas", "leasing-vis"), undefined);
     assert.equal(reglaDe("banco-agrario", "leasing-no-vis"), undefined);
+    assert.equal(reglaDe("banco-caja-social", "leasing-no-vis"), undefined);
   });
 });
