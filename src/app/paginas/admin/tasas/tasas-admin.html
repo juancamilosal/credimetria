@@ -52,6 +52,35 @@
   @if (aviso()) {
     <p class="aviso-ok" role="status">{{ aviso() }}</p>
   }
+  @if (ofertaDe(); as c) {
+    <div class="aviso-cargar oferta" role="note">
+      <p>
+        <b
+          >¿Usar este PDF también en los otros productos de
+          {{ c.entidad.nombre }}?</b
+        >
+        {{ nombresDe(otrasManuales(c)) }}. Quedan con una tasa por aprobar unida
+        a este PDF (sin subirlo otra vez) y salen de "Por cargar".
+      </p>
+      <div class="acciones">
+        <button
+          type="button"
+          class="btn btn-principal"
+          [disabled]="ocupado() === c.clave"
+          (click)="usarEnOtros(c)"
+        >
+          Sí, en todos
+        </button>
+        <button
+          type="button"
+          class="btn btn-borde"
+          (click)="ofrecerOtros.set(null)"
+        >
+          No, solo este
+        </button>
+      </div>
+    </div>
+  }
 
   @if (cargando()) {
     <p class="muted">Cargando tasas…</p>
@@ -163,14 +192,26 @@
                 carga el PDF del mes o, si el banco no lo cambió, márcalo como
                 revisado. Última revisión: {{ ultimaRevision(c) }}.
               </p>
-              <button
-                type="button"
-                class="btn btn-claro"
-                [disabled]="ocupado() === c.clave"
-                (click)="sigueIgual(c)"
-              >
-                Sigue igual este mes
-              </button>
+              <div class="acciones">
+                <button
+                  type="button"
+                  class="btn btn-claro"
+                  [disabled]="ocupado() === c.clave"
+                  (click)="sigueIgual(c)"
+                >
+                  Sigue igual este mes
+                </button>
+                @if (otrasPorCargar(c).length; as n) {
+                  <button
+                    type="button"
+                    class="btn btn-claro"
+                    [disabled]="ocupado() === c.clave"
+                    (click)="sigueIgualEnTodos(c)"
+                  >
+                    Sigue igual en todos ({{ n + 1 }})
+                  </button>
+                }
+              </div>
             </div>
           }
 

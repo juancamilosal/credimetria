@@ -150,6 +150,16 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected readonly direccionesEn = signal<string | null>(null);
   protected readonly ocupado = signal<string | null>(null);
   protected readonly comparando = signal<Comparacion | null>(null);
+  /**
+   * Después de cargar el PDF de un banco manual en una tarjeta: el mismo
+   * archivo, para ofrecerlo en sus otros productos (Davivienda trae libre
+   * inversión, libranza y vivienda en un solo PDF).
+   */
+  protected readonly ofrecerOtros = signal<{
+    clave: string;
+    archivo: File;
+    vigencia: string | null;
+  } | null>(null);
   /** La tarjeta y la tasa que se comparan, siempre con sus datos al día. */
   protected readonly comparada = computed(() => {
     const cmp = this.comparando();
@@ -165,63 +175,60 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected url = '';
   protected urlIndice = '';
 
-  protected readonly tarjetas = computed<TarjetaTasa[]>(() => {
+  /** Todas las tarjetas (banco y producto), sin filtros. */
+  private readonly todas = computed<TarjetaTasa[]>(() => {
     const fuentes = this.fuentes();
     const tasas = this.tasas();
     const documentos = this.documentos();
-    return (
-      this.entidades()
-        .flatMap((entidad) => {
-          const propias = fuentes.filter((f) => f.entidad === entidad.codigo);
-          const productos = new Set<Producto>(propias.map((f) => f.producto));
-          for (const t of tasas) {
-            if (t.entidad.codigo === entidad.codigo) productos.add(t.producto);
-          }
-          if (!productos.size) productos.add('libre-inversion');
-          return [...productos].map((producto) => {
-            const deProducto = propias.filter((f) => f.producto === producto);
-            const pdf = deProducto.find((f) => f.tipo === 'pdf') ?? null;
-            const pagina = deProducto.find((f) => f.tipo === 'pagina') ?? null;
-            const ids = deProducto.map((f) => f.id);
-            const manuales = deProducto.filter(
-              (f) => f.como_extraer === 'manual',
-            );
-            const suyas = tasas.filter(
-              (t) =>
-                t.entidad.codigo === entidad.codigo && t.producto === producto,
-            );
-            return {
-              clave: `${entidad.codigo}:${producto}`,
-              entidad,
-              producto,
-              pdf,
-              pagina,
-              carga: pdf ?? pagina,
-              publicada: suyas.find((t) => t.estado === 'publicada') ?? null,
-              porAprobar: suyas.filter((t) => t.estado === 'por_revisar'),
-              historial: suyas.filter(
-                (t) => t.estado === 'anterior' || t.estado === 'rechazada',
-              ),
-              // Los PDF y los pantallazos de sus páginas.
-              documentos: documentos.filter((d) => ids.includes(d.fuente)),
-              manuales,
-              porCargar: manuales.some((f) =>
-                pendienteDelMes(f.ultima_revision),
-              ),
-            };
-          });
-        })
-        .filter(
-          (t) =>
-            (this.producto() === 'todos' || t.producto === this.producto()) &&
-            (this.vista() !== 'aprobar' || t.porAprobar.length > 0) &&
-            (this.vista() !== 'cargar' || t.porCargar),
-        )
-        // Primero lo que espera aprobación, luego lo que hay que cargar a mano
-        // este mes y al final lo que está al día.
-        .sort((a, b) => orden(a) - orden(b))
-    );
+    return this.entidades().flatMap((entidad) => {
+      const propias = fuentes.filter((f) => f.entidad === entidad.codigo);
+      const productos = new Set<Producto>(propias.map((f) => f.producto));
+      for (const t of tasas) {
+        if (t.entidad.codigo === entidad.codigo) productos.add(t.producto);
+      }
+      if (!productos.size) productos.add('libre-inversion');
+      return [...productos].map((producto) => {
+        const deProducto = propias.filter((f) => f.producto === producto);
+        const pdf = deProducto.find((f) => f.tipo === 'pdf') ?? null;
+        const pagina = deProducto.find((f) => f.tipo === 'pagina') ?? null;
+        const ids = deProducto.map((f) => f.id);
+        const manuales = deProducto.filter((f) => f.como_extraer === 'manual');
+        const suyas = tasas.filter(
+          (t) => t.entidad.codigo === entidad.codigo && t.producto === producto,
+        );
+        return {
+          clave: `${entidad.codigo}:${producto}`,
+          entidad,
+          producto,
+          pdf,
+          pagina,
+          carga: pdf ?? pagina,
+          publicada: suyas.find((t) => t.estado === 'publicada') ?? null,
+          porAprobar: suyas.filter((t) => t.estado === 'por_revisar'),
+          historial: suyas.filter(
+            (t) => t.estado === 'anterior' || t.estado === 'rechazada',
+          ),
+          // Los PDF y los pantallazos de sus páginas.
+          documentos: documentos.filter((d) => ids.includes(d.fuente)),
+          manuales,
+          porCargar: manuales.some((f) => pendienteDelMes(f.ultima_revision)),
+        };
+      });
+    });
   });
+
+  protected readonly tarjetas = computed<TarjetaTasa[]>(() =>
+    this.todas()
+      .filter(
+        (t) =>
+          (this.producto() === 'todos' || t.producto === this.producto()) &&
+          (this.vista() !== 'aprobar' || t.porAprobar.length > 0) &&
+          (this.vista() !== 'cargar' || t.porCargar),
+      )
+      // Primero lo que espera aprobación, luego lo que hay que cargar a mano
+      // este mes y al final lo que está al día.
+      .sort((a, b) => orden(a) - orden(b)),
+  );
   protected readonly pendientes = computed(
     () => this.tasas().filter((t) => t.estado === 'por_revisar').length,
   );
@@ -613,60 +620,113 @@ export class TasasAdmin implements OnInit, OnDestroy {
       return;
     }
     const archivo = this.archivo;
+    const vigencia = this.vigencia || null;
     const esPdf =
       archivo.type === 'application/pdf' || /\.pdf$/i.test(archivo.name);
     const que = esPdf ? 'PDF' : 'pantallazo';
     await this.trabajar(c.clave, async () => {
       try {
-        // Si ese mismo archivo ya está cargado en esta tarjeta, se usa el
-        // que hay y se vuelve a leer (para actualizar la tasa).
-        let documento: DocumentoPdf;
-        let yaEstaba = false;
-        try {
-          documento = await this.docs.cargar(
-            fuente.id,
-            archivo,
-            this.vigencia || null,
-          );
-          this.documentos.update((lista) => [documento, ...lista]);
-        } catch (error) {
-          if (
-            !(error instanceof DocumentoRepetido) ||
-            error.existente.fuente !== fuente.id
-          )
-            throw error;
-          documento = error.existente;
-          yaEstaba = true;
-        }
-        // No se borra lo que ya está escrito: si hay una tasa por aprobar,
-        // el archivo se le une; si no, la nueva copia la publicada.
-        const pendiente = c.porAprobar[0];
-        const tasa = pendiente
-          ? pendiente.documento?.id === documento.id
-            ? pendiente
-            : await this.admin.unirDocumento(pendiente, documento)
-          : await this.admin.crearDesdeDocumento(
-              fuente,
-              documento,
-              c.publicada,
-            );
-        if (pendiente) this.reemplazar(tasa);
-        else this.tasas.update((lista) => [tasa, ...lista]);
-        await this.marcarRevisadas(c);
+        const { tasa, yaEstaba } = await this.cargarEn(c, archivo, vigencia);
         this.cargandoEn.set(null);
         this.editar(tasa);
         const cargado = yaEstaba
           ? `Ese ${que} de ${c.entidad.nombre} ya estaba cargado: lo volví a usar.`
           : `${que[0].toUpperCase() + que.slice(1)} de ${c.entidad.nombre} cargado.`;
         const sigue =
-          pendiente || c.publicada
+          c.porAprobar.length || c.publicada
             ? 'Las tasas quedaron como estaban: revisa que el archivo diga lo mismo y apruébalas.'
             : 'Escribe las tasas que trae y apruébalas.';
         this.aviso.set(`${cargado} ${sigue}`);
+        if (esPdf && this.otrasManuales(c).length)
+          this.ofrecerOtros.set({ clave: c.clave, archivo, vigencia });
       } catch (error) {
         if (!(error instanceof DocumentoRepetido)) throw error;
         this.error.set(`Ese ${que} ya está guardado. No se cargó de nuevo.`);
       }
+    });
+  }
+
+  /**
+   * Carga el archivo en la fuente de la tarjeta y deja la tasa por aprobar
+   * unida a él. Si ese mismo archivo ya está cargado en esta tarjeta, se usa
+   * el que hay (para actualizar la tasa).
+   */
+  private async cargarEn(
+    c: TarjetaTasa,
+    archivo: File,
+    vigencia: string | null,
+  ): Promise<{ tasa: TasaAdmin; yaEstaba: boolean }> {
+    const fuente = c.carga!;
+    let documento: DocumentoPdf;
+    let yaEstaba = false;
+    try {
+      documento = await this.docs.cargar(fuente.id, archivo, vigencia);
+      this.documentos.update((lista) => [documento, ...lista]);
+    } catch (error) {
+      if (
+        !(error instanceof DocumentoRepetido) ||
+        error.existente.fuente !== fuente.id
+      )
+        throw error;
+      documento = error.existente;
+      yaEstaba = true;
+    }
+    // No se borra lo que ya está escrito: si hay una tasa por aprobar, el
+    // archivo se le une; si no, la nueva copia la publicada.
+    const pendiente = c.porAprobar[0];
+    const tasa = pendiente
+      ? pendiente.documento?.id === documento.id
+        ? pendiente
+        : await this.admin.unirDocumento(pendiente, documento)
+      : await this.admin.crearDesdeDocumento(fuente, documento, c.publicada);
+    if (pendiente) this.reemplazar(tasa);
+    else this.tasas.update((lista) => [tasa, ...lista]);
+    await this.marcarRevisadas(c);
+    return { tasa, yaEstaba };
+  }
+
+  /**
+   * Los otros productos manuales del mismo banco que se cargan con el mismo
+   * tipo de archivo (los 6 de Davivienda salen de un solo PDF).
+   */
+  protected otrasManuales(c: TarjetaTasa): TarjetaTasa[] {
+    return this.todas().filter(
+      (o) =>
+        o.clave !== c.clave &&
+        o.entidad.codigo === c.entidad.codigo &&
+        o.manuales.length > 0 &&
+        o.carga?.tipo === c.carga?.tipo,
+    );
+  }
+
+  /**
+   * La tarjeta a la que se le cargó el PDF que se ofrece en los otros
+   * productos. Va arriba de la lista: en "Por cargar" la tarjeta ya salió.
+   */
+  protected readonly ofertaDe = computed(() => {
+    const clave = this.ofrecerOtros()?.clave;
+    return this.todas().find((c) => c.clave === clave) ?? null;
+  });
+
+  /** Nombres de los productos, para la pregunta: "Libranza, Leasing VIS…". */
+  protected nombresDe(lista: TarjetaTasa[]): string {
+    return lista.map((o) => this.nombreProducto(o.producto)).join(', ');
+  }
+
+  /** Usa el PDF recién cargado también en los otros productos del banco. */
+  protected async usarEnOtros(c: TarjetaTasa): Promise<void> {
+    const oferta = this.ofrecerOtros();
+    if (!oferta || oferta.clave !== c.clave) return;
+    await this.trabajar(c.clave, async () => {
+      const hechos: string[] = [];
+      for (const otra of this.otrasManuales(c)) {
+        await this.cargarEn(otra, oferta.archivo, oferta.vigencia);
+        hechos.push(this.nombreProducto(otra.producto));
+      }
+      this.ofrecerOtros.set(null);
+      this.aviso.set(
+        `El PDF de ${c.entidad.nombre} también quedó en ${hechos.join(', ')}. Revisa las tasas de cada uno y apruébalas.`,
+      );
     });
   }
 
@@ -690,6 +750,22 @@ export class TasasAdmin implements OnInit, OnDestroy {
       await this.marcarRevisadas(c);
       this.aviso.set(
         `${c.entidad.nombre} (${this.nombreProducto(c.producto)}) quedó revisado este mes.`,
+      );
+    });
+  }
+
+  /** Los otros productos manuales del banco que siguen por cargar. */
+  protected otrasPorCargar(c: TarjetaTasa): TarjetaTasa[] {
+    return this.otrasManuales(c).filter((o) => o.porCargar);
+  }
+
+  /** "Sigue igual" en todos los productos del banco que siguen por cargar. */
+  protected async sigueIgualEnTodos(c: TarjetaTasa): Promise<void> {
+    await this.trabajar(c.clave, async () => {
+      const todas = [c, ...this.otrasPorCargar(c)];
+      for (const t of todas) await this.marcarRevisadas(t);
+      this.aviso.set(
+        `${c.entidad.nombre} quedó revisado este mes en ${todas.length} productos.`,
       );
     });
   }

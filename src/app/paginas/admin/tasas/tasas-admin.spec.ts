@@ -619,6 +619,65 @@ describe('TasasAdmin', () => {
       expect(docs.marcarRevisadas).toHaveBeenCalledWith([41]);
     });
 
+    const libranza: FuenteAdmin = {
+      ...manual,
+      id: 25,
+      producto: 'libranza',
+    };
+    const davivienda = () =>
+      [...html.querySelectorAll('.banco')].filter((b) =>
+        b.textContent!.includes('Davivienda'),
+      );
+
+    it('al cargar el PDF en un producto, ofrece usarlo en los otros del banco', async () => {
+      await crearCon([], [...fuentes, manual, libranza]);
+      docs.marcarRevisadas.and.resolveTo(new Date().toISOString());
+      docs.cargar.and.callFake(async (fuente: number) =>
+        documento({ id: 100 + fuente, fuente }),
+      );
+      admin.crearDesdeDocumento.and.callFake(async (f: FuenteAdmin) =>
+        tasa({
+          id: 200 + f.id,
+          estado: 'por_revisar',
+          producto: f.producto,
+          entidad: { codigo: 'davivienda', nombre: 'Davivienda', logo: null },
+        }),
+      );
+      // Desde "Por cargar": la tarjeta sale de la lista al cargarla, pero la
+      // pregunta sigue arriba.
+      boton(html, 'Por cargar').click();
+      fixture.detectChanges();
+      const [primera] = davivienda();
+      boton(primera, 'Cargar PDF nuevo').click();
+      fixture.detectChanges();
+      const campo = primera.querySelector<HTMLInputElement>(
+        '.carga input[type="file"]',
+      )!;
+      const pdf = new File(['%PDF'], 'tasas.pdf', { type: 'application/pdf' });
+      Object.defineProperty(campo, 'files', { value: [pdf] });
+      campo.dispatchEvent(new Event('change'));
+      primera.querySelector<HTMLFormElement>('.carga')!.requestSubmit();
+      await esperar();
+      expect(docs.cargar).toHaveBeenCalledTimes(1);
+      expect(html.textContent).toContain('¿Usar este PDF también');
+      boton(html, 'Sí, en todos').click();
+      await esperar();
+      expect(docs.cargar).toHaveBeenCalledTimes(2);
+      expect(docs.cargar.calls.mostRecent().args[1]).toBe(pdf);
+      expect(docs.marcarRevisadas).toHaveBeenCalledWith([41]);
+      expect(docs.marcarRevisadas).toHaveBeenCalledWith([25]);
+      expect(html.textContent).not.toContain('¿Usar este PDF también');
+    });
+
+    it('"Sigue igual en todos" marca todos los productos del banco', async () => {
+      await crearCon([], [...fuentes, manual, libranza]);
+      docs.marcarRevisadas.and.resolveTo(new Date().toISOString());
+      boton(davivienda()[0], 'Sigue igual en todos (2)').click();
+      await esperar();
+      expect(docs.marcarRevisadas).toHaveBeenCalledTimes(2);
+      expect(boton(html, 'Por cargar').textContent).toContain('0');
+    });
+
     it('las que lee el robot no salen en "Por cargar"', async () => {
       await crearCon(
         [],

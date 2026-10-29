@@ -104,6 +104,18 @@
   flex: 1 1 280px;
 }
 
+.aviso-cargar .acciones {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.aviso-cargar.oferta {
+  margin-bottom: 16px;
+  background: var(--cm-ahorro-100);
+  color: var(--cm-ahorro-700);
+}
+
 .banco-cabeza {
   display: flex;
   justify-content: space-between;

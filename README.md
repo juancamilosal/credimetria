@@ -162,6 +162,13 @@ Directus. No está en el menú: se entra por `/admin`.
     revisión, hasta que alguien **carga su PDF** o toca **"Sigue igual este
     mes"** (si el banco no lo cambió). Las dos cosas guardan
     `ultima_revision` en la fuente (`core/utilidades/mes.ts`).
+    Un mismo PDF puede servir a varios productos del banco (Davivienda trae
+    libre inversión, libranza y vivienda en uno): al cargarlo en una
+    tarjeta, arriba aparece **"¿Usar este PDF también en los otros productos
+    de …?"**; con **Sí, en todos** queda unido (sin subirlo otra vez) a una
+    tasa por aprobar en cada producto manual del banco, y todos salen de
+    "Por cargar". Si no cambió, **Sigue igual en todos (N)** marca de una vez
+    todos los del banco que siguen por cargar.
   - La **tasa publicada** se puede corregir si se aprobó por error:
     **Editar** sus valores (si cambia la vigencia, también cambia la de su
     PDF), **Cambiar archivo** sube el PDF correcto en lugar del equivocado
