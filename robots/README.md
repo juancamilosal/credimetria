@@ -254,10 +254,10 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
 
    | Tarea                                                       | Hora Colombia | Cron (UTC)   |
    | ----------------------------------------------------------- | ------------- | ------------ |
-   | `node pdf-bancos.mjs --producto libre-inversion` (diaria)   | 1:53 a. m.    | `53 6 * * *` |
-   | `node pdf-bancos.mjs --producto libranza` (diaria)          | 2:13 a. m.    | `13 7 * * *` |
-   | `node pdf-bancos.mjs --producto hipotecario` (diaria)       | 2:33 a. m.    | `33 7 * * *` |
-   | `node pdf-bancos.mjs --producto leasing` (diaria)           | 2:53 a. m.    | `53 7 * * *` |
+   | `node pdf-bancos.mjs --producto libre-inversion` (diaria)   | 12:13 a. m.   | `13 5 * * *` |
+   | `node pdf-bancos.mjs --producto libranza` (diaria)          | 12:33 a. m.   | `33 5 * * *` |
+   | `node pdf-bancos.mjs --producto hipotecario` (diaria)       | 12:53 a. m.   | `53 5 * * *` |
+   | `node pdf-bancos.mjs --producto leasing` (diaria)           | 1:13 a. m.    | `13 6 * * *` |
    | `node promedio-sfc.mjs --producto libre-inversion` (martes) | 3:23 a. m.    | `23 8 * * 2` |
    | `node promedio-sfc.mjs --producto libranza` (martes)        | 3:43 a. m.    | `43 8 * * 2` |
    | `node promedio-sfc.mjs --producto vivienda-vis` (martes)    | 4:03 a. m.    | `3 9 * * 2`  |
