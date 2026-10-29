@@ -52,6 +52,19 @@ const VIVIENDA = [
 const numero = (v) => (v === null || v === undefined ? null : Number(v));
 
 /**
+ * Enlace de una tasa publicada: la página de tasas del banco (`url_indice`
+ * de su fuente, o la página de donde se leyó) y, si no hay, el PDF.
+ */
+function enlaceDe(p) {
+  const pagina =
+    p.fuente?.url_indice ??
+    (p.enlace && p.enlace_es_pagina ? p.enlace : null) ??
+    (p.fuente?.tipo === "pagina" ? p.fuente.url : null);
+  if (pagina) return { pdf: pagina, enPagina: true };
+  return { pdf: p.enlace ?? p.fuente?.url ?? null, enPagina: false };
+}
+
+/**
  * Bancos que en un producto no publican su tasa (fuente con `como_extraer`
  * "solo_promedio", p. ej. Banco Popular en libranza): salen solo con el
  * promedio de la Superfinanciera. Si no se pueden leer, la página sigue sin
@@ -131,12 +144,10 @@ async function leer() {
       tasaHasta: numero(p.ea_hasta),
       hastaUsura: p.hasta_origen === "usura",
       vigencia: p.vigente_desde,
-      // De dónde salió esta tasa: su propio enlace (PDF o página) o, en las
-      // tasas anteriores a ese campo, la dirección de su fuente.
-      pdf: p.enlace ?? p.fuente?.url ?? null,
-      enPagina: p.enlace
-        ? Boolean(p.enlace_es_pagina)
-        : p.fuente?.tipo === "pagina",
+      // De dónde sale la tasa: siempre la página del banco donde publica sus
+      // tasas (la que enlaza el PDF, o la página de donde se leyó) y no el
+      // PDF suelto; el PDF solo si no hay página guardada.
+      ...enlaceDe(p),
       logo: p.entidad.logo ? `/api/logos/${p.entidad.codigo}` : null,
     });
   }

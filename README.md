@@ -330,15 +330,15 @@ en `public/imagenes/` y su entrada en `FOTOS`.
   fija" en el simulador) que lo explica con un ejemplo (`AYUDA_DIFERENCIA`
   en `core/datos/tasas.ts`): en el inicio, en el título de la tabla del
   ranking y en las tarjetas del celular.
-- **Enlace de cada tasa**: `tasas_publicadas.enlace` y `enlace_es_pagina`
-  (26 oct 2026) dicen de dónde salió esa tasa (PDF o página). La web los usa
-  y, en las tasas anteriores a esos campos, usa la dirección y el tipo de la
-  fuente. El "Lector web" puede leerlos.
-- **Bancos sin PDF**: si la fuente de la tasa publicada es la página del
-  banco (`fuentes.tipo = pagina`, hoy Banco Popular), el enlace dice "Tasas
-  en la página del banco ↗" (o "Página ↗" en la tabla) en vez de "PDF del
-  banco ↗". El servidor lo sabe por `fuente.tipo` (`enPagina` en
-  `TasaEntidad`).
+- **Enlace de cada tasa** (29 oct 2026): la web siempre lleva a la
+  **página del banco** donde publica sus tasas, no al PDF suelto:
+  `fuentes.url_indice` (la página que enlaza el PDF) o, si la tasa salió de
+  una página (`tasas_publicadas.enlace` con `enlace_es_pagina`, o una
+  fuente `pagina`), esa página. Solo si no hay ninguna, el PDF. El enlace
+  dice "Página ↗" en la tabla y "Tasas en la página del banco ↗" en el
+  celular (`enlaceDe` en `servidor/tasas.mjs`, `enPagina` en
+  `TasaEntidad`). La página de cada banco se corrige en el admin con
+  "Editar direcciones" (campo "Página de tasas y tarifas").
 - **Fuente del promedio a la vista**: el inicio y el ranking enlazan el
   conjunto de la Superfinanciera en datos.gov.co (`FUENTE_PROMEDIO` en
   `core/datos/tasas.ts`) de donde sale "Cobra en promedio". Las tarjetas del
