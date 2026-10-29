@@ -17,7 +17,13 @@ import {
   PesosPipe,
   TasaPipe,
 } from '../../../compartido/pipes/formato';
-import { USURA_CONSUMO } from '../../../core/datos/tasas';
+import { esVivienda, plazosDe, USURA_CONSUMO } from '../../../core/datos/tasas';
+import {
+  MONTO_RANKING,
+  MONTO_VIVIENDA,
+  PLAZO_RANKING,
+  PLAZO_VIVIENDA,
+} from '../../../compartido/tabla-ranking/tabla-ranking';
 import { Producto } from '../../../core/modelos/tasa';
 import { TasasService } from '../../../core/servicios/tasas.service';
 import {
@@ -29,20 +35,23 @@ import {
 
 /** Explicación del globo de ayuda de la casilla "Cuota fija". */
 const AYUDA_CUOTA_FIJA =
-  'Sin marcar, la cuota baja cada mes: abonas lo mismo a capital y los intereses se calculan sobre lo que aún debes. Empiezas pagando más, pero pagas menos intereses. Márcala si tu banco te cobra la misma cuota todos los meses, como suele pasar en libre inversión, libranza y vehículo.';
+  'Sin marcar, la cuota baja cada mes: abonas lo mismo a capital y los intereses se calculan sobre lo que aún debes. Empiezas pagando más, pero pagas menos intereses. Márcala si tu banco te cobra la misma cuota todos los meses, como suele pasar en libre inversión, libranza y vehículo. En vivienda en pesos los bancos ofrecen las dos: cuota fija o abono constante a capital.';
 
 /** Suma de las cuotas de una tabla. */
 function totalPagado(tabla: CuotaAmortizacion[]): number {
   return tabla.reduce((suma, fila) => suma + fila.cuota, 0);
 }
 
-/** Productos que se pueden simular (vivienda tiene su propio cálculo). */
-const PRODUCTOS_SIMULADOR: Producto[] = [
-  'libre-inversion',
-  'libranza',
-  'compra-cartera',
-  'vehiculo',
-];
+/** Tasa de ejemplo con que arranca el simulador en cada tipo de crédito. */
+const TASA_CONSUMO = '26,38';
+const TASA_VIVIENDA = '14,50';
+
+/** Monto, plazo y tasa de ejemplo de un producto. */
+function porDefecto(producto: Producto) {
+  return esVivienda(producto)
+    ? { monto: MONTO_VIVIENDA, plazo: PLAZO_VIVIENDA, tasa: TASA_VIVIENDA }
+    : { monto: MONTO_RANKING, plazo: PLAZO_RANKING, tasa: TASA_CONSUMO };
+}
 
 /**
  * La persona escribe la tasa que le ofrecieron y ve al instante su cuota y
@@ -58,10 +67,15 @@ const PRODUCTOS_SIMULADOR: Producto[] = [
 export class Simulador {
   private readonly tasas = inject(TasasService);
 
-  protected readonly productos = this.tasas.productos.filter((p) =>
-    PRODUCTOS_SIMULADOR.includes(p.id),
-  );
-  protected readonly plazos = [12, 24, 36, 48, 60, 72];
+  /**
+   * Como en el ranking, vivienda es una sola opción; debajo se elige crédito
+   * hipotecario o leasing habitacional, y VIS o No VIS.
+   */
+  protected readonly productos = [
+    ...this.tasas.productos.filter((p) => !esVivienda(p.id)),
+    { id: 'vivienda', nombre: 'Vivienda' },
+  ];
+  protected readonly esVivienda = esVivienda;
 
   /**
    * Producto, monto y plazo los comparte con la página: el ranking resumido y
@@ -71,7 +85,19 @@ export class Simulador {
   readonly monto = model(20_000_000);
   readonly plazo = model(48);
   protected readonly montoTexto = signal(formatoPesos(this.monto()).slice(1));
-  protected readonly tasaTexto = signal('26,38');
+  protected readonly tasaTexto = signal(TASA_CONSUMO);
+  /** Consumo hasta 72 meses; vivienda hasta 240. */
+  protected readonly plazos = computed(() => plazosDe(this.producto()));
+  /** La opción del selector: "vivienda" para los cuatro de vivienda. */
+  protected readonly opcion = computed(() =>
+    esVivienda(this.producto()) ? 'vivienda' : this.producto(),
+  );
+  protected readonly modalidad = computed<'hipotecario' | 'leasing'>(() =>
+    this.producto().startsWith('leasing') ? 'leasing' : 'hipotecario',
+  );
+  protected readonly vis = computed<'vis' | 'no-vis'>(() =>
+    this.producto().endsWith('-no-vis') ? 'no-vis' : 'vis',
+  );
 
   protected readonly tasa = computed(() => leerNumero(this.tasaTexto()));
   protected readonly listo = computed(
@@ -130,12 +156,42 @@ export class Simulador {
   private readonly injector = inject(Injector);
 
   protected readonly usura = USURA_CONSUMO;
+  /** La usura de consumo no aplica a vivienda. */
   protected readonly superaUsura = computed(
-    () => this.tasa() > USURA_CONSUMO.tasa,
+    () => !esVivienda(this.producto()) && this.tasa() > USURA_CONSUMO.tasa,
   );
 
   protected cambiarProducto(valor: string): void {
-    if (this.tasas.esProducto(valor)) this.producto.set(valor);
+    const nuevo =
+      valor === 'vivienda'
+        ? this.vivienda(this.modalidad(), this.vis())
+        : valor;
+    if (!this.tasas.esProducto(nuevo)) return;
+    // Entre consumo y vivienda cambian mucho el monto, el plazo y la tasa:
+    // si siguen los de ejemplo, pasan a los del nuevo.
+    const antes = porDefecto(this.producto());
+    const despues = porDefecto(nuevo);
+    if (this.monto() === antes.monto)
+      this.cambiarMonto(formatoPesos(despues.monto).slice(1));
+    if (this.tasaTexto() === antes.tasa) this.tasaTexto.set(despues.tasa);
+    if (this.plazo() === antes.plazo || !plazosDe(nuevo).includes(this.plazo()))
+      this.plazo.set(despues.plazo);
+    this.producto.set(nuevo);
+  }
+
+  protected elegirModalidad(modalidad: 'hipotecario' | 'leasing'): void {
+    this.cambiarProducto(this.vivienda(modalidad, this.vis()));
+  }
+
+  protected elegirVis(vis: 'vis' | 'no-vis'): void {
+    this.cambiarProducto(this.vivienda(this.modalidad(), vis));
+  }
+
+  private vivienda(
+    modalidad: 'hipotecario' | 'leasing',
+    vis: 'vis' | 'no-vis',
+  ): Producto {
+    return `${modalidad === 'leasing' ? 'leasing' : 'vivienda'}-${vis}`;
   }
 
   protected simular(): void {

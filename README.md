@@ -82,6 +82,16 @@ morada y oro del diseño (ver abajo).
   valores por defecto: $11.108.167 en intereses y $31.108.167 en total. En
   celular se quita la columna de cuota (es fija y está arriba). El cálculo
   es `amortizacion()` en `core/utilidades/credito.ts`.
+- **Vivienda en el simulador**: "Vivienda" es una opción del producto y
+  debajo se elige **Crédito hipotecario | Leasing habitacional** y **VIS |
+  No VIS**, como en el ranking. Al pasar a vivienda, si seguían los de
+  ejemplo, el monto pasa a $150.000.000, el plazo a 240 meses (opciones de
+  60 a 240) y la tasa a 14,50 %; al volver a consumo, a $20.000.000, 48
+  meses y 26,38 %. En vivienda no se avisa la usura de consumo. La
+  comparación con quien menos cobra, el comparador de dos entidades y "las
+  3 que menos cobran" usan las tasas de vivienda. **Compara tu oferta**
+  también acepta los créditos de vivienda (plazos de 60 a 240 meses, sin
+  usura de consumo).
 - **Tipo de cuota** (simulador): una sola casilla "Cuota fija", sin marcar.
   Sin marcar, el simulador usa cuota decreciente (abono constante a
   capital); marcada, cuota fija (sistema francés). El botón "?" abre un

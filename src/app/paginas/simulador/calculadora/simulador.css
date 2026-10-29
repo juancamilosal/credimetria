@@ -270,3 +270,42 @@ h3 {
     padding: 18px;
   }
 }
+
+/* Vivienda: crédito hipotecario o leasing, y VIS o No VIS (como el ranking). */
+.vivienda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.segmento {
+  display: inline-flex;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--cm-linea);
+  border-radius: 999px;
+  background: var(--cm-campo);
+}
+
+.segmento button {
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cm-tinta);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.segmento button.activo {
+  background: var(--cm-bloque);
+  color: #fff;
+}
+
+.segmento button:focus-visible {
+  outline: 3px solid var(--cm-marca-100);
+  outline-offset: 2px;
+}

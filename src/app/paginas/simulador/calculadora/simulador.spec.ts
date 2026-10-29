@@ -68,6 +68,83 @@ describe('Simulador', () => {
     expect(html.querySelector('#avisoUsura')).not.toBeNull();
   });
 
+  describe('vivienda', () => {
+    function aVivienda(fixture: { detectChanges(): void }, html: HTMLElement) {
+      const select = html.querySelector<HTMLSelectElement>('#simProducto')!;
+      select.value = 'vivienda';
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+    }
+    const opcionesPlazo = (html: HTMLElement) =>
+      [...html.querySelectorAll<HTMLOptionElement>('#simPlazo option')].map(
+        (o) => o.textContent!.trim(),
+      );
+
+    it('pasa a $150.000.000 a 240 meses con plazos de vivienda', () => {
+      const { fixture, html } = crear();
+      expect(opcionesPlazo(html)).toEqual(['12', '24', '36', '48', '60', '72']);
+      aVivienda(fixture, html);
+      expect(
+        html.querySelector<HTMLInputElement>('#simMonto')!.value,
+      ).toContain('150.000.000');
+      expect(opcionesPlazo(html)).toEqual(['60', '120', '180', '240']);
+      expect(html.querySelector<HTMLSelectElement>('#simPlazo')!.value).toBe(
+        '240',
+      );
+      expect(html.querySelector<HTMLInputElement>('#simTasa')!.value).toBe(
+        '14,50',
+      );
+    });
+
+    it('elige crédito hipotecario o leasing, y VIS o No VIS', () => {
+      const { fixture, html } = crear();
+      aVivienda(fixture, html);
+      const boton = (texto: string) =>
+        [...html.querySelectorAll<HTMLButtonElement>('.segmento button')].find(
+          (b) => b.textContent!.trim() === texto,
+        )!;
+      expect(boton('Crédito hipotecario').getAttribute('aria-pressed')).toBe(
+        'true',
+      );
+      boton('Leasing habitacional').click();
+      fixture.detectChanges();
+      boton('No VIS').click();
+      fixture.detectChanges();
+      expect(boton('Leasing habitacional').getAttribute('aria-pressed')).toBe(
+        'true',
+      );
+      expect(boton('No VIS').getAttribute('aria-pressed')).toBe('true');
+      // Con las tasas de prueba de leasing No VIS, la mejor es Occidente.
+      expect(html.querySelector('.resultado')?.textContent).toContain(
+        'Banco de Occidente',
+      );
+    });
+
+    it('no avisa de usura en vivienda (la de consumo no aplica)', () => {
+      const { fixture, html } = crear();
+      aVivienda(fixture, html);
+      escribir(html.querySelector<HTMLInputElement>('#simTasa')!, '35');
+      fixture.detectChanges();
+      expect(html.querySelector('#avisoUsura')).toBeNull();
+    });
+
+    it('al volver a consumo regresa a $20.000.000 a 48 meses', () => {
+      const { fixture, html } = crear();
+      aVivienda(fixture, html);
+      const select = html.querySelector<HTMLSelectElement>('#simProducto')!;
+      select.value = 'libranza';
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      expect(
+        html.querySelector<HTMLInputElement>('#simMonto')!.value,
+      ).toContain('20.000.000');
+      expect(html.querySelector<HTMLSelectElement>('#simPlazo')!.value).toBe(
+        '48',
+      );
+      expect(html.querySelector('.vivienda')).toBeNull();
+    });
+  });
+
   it('pide monto y tasa si faltan', () => {
     const { fixture, html } = crear();
     escribir(html.querySelector<HTMLInputElement>('#simMonto')!, '');
