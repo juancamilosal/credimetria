@@ -394,7 +394,7 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   y debajo hay dos filtros aparte: **Crédito hipotecario | Leasing
   habitacional** y **VIS | No VIS** (el producto y la dirección siguen
   siendo `vivienda-vis`, `leasing-no-vis`…). La cuota de vivienda se calcula con
-  $150.000.000 a 240 meses (consumo: $20.000.000 a 48). El Fondo Nacional
+  $150.000.000 a 20 años (consumo: $20.000.000 a 48 meses). **Plazos:** los créditos de consumo (libre inversión, libranza…) van de 12 a **72 meses** y vivienda de **5 a 20 años** (60 a 240 meses), en el ranking y en Compara tu oferta (`plazosDe` y `textoPlazo` en `core/datos/tasas.ts`). El Fondo Nacional
   del Ahorro es tipo "Fondo". Una tasa de vivienda publicada sin promedio
   de la Superfinanciera (p. ej. Bancolombia o AV Villas en leasing, que lo
   ofrecen pero no lo reportan) sale igual, con **"Sin reporte"** en "Cobra

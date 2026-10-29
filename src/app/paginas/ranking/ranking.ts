@@ -22,11 +22,14 @@ import {
   TODAS,
 } from '../../compartido/tabla-ranking/tabla-ranking';
 import { Producto, TipoEntidad } from '../../core/modelos/tasa';
-import { esVivienda, FUENTE_PROMEDIO } from '../../core/datos/tasas';
+import {
+  esVivienda,
+  FUENTE_PROMEDIO,
+  plazosDe,
+  textoPlazo,
+} from '../../core/datos/tasas';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { leerNumero } from '../../core/utilidades/credito';
-
-const PLAZOS = [12, 24, 36, 48, 60, 72, 120, 180, 240];
 
 /** Monto y plazo con que se calcula la cuota si la persona no los cambia. */
 function porDefecto(producto: Producto): { monto: number; plazo: number } {
@@ -88,7 +91,9 @@ export class Ranking {
   protected readonly cargando = this.tasas.cargando;
   protected readonly productos = this.tasas.productos;
   protected readonly tipos = [TODAS, ...this.tasas.tipos];
-  protected readonly plazos = PLAZOS;
+  /** Consumo hasta 72 meses; vivienda de 5 a 20 años. */
+  protected readonly plazos = computed(() => plazosDe(this.producto()));
+  protected readonly textoPlazo = textoPlazo;
   protected readonly ordenes = ORDENES;
   protected readonly fuente = FUENTE_PROMEDIO;
 
@@ -214,6 +219,9 @@ export class Ranking {
       this.montoTexto.set(formatoPesos(despues.monto).slice(1));
       this.plazo.set(despues.plazo);
     }
+    // El plazo que no existe en el producto nuevo (240 meses en libre
+    // inversión) pasa al de por defecto.
+    if (!plazosDe(valor).includes(this.plazo())) this.plazo.set(despues.plazo);
     this.producto.set(valor);
   }
 
@@ -236,7 +244,9 @@ export class Ranking {
     this.montoTexto.set(
       formatoPesos(monto > 0 ? monto : defecto.monto).slice(1),
     );
-    this.plazo.set(PLAZOS.includes(plazo) ? plazo : defecto.plazo);
+    this.plazo.set(
+      plazosDe(this.producto()).includes(plazo) ? plazo : defecto.plazo,
+    );
     if (
       COLUMNAS.includes(columna as ColumnaRanking) &&
       (dir === 'asc' || dir === 'desc')

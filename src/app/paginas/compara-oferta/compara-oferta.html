@@ -137,7 +137,10 @@
               <dl class="filas">
                 <div class="fila">
                   <dt>{{ nombreProducto(d.producto) }}</dt>
-                  <dd>{{ d.monto | pesos }} a {{ d.plazo }} meses</dd>
+                  <dd>
+                    {{ d.monto | pesos }} a
+                    {{ textoPlazo(d.plazo, d.producto) }}
+                  </dd>
                 </div>
                 @if (d.tasaDicha !== null) {
                   <div class="fila">

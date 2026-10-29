@@ -89,6 +89,21 @@ describe('ComparaOferta', () => {
     expect(resultado).toContain('Buena tasa');
   });
 
+  it('en vivienda pregunta en años, de 5 a 20', () => {
+    tocar('Comparar mi oferta');
+    tocar('Crédito hipotecario VIS');
+    escribir('150.000.000');
+    expect(html.textContent).toContain('¿A cuántos años?');
+    for (const anos of ['5 años', '10 años', '15 años', '20 años'])
+      expect(boton(anos)).toBeTruthy();
+    const textos = [...html.querySelectorAll('button')].map((b) =>
+      b.textContent!.trim(),
+    );
+    expect(textos).not.toContain('72 meses');
+    tocar('20 años');
+    expect(html.textContent).toContain('¿Qué te dijo el asesor?');
+  });
+
   it('valida el monto, la tasa mensual y la cuota', () => {
     tocar('Comparar mi oferta');
     tocar('Libre inversión');

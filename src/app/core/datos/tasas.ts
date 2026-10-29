@@ -27,6 +27,23 @@ export const VIVIENDA: Producto[] = [
 export const esVivienda = (producto: string): boolean =>
   (VIVIENDA as string[]).includes(producto);
 
+/** Plazos (en meses) de los créditos de consumo: hasta 72 meses. */
+export const PLAZOS_CONSUMO = [12, 24, 36, 48, 60, 72];
+/** Plazos de vivienda (hipotecario y leasing): de 5 a 20 años. */
+export const PLAZOS_VIVIENDA = [60, 120, 180, 240];
+
+/** Los plazos que se ofrecen para un producto. */
+export function plazosDe(producto: string | null | undefined): number[] {
+  return producto && esVivienda(producto) ? PLAZOS_VIVIENDA : PLAZOS_CONSUMO;
+}
+
+/** "48 meses" o, en años exactos de vivienda, "20 años". */
+export function textoPlazo(meses: number, producto?: string | null): string {
+  return producto && esVivienda(producto) && meses % 12 === 0
+    ? `${meses / 12} años`
+    : `${meses} meses`;
+}
+
 /**
  * Tasa de usura del mes para crédito de consumo ordinario (certificada por
  * la Superfinanciera). Ninguna entidad puede cobrar más. Se actualiza cada

@@ -225,12 +225,32 @@ describe('Ranking', () => {
     );
   });
 
-  it('en vivienda la cuota se calcula con $150.000.000 a 240 meses', () => {
+  it('en vivienda la cuota se calcula con $150.000.000 a 20 años', () => {
     const select = html.querySelector<HTMLSelectElement>('select')!;
     select.value = 'vivienda';
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-    expect(html.textContent).toContain('$150.000.000 a 240 meses');
+    expect(html.textContent).toContain('$150.000.000 a 20 años');
+  });
+
+  it('consumo ofrece plazos hasta 72 meses y vivienda de 5 a 20 años', () => {
+    const opciones = () =>
+      [...html.querySelectorAll<HTMLOptionElement>('#rkPlazo option')].map(
+        (o) => o.textContent!.trim(),
+      );
+    expect(opciones()).toEqual([
+      '12 meses',
+      '24 meses',
+      '36 meses',
+      '48 meses',
+      '60 meses',
+      '72 meses',
+    ]);
+    const select = html.querySelector<HTMLSelectElement>('select')!;
+    select.value = 'vivienda';
+    select.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    expect(opciones()).toEqual(['5 años', '10 años', '15 años', '20 años']);
   });
 
   it('vivienda se filtra por crédito hipotecario o leasing, y VIS o No VIS', () => {

@@ -20,7 +20,12 @@ import {
   PesosPipe,
   TasaPipe,
 } from '../../compartido/pipes/formato';
-import { esVivienda, USURA_CONSUMO } from '../../core/datos/tasas';
+import {
+  esVivienda,
+  plazosDe,
+  textoPlazo,
+  USURA_CONSUMO,
+} from '../../core/datos/tasas';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
@@ -37,7 +42,6 @@ import {
 } from './oferta';
 
 const MONTO_MINIMO = 1_000_000;
-const PLAZOS = [12, 24, 36, 48, 60, 72];
 
 /** Un pedazo de texto de un mensaje del bot; `cifra` lo pone en negrilla. */
 interface Parte {
@@ -109,6 +113,7 @@ export class ComparaOferta {
   private readonly respuesta = viewChild<ElementRef<HTMLElement>>('respuesta');
 
   protected readonly corte = this.tasas.corte;
+  protected readonly textoPlazo = textoPlazo;
   protected readonly mesUsura = USURA_CONSUMO.mes;
   protected readonly mensajes = signal<Mensaje[]>([]);
   protected readonly zona = signal<Zona>({ tipo: 'nada' });
@@ -188,10 +193,18 @@ export class ComparaOferta {
   }
 
   private preguntarPlazo(): void {
-    this.bot('¿A cuántos meses?');
+    const producto = this.datos.producto;
+    this.bot(
+      producto && esVivienda(producto)
+        ? '¿A cuántos años?'
+        : '¿A cuántos meses?',
+    );
     this.opciones(
       'Plazo',
-      PLAZOS.map((n) => ({ texto: `${n} meses`, valor: String(n) })),
+      plazosDe(producto).map((n) => ({
+        texto: textoPlazo(n, producto),
+        valor: String(n),
+      })),
       (o) => {
         this.datos.plazo = Number(o.valor);
         this.preguntarQueDijeron();
