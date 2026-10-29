@@ -258,12 +258,12 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
    | `node pdf-bancos.mjs --producto libranza` (diaria)          | 12:33 a. m.   | `33 5 * * *` |
    | `node pdf-bancos.mjs --producto hipotecario` (diaria)       | 12:53 a. m.   | `53 5 * * *` |
    | `node pdf-bancos.mjs --producto leasing` (diaria)           | 1:13 a. m.    | `13 6 * * *` |
-   | `node promedio-sfc.mjs --producto libre-inversion` (martes) | 3:23 a. m.    | `23 8 * * 2` |
-   | `node promedio-sfc.mjs --producto libranza` (martes)        | 3:43 a. m.    | `43 8 * * 2` |
-   | `node promedio-sfc.mjs --producto vivienda-vis` (martes)    | 4:03 a. m.    | `3 9 * * 2`  |
-   | `node promedio-sfc.mjs --producto vivienda-no-vis` (martes) | 4:23 a. m.    | `23 9 * * 2` |
-   | `node promedio-sfc.mjs --producto leasing-vis` (martes)     | 4:43 a. m.    | `43 9 * * 2` |
-   | `node promedio-sfc.mjs --producto leasing-no-vis` (martes)  | 5:03 a. m.    | `3 10 * * 2` |
+   | `node promedio-sfc.mjs --producto libre-inversion` (martes) | 1:33 a. m.    | `33 6 * * 2` |
+   | `node promedio-sfc.mjs --producto libranza` (martes)        | 1:53 a. m.    | `53 6 * * 2` |
+   | `node promedio-sfc.mjs --producto vivienda-vis` (martes)    | 2:13 a. m.    | `13 7 * * 2` |
+   | `node promedio-sfc.mjs --producto vivienda-no-vis` (martes) | 2:33 a. m.    | `33 7 * * 2` |
+   | `node promedio-sfc.mjs --producto leasing-vis` (martes)     | 2:53 a. m.    | `53 7 * * 2` |
+   | `node promedio-sfc.mjs --producto leasing-no-vis` (martes)  | 3:13 a. m.    | `13 8 * * 2` |
 
    Una tarea por producto, también en el robot de los PDF: cada una con sus
    15 minutos. Dentro de una corrida, el mismo PDF o la misma página (VIS y
