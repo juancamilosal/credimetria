@@ -2181,7 +2181,42 @@ const vehiculoFinandina = {
   },
 };
 
+/**
+ * BBVA: PDF aparte DO-01-Vehiculo-tasas.pdf (página de tasas y tarifas,
+ * "Tasa de Vehículo"), dos hojas: tasa variable (IBR) y tasa fija, cada una
+ * con vehículos nuevos y usados, motos, híbridos y eléctricos y utilitarios
+ * ("*Desde" E.A. y M.V.). Desde = la más baja de las dos hojas; hasta =
+ * usura.
+ */
+const vehiculoBbva = {
+  ...REGLAS.bbva,
+  enlace: /[^"'\s]*DO-01-Vehiculo-tasas\.pdf/gi,
+  ancla: /Tasas de interés para oferta de vehículos/,
+  leer(texto) {
+    const t = plano(texto);
+    const vig = exigir(
+      t,
+      /Vigencia a partir del (\d{1,2}) de (\p{L}+)(?: de)? (\d{4})/u,
+      'la fecha "Vigencia a partir del …"',
+    );
+    const filas = [...t.matchAll(/([\d,]+)% ?E\.A\s+([\d,]+)% M\.V/g)];
+    if (!filas.length)
+      throw new ReglaRota('No encontré las tasas "… E.A … M.V" de vehículos.');
+    const menor = filas.reduce((a, b) => (numero(b[1]) < numero(a[1]) ? b : a));
+    const variable = t.indexOf(menor[0]) < t.search(/Tasa Fija/);
+    return {
+      eaDesde: numero(menor[1]),
+      mvDesde: numero(menor[2]),
+      eaHasta: null,
+      mvHasta: null,
+      vigencia: fecha(`${vig[1]} de ${vig[2].toLowerCase()} de ${vig[3]}`),
+      frase: `Tasas de interés para oferta de vehículos · desde ${menor[1]}% E.A. (${menor[2]}% M.V.), ${variable ? "tasa variable (IBR)" : "tasa fija"}; la más baja de ${filas.length} tasas`,
+    };
+  },
+};
+
 REGLAS["davivienda:vehiculo"] = vehiculoDavivienda;
+REGLAS["bbva:vehiculo"] = vehiculoBbva;
 REGLAS["banco-finandina:vehiculo"] = vehiculoFinandina;
 REGLAS["banco-de-bogota:vehiculo"] = vehiculoBogota;
 REGLAS["banco-de-occidente:vehiculo"] = vehiculoOccidente;

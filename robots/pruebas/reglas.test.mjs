@@ -833,6 +833,7 @@ const VEHICULO = [
   ["banco-agrario", mensual(20.9), 20.9, null, null, "2026-10-05"],
   ["bancoomeva", mensual(18.44), 18.44, null, null, "2026-10-01"],
   ["banco-serfinanza", 1.59, 20.84, null, null, "2026-10-01"],
+  ["bbva", 1.29, 16.65, null, null, "2026-10-03"],
 ];
 
 describe("reglas de vehículo", () => {
