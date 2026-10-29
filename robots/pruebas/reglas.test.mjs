@@ -424,7 +424,7 @@ const VIVIENDA = [
     14.3,
     null,
     null,
-    "2026-11-01",
+    "2026-10-16",
   ],
   [
     "davivienda",
@@ -434,7 +434,7 @@ const VIVIENDA = [
     14.35,
     null,
     null,
-    "2026-11-01",
+    "2026-10-16",
   ],
   [
     "davivienda",
@@ -444,7 +444,7 @@ const VIVIENDA = [
     13.8,
     null,
     null,
-    "2026-11-01",
+    "2026-10-16",
   ],
   [
     "davivienda",
@@ -454,7 +454,7 @@ const VIVIENDA = [
     13.95,
     null,
     null,
-    "2026-11-01",
+    "2026-10-16",
   ],
   [
     "banco-agrario",

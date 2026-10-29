@@ -1262,27 +1262,25 @@ function viviendaDavivienda(producto) {
           : /(?:^|\n) ?VIS ([\d,]+)% ([\d,]+)%/,
         `la fila ${noVis ? "NO VIS" : "VIS"} de "${leasing ? "Leasing Habitacional" : "Crédito Hipotecario"}"`,
       );
-      // "Vigente a partir del 01 de Noviembre 20…": el año puede quedar
-      // cortado en el texto; se toma el de "Fecha de Actualización … de 2026".
-      const vig = exigir(
-        pagina,
-        /Vigente a partir del (\d{1,2}) de (\p{L}+)(?: de)? ?(\d{4})?/u,
-        "la vigencia de vivienda",
-      );
-      const año =
-        vig[3] ??
-        exigir(
-          t,
-          /Fecha de Actualización \p{L}+ \d{1,2} de (\d{4})/u,
-          "el año de actualización",
-        )[1];
+      // Vigencia: la "Fecha de Actualización Octubre 16 de 2026" que se ve
+      // arriba de la tabla. El "Vigente a partir del 01 de Noviembre…" que
+      // sale en el texto es oculto (queda bajo el encabezado de la tabla de
+      // leasing y no se ve en el PDF): no sirve. Se toma la más cercana antes
+      // del título; si no hay, la primera después.
+      const i = t.search(/FINANCIACIÓN DE VIVIENDA/);
+      const formato = /Fecha de Actualización (\p{L}+) (\d{1,2}) de (\d{4})/gu;
+      const antes = [...t.slice(Math.max(0, i - 3000), i).matchAll(formato)];
+      const vig =
+        antes.at(-1) ??
+        [...pagina.matchAll(formato)][0] ??
+        exigir(pagina, formato, "la fecha de actualización de vivienda");
       return {
         eaDesde: numero(m[1]),
         mvDesde: numero(m[2]),
         eaHasta: null,
         mvHasta: null,
-        vigencia: fecha(`${vig[1]} de ${vig[2].toLowerCase()} de ${año}`),
-        frase: `${leasing ? "Leasing Habitacional" : "Crédito Hipotecario"} · ${m[0].trim()} (desde, pesos E.A. y M.V.)`,
+        vigencia: fecha(`${vig[2]} de ${vig[1].toLowerCase()} de ${vig[3]}`),
+        frase: `${leasing ? "Leasing Habitacional" : "Crédito Hipotecario"} · ${m[0].trim()} (desde, pesos E.A. y M.V.; actualización ${vig[1].toLowerCase()} ${vig[2]} de ${vig[3]})`,
       };
     },
   };
