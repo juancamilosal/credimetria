@@ -435,10 +435,6 @@
 <ng-template #bloque let-t let-base="base">
   <dl class="datos">
     <div>
-      <dt>Publica</dt>
-      <dd class="cifra">{{ publica(t) }}</dd>
-    </div>
-    <div>
       <dt>Efectiva anual</dt>
       <dd class="cifra">
         @if (t.ea_desde === null && t.ea_hasta !== null) {
@@ -463,6 +459,10 @@
           }
         </dd>
       }
+    </div>
+    <div>
+      <dt>Publica</dt>
+      <dd class="cifra">{{ publica(t) }}</dd>
     </div>
     <div>
       <dt>Vigente desde</dt>
