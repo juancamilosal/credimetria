@@ -176,7 +176,12 @@
               <span class="nombre">
                 @if (fila.logo) {
                   <span class="logo-mini"
-                    ><img [src]="fila.logo" alt="" height="24" loading="lazy"
+                    ><img
+                      appEsqueleto
+                      [src]="fila.logo"
+                      alt=""
+                      height="24"
+                      loading="lazy"
                   /></span>
                 }
                 <!-- Con logo, el nombre queda solo para lectores de pantalla -->
@@ -294,7 +299,12 @@
             ><span class="pos">{{ fila.puesto }}</span>
             @if (fila.logo) {
               <span class="logo-mini"
-                ><img [src]="fila.logo" alt="" height="24" loading="lazy"
+                ><img
+                  appEsqueleto
+                  [src]="fila.logo"
+                  alt=""
+                  height="24"
+                  loading="lazy"
               /></span>
             }
             <span [class.visualmente-oculto]="fila.logo">{{

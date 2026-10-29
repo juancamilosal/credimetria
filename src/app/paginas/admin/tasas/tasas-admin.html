@@ -106,7 +106,9 @@
           <div class="banco-cabeza">
             <div class="marca">
               @if (logo(c.entidad); as url) {
-                <span class="logo"><img [src]="url" alt="" height="28" /></span>
+                <span class="logo"
+                  ><img appEsqueleto [src]="url" alt="" height="28"
+                /></span>
               }
               <div>
                 <h2>{{ c.entidad.nombre }}</h2>

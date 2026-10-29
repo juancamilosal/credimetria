@@ -19,6 +19,7 @@ import { FOTOS } from '../../core/datos/fotos';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
+import { EsqueletoImagen } from '../../compartido/esqueleto-imagen/esqueleto-imagen';
 
 /**
  * Inicio: qué hace Credimetría, las 3 tasas más bajas de libre inversión,
@@ -35,6 +36,7 @@ import { TasasService } from '../../core/servicios/tasas.service';
     PesosPipe,
     PuntosPipe,
     TasaPipe,
+    EsqueletoImagen,
   ],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',

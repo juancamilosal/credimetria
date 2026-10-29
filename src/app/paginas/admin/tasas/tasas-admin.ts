@@ -43,6 +43,7 @@ import {
 } from '../../../core/utilidades/credito';
 import { pendienteDelMes } from '../../../core/utilidades/mes';
 import { CabeceraAdmin } from '../cabecera/cabecera-admin';
+import { EsqueletoImagen } from '../../../compartido/esqueleto-imagen/esqueleto-imagen';
 
 const UNIDAD_TEXTO: Record<UnidadTasa, string> = {
   MV: 'M.V.',
@@ -127,6 +128,7 @@ interface Comparacion {
     ReactiveFormsModule,
     TasaPipe,
     CabeceraAdmin,
+    EsqueletoImagen,
   ],
   templateUrl: './tasas-admin.html',
   styleUrl: './tasas-admin.css',

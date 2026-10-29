@@ -13,6 +13,7 @@ import { Producto, TasaEntidad } from '../../core/modelos/tasa';
 import { cuotaMensual } from '../../core/utilidades/credito';
 import { Ayuda } from '../ayuda/ayuda';
 import { PesosPipe, PuntosPipe, TasaPipe } from '../pipes/formato';
+import { EsqueletoImagen } from '../esqueleto-imagen/esqueleto-imagen';
 
 /** Monto y plazo con los que se calcula la cuota estimada si no llegan otros. */
 export const MONTO_RANKING = 20_000_000;
@@ -59,7 +60,14 @@ interface FilaVista extends TasaEntidad {
  */
 @Component({
   selector: 'app-tabla-ranking',
-  imports: [RouterLink, Ayuda, PesosPipe, PuntosPipe, TasaPipe],
+  imports: [
+    RouterLink,
+    Ayuda,
+    PesosPipe,
+    PuntosPipe,
+    TasaPipe,
+    EsqueletoImagen,
+  ],
   templateUrl: './tabla-ranking.html',
   styleUrl: './tabla-ranking.css',
   host: {

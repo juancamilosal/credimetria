@@ -49,6 +49,10 @@ morada y oro del diseño (ver abajo).
   Si las tasas no vinieron con la página, la tabla y las tarjetas muestran
   un esqueleto (`TasasService.cargando`) mientras llegan de `/api/tasas`;
   en el servidor la página se arma ya con las tasas.
+  Los **logos** (ranking, inicio y admin) muestran un esqueleto gris
+  mientras cargan (directiva `appEsqueleto` en
+  `compartido/esqueleto-imagen/`, estilo `.img-cargando` en `styles.css`):
+  solo en el navegador, y se quita al cargar o fallar la imagen.
 - **Compara tu oferta** (`paginas/compara-oferta/`): preguntas fijas con
   botones (producto, monto, plazo, qué le dijeron: tasa E.A., tasa mensual o
   solo la cuota). Convierte la tasa mensual a E.A., saca la tasa real de la

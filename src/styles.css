@@ -385,3 +385,44 @@ button {
   color: var(--cm-gris);
   white-space: nowrap;
 }
+
+/* Esqueleto de los logos mientras cargan (directiva appEsqueleto). Va en
+   una capa encima (::after): el recuadro del logo tiene su propio fondo. */
+.img-cargando {
+  position: relative;
+}
+
+.img-cargando::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--cm-linea-suave) 25%,
+    var(--cm-linea) 50%,
+    var(--cm-linea-suave) 75%
+  );
+  background-size: 300% 100%;
+  animation: brillo-img 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.img-cargando > img {
+  opacity: 0;
+}
+
+@keyframes brillo-img {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .img-cargando::after {
+    animation: none;
+  }
+}
