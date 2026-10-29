@@ -848,6 +848,19 @@ describe("reglas de vehículo", () => {
     });
   }
 
+  it("banco-finandina: lee vehículo de su página de tasas vigentes", () => {
+    const html = readFileSync(
+      new URL("textos/banco-finandina-vigentes.html", import.meta.url),
+      "utf8",
+    );
+    const t = reglaDe("banco-finandina", "vehiculo").leer(textoHtml(html));
+    assert.deepEqual(
+      [t.mvDesde, t.eaDesde, t.mvHasta, t.eaHasta, t.vigencia],
+      [1.39, 18.02, null, null, "2026-10-01"],
+    );
+    assert.equal(reglaDe("banco-finandina", "vehiculo").pagina, true);
+  });
+
   it("no cuenta los créditos comerciales", () => {
     // Bogotá: "VEHÍCULOS PUBLICOS" (19,99 %) no baja el desde de 18,58 %.
     const bogota = reglaDe("banco-de-bogota", "vehiculo").leer(

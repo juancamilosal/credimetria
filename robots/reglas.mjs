@@ -2147,7 +2147,42 @@ const vehiculoSerfinanza = {
   },
 };
 
+/**
+ * Finandina no publica vehículo en su PDF: en su página de tasas vigentes
+ * (pestaña "Tasas de interés"), "Crédito Otros Vehículos (Tradicional y
+ * Leasing) Desde el 1.39% NMV - Equivalente a 18.02% EA". Solo el desde;
+ * hasta = usura.
+ */
+const vehiculoFinandina = {
+  pagina: true,
+  pantallazo: "Otros Vehículos",
+  clic: "Tasas de interés",
+  ancla: /Otros Vehículos/,
+  leer(texto) {
+    const t = texto.replace(/\s+/g, " ");
+    const vig = exigir(
+      t,
+      /Las tasas aplican a partir del (\d{1,2} de \p{L}+ de \d{4})/u,
+      'la fecha "Las tasas aplican a partir del …"',
+    );
+    const m = exigir(
+      t,
+      /Otros Vehículos[^%]*?Desde el ([\d.,]+)% NMV . Equivalente a[l]? ([\d.,]+)% EA/,
+      'la fila "Crédito Otros Vehículos"',
+    );
+    return {
+      mvDesde: numero(m[1]),
+      eaDesde: numero(m[2]),
+      mvHasta: null,
+      eaHasta: null,
+      vigencia: fecha(vig[1]),
+      frase: `Crédito ${m[0]}`,
+    };
+  },
+};
+
 REGLAS["davivienda:vehiculo"] = vehiculoDavivienda;
+REGLAS["banco-finandina:vehiculo"] = vehiculoFinandina;
 REGLAS["banco-de-bogota:vehiculo"] = vehiculoBogota;
 REGLAS["banco-de-occidente:vehiculo"] = vehiculoOccidente;
 REGLAS["banco-agrario:vehiculo"] = vehiculoAgrario;

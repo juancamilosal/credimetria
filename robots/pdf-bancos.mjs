@@ -346,7 +346,7 @@ async function revisarFuente(fuente) {
       return sinCambios(url, marca);
     }
     prueba = async () => ({
-      datos: await pantallazo(url, regla.pantallazo),
+      datos: await pantallazo(url, regla.pantallazo, { clic: regla.clic }),
       tipo: "image/png",
       extension: "png",
       nota: `Pantallazo tomado por el robot de ${url}`,
