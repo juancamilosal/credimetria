@@ -817,3 +817,47 @@ describe("reglas de vivienda", () => {
     assert.equal(reglaDe("banco-serfinanza", "vivienda-vis"), undefined);
   });
 });
+
+const VEHICULO = [
+  // [banco, mvDesde, eaDesde, mvHasta, eaHasta, vigencia]
+  ["davivienda", 1.27, 16.35, null, null, "2026-09-11"],
+  [
+    "banco-de-bogota",
+    mensual(18.58),
+    18.58,
+    mensual(27.12),
+    27.12,
+    "2026-10-01",
+  ],
+  ["banco-de-occidente", 1.47, 19.2, null, null, "2026-10-01"],
+  ["banco-agrario", mensual(20.9), 20.9, null, null, "2026-10-05"],
+  ["bancoomeva", mensual(18.44), 18.44, null, null, "2026-10-01"],
+  ["banco-serfinanza", 1.59, 20.84, null, null, "2026-10-01"],
+];
+
+describe("reglas de vehículo", () => {
+  for (const [banco, ...esperado] of VEHICULO) {
+    it(`${banco}: lee vehículo (la más baja para personas)`, () => {
+      const t = reglaDe(banco, "vehiculo").leer(texto(`${banco}-vehiculo`));
+      assert.deepEqual(
+        [t.mvDesde, t.eaDesde, t.mvHasta, t.eaHasta, t.vigencia],
+        esperado,
+      );
+      assert.deepEqual(revisar(t, USURA), []);
+      assert.ok(t.frase);
+    });
+  }
+
+  it("no cuenta los créditos comerciales", () => {
+    // Bogotá: "VEHÍCULOS PUBLICOS" (19,99 %) no baja el desde de 18,58 %.
+    const bogota = reglaDe("banco-de-bogota", "vehiculo").leer(
+      texto("banco-de-bogota-vehiculo"),
+    );
+    assert.equal(bogota.frase.includes("PUBLICOS"), false);
+    // Davivienda: el productivo (carga y taxi) va aparte.
+    const davivienda = reglaDe("davivienda", "vehiculo").leer(
+      texto("davivienda-vehiculo"),
+    );
+    assert.equal(/Taxi|Carga/.test(davivienda.frase), false);
+  });
+});

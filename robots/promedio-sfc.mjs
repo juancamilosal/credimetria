@@ -33,6 +33,9 @@ const SEMANAS = 4;
 const PRODUCTOS = {
   "libre-inversion": "Libre inversión",
   libranza: "Libranza otros",
+  // Vehículo: la Superfinanciera no separa nuevo, usado ni motos (el
+  // "Leasing financiero - financiación vehículos" va aparte y no cuenta).
+  vehiculo: "Vehículo",
   "vivienda-vis": "Adquisición de vivienda vis (colocación en pesos)",
   "vivienda-no-vis": "Adquisición de vivienda no vis (colocación en pesos)",
   "leasing-vis": "Adquisición leasing habitacional vis (colocación en pesos)",
@@ -43,6 +46,7 @@ const PRODUCTOS = {
 const NOMBRES = {
   "libre-inversion": "Libre inversión",
   libranza: "Libranza",
+  vehiculo: "Vehículo",
   "vivienda-vis": "Vivienda VIS",
   "vivienda-no-vis": "Vivienda No VIS",
   "leasing-vis": "Leasing habitacional VIS",

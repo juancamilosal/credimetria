@@ -134,6 +134,23 @@ Davivienda 22,71 % E.A.
 | AV Villas             | Página en dos columnas (se separan por la posición del título "Leasing Habitacional"): Créditos Hipotecarios VIS 13,00 % a 15,45 % y NO VIS 13,50 % a 16,50 % (todas sus tablas en pesos, también digital); Leasing Habitacional solo NO VIS 15,50 % a 16,25 %                                                                     |
 | Banco Caja Social     | PDF aparte "Tasas-Credito-Vivienda.pdf" (sección "Créditos de vivienda" de la página de tasas; la regla busca el enlace en `url_indice`), "Adquisición de vivienda": VIS 13,75 % a 16,30 % y NO VIS 14,35 % a 17,80 % E.A. en pesos (desde y hasta); sin leasing ni las columnas UVR. Vigencia "Vigentes a partir del 17-Jul-2026" |
 
+- **Reglas de vehículo** (`<banco>:vehiculo`, 29 oct 2026). La
+  Superfinanciera reporta un solo "Vehículo" (sin separar nuevo, usado ni
+  motos): desde = la tasa **más baja** de vehículo para personas que
+  publique el banco (carro nuevo o usado, eléctrico o híbrido, motos);
+  hasta = la máxima que publique o, si no, la usura (es consumo). No
+  cuentan los créditos comerciales (productivo, taxis, carga, públicos,
+  transportador ni persona jurídica). Vigencia = la del mismo PDF.
+
+| Banco              | Qué lee (oct 2026)                                                                                                                                                                           |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Davivienda         | "Crédito Vehículo Particular": eléctricos e híbridos desde 16,35 % E.A. (1,27 % M.V.) y combustión desde 16,90 %; vigencia "Vigente a partir del 11 de septiembre 2026" (se carga a mano)    |
+| Banco de Bogotá    | "Crédito de Consumo - Vehículos": particulares nuevos 18,58 % a 27,12 %, usados 19,56 % a 26,82 % y motos de alto cilindraje 22,52 %; sin "VEHÍCULOS PUBLICOS". Desde 18,58 %, hasta 27,12 % |
+| Banco de Occidente | "Occiauto", persona natural: vehículos livianos nuevo desde 19,20 % E.A. (1,47 % M.V.) y usado 19,77 %, y motos; sin transportador ni persona jurídica                                       |
+| Banco Agrario      | "CRÉDITO INVERSIÓN VEHÍCULO (CARRO Y MOTO)": carro nuevo 20,90 %, usado 21,40 % y moto nueva 22,40 % E.A.                                                                                    |
+| Bancoomeva         | Cartelera de clientes: "VEHÍCULO CON PRENDA" (híbrido o eléctrico) 18,44 % y motos 19,84 % E.A.                                                                                              |
+| Banco Serfinanza   | "Crédito de Vehículo": 20,84 % E.A. (1,59 % M.V.), hasta 60 meses                                                                                                                            |
+
 - **Reglas de libranza** (`<banco>:libranza`). Cuentan **todas** las filas
   de libranza que publica el banco (pagadurías, plazos, convenios especiales
   como Policía, Ministerio de Defensa o Grupo Olímpica, compra de cartera,
@@ -272,6 +289,8 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
    | `node promedio-sfc.mjs --producto vivienda-no-vis` (martes) | 2:33 a. m.    | `33 7 * * 2` |
    | `node promedio-sfc.mjs --producto leasing-vis` (martes)     | 2:53 a. m.    | `53 7 * * 2` |
    | `node promedio-sfc.mjs --producto leasing-no-vis` (martes)  | 3:13 a. m.    | `13 8 * * 2` |
+   | `node pdf-bancos.mjs --producto vehiculo` (diaria)          | 3:33 a. m.    | `33 8 * * *` |
+   | `node promedio-sfc.mjs --producto vehiculo` (martes)        | 3:53 a. m.    | `53 8 * * 2` |
 
    Una tarea por producto, también en el robot de los PDF: cada una con sus
    15 minutos. Dentro de una corrida, el mismo PDF o la misma página (VIS y

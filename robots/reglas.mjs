@@ -1930,6 +1930,230 @@ REGLAS["fna:vivienda-vis"] = viviendaFna("vivienda-vis");
 REGLAS["fna:vivienda-no-vis"] = viviendaFna("vivienda-no-vis");
 REGLAS["fna:leasing-no-vis"] = viviendaFna("leasing-no-vis");
 
+// ── Vehículo ─────────────────────────────────────────────────────────────
+// La Superfinanciera reporta un solo "Vehículo" (sin separar nuevo, usado ni
+// motos): desde = la tasa más baja de vehículo para personas que publique el
+// banco (carro nuevo o usado, eléctrico o híbrido, motos); hasta = la máxima
+// que publique o, si no, la usura (es consumo). No cuentan los créditos
+// comerciales (vehículo productivo, taxis, carga, públicos, transportador ni
+// persona jurídica). La vigencia es la del mismo PDF (la de libre inversión).
+
+/** E.A. de un texto con varias tasas: { eaDesde, eaHasta } o error. */
+function rangoVehiculo(eas, queBusca) {
+  const tasas = eas.map(numero).filter((n) => Number.isFinite(n));
+  if (!tasas.length) throw new ReglaRota(`No encontré ${queBusca}.`);
+  return { eaDesde: Math.min(...tasas), eaMax: Math.max(...tasas) };
+}
+
+const vehiculoDavivienda = {
+  ...REGLAS.davivienda,
+  ancla: /Crédito Vehículo Particular/,
+  leer(texto) {
+    const t = plano(texto);
+    // La sección va hasta "Crédito Vehículo Productivo" (comercial: no cuenta).
+    const i = t.search(/Crédito Vehículo Particular/);
+    if (i < 0)
+      throw new ReglaRota('No encontré "Crédito Vehículo Particular".');
+    const bloque = t.slice(i).split(/Crédito Vehículo Productivo/)[0];
+    const filas = [
+      ...bloque.matchAll(
+        /desde el ([\d.,]+)% nominal mes vencido, equivalente al ([\d.,]+)% efectivo anual/g,
+      ),
+    ];
+    if (!filas.length)
+      throw new ReglaRota(
+        'No encontré las tasas "desde … nominal mes vencido, equivalente al … efectivo anual".',
+      );
+    const menor = filas.reduce((a, b) => (numero(b[2]) < numero(a[2]) ? b : a));
+    // Su fecha va justo antes del título ("Vigente a partir del 11 de
+    // septiembre 2026"); si no, la del PDF.
+    const fechas = [
+      ...t
+        .slice(Math.max(0, i - 600), i)
+        .matchAll(/Vigente a partir del (\d{1,2} de \p{L}+(?: de)? \d{4})/gu),
+    ];
+    return {
+      eaDesde: numero(menor[2]),
+      mvDesde: numero(menor[1]),
+      eaHasta: null,
+      mvHasta: null,
+      vigencia: fechas.length
+        ? fecha(fechas.at(-1)[1].replace(/ (\d{4})$/, " de $1"))
+        : REGLAS.davivienda.leer(texto).vigencia,
+      frase: `Crédito Vehículo Particular · ${filas.map((m) => m[0]).join(" · ")}`,
+    };
+  },
+};
+
+const vehiculoBogota = {
+  ...REGLAS["banco-de-bogota"],
+  ancla: /Crédito de Consumo - Vehículos/,
+  leer(texto) {
+    const t = plano(texto);
+    const tabla = despuesDe(
+      t,
+      /Crédito de Consumo - Vehículos/,
+      'la tabla "Crédito de Consumo - Vehículos"',
+    ).slice(0, 1500);
+    // Particulares (nuevos: desde y hasta; usados: desde y hasta) y motos;
+    // "VEHÍCULOS PUBLICOS" es comercial y no cuenta.
+    const part = exigir(
+      tabla,
+      /CRÉDITO VEHÍCULO PARTICULARES ([\d.,]+)% ([\d.,]+)% ([\d.,]+)% ([\d.,]+)%/,
+      'la fila "CRÉDITO VEHÍCULO PARTICULARES"',
+    );
+    const motos = tabla.match(/MOTOS DE ALTO CILINDRAJE[^\n]*? ([\d.,]+)%/);
+    const desdes = [part[1], part[3], ...(motos ? [motos[1]] : [])];
+    const { eaDesde } = rangoVehiculo(desdes, "las tasas desde");
+    const eaHasta = Math.max(numero(part[2]), numero(part[4]));
+    return {
+      eaDesde,
+      mvDesde: mensual(eaDesde),
+      eaHasta,
+      mvHasta: mensual(eaHasta),
+      vigencia: REGLAS["banco-de-bogota"].leer(texto).vigencia,
+      frase: `Crédito de Consumo - Vehículos · ${part[0]}${motos ? ` · ${motos[0].trim()}` : ""} (E.A.; sin vehículos públicos)`,
+    };
+  },
+};
+
+const vehiculoOccidente = {
+  ...REGLAS["banco-de-occidente"],
+  ancla: /Occiauto/,
+  leer(texto) {
+    const t = plano(texto);
+    // La tabla de tasas (no el índice del comienzo): "Occiauto" seguido de
+    // "Persona Natural".
+    const i = t.search(/Occiauto\s+Persona Natural/);
+    if (i < 0) throw new ReglaRota('No encontré la tabla "Occiauto".');
+    const seccion = t.slice(i).split(/Seguros\s/)[0];
+    // Solo persona natural (vehículos livianos y motos); transportador y
+    // persona jurídica son comerciales.
+    const partes = seccion.split(
+      /(?=Persona Natural|Persona Jurídica|Motos Alto Cilindraje)/,
+    );
+    const validas = partes.filter(
+      (p) =>
+        !/^Persona Jurídica/.test(p) && !/Transportador/.test(p.slice(0, 80)),
+    );
+    const eas = validas.flatMap((p) =>
+      [...p.matchAll(/TASA E\.A\.\s+([\d,]+)%/g)].map((m) => m[1]),
+    );
+    const { eaDesde } = rangoVehiculo(eas, 'las "TASA E.A." de Occiauto');
+    const mv = validas
+      .map((p) =>
+        p.match(
+          new RegExp(
+            `TASA m\\.v\\.\\s+([\\d,]+)%\\s+\\S+\\s+TASA E\\.A\\.\\s+${eaDesde.toFixed(2).replace(".", ",")}%`,
+          ),
+        ),
+      )
+      .find(Boolean);
+    return {
+      eaDesde,
+      mvDesde: mv ? numero(mv[1]) : mensual(eaDesde),
+      eaHasta: null,
+      mvHasta: null,
+      vigencia: REGLAS["banco-de-occidente"].leer(texto).vigencia,
+      frase: `Occiauto · Persona Natural · desde ${eaDesde.toFixed(2).replace(".", ",")}% E.A. (sin transportador ni persona jurídica)`,
+    };
+  },
+};
+
+const vehiculoAgrario = {
+  ...REGLAS["banco-agrario"],
+  ancla: /CRÉDITO INVERSIÓN VEHÍCULO/,
+  leer(texto) {
+    const t = plano(texto);
+    const tabla = despuesDe(
+      t,
+      /Tipo de Vehículo/,
+      'la tabla "CRÉDITO INVERSIÓN VEHÍCULO (CARRO Y MOTO)"',
+    ).slice(0, 900);
+    const filas = [
+      ...tabla.matchAll(
+        /(Carro Nuevo|Carro Usado|Moto Nueva)\s+\d+ - \d+ Meses\s+([\d.,]+)%/g,
+      ),
+    ];
+    const { eaDesde } = rangoVehiculo(
+      filas.map((m) => m[2]),
+      "las filas de carro y moto",
+    );
+    return {
+      eaDesde,
+      mvDesde: mensual(eaDesde),
+      eaHasta: null,
+      mvHasta: null,
+      vigencia: REGLAS["banco-agrario"].leer(texto).vigencia,
+      frase: `Crédito inversión vehículo · ${filas.map((m) => `${m[1]} ${m[2]}%`).join(" · ")} (E.A.)`,
+    };
+  },
+};
+
+const vehiculoBancoomeva = {
+  ...REGLAS.bancoomeva,
+  ancla: /VEHÍCULO CON PRENDA/,
+  leer(texto) {
+    const t = plano(texto);
+    // La página de clientes (no la de asociados a Coomeva).
+    const clientes = despuesDe(
+      t,
+      /Aplica para Clientes Bancoomeva/,
+      'la página "Aplica para Clientes Bancoomeva"',
+    ).split(/Aplica para Clientes Asociados/)[0];
+    const filas = [
+      ...clientes.matchAll(
+        /(VEHÍCULO CON PRENDA|MOTO NUEVA BAJO CILINDRAJE|MOTO NUEVA ALTO CILINDRAJE)[^\n]*? ([\d,]+) ?% E\.A/g,
+      ),
+    ];
+    const { eaDesde } = rangoVehiculo(
+      filas.map((m) => m[2]),
+      'las filas "VEHÍCULO CON PRENDA" y motos',
+    );
+    return {
+      eaDesde,
+      mvDesde: mensual(eaDesde),
+      eaHasta: null,
+      mvHasta: null,
+      vigencia: REGLAS.bancoomeva.leer(texto).vigencia,
+      frase: `Vehículo · ${filas.map((m) => `${m[1]} ${m[2]}%`).join(" · ")} (E.A., clientes Bancoomeva; tasa desde)`,
+    };
+  },
+};
+
+const vehiculoSerfinanza = {
+  ...REGLAS["banco-serfinanza"],
+  ancla: /Crédito de Vehículo/,
+  leer(texto) {
+    const t = plano(texto);
+    const tabla = despuesDe(
+      t,
+      /Crédito de Vehículo Tasa M\.V\./,
+      'la tabla "Crédito de Vehículo"',
+    ).slice(0, 600);
+    const m = exigir(
+      tabla,
+      /Vehículo ([\d,]+)% Nominal M\.V\. ([\d,]+)% E\.A\./,
+      'la fila "Vehículo"',
+    );
+    return {
+      eaDesde: numero(m[2]),
+      mvDesde: numero(m[1]),
+      eaHasta: null,
+      mvHasta: null,
+      vigencia: REGLAS["banco-serfinanza"].leer(texto).vigencia,
+      frase: `Crédito de Vehículo · ${m[0]}`,
+    };
+  },
+};
+
+REGLAS["davivienda:vehiculo"] = vehiculoDavivienda;
+REGLAS["banco-de-bogota:vehiculo"] = vehiculoBogota;
+REGLAS["banco-de-occidente:vehiculo"] = vehiculoOccidente;
+REGLAS["banco-agrario:vehiculo"] = vehiculoAgrario;
+REGLAS["bancoomeva:vehiculo"] = vehiculoBancoomeva;
+REGLAS["banco-serfinanza:vehiculo"] = vehiculoSerfinanza;
+
 /**
  * La regla de un banco para un producto: la de libre inversión es la del
  * código del banco y la de los demás, "<banco>:<producto>".

@@ -123,6 +123,7 @@ const soloProductos = pedidos?.flatMap((p) => GRUPOS[p] ?? [p]) ?? null;
 const NOMBRES = {
   "libre-inversion": "Libre inversión",
   libranza: "Libranza",
+  vehiculo: "Vehículo",
   hipotecario: "Hipotecario",
   leasing: "Leasing",
   vivienda: "Vivienda",
