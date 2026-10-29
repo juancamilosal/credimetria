@@ -27,8 +27,11 @@ const logos = new Map(); // codigo → { datos, tipo, en }
 async function pedir(ruta) {
   const token = process.env.DIRECTUS_TOKEN;
   if (!token) throw new Error("Falta DIRECTUS_TOKEN");
+  // Si Directus se cuelga (a ratos tarda 20 s o responde 522), la página no
+  // se queda esperando: a los 15 s se rinde y usa lo último guardado.
   const r = await fetch(DIRECTUS + ruta, {
     headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(15_000),
   });
   if (!r.ok) {
     // El mensaje de Directus (p. ej. "You don't have permission…") ayuda a
@@ -233,12 +236,13 @@ async function leer() {
 }
 
 /**
- * Las tasas publicadas con su promedio. Guarda la respuesta 10 minutos; si
- * Directus falla, devuelve la última que tenía.
+ * Las tasas publicadas con su promedio. Guarda la respuesta 10 minutos;
+ * pasado ese tiempo devuelve al instante la que tenía y la renueva por
+ * detrás (nadie espera a Directus). Si Directus falla, sigue con la última.
  */
 export async function tasasPublicas() {
   if (guardado && Date.now() - guardado.en < VIGENCIA_MS) return guardado.datos;
-  pidiendo ??= leer()
+  const renovar = (pidiendo ??= leer()
     .then((nuevo) => {
       guardado = { ...nuevo, en: Date.now() };
       return nuevo.datos;
@@ -247,8 +251,12 @@ export async function tasasPublicas() {
       if (guardado) return guardado.datos;
       throw error;
     })
-    .finally(() => (pidiendo = null));
-  return pidiendo;
+    .finally(() => (pidiendo = null)));
+  if (guardado) {
+    renovar.catch(() => {});
+    return guardado.datos;
+  }
+  return renovar;
 }
 
 /** El logo de una entidad, reducido; `null` si no tiene. */

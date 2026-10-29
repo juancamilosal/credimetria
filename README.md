@@ -368,7 +368,9 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   `/api/logos/<entidad>`, con el token del usuario **"Lector web"** de
   Directus (política de solo lectura: tasas publicadas, promedios,
   entidades activas, dirección del PDF y logos). Guarda la respuesta 10
-  minutos y, si Directus falla, sigue con la última. Al armar la página en
+  minutos; pasado ese tiempo responde al instante con la que tenía y la
+  renueva por detrás, y cada consulta a Directus se rinde a los 15 s (a
+  ratos tarda 20 s o responde 522): si falla, sigue con la última. Al armar la página en
   el servidor, las tasas van dentro de ella (`TransferState`): el navegador
   no las vuelve a pedir y nunca ve Directus ni el token.
 - **Bancos que solo publican la máxima** (GNB Sudameris en libranza: "se
