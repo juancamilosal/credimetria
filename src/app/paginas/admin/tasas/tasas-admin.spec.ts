@@ -691,6 +691,39 @@ describe('TasasAdmin', () => {
     });
   });
 
+  it('busca por nombre de entidad, sin importar tildes ni mayúsculas', async () => {
+    await crearCon(
+      [],
+      [
+        ...fuentes,
+        {
+          id: 9,
+          producto: 'libre-inversion',
+          tipo: 'pdf',
+          url: 'https://www.davivienda.com/t.pdf',
+          url_indice: null,
+          entidad: 'davivienda',
+        },
+      ],
+    );
+    const buscar = html.querySelector<HTMLInputElement>('#adBuscar')!;
+    const nombres = () =>
+      [...html.querySelectorAll('.banco h2')].map((h) => h.textContent!.trim());
+    buscar.value = 'DAVÍ';
+    buscar.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(nombres()).toEqual(['Davivienda']);
+    buscar.value = 'xyz';
+    buscar.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(nombres()).toEqual([]);
+    expect(html.textContent).toContain('coincide con «xyz»');
+    buscar.value = '';
+    buscar.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(nombres().length).toBe(2);
+  });
+
   it('lee decimales con coma o punto', () => {
     expect(leerDecimal('1,3')).toBe(1.3);
     expect(leerDecimal('16.77 %')).toBe(16.77);

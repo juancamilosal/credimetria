@@ -184,7 +184,8 @@ Directus. No está en el menú: se entra por `/admin`.
     "Ver anteriores" muestra las anteriores con su PDF (y las rechazadas de
     antes, cuando existía el botón Rechazar).
   - Filtros: todos los bancos, **Por aprobar**, **Por cargar** (con su
-    número) y producto. La cabecera con "Salir" está en `paginas/admin/cabecera/`.
+    número), producto y un **buscador por nombre de entidad** (filtra
+    mientras se escribe, sin importar tildes ni mayúsculas). La cabecera con "Salir" está en `paginas/admin/cabecera/`.
   - `/admin/pdf` (la pestaña que hubo antes) lleva a esta pantalla.
 - Estas rutas no se prerenderizan (`RenderMode.Client`) y llevan
   `noindex`. La dirección de Directus está en `core/config/directus.ts`.

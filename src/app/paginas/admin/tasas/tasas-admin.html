@@ -31,6 +31,17 @@
         Por cargar <span class="cuenta-num">{{ cuentaPorCargar() }}</span>
       </button>
     </div>
+    <div class="campo buscar">
+      <label for="adBuscar" class="visualmente-oculto">Buscar entidad</label>
+      <input
+        id="adBuscar"
+        type="search"
+        placeholder="Buscar entidad…"
+        autocomplete="off"
+        [value]="buscar()"
+        (input)="buscar.set($any($event.target).value)"
+      />
+    </div>
     <div class="campo producto">
       <label for="adProducto" class="visualmente-oculto">Producto</label>
       <select
@@ -408,7 +419,13 @@
           }
         </li>
       } @empty {
-        <li class="muted vacio">No hay bancos en esta lista.</li>
+        <li class="muted vacio">
+          @if (buscar().trim()) {
+            Ninguna entidad de esta lista coincide con «{{ buscar().trim() }}».
+          } @else {
+            No hay bancos en esta lista.
+          }
+        </li>
       }
     </ul>
   }

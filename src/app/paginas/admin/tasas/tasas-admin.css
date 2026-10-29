@@ -48,6 +48,10 @@
   flex: 0 1 220px;
 }
 
+.buscar {
+  flex: 0 1 240px;
+}
+
 .aviso-error,
 .aviso-ok {
   border-radius: var(--cm-r-boton);

@@ -90,6 +90,15 @@ interface TarjetaTasa {
   porCargar: boolean;
 }
 
+/** "Bogotá" → "bogota", para buscar sin importar tildes ni mayúsculas. */
+function sinTildes(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
 /** Primero lo que espera aprobación, luego lo por cargar, luego lo demás. */
 function orden(t: TarjetaTasa): number {
   return t.porAprobar.length ? 0 : t.porCargar ? 1 : 2;
@@ -142,6 +151,8 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected readonly aviso = signal('');
   /** Qué tarjetas se ven: todas, las que esperan aprobación o las por cargar. */
   protected readonly vista = signal<'todos' | 'aprobar' | 'cargar'>('todos');
+  /** Texto del buscador por nombre de entidad. */
+  protected readonly buscar = signal('');
   protected readonly producto = signal<string>('todos');
   /** Id de la tasa que se edita. */
   protected readonly editando = signal<number | null>(null);
@@ -223,7 +234,8 @@ export class TasasAdmin implements OnInit, OnDestroy {
         (t) =>
           (this.producto() === 'todos' || t.producto === this.producto()) &&
           (this.vista() !== 'aprobar' || t.porAprobar.length > 0) &&
-          (this.vista() !== 'cargar' || t.porCargar),
+          (this.vista() !== 'cargar' || t.porCargar) &&
+          sinTildes(t.entidad.nombre).includes(sinTildes(this.buscar())),
       )
       // Primero lo que espera aprobación, luego lo que hay que cargar a mano
       // este mes y al final lo que está al día.
