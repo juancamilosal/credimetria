@@ -47,7 +47,7 @@
       >
         @for (meses of plazos(); track meses) {
           <option [value]="meses" [selected]="meses === plazo()">
-            {{ textoPlazo(meses, producto()) }}
+            {{ textoPlazo(meses) }}
           </option>
         }
       </select>
@@ -135,8 +135,8 @@
     <span class="solo-escritorio"
       >Toca los títulos de la tabla para ordenar; el embudo de "Tipo" filtra.
     </span>
-    Cuota estimada con {{ monto() | pesos }} a
-    {{ textoPlazo(plazo(), producto()) }} · Promedio de la
+    Cuota estimada con {{ monto() | pesos }} a {{ textoPlazo(plazo()) }} ·
+    Promedio de la
     <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
       >{{ fuente.texto }} ↗</a
     >

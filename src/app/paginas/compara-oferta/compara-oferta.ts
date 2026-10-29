@@ -194,15 +194,11 @@ export class ComparaOferta {
 
   private preguntarPlazo(): void {
     const producto = this.datos.producto;
-    this.bot(
-      producto && esVivienda(producto)
-        ? '¿A cuántos años?'
-        : '¿A cuántos meses?',
-    );
+    this.bot('¿A cuántos meses?');
     this.opciones(
       'Plazo',
       plazosDe(producto).map((n) => ({
-        texto: textoPlazo(n, producto),
+        texto: textoPlazo(n),
         valor: String(n),
       })),
       (o) => {

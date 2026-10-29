@@ -91,7 +91,7 @@ export class Ranking {
   protected readonly cargando = this.tasas.cargando;
   protected readonly productos = this.tasas.productos;
   protected readonly tipos = [TODAS, ...this.tasas.tipos];
-  /** Consumo hasta 72 meses; vivienda de 5 a 20 años. */
+  /** Consumo hasta 72 meses; vivienda hasta 240 meses. */
   protected readonly plazos = computed(() => plazosDe(this.producto()));
   protected readonly textoPlazo = textoPlazo;
   protected readonly ordenes = ORDENES;
