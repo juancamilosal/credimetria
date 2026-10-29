@@ -144,6 +144,7 @@ describe('TasasAdmin', () => {
         'reemplazarArchivo',
         'descartar',
         'cambiarVigencia',
+        'marcarRevisadas',
       ],
     );
     admin.listar.and.resolveTo(lista);
@@ -555,6 +556,80 @@ describe('TasasAdmin', () => {
     filtro.click();
     fixture.detectChanges();
     expect(html.querySelectorAll('.banco').length).toBe(1);
+  });
+
+  describe('fuentes manuales', () => {
+    const manual: FuenteAdmin = {
+      id: 41,
+      producto: 'leasing-no-vis',
+      tipo: 'pdf',
+      url: 'https://www.davivienda.com/tasas.pdf',
+      url_indice: null,
+      entidad: 'davivienda',
+      como_extraer: 'manual',
+      ultima_revision: '2020-01-15T15:00:00.000Z',
+    };
+
+    it('salen en "Por cargar" hasta que alguien las revisa este mes', async () => {
+      await crearCon([], [...fuentes, manual]);
+      const filtro = boton(html, 'Por cargar');
+      expect(filtro.textContent).toContain('1');
+      filtro.click();
+      fixture.detectChanges();
+      const tarjetas = html.querySelectorAll('.banco');
+      expect(tarjetas.length).toBe(1);
+      expect(tarjetas[0].textContent).toContain('Davivienda');
+      expect(tarjetas[0].textContent).toContain('Por cargar este mes');
+      expect(tarjetas[0].textContent).toContain('15 ene 2020');
+    });
+
+    it('"Sigue igual este mes" la marca revisada y sale de "Por cargar"', async () => {
+      await crearCon([], [...fuentes, manual]);
+      docs.marcarRevisadas.and.resolveTo(new Date().toISOString());
+      const davivienda = [...html.querySelectorAll('.banco')].find((b) =>
+        b.textContent!.includes('Davivienda'),
+      )!;
+      boton(davivienda, 'Sigue igual este mes').click();
+      await esperar();
+      expect(docs.marcarRevisadas).toHaveBeenCalledWith([41]);
+      expect(boton(html, 'Por cargar').textContent).toContain('0');
+      expect(html.textContent).not.toContain('Por cargar este mes');
+    });
+
+    it('cargar su PDF también la marca revisada', async () => {
+      await crearCon([], [...fuentes, manual]);
+      docs.marcarRevisadas.and.resolveTo(new Date().toISOString());
+      docs.cargar.and.resolveTo(documento({ id: 14, fuente: 41 }));
+      admin.crearDesdeDocumento.and.resolveTo(
+        tasa({ id: 6, estado: 'por_revisar', producto: 'leasing-no-vis' }),
+      );
+      const davivienda = [...html.querySelectorAll('.banco')].find((b) =>
+        b.textContent!.includes('Davivienda'),
+      )!;
+      boton(davivienda, 'Cargar PDF nuevo').click();
+      fixture.detectChanges();
+      const campo = davivienda.querySelector<HTMLInputElement>(
+        '.carga input[type="file"]',
+      )!;
+      const pdf = new File(['%PDF'], 'tasas.pdf', { type: 'application/pdf' });
+      Object.defineProperty(campo, 'files', { value: [pdf] });
+      campo.dispatchEvent(new Event('change'));
+      davivienda.querySelector<HTMLFormElement>('.carga')!.requestSubmit();
+      await esperar();
+      expect(docs.marcarRevisadas).toHaveBeenCalledWith([41]);
+    });
+
+    it('las que lee el robot no salen en "Por cargar"', async () => {
+      await crearCon(
+        [],
+        [
+          ...fuentes,
+          { ...manual, como_extraer: 'regla', ultima_revision: null },
+        ],
+      );
+      expect(boton(html, 'Por cargar').textContent).toContain('0');
+      expect(html.textContent).not.toContain('Por cargar este mes');
+    });
   });
 
   it('lee decimales con coma o punto', () => {

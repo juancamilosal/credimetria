@@ -82,6 +82,28 @@
   border-left: 4px solid var(--cm-aviso-800);
 }
 
+.banco.por-cargar {
+  border-left: 4px solid var(--cm-error);
+}
+
+/* Fuente manual que nadie ha revisado este mes. */
+.aviso-cargar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-radius: var(--cm-r-boton);
+  background: var(--cm-aviso-100);
+  color: var(--cm-aviso-800);
+}
+
+.aviso-cargar p {
+  margin: 0;
+  flex: 1 1 280px;
+}
+
 .banco-cabeza {
   display: flex;
   justify-content: space-between;

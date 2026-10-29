@@ -153,8 +153,15 @@ Directus. No está en el menú: se entra por `/admin`.
     página guardada como PDF); la tasa creada enlaza a la página en el sitio.
     Las tasas de lo que se carga a mano se escriben a mano (se probó leerlas
     al cargar y se quitó el 28 oct 2026).
-  - Los bancos con algo por aprobar salen primero; al final, los que no
-    tienen nada (los que toca cargar a mano).
+  - Los bancos con algo por aprobar salen primero, luego los **por cargar**
+    y al final los que están al día.
+  - **Fuentes manuales** (`como_extraer` = "manual" en `fuentes`: hoy
+    Davivienda en todos sus productos, Lulo Bank y Falabella, que el robot
+    no puede leer): desde el **día 1 de cada mes** (medianoche de Colombia)
+    salen en **"Por cargar"** con el aviso "Por cargar este mes" y la última
+    revisión, hasta que alguien **carga su PDF** o toca **"Sigue igual este
+    mes"** (si el banco no lo cambió). Las dos cosas guardan
+    `ultima_revision` en la fuente (`core/utilidades/mes.ts`).
   - La **tasa publicada** se puede corregir si se aprobó por error:
     **Editar** sus valores (si cambia la vigencia, también cambia la de su
     PDF), **Cambiar archivo** sube el PDF correcto en lugar del equivocado
@@ -169,8 +176,8 @@ Directus. No está en el menú: se entra por `/admin`.
     estaba publicada y el PDF anterior pasan a `anterior`. Nada se borra:
     "Ver anteriores" muestra las anteriores con su PDF (y las rechazadas de
     antes, cuando existía el botón Rechazar).
-  - Filtros: todos los bancos o solo los que tienen algo por aprobar, y
-    producto. La cabecera con "Salir" está en `paginas/admin/cabecera/`.
+  - Filtros: todos los bancos, **Por aprobar**, **Por cargar** (con su
+    número) y producto. La cabecera con "Salir" está en `paginas/admin/cabecera/`.
   - `/admin/pdf` (la pestaña que hubo antes) lleva a esta pantalla.
 - Estas rutas no se prerenderizan (`RenderMode.Client`) y llevan
   `noindex`. La dirección de Directus está en `core/config/directus.ts`.

@@ -219,6 +219,14 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
 - **Sin navegador:** pide el PDF como un navegador (sin Playwright). Si un
   banco lo bloquea, llega el correo de "no encontré el PDF" y se carga a
   mano en `/admin/tasas`.
+- **Fuentes manuales** (`como_extraer` = "manual": Davivienda en todos sus
+  productos, Lulo Bank y Falabella, desde el 29 oct 2026): el robot **no las
+  intenta**. Desde el **día 1 de cada mes** (medianoche de Colombia) salen en
+  el recordatorio **todos los días** hasta que alguien las revisa en
+  `/admin/tasas` (cargando el PDF o con "Sigue igual este mes"), que guarda
+  `ultima_revision` en la fuente (`comun/mes.mjs`). En el admin salen en la
+  pestaña "Por cargar". Lo de abajo (`bloquea`, `mensual`, `manual` en la
+  regla) queda para las fuentes que no están marcadas como manuales.
 - **Davivienda bloquea servidores** (prueba del 26 oct 2026 en el VPS: 403
   con Node, con `curl` y con Chromium de Playwright, incluso en su página de
   tasas). Su regla tiene `bloquea: true`: el robot lo intenta cada día y,

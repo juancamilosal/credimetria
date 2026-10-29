@@ -36,4 +36,11 @@ export interface FuenteAdmin {
   url: string;
   url_indice: string | null;
   entidad: string;
+  /** "manual": la cargas tú cada mes (Davivienda, Lulo Bank, Falabella). */
+  como_extraer?: string | null;
+  /**
+   * Última vez que la revisaron: el robot o, en las manuales, la persona al
+   * cargar el PDF o confirmar que sigue igual.
+   */
+  ultima_revision?: string | null;
 }

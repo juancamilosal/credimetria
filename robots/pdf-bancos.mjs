@@ -42,6 +42,7 @@ import { avisar } from "./comun/aviso.mjs";
 import { directus, hayToken, subirArchivo } from "./comun/directus.mjs";
 import * as navegador from "./comun/pantallazo.mjs";
 import * as pdf from "./comun/pdf.mjs";
+import { pendienteDelMes } from "./comun/mes.mjs";
 import { cifrasPublicadas, resaltarPdf } from "./comun/resaltar.mjs";
 import {
   masReciente,
@@ -271,6 +272,20 @@ async function revisarFuente(fuente) {
     };
   // Las fuentes de tipo página solo se revisan en bancos sin PDF.
   if ((fuente.tipo === "pagina") !== Boolean(regla.pagina)) return {};
+  // Fuente que se carga a mano (como_extraer "manual": Davivienda, Lulo
+  // Bank, Falabella): el robot no la intenta. Desde el día 1 de cada mes va
+  // en el recordatorio diario hasta que alguien la revisa en el admin
+  // (cargando el PDF o con "Sigue igual este mes", que guardan
+  // ultima_revision).
+  if (fuente.como_extraer === "manual") {
+    if (!pendienteDelMes(fuente.ultima_revision, HOY)) {
+      console.log(`${nombre}: se carga a mano; ya se revisó este mes.`);
+      return {};
+    }
+    console.log(`${nombre}: se carga a mano; falta revisarla este mes.`);
+    const { texto } = await recordatorio(fuente, nombre);
+    return { manual: { texto, sinTasa: true } };
+  }
   // Banco que se revisa siempre a mano (Lulo): no se abre su página, solo
   // va en el recordatorio.
   if (regla.manual) {
@@ -582,7 +597,7 @@ async function main() {
       "GET",
       // Las de "solo_promedio" (el banco no publica su tasa) no se revisan.
       "/items/fuentes?filter[tipo][_in]=pdf,pagina&filter[estado][_eq]=activa&filter[como_extraer][_neq]=solo_promedio&limit=-1" +
-        "&fields=id,tipo,producto,url,url_indice,ultimo_hash,entidad.codigo,entidad.nombre",
+        "&fields=id,tipo,producto,url,url_indice,ultimo_hash,como_extraer,ultima_revision,entidad.codigo,entidad.nombre",
     )
   ).filter(
     (f) =>
@@ -608,7 +623,10 @@ async function main() {
       // Sin ninguna tasa cargada: a diario; si ya tiene, solo los lunes.
       if (r.manual?.sinTasa) vencidos.push(r.manual.texto);
       else if (r.manual) manuales.push(r.manual.texto);
-      if (reglaDe(fuente.entidad?.codigo, fuente.producto)?.mensual) {
+      if (
+        fuente.como_extraer !== "manual" &&
+        reglaDe(fuente.entidad?.codigo, fuente.producto)?.mensual
+      ) {
         const vencido = await pdfDelMes(fuente, nombreDe(fuente));
         if (vencido) {
           console.log(vencido.split("\n")[0]);
@@ -636,8 +654,8 @@ async function main() {
   else console.log("Sin cambios.");
 
   // Recordatorio en un correo aparte: a diario los PDF mensuales vencidos
-  // (hasta que se sube el nuevo) y los bancos a mano sin ninguna tasa; los
-  // lunes, los demás bancos que bloquean.
+  // (hasta que se sube el nuevo) y las fuentes manuales sin revisar este mes;
+  // los lunes, los demás bancos que bloquean.
   const recordatorio = [...vencidos, ...(recordar ? manuales : [])];
   if (recordatorio.length)
     await avisar(
@@ -645,7 +663,7 @@ async function main() {
         `Recordatorio: revisa a mano ${recordatorio.length === 1 ? "1 banco" : `${recordatorio.length} bancos`}`,
       ),
       recordatorio,
-      "Estos bancos no dejan que el robot baje su PDF o encuentre el del mes. Ábrelo y, si la fecha o las tasas cambiaron, súbelo en Configuración de tasas (Cargar PDF nuevo).",
+      "Estos bancos no dejan que el robot baje su PDF o encuentre el del mes. Ábrelo y súbelo en Configuración de tasas (Cargar PDF nuevo) o, si no cambió, toca «Sigue igual este mes». Los que se cargan a mano salen aquí cada día desde el 1 hasta que los revises.",
     );
 }
 

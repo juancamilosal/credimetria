@@ -41,6 +41,7 @@ import {
   efectivaAnualDeMensual,
   tasaMensual,
 } from '../../../core/utilidades/credito';
+import { pendienteDelMes } from '../../../core/utilidades/mes';
 import { CabeceraAdmin } from '../cabecera/cabecera-admin';
 
 const UNIDAD_TEXTO: Record<UnidadTasa, string> = {
@@ -83,6 +84,15 @@ interface TarjetaTasa {
   porAprobar: TasaAdmin[];
   historial: TasaAdmin[];
   documentos: DocumentoPdf[];
+  /** Fuentes que se cargan a mano (Davivienda, Lulo Bank, Falabella). */
+  manuales: FuenteAdmin[];
+  /** Manual y nadie la ha revisado este mes: hay que cargarla. */
+  porCargar: boolean;
+}
+
+/** Primero lo que espera aprobación, luego lo por cargar, luego lo demás. */
+function orden(t: TarjetaTasa): number {
+  return t.porAprobar.length ? 0 : t.porCargar ? 1 : 2;
 }
 
 /** Lo que se ve al comparar los dos PDF. */
@@ -130,7 +140,8 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected readonly cargando = signal(true);
   protected readonly error = signal('');
   protected readonly aviso = signal('');
-  protected readonly soloPendientes = signal(false);
+  /** Qué tarjetas se ven: todas, las que esperan aprobación o las por cargar. */
+  protected readonly vista = signal<'todos' | 'aprobar' | 'cargar'>('todos');
   protected readonly producto = signal<string>('todos');
   /** Id de la tasa que se edita. */
   protected readonly editando = signal<number | null>(null);
@@ -172,6 +183,9 @@ export class TasasAdmin implements OnInit, OnDestroy {
             const pdf = deProducto.find((f) => f.tipo === 'pdf') ?? null;
             const pagina = deProducto.find((f) => f.tipo === 'pagina') ?? null;
             const ids = deProducto.map((f) => f.id);
+            const manuales = deProducto.filter(
+              (f) => f.como_extraer === 'manual',
+            );
             const suyas = tasas.filter(
               (t) =>
                 t.entidad.codigo === entidad.codigo && t.producto === producto,
@@ -190,22 +204,38 @@ export class TasasAdmin implements OnInit, OnDestroy {
               ),
               // Los PDF y los pantallazos de sus páginas.
               documentos: documentos.filter((d) => ids.includes(d.fuente)),
+              manuales,
+              porCargar: manuales.some((f) =>
+                pendienteDelMes(f.ultima_revision),
+              ),
             };
           });
         })
         .filter(
           (t) =>
             (this.producto() === 'todos' || t.producto === this.producto()) &&
-            (!this.soloPendientes() || t.porAprobar.length > 0),
+            (this.vista() !== 'aprobar' || t.porAprobar.length > 0) &&
+            (this.vista() !== 'cargar' || t.porCargar),
         )
-        // Primero lo que espera aprobación; al final los que hay que cargar a mano.
-        .sort(
-          (a, b) => Number(!a.porAprobar.length) - Number(!b.porAprobar.length),
-        )
+        // Primero lo que espera aprobación, luego lo que hay que cargar a mano
+        // este mes y al final lo que está al día.
+        .sort((a, b) => orden(a) - orden(b))
     );
   });
   protected readonly pendientes = computed(
     () => this.tasas().filter((t) => t.estado === 'por_revisar').length,
+  );
+  /** Tarjetas manuales que nadie ha revisado este mes (sin el filtro). */
+  protected readonly cuentaPorCargar = computed(
+    () =>
+      new Set(
+        this.fuentes()
+          .filter(
+            (f) =>
+              f.como_extraer === 'manual' && pendienteDelMes(f.ultima_revision),
+          )
+          .map((f) => `${f.entidad}:${f.producto}`),
+      ).size,
   );
 
   protected readonly form = inject(FormBuilder).nonNullable.group({
@@ -322,6 +352,8 @@ export class TasasAdmin implements OnInit, OnDestroy {
         porAprobar: [],
         historial: [],
         documentos: [],
+        manuales: [],
+        porCargar: false,
       }
     );
   }
@@ -620,6 +652,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
             );
         if (pendiente) this.reemplazar(tasa);
         else this.tasas.update((lista) => [tasa, ...lista]);
+        await this.marcarRevisadas(c);
         this.cargandoEn.set(null);
         this.editar(tasa);
         const cargado = yaEstaba
@@ -635,6 +668,42 @@ export class TasasAdmin implements OnInit, OnDestroy {
         this.error.set(`Ese ${que} ya está guardado. No se cargó de nuevo.`);
       }
     });
+  }
+
+  // Fuentes manuales: pendientes desde el día 1 de cada mes
+
+  /** Guarda que las fuentes manuales de la tarjeta se revisaron hoy. */
+  private async marcarRevisadas(c: TarjetaTasa): Promise<void> {
+    if (!c.manuales.length) return;
+    const ids = c.manuales.map((f) => f.id);
+    const fecha = await this.docs.marcarRevisadas(ids);
+    this.fuentes.update((lista) =>
+      lista.map((f) =>
+        ids.includes(f.id) ? { ...f, ultima_revision: fecha } : f,
+      ),
+    );
+  }
+
+  /** El banco no cambió su PDF este mes: sale de "Por cargar". */
+  protected async sigueIgual(c: TarjetaTasa): Promise<void> {
+    await this.trabajar(c.clave, async () => {
+      await this.marcarRevisadas(c);
+      this.aviso.set(
+        `${c.entidad.nombre} (${this.nombreProducto(c.producto)}) quedó revisado este mes.`,
+      );
+    });
+  }
+
+  /** "28 oct 2026" o "nunca", para la última revisión de una manual. */
+  protected ultimaRevision(c: TarjetaTasa): string {
+    const fechas = c.manuales
+      .map((f) => f.ultima_revision)
+      .filter((f): f is string => !!f)
+      .sort();
+    const ultima = fechas.at(-1);
+    return ultima
+      ? formatDate(ultima, 'd MMM y', this.locale, '-0500')
+      : 'nunca';
   }
 
   // Comparar los dos PDF lado a lado

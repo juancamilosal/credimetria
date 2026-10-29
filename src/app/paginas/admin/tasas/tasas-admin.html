@@ -9,18 +9,26 @@
       <button
         type="button"
         class="filtro"
-        [attr.aria-pressed]="!soloPendientes()"
-        (click)="soloPendientes.set(false)"
+        [attr.aria-pressed]="vista() === 'todos'"
+        (click)="vista.set('todos')"
       >
         Todos los bancos
       </button>
       <button
         type="button"
         class="filtro"
-        [attr.aria-pressed]="soloPendientes()"
-        (click)="soloPendientes.set(true)"
+        [attr.aria-pressed]="vista() === 'aprobar'"
+        (click)="vista.set('aprobar')"
       >
         Por aprobar <span class="cuenta-num">{{ pendientes() }}</span>
+      </button>
+      <button
+        type="button"
+        class="filtro"
+        [attr.aria-pressed]="vista() === 'cargar'"
+        (click)="vista.set('cargar')"
+      >
+        Por cargar <span class="cuenta-num">{{ cuentaPorCargar() }}</span>
       </button>
     </div>
     <div class="campo producto">
@@ -50,7 +58,11 @@
   } @else {
     <ul class="lista">
       @for (c of tarjetas(); track c.clave) {
-        <li class="tarjeta banco" [class.pendiente]="c.porAprobar.length">
+        <li
+          class="tarjeta banco"
+          [class.pendiente]="c.porAprobar.length"
+          [class.por-cargar]="c.porCargar"
+        >
           <div class="banco-cabeza">
             <div class="marca">
               @if (logo(c.entidad); as url) {
@@ -141,6 +153,24 @@
                   Cancelar
                 </button>
               </div>
+            </div>
+          }
+
+          @if (c.porCargar) {
+            <div class="aviso-cargar" role="note">
+              <p>
+                <b>Por cargar este mes.</b> El robot no puede leer este banco:
+                carga el PDF del mes o, si el banco no lo cambió, márcalo como
+                revisado. Última revisión: {{ ultimaRevision(c) }}.
+              </p>
+              <button
+                type="button"
+                class="btn btn-claro"
+                [disabled]="ocupado() === c.clave"
+                (click)="sigueIgual(c)"
+              >
+                Sigue igual este mes
+              </button>
             </div>
           }
 

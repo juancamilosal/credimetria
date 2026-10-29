@@ -20,7 +20,8 @@ const CAMPOS_DOCUMENTO = [
   'user_created.last_name',
 ].join(',');
 
-const CAMPOS_FUENTE = 'id,producto,tipo,url,url_indice,entidad';
+const CAMPOS_FUENTE =
+  'id,producto,tipo,url,url_indice,entidad,como_extraer,ultima_revision';
 
 /** Dirección directa del PDF y página de tasas y tarifas que lo enlaza. */
 export interface Direcciones {
@@ -64,6 +65,19 @@ export class DocumentosAdminService {
       'GET',
       `/items/fuentes?fields=${CAMPOS_FUENTE}&limit=-1`,
     );
+  }
+
+  /**
+   * Marca como revisadas este mes las fuentes manuales (al cargar su PDF o
+   * al confirmar que sigue igual). Devuelve la fecha guardada.
+   */
+  async marcarRevisadas(ids: number[]): Promise<string> {
+    const ahora = new Date().toISOString();
+    await this.sesion.pedir('PATCH', '/items/fuentes', {
+      keys: ids,
+      data: { ultima_revision: ahora },
+    });
+    return ahora;
   }
 
   documentos(): Promise<DocumentoPdf[]> {
