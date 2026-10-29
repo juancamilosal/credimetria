@@ -7,10 +7,12 @@ import { describe, it } from "node:test";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import {
   aResaltar,
+  cifrasPublicadas,
   palabrasDe,
   recuadros,
   resaltarPdf,
 } from "../comun/resaltar.mjs";
+import { mensual } from "../reglas.mjs";
 
 const pagina = (nombre) =>
   palabrasDe(
@@ -108,6 +110,34 @@ describe("resaltar la tasa en el PDF", () => {
     assert.equal(
       await resaltarPdf(original, { cifras: [5.55], producto: "libranza" }),
       null,
+    );
+  });
+});
+
+describe("cifrasPublicadas", () => {
+  it("no busca la M.V. que calculamos de la E.A. (Banco Agrario)", () => {
+    // 14,70 % E.A. → 1,1495 % M.V. calculada: en el PDF no está y "1,15 %"
+    // aparecía en la tabla de tarjetas de crédito.
+    assert.deepEqual(cifrasPublicadas(mensual(14.7), 14.7, null, null), [
+      null,
+      14.7,
+      null,
+      null,
+    ]);
+    // Guardada en Directus como texto.
+    assert.deepEqual(cifrasPublicadas("1.1495", "14.7000", null, null), [
+      null,
+      "14.7000",
+      null,
+      null,
+    ]);
+  });
+
+  it("sí busca la M.V. que publica el banco", () => {
+    // BBVA: 12,10 % E.A. y 0,96 % M.V. (la calculada sería 0,9555).
+    assert.deepEqual(
+      cifrasPublicadas(0.96, 12.1, 1.27, 16.3),
+      [0.96, 12.1, 1.27, 16.3],
     );
   });
 });

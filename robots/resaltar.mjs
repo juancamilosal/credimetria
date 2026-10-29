@@ -13,7 +13,7 @@ import {
   hayToken,
   subirArchivo,
 } from "./comun/directus.mjs";
-import { resaltarPdf } from "./comun/resaltar.mjs";
+import { cifrasPublicadas, resaltarPdf } from "./comun/resaltar.mjs";
 import { reglaDe } from "./reglas.mjs";
 
 const soloMirar = process.argv.includes("--sin-guardar");
@@ -40,11 +40,11 @@ for (const d of documentos) {
   }
   const propia = tasa.hasta_origen !== "usura";
   const resaltado = await resaltarPdf(await bajarArchivo(d.archivo.id), {
-    cifras: [
+    cifras: cifrasPublicadas(
       tasa.valor_desde,
       tasa.ea_desde,
       ...(propia ? [tasa.valor_hasta, tasa.ea_hasta] : []),
-    ],
+    ),
     vigencia: d.vigente_desde,
     producto,
     ancla: reglaDe(banco, producto)?.ancla,

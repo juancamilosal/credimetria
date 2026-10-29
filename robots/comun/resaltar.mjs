@@ -2,6 +2,7 @@
 // una dónde está en el documento. El original no se toca (es la prueba y su
 // huella dice si el banco lo cambió).
 
+import { mensual } from "../reglas.mjs";
 import { execFile } from "node:child_process";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -19,6 +20,27 @@ const ANCLAS = {
   "leasing-vis": /leasing habitacional/i,
   "leasing-no-vis": /leasing habitacional/i,
 };
+
+/**
+ * Las cifras que se buscan en el PDF. La M.V. que el banco no publica (la
+ * calculamos de la E.A. con `mensual`, p. ej. Banco Agrario) no se busca: no
+ * está en su tabla y, redondeada ("1,15 %"), aparecía en otra tabla del PDF
+ * (tarjetas de crédito) y se resaltaba ahí.
+ */
+export function cifrasPublicadas(mvDesde, eaDesde, mvHasta, eaHasta) {
+  const calculada = (mv, ea) =>
+    mv !== null &&
+    mv !== undefined &&
+    ea !== null &&
+    ea !== undefined &&
+    Math.abs(Number(mv) - mensual(Number(ea))) < 0.00006;
+  return [
+    calculada(mvDesde, eaDesde) ? null : mvDesde,
+    eaDesde,
+    calculada(mvHasta, eaHasta) ? null : mvHasta,
+    eaHasta,
+  ];
+}
 
 const ENTIDADES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
 

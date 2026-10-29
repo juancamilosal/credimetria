@@ -42,7 +42,7 @@ import { avisar } from "./comun/aviso.mjs";
 import { directus, hayToken, subirArchivo } from "./comun/directus.mjs";
 import * as navegador from "./comun/pantallazo.mjs";
 import * as pdf from "./comun/pdf.mjs";
-import { resaltarPdf } from "./comun/resaltar.mjs";
+import { cifrasPublicadas, resaltarPdf } from "./comun/resaltar.mjs";
 import {
   masReciente,
   mesVencido,
@@ -475,11 +475,11 @@ async function revisarFuente(fuente) {
   const resaltado =
     leida && copia.tipo === "application/pdf"
       ? await resaltarPdf(copia.datos, {
-          cifras: [
+          cifras: cifrasPublicadas(
             tasa.mvDesde,
             tasa.eaDesde,
             ...(sinMaxima ? [] : [tasa.mvHasta, tasa.eaHasta]),
-          ],
+          ),
           vigencia: tasa.vigencia,
           producto: fuente.producto,
           ancla: regla.ancla,
