@@ -116,8 +116,28 @@ function opcion(nombre) {
     .map((v) => v.trim())
     .filter(Boolean);
 }
-const soloProductos =
-  opcion("--producto")?.flatMap((p) => GRUPOS[p] ?? [p]) ?? null;
+const pedidos = opcion("--producto");
+const soloProductos = pedidos?.flatMap((p) => GRUPOS[p] ?? [p]) ?? null;
+/** Nombre de cada producto o grupo para el asunto del correo. */
+const NOMBRES = {
+  "libre-inversion": "Libre inversión",
+  libranza: "Libranza",
+  hipotecario: "Hipotecario",
+  leasing: "Leasing",
+  vivienda: "Vivienda",
+  "vivienda-vis": "Hipotecario VIS",
+  "vivienda-no-vis": "Hipotecario No VIS",
+  "leasing-vis": "Leasing VIS",
+  "leasing-no-vis": "Leasing No VIS",
+};
+/**
+ * El asunto lleva el producto de la tarea ("Hipotecario: hay 3 tasas
+ * nuevas…") para saber de cuál es sin abrir el correo.
+ */
+const asunto = (texto) =>
+  pedidos
+    ? `${pedidos.map((p) => NOMBRES[p] ?? p).join(" y ")}: ${texto.charAt(0).toLowerCase()}${texto.slice(1)}`
+    : texto;
 const soloEntidades = opcion("--solo");
 
 /** Día del recordatorio de los bancos que se revisan a mano (1 = lunes). */
@@ -601,12 +621,16 @@ async function main() {
   }
   if (problemas.length)
     await avisar(
-      `${problemas.length === 1 ? "Un banco necesita" : `${problemas.length} bancos necesitan`} revisión`,
+      asunto(
+        `${problemas.length === 1 ? "Un banco necesita" : `${problemas.length} bancos necesitan`} revisión`,
+      ),
       [...problemas, ...nuevos],
     );
   else if (nuevos.length)
     await avisar(
-      `${nuevos.length === 1 ? "Hay una tasa nueva" : `Hay ${nuevos.length} tasas nuevas`} por aprobar`,
+      asunto(
+        `${nuevos.length === 1 ? "Hay una tasa nueva" : `Hay ${nuevos.length} tasas nuevas`} por aprobar`,
+      ),
       nuevos,
     );
   else console.log("Sin cambios.");
@@ -617,13 +641,15 @@ async function main() {
   const recordatorio = [...vencidos, ...(recordar ? manuales : [])];
   if (recordatorio.length)
     await avisar(
-      `Recordatorio: revisa a mano ${recordatorio.length === 1 ? "1 banco" : `${recordatorio.length} bancos`}`,
+      asunto(
+        `Recordatorio: revisa a mano ${recordatorio.length === 1 ? "1 banco" : `${recordatorio.length} bancos`}`,
+      ),
       recordatorio,
       "Estos bancos no dejan que el robot baje su PDF o encuentre el del mes. Ábrelo y, si la fecha o las tasas cambiaron, súbelo en Configuración de tasas (Cargar PDF nuevo).",
     );
 }
 
 main().catch(async (error) => {
-  await avisar("El robot de los PDF falló", [error.message]);
+  await avisar(asunto("El robot de los PDF falló"), [error.message]);
   process.exit(1);
 });

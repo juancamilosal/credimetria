@@ -270,7 +270,9 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
    No VIS, o libre inversión y libranza) se baja, se lee y se fotografía una
    sola vez. Sin `--producto`, el robot revisa todas las fuentes (sirve para
    probar, pero puede pasar de los 15 minutos). Un producto nuevo necesita su
-   propia tarea.
+   propia tarea. El asunto de cada correo empieza con el producto de la
+   tarea ("Hipotecario: hay 3 tasas nuevas por aprobar", "Leasing:
+   recordatorio…"), así se sabe de cuál es sin abrirlo.
 
 ## Probar en local
 
