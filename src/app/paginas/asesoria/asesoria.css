@@ -52,42 +52,210 @@ legend {
   margin-bottom: 10px;
 }
 
-.rapidos {
+/* Tipo de crédito: tarjetas con ícono */
+.tipos {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tipo {
+  position: relative;
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.rapido {
-  min-height: 44px;
-  padding: 9px 14px;
-  border-radius: var(--cm-r-campo);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 14px 12px;
   border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-tarjeta);
   background: var(--cm-blanco);
-  color: var(--cm-tinta);
-  font-family: var(--cm-f-cifra);
-  font-size: 14px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    transform 0.15s;
 }
 
-.otro {
-  font-family: var(--cm-f-texto);
-}
-
-.rapido[aria-pressed="true"] {
-  background: var(--cm-marca-100);
+.tipo:hover {
   border-color: var(--cm-marca-600);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgb(11 42 74 / 8%);
+}
+
+.tipo:has(input:focus-visible) {
+  outline: 3px solid var(--cm-marca-100);
+  outline-offset: 2px;
+}
+
+.tipo-icono {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 6px;
+  border-radius: 12px;
+  background: var(--cm-marca-100);
   color: var(--cm-enlace);
+}
+
+.tipo-nombre {
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--cm-tinta);
+}
+
+.tipo-detalle {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--cm-gris);
+}
+
+.tipo-marca {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--cm-enlace);
+  color: var(--cm-blanco);
+  opacity: 0;
+  transform: scale(0.6);
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+}
+
+.tipo.elegido {
+  border-color: var(--cm-marca-600);
+  box-shadow:
+    0 0 0 1px var(--cm-marca-600),
+    0 6px 16px rgb(11 42 74 / 8%);
+}
+
+/* El color de la tarjeta: blanco en claro, casi negro en oscuro. */
+.tipo.elegido .tipo-icono {
+  background: var(--cm-enlace);
+  color: var(--cm-blanco);
+}
+
+.tipo.elegido .tipo-marca {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (max-width: 640px) {
+  .tipos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tipo,
+  .tipo-marca {
+    transition: none;
+  }
+  .tipo:hover {
+    transform: none;
+  }
+}
+
+/* Vivienda: hipotecario o leasing, y VIS o No VIS (como el ranking) */
+.vivienda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.segmento {
+  display: inline-flex;
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--cm-linea);
+  border-radius: 999px;
+  background: var(--cm-campo);
+}
+
+.segmento button {
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--cm-tinta);
+  font: inherit;
+  font-size: 14px;
   font-weight: 700;
+  cursor: pointer;
+}
+
+.segmento button.activo {
+  background: var(--cm-bloque);
+  color: #fff;
+}
+
+.segmento button:focus-visible {
+  outline: 3px solid var(--cm-marca-100);
+  outline-offset: 2px;
+}
+
+.segmento .corto {
+  display: none;
+}
+
+/* En celular, textos cortos para que cada botón quede en una línea. */
+@media (max-width: 480px) {
+  .segmento .largo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .segmento .corto {
+    display: inline;
+  }
+}
+
+/* Monto y ciudad, lado a lado */
+.fila-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.con-prefijo {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-campo);
+  background: var(--cm-campo);
+}
+
+.con-prefijo:focus-within {
+  border-color: var(--cm-marca-600);
+  box-shadow: 0 0 0 3px var(--cm-marca-100);
+}
+
+.con-prefijo span {
+  padding-left: 14px;
+  color: var(--cm-gris);
+  font-family: var(--cm-f-cifra);
+}
+
+.campo .con-prefijo input {
+  border: 0;
+  box-shadow: none;
+  padding-left: 6px;
+  font-family: var(--cm-f-cifra);
 }
 
 fieldset .error {
   display: block;
   margin-top: 8px;
-}
-
-.otra {
-  margin-top: 12px;
-  max-width: 360px;
 }
 
 /* Bloque de datos de contacto */

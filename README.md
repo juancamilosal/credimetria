@@ -69,9 +69,12 @@ morada y oro del diseño (ver abajo).
   más barata (Banco de Bogotá contra AV Villas, $20.000.000 a 48 meses →
   $2.090.784). Usa la tasa que cada una cobra en promedio.
 - **Asesoría corta** (`paginas/asesoria/`): una sola pantalla con lo mínimo
-  para que el asesor contacte a la persona: qué crédito le interesa, monto
-  (opcional, con botones de $5, $10, $20 y $50 millones u "Otro monto"),
-  ciudad (botones con las principales y "Otra"), el bloque "Tus datos de
+  para que el asesor contacte a la persona: qué crédito le interesa (cuatro
+  tarjetas con ícono: Libranza, Libre inversión, Vehículo y Vivienda; en
+  vivienda, debajo, Crédito hipotecario | Leasing habitacional y VIS | No
+  VIS, con textos cortos en celular), monto (opcional, un solo campo con "$"
+  y puntos de miles), ciudad (un solo campo con sugerencias de las
+  principales ciudades, `datalist`), el bloque "Tus datos de
   contacto" (nombres, apellidos, número de celular y canal) y la
   autorización. Ingresos, reportes y demás los pregunta el asesor. La
   urgencia solo se guarda si llega en el enlace (inicio o Compara tu oferta).

@@ -34,10 +34,21 @@ describe('Asesoria', () => {
     fixture.detectChanges();
   }
 
-  /** Toca el botón con ese texto (chips o montos rápidos). */
+  /** Elige la tarjeta del tipo de crédito con ese nombre. */
+  function elegirTipo(nombre: string) {
+    const tarjeta = [...html.querySelectorAll<HTMLLabelElement>('.tipo')].find(
+      (t) => t.querySelector('.tipo-nombre')?.textContent?.trim() === nombre,
+    );
+    if (!tarjeta) throw new Error(`No hay tarjeta "${nombre}"`);
+    tarjeta.querySelector('input')!.click();
+    fixture.detectChanges();
+  }
+
+  /** Toca el botón con ese texto. */
   function tocar(texto: string) {
+    // Los botones de vivienda traen un texto largo y uno corto (celular).
     const boton = [...html.querySelectorAll<HTMLButtonElement>('button')].find(
-      (b) => b.textContent?.trim() === texto,
+      (b) => (b.querySelector('.largo') ?? b).textContent?.trim() === texto,
     );
     if (!boton) throw new Error(`No hay botón "${texto}"`);
     boton.click();
@@ -58,7 +69,8 @@ describe('Asesoria', () => {
     crear();
     expect(html.textContent).not.toContain('¿De dónde vienen tus ingresos?');
     expect(html.textContent).not.toContain('reportes negativos');
-    expect(html.querySelectorAll('fieldset').length).toBe(3);
+    // Solo el tipo de crédito y los canales de contacto (la ciudad es un campo).
+    expect(html.querySelectorAll('fieldset').length).toBe(2);
   });
 
   it('el botón queda bloqueado hasta marcar la autorización', () => {
@@ -84,27 +96,29 @@ describe('Asesoria', () => {
     expect(html.querySelector('.listo')).toBeNull();
   });
 
-  it('un monto que no está en los botones llega en "Otro monto"', () => {
+  it('el monto que llega en el enlace queda escrito', () => {
     crear({ producto: 'libranza', monto: '15000000', origen: 'oferta' });
     expect(html.querySelector<HTMLInputElement>('#asMonto')!.value).toBe(
       '15.000.000',
     );
   });
 
-  it('"Otro monto" abre el campo y valida el mínimo', () => {
+  it('el monto es un solo campo con "$" y valida el mínimo', () => {
     crear();
-    expect(html.querySelector('#asMonto')).toBeNull();
-    tocar('Otro monto');
+    expect(html.querySelector('.con-prefijo span')?.textContent).toBe('$');
     escribir('#asMonto', '500.000');
     autorizar();
     enviar();
     expect(html.querySelector('#errMonto')).not.toBeNull();
   });
 
-  it('"Otra" deja escribir la ciudad', () => {
+  it('la ciudad es un solo campo con sugerencias', () => {
     crear();
-    tocar('Otra');
-    expect(html.querySelector('#asCiudad')).not.toBeNull();
+    const ciudad = html.querySelector<HTMLInputElement>('#asCiudad')!;
+    expect(ciudad.getAttribute('list')).toBe('asCiudades');
+    expect(html.querySelectorAll('#asCiudades option').length).toBeGreaterThan(
+      10,
+    );
     autorizar();
     enviar();
     expect(html.querySelector('#errCiudad')?.textContent).toContain(
@@ -112,17 +126,67 @@ describe('Asesoria', () => {
     );
   });
 
+  it('el tipo de crédito son cuatro tarjetas con ícono', () => {
+    crear();
+    const nombres = [...html.querySelectorAll('.tipo .tipo-nombre')].map((n) =>
+      n.textContent!.trim(),
+    );
+    expect(nombres).toEqual([
+      'Libranza',
+      'Libre inversión',
+      'Vehículo',
+      'Vivienda',
+    ]);
+    expect(html.querySelectorAll('.tipo svg').length).toBeGreaterThanOrEqual(4);
+    elegirTipo('Vehículo');
+    expect(html.querySelector('.tipo.elegido .tipo-nombre')?.textContent).toBe(
+      'Vehículo',
+    );
+  });
+
+  it('en vivienda se elige hipotecario o leasing, y VIS o No VIS', async () => {
+    crear();
+    const enviarProspecto = spyOn(
+      TestBed.inject(ProspectosService),
+      'enviar',
+    ).and.callThrough();
+    elegirTipo('Vivienda');
+    tocar('Leasing habitacional');
+    tocar('No VIS');
+    escribir('#asCiudad', 'Pereira');
+    escribir('#asNombres', 'Ana');
+    escribir('#asApellidos', 'Gómez');
+    escribir('#asCel', '3001234567');
+    autorizar();
+    enviar();
+    await fixture.whenStable();
+    expect(enviarProspecto.calls.mostRecent().args[0].producto).toBe(
+      'leasing-no-vis',
+    );
+  });
+
   it('llega lleno desde el simulador', () => {
     crear({ producto: 'libranza', monto: '20000000', origen: 'simulador' });
-    expect(
-      html.querySelector('.rapido[aria-pressed=true]')?.textContent,
-    ).toContain('$20.000.000');
-    expect(
-      html.querySelector('app-chips button[aria-pressed=true]')?.textContent,
-    ).toContain('Libranza');
+    expect(html.querySelector<HTMLInputElement>('#asMonto')!.value).toBe(
+      '20.000.000',
+    );
+    expect(html.querySelector('.tipo.elegido .tipo-nombre')?.textContent).toBe(
+      'Libranza',
+    );
     expect(html.textContent).toContain(
       'Desde el simulador: Libranza, $20.000.000.',
     );
+  });
+
+  it('desde el ranking de vivienda llega con la tarjeta y los filtros', () => {
+    crear({ producto: 'vivienda-no-vis' });
+    expect(html.querySelector('.tipo.elegido .tipo-nombre')?.textContent).toBe(
+      'Vivienda',
+    );
+    const activos = [...html.querySelectorAll('.segmento button.activo')].map(
+      (b) => (b.querySelector('.largo') ?? b).textContent!.trim(),
+    );
+    expect(activos).toEqual(['Crédito hipotecario', 'No VIS']);
   });
 
   it('con lo mínimo envía y guarda la prueba de la autorización', async () => {
@@ -131,8 +195,8 @@ describe('Asesoria', () => {
       TestBed.inject(ProspectosService),
       'enviar',
     ).and.callThrough();
-    tocar('Libre inversión');
-    tocar('Medellín');
+    elegirTipo('Libre inversión');
+    escribir('#asCiudad', 'Medellín');
     escribir('#asNombres', 'Ana María');
     escribir('#asApellidos', 'Gómez Rojas');
     escribir('#asCel', '300 123 4567');
@@ -155,9 +219,9 @@ describe('Asesoria', () => {
 
   it('sin urgencia en el enlace dice "pronto"', async () => {
     crear();
-    tocar('Libranza');
-    tocar('$10.000.000');
-    tocar('Cali');
+    elegirTipo('Libranza');
+    escribir('#asMonto', '10.000.000');
+    escribir('#asCiudad', 'Cali');
     escribir('#asNombres', 'Luis');
     escribir('#asApellidos', 'Pérez');
     escribir('#asCel', '3109876543');

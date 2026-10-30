@@ -1,9 +1,7 @@
 import {
-  afterNextRender,
   Component,
   ElementRef,
   inject,
-  Injector,
   signal,
   viewChild,
 } from '@angular/core';
@@ -16,9 +14,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
-import { Chips } from '../../compartido/chips/chips';
 import { EntradaMoneda } from '../../compartido/entrada-moneda/entrada-moneda';
-import { formatoPesos, PesosPipe } from '../../compartido/pipes/formato';
+import { formatoPesos } from '../../compartido/pipes/formato';
 import { URGENCIAS, Urgencia } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
 import { ProspectosService } from '../../core/servicios/prospectos.service';
@@ -27,14 +24,56 @@ import { leerNumero } from '../../core/utilidades/credito';
 
 const MONTO_MINIMO = 1_000_000;
 
-/** Montos de un toque para no tener que escribir. */
-const MONTOS_RAPIDOS = [5_000_000, 10_000_000, 20_000_000, 50_000_000];
+/** Ciudades que se sugieren mientras escribe (puede escribir cualquiera). */
+const CIUDADES = [
+  'Bogotá',
+  'Medellín',
+  'Cali',
+  'Barranquilla',
+  'Cartagena',
+  'Bucaramanga',
+  'Cúcuta',
+  'Pereira',
+  'Manizales',
+  'Ibagué',
+  'Santa Marta',
+  'Villavicencio',
+  'Pasto',
+  'Neiva',
+  'Armenia',
+  'Montería',
+  'Valledupar',
+  'Popayán',
+  'Tunja',
+  'Sincelejo',
+];
 
-/** Ciudades con más solicitudes; "Otra" deja escribirla. */
-const CIUDADES = ['Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Bucaramanga'];
-const OTRA = 'Otra';
+/** Tarjetas del tipo de crédito; vivienda se precisa debajo. */
+export type TipoCredito =
+  | 'libranza'
+  | 'libre-inversion'
+  | 'vehiculo'
+  | 'vivienda';
+const TIPOS: { id: TipoCredito; nombre: string; detalle: string }[] = [
+  {
+    id: 'libranza',
+    nombre: 'Libranza',
+    detalle: 'Se descuenta de tu nómina o pensión',
+  },
+  {
+    id: 'libre-inversion',
+    nombre: 'Libre inversión',
+    detalle: 'Para lo que necesites',
+  },
+  {
+    id: 'vehiculo',
+    nombre: 'Vehículo',
+    detalle: 'Carro o moto, nuevo o usado',
+  },
+  { id: 'vivienda', nombre: 'Vivienda', detalle: 'Comprar casa o apartamento' },
+];
 
-/** Productos en el orden del formulario. */
+/** Productos que acepta el formulario (desde un enlace). */
 const ORDEN_PRODUCTOS: Producto[] = [
   'libranza',
   'libre-inversion',
@@ -81,7 +120,7 @@ function canalesValidos(grupo: AbstractControl): ValidationErrors | null {
  */
 @Component({
   selector: 'app-asesoria',
-  imports: [ReactiveFormsModule, RouterLink, Chips, EntradaMoneda, PesosPipe],
+  imports: [ReactiveFormsModule, RouterLink, EntradaMoneda],
   templateUrl: './asesoria.html',
   styleUrl: './asesoria.css',
 })
@@ -90,7 +129,6 @@ export class Asesoria {
   private readonly prospectos = inject(ProspectosService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder).nonNullable;
-  private readonly injector = inject(Injector);
   private readonly formulario =
     viewChild.required<ElementRef<HTMLElement>>('formulario');
   /** Entidad elegida en el ranking, si llegó desde allí. */
@@ -98,15 +136,14 @@ export class Asesoria {
   /** Urgencia, solo si la trae el enlace (inicio o Compara tu oferta). */
   private urgencia: Urgencia | null = null;
 
-  protected readonly opcionesProducto = ORDEN_PRODUCTOS.map((id) => ({
-    valor: id,
-    texto: this.tasas.nombre(id),
-  }));
-  protected readonly opcionesCiudad = [...CIUDADES, OTRA].map((c) => ({
-    valor: c,
-    texto: c,
-  }));
-  protected readonly montosRapidos = MONTOS_RAPIDOS;
+  protected readonly tipos = TIPOS;
+  protected readonly ciudades = CIUDADES;
+  /** Tarjeta elegida; en vivienda, además hipotecario o leasing y VIS o No VIS. */
+  protected readonly tipo = signal<TipoCredito | null>(null);
+  protected readonly modalidad = signal<'hipotecario' | 'leasing'>(
+    'hipotecario',
+  );
+  protected readonly vis = signal<'vis' | 'no-vis'>('vis');
   protected readonly conectado = this.prospectos.conectado;
 
   protected readonly form = this.fb.group(
@@ -133,10 +170,6 @@ export class Asesoria {
     { initialValue: false },
   );
 
-  /** Muestra el campo para escribir un monto que no está en los botones. */
-  protected readonly otroMonto = signal(false);
-  /** Ciudad elegida en los botones ('Otra' muestra el campo para escribirla). */
-  protected readonly ciudadElegida = signal('');
   /** Texto que explica de dónde viene la persona. */
   protected readonly vieneDe = signal<string | null>(null);
   protected readonly intentoEnviar = signal(false);
@@ -156,24 +189,30 @@ export class Asesoria {
     return this.form.hasError(error) && this.intentoEnviar();
   }
 
-  protected elegirMonto(monto: number): void {
-    this.otroMonto.set(false);
-    this.form.controls.monto.setValue(formatoPesos(monto).slice(1));
+  protected elegirTipo(tipo: TipoCredito): void {
+    this.tipo.set(tipo);
+    this.actualizarProducto();
   }
 
-  protected escribirOtroMonto(): void {
-    this.otroMonto.set(true);
-    this.form.controls.monto.setValue('');
-    this.enfocar('#asMonto');
+  protected elegirModalidad(modalidad: 'hipotecario' | 'leasing'): void {
+    this.modalidad.set(modalidad);
+    this.actualizarProducto();
   }
 
-  protected elegirCiudad(ciudad: string): void {
-    this.ciudadElegida.set(ciudad);
-    this.form.controls.ciudad.setValue(ciudad === OTRA ? '' : ciudad);
-    if (ciudad === OTRA) {
-      this.form.controls.ciudad.markAsUntouched();
-      this.enfocar('#asCiudad');
-    }
+  protected elegirVis(vis: 'vis' | 'no-vis'): void {
+    this.vis.set(vis);
+    this.actualizarProducto();
+  }
+
+  /** El producto del prospecto: la tarjeta o, en vivienda, la combinación. */
+  private actualizarProducto(): void {
+    const tipo = this.tipo();
+    const producto =
+      tipo === 'vivienda'
+        ? `${this.modalidad() === 'leasing' ? 'leasing' : 'vivienda'}-${this.vis()}`
+        : (tipo ?? '');
+    this.form.controls.producto.setValue(producto);
+    this.form.controls.producto.markAsTouched();
   }
 
   protected async enviar(): Promise<void> {
@@ -219,10 +258,16 @@ export class Asesoria {
 
     if (producto && ORDEN_PRODUCTOS.includes(producto as Producto)) {
       this.form.controls.producto.setValue(producto);
+      if (/^(vivienda|leasing)-/.test(producto)) {
+        this.tipo.set('vivienda');
+        this.modalidad.set(
+          producto.startsWith('leasing') ? 'leasing' : 'hipotecario',
+        );
+        this.vis.set(producto.endsWith('-no-vis') ? 'no-vis' : 'vis');
+      } else this.tipo.set(producto as TipoCredito);
     }
     if (monto > 0) {
       this.form.controls.monto.setValue(formatoPesos(monto).slice(1));
-      this.otroMonto.set(!MONTOS_RAPIDOS.includes(monto));
     }
     const conocida = URGENCIAS.find((u) => u.id === urgencia);
     if (conocida) this.urgencia = conocida.id;
@@ -240,17 +285,6 @@ export class Asesoria {
     } else if (origen === 'ranking' && this.entidad && nombre) {
       this.vieneDe.set(`Desde el ranking: ${this.entidad}, ${nombre}.`);
     }
-  }
-
-  /** Pone el foco en un elemento cuando ya está en pantalla. */
-  private enfocar(selector: string): void {
-    afterNextRender(
-      () =>
-        this.formulario()
-          .nativeElement.querySelector<HTMLElement>(selector)
-          ?.focus(),
-      { injector: this.injector },
-    );
   }
 
   private enfocarPrimerError(): void {
