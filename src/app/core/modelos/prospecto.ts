@@ -35,7 +35,8 @@ export interface DatosProspecto {
   apellidos: string;
   celular: string;
   canales: Canales;
-  correo: string | null;
+  /** Para mandarle la confirmación (y escribirle, si marcó Correo). */
+  correo: string;
   /** Entidad elegida en el ranking, si llegó desde allí. */
   entidad: string | null;
 }

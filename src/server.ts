@@ -6,6 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { rutasProspectos } from '../servidor/prospectos.mjs';
 import { rutasTasas } from '../servidor/tasas.mjs';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
@@ -28,6 +29,12 @@ const angularApp = new AngularNodeAppEngine({
  * ve Directus ni el token.
  */
 rutasTasas(app);
+
+/**
+ * /api/prospectos: el formulario de asesoría. Guarda la solicitud en Directus
+ * y manda el correo a la persona y al administrador.
+ */
+rutasProspectos(app);
 
 /**
  * Serve static files from /browser

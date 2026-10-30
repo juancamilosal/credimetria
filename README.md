@@ -25,7 +25,7 @@ morada y oro del diseño (ver abajo).
 | `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas                                      |
 | `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                                     |
 | `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                                             |
-| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular y autorización de datos obligatoria                                                     |
+| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular, correo y autorización; lo guarda en Directus y manda los correos                       |
 | `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                                                            |
 | `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                                                            |
 | `/admin/tasas`       | Configuración     | Solo administradores de Directus: por banco, la tasa publicada y la que espera aprobación, cada una con su PDF; comparar los PDF, editar, aprobar y cargar PDF o pantallazos nuevos |
@@ -76,9 +76,23 @@ morada y oro del diseño (ver abajo).
   simulador con un producto de vivienda exacto, se guarda ese), monto (opcional, un solo campo con "$"
   y puntos de miles), ciudad (un solo campo con sugerencias de las
   principales ciudades, `datalist`), el bloque "Tus datos de
-  contacto" (nombres, apellidos, número de celular y canal) y la
+  contacto" (nombres, apellidos, celular, correo y canal) y la
   autorización. Ingresos, reportes y demás los pregunta el asesor. La
   urgencia solo se guarda si llega en el enlace (inicio o Compara tu oferta).
+  El correo es obligatorio: allí llega la confirmación. Al enviar, el botón
+  dice "Enviando…"; si el servidor falla, se queda en el formulario con el
+  aviso "No pudimos enviar tu solicitud".
+- **Solicitudes de asesoría** (`servidor/prospectos.mjs`, `POST
+/api/prospectos`): el servidor revisa los datos (nunca confía en el
+  navegador), les agrega la IP (`cf-connecting-ip`) y la fecha de recibido,
+  los guarda en la colección `prospectos` de Directus (estado `nuevo`;
+  luego `contactado` o `descartado`, y notas internas) y responde 201.
+  Después manda dos correos: a la persona, con la marca, "un asesor de
+  crédito aliado se contactará contigo", lo que pidió, las 5 reglas de
+  `/aliados` y el aviso de estafa (logo en `public/correo/credimetria.png`);
+  y al administrador (`AVISO_PARA`), con todos los datos y respuesta directa
+  a la persona. Máximo 5 solicitudes por IP por hora. Si Directus falla
+  responde 503 y no manda correos. Pruebas: `npm run test:servidor`.
 - **Simular y tabla de amortización** (`paginas/simulador/calculadora/`):
   el botón "Simular" muestra debajo la tabla mes a mes (cuota, intereses,
   abono a capital y saldo, que cierra en $0) con el total de intereses y el
@@ -436,10 +450,17 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   Directus si no).
 - **Variables del servidor** (Coolify): `DIRECTUS_TOKEN` (token del "Lector
   web", obligatorio) y `DIRECTUS_URL` (opcional). Sin el token, la página
-  sale sin tasas.
-- **El formulario no envía datos todavía.** `ProspectosService` arma el
-  prospecto con la prueba de la autorización (fecha, texto exacto, versión de
-  la política y página de origen). Falta la API que lo guarde y agregue la IP.
+  sale sin tasas. Para los correos de asesoría: `SMTP_HOST`, `SMTP_PUERTO`
+  (465 por defecto), `SMTP_USUARIO`, `SMTP_CLAVE`, `AVISO_PARA` (a quién le
+  llega cada solicitud), `CORREO_DE` (remitente, p. ej. `Credimetría
+<hola@credimetria.co>`; si no, el usuario SMTP) y `SITIO_URL` (enlaces y
+  logo; por defecto `https://credimetria.valkiriacode.com`). Sin
+  `SMTP_HOST` la solicitud se guarda igual y los correos solo salen en el
+  log.
+- **Prospectos en Directus:** la política "Lector web" solo puede _crear_
+  en `prospectos` (no leer, editar ni borrar), así el token de la página no
+  sirve para sacar los datos. Se ven y se marcan desde el panel de
+  Directus con el usuario administrador.
 - Antes de publicar el formulario: la política de tratamiento de datos real
   y los aliados reales en `/aliados`.
 - **Para abrir vivienda u otra línea:** si un mismo PDF trae varios
@@ -457,6 +478,7 @@ npm start                      # http://localhost:4200 (sin SSR) + API de tasas
 npm run build                  # compila (sin prerenderizar: las tasas cambian)
 npm run serve:ssr:credimetria  # sirve la compilación con SSR
 npm test                       # pruebas con Karma
+npm run test:servidor          # pruebas de servidor/ (node --test)
 npx prettier --write "src/**/*.{ts,html,css}"
 ```
 

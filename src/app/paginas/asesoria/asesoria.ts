@@ -106,14 +106,19 @@ function celularColombiano(
     : { celular: true };
 }
 
-/** Al menos un canal, y el correo si marcó "Correo". */
+/** Al menos un canal. */
 function canalesValidos(grupo: AbstractControl): ValidationErrors | null {
   const { whatsapp, llamada, correo } = grupo.get('canales')!.value;
-  const errores: ValidationErrors = {};
-  if (!whatsapp && !llamada && !correo) errores['sinCanal'] = true;
-  const email = String(grupo.get('correo')!.value).trim();
-  if (correo && !/^\S+@\S+\.\S+$/.test(email)) errores['correo'] = true;
-  return Object.keys(errores).length ? errores : null;
+  return whatsapp || llamada || correo ? null : { sinCanal: true };
+}
+
+/** El correo siempre: allí le llega la confirmación de la solicitud. */
+function correoValido(
+  control: AbstractControl<string>,
+): ValidationErrors | null {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(control.value.trim())
+    ? null
+    : { correo: true };
 }
 
 /**
@@ -149,7 +154,6 @@ export class Asesoria {
    * se guarda sin preguntarlo; si no, el prospecto dice solo "vivienda".
    */
   private viviendaDelEnlace: Producto | null = null;
-  protected readonly conectado = this.prospectos.conectado;
 
   protected readonly form = this.fb.group(
     {
@@ -160,7 +164,7 @@ export class Asesoria {
       apellidos: ['', Validators.required],
       celular: ['', celularColombiano],
       canales: this.fb.group({ whatsapp: true, llamada: false, correo: false }),
-      correo: [''],
+      correo: ['', correoValido],
       autorizo: [false, Validators.requiredTrue],
     },
     { validators: canalesValidos },
@@ -170,15 +174,14 @@ export class Asesoria {
     this.form.controls.autorizo.valueChanges,
     { initialValue: false },
   );
-  protected readonly quiereCorreo = toSignal(
-    this.form.controls.canales.controls.correo.valueChanges,
-    { initialValue: false },
-  );
 
   /** Texto que explica de dónde viene la persona. */
   protected readonly vieneDe = signal<string | null>(null);
   protected readonly intentoEnviar = signal(false);
   protected readonly enviado = signal<string | null>(null);
+  protected readonly enviando = signal(false);
+  /** El servidor no la pudo guardar: se queda en el formulario. */
+  protected readonly fallo = signal(false);
 
   constructor() {
     this.llenarDesdeEnlace(inject(ActivatedRoute).snapshot.queryParamMap);
@@ -190,8 +193,8 @@ export class Asesoria {
     return control.invalid && (control.touched || this.intentoEnviar());
   }
 
-  protected errorGrupo(error: 'sinCanal' | 'correo'): boolean {
-    return this.form.hasError(error) && this.intentoEnviar();
+  protected errorCanales(): boolean {
+    return this.form.hasError('sinCanal') && this.intentoEnviar();
   }
 
   protected elegirTipo(tipo: TipoCredito): void {
@@ -213,7 +216,7 @@ export class Asesoria {
   protected async enviar(): Promise<void> {
     this.intentoEnviar.set(true);
     this.form.markAllAsTouched();
-    if (!this.form.controls.autorizo.value) return;
+    if (!this.form.controls.autorizo.value || this.enviando()) return;
     if (this.form.invalid) {
       this.enfocarPrimerError();
       return;
@@ -230,12 +233,21 @@ export class Asesoria {
         apellidos: v.apellidos.trim(),
         celular: v.celular.replace(/\D/g, ''),
         canales: v.canales,
-        correo: v.canales.correo ? v.correo.trim() : null,
+        correo: v.correo.trim(),
         entidad: this.entidad,
       },
       this.router.url,
     );
-    await this.prospectos.enviar(prospecto);
+    this.enviando.set(true);
+    this.fallo.set(false);
+    try {
+      await this.prospectos.enviar(prospecto);
+    } catch {
+      this.fallo.set(true);
+      return;
+    } finally {
+      this.enviando.set(false);
+    }
     const urgencia = URGENCIAS.find((u) => u.id === this.urgencia);
     this.enviado.set(urgencia?.cuando ?? 'pronto');
     globalThis.scrollTo?.(0, 0);

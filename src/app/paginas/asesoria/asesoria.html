@@ -18,14 +18,10 @@
         </svg>
         <h1>¡Listo! Un asesor te contactará {{ cuando }}</h1>
         <p class="muted">
-          Te escribirá por el canal que elegiste. Recuerda: los asesores aliados
+          Te escribirá por el canal que elegiste. Te enviamos un correo con tu
+          solicitud y las reglas de los asesores. Recuerda: los asesores aliados
           nunca te cobran nada por adelantado. Si alguno lo hace, repórtalo.
         </p>
-        @if (!conectado) {
-          <p class="nota">
-            Versión de prueba: tus datos todavía no se envían a ningún asesor.
-          </p>
-        }
         <div class="acciones">
           <a class="btn btn-principal" routerLink="/ranking"
             >Seguir comparando tasas</a
@@ -207,23 +203,44 @@
               }
             </div>
           </div>
-          <div class="campo">
-            <label for="asCel">Número de contacto (celular)</label>
-            <input
-              id="asCel"
-              formControlName="celular"
-              type="tel"
-              inputmode="tel"
-              placeholder="300 000 0000"
-              autocomplete="tel-national"
-              [attr.aria-invalid]="mostrarError('celular')"
-              aria-describedby="errCel"
-            />
-            @if (mostrarError("celular")) {
-              <span class="error" id="errCel">
-                Escribe un celular de 10 dígitos que empiece por 3.
-              </span>
-            }
+          <div class="rejilla">
+            <div class="campo">
+              <label for="asCel">Número de contacto (celular)</label>
+              <input
+                id="asCel"
+                formControlName="celular"
+                type="tel"
+                inputmode="tel"
+                placeholder="300 000 0000"
+                autocomplete="tel-national"
+                [attr.aria-invalid]="mostrarError('celular')"
+                aria-describedby="errCel"
+              />
+              @if (mostrarError("celular")) {
+                <span class="error" id="errCel">
+                  Escribe un celular de 10 dígitos que empiece por 3.
+                </span>
+              }
+            </div>
+            <div class="campo">
+              <label for="asCorreo">Correo</label>
+              <input
+                id="asCorreo"
+                type="email"
+                formControlName="correo"
+                placeholder="tu@correo.com"
+                autocomplete="email"
+                [attr.aria-invalid]="mostrarError('correo')"
+                aria-describedby="errCorreo"
+              />
+              @if (mostrarError("correo")) {
+                <span class="error" id="errCorreo"
+                  >Escribe un correo válido.</span
+                >
+              } @else {
+                <span class="nota">Allí te llega la confirmación.</span>
+              }
+            </div>
           </div>
 
           <fieldset formGroupName="canales" class="canales">
@@ -250,23 +267,7 @@
               7 p. m. y sábados de 8 a. m. a 3 p. m.
             </span>
           </fieldset>
-          @if (quiereCorreo()) {
-            <div class="campo correo">
-              <label for="asCorreo">Correo</label>
-              <input
-                id="asCorreo"
-                type="email"
-                formControlName="correo"
-                placeholder="tu@correo.com"
-                autocomplete="email"
-                [attr.aria-invalid]="errorGrupo('correo')"
-              />
-              @if (errorGrupo("correo")) {
-                <span class="error">Escribe un correo válido.</span>
-              }
-            </div>
-          }
-          @if (errorGrupo("sinCanal")) {
+          @if (errorCanales()) {
             <span class="error">Marca al menos un canal.</span>
           }
         </section>
@@ -288,14 +289,22 @@
         <button
           class="btn btn-principal enviar"
           type="submit"
-          [disabled]="!autorizo()"
+          [disabled]="!autorizo() || enviando()"
         >
           {{
-            autorizo()
-              ? "Quiero que me asesoren"
-              : "Marca la autorización para continuar"
+            enviando()
+              ? "Enviando…"
+              : autorizo()
+                ? "Quiero que me asesoren"
+                : "Marca la autorización para continuar"
           }}
         </button>
+        @if (fallo()) {
+          <p class="error fallo" role="alert">
+            No pudimos enviar tu solicitud. Revisa tu conexión e intenta de
+            nuevo en unos minutos.
+          </p>
+        }
       </form>
     }
   </div>

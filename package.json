@@ -7,6 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:servidor": "node --test servidor/pruebas/*.test.mjs",
     "serve:ssr:credimetria": "node dist/credimetria/server/server.mjs"
   },
   "prettier": {
@@ -30,6 +31,7 @@
     "@angular/router": "^20.1.0",
     "@angular/ssr": "^20.1.5",
     "express": "^5.1.0",
+    "nodemailer": "^6.10.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

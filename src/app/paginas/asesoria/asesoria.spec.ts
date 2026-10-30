@@ -1,3 +1,8 @@
+import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   ActivatedRoute,
@@ -16,6 +21,8 @@ describe('Asesoria', () => {
       imports: [Asesoria],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { queryParamMap: convertToParamMap(params) } },
@@ -91,6 +98,7 @@ describe('Asesoria', () => {
     expect(html.querySelector('#errNombres')).not.toBeNull();
     expect(html.querySelector('#errApellidos')).not.toBeNull();
     expect(html.querySelector('#errCel')).not.toBeNull();
+    expect(html.querySelector('#errCorreo')).not.toBeNull();
     expect(html.querySelector('#errMonto')).toBeNull();
     expect(html.querySelector('.listo')).toBeNull();
   });
@@ -148,7 +156,7 @@ describe('Asesoria', () => {
     const enviarProspecto = spyOn(
       TestBed.inject(ProspectosService),
       'enviar',
-    ).and.callThrough();
+    ).and.resolveTo();
     elegirTipo('Vivienda');
     expect(html.querySelector('.segmento')).toBeNull();
     expect(html.textContent).not.toContain('Leasing habitacional');
@@ -156,6 +164,7 @@ describe('Asesoria', () => {
     escribir('#asNombres', 'Ana');
     escribir('#asApellidos', 'Gómez');
     escribir('#asCel', '3001234567');
+    escribir('#asCorreo', 'ana@ejemplo.com');
     autorizar();
     enviar();
     await fixture.whenStable();
@@ -186,11 +195,12 @@ describe('Asesoria', () => {
     const enviarProspecto = spyOn(
       TestBed.inject(ProspectosService),
       'enviar',
-    ).and.callThrough();
+    ).and.resolveTo();
     escribir('#asCiudad', 'Cali');
     escribir('#asNombres', 'Luis');
     escribir('#asApellidos', 'Pérez');
     escribir('#asCel', '3109876543');
+    escribir('#asCorreo', 'luis@ejemplo.com');
     autorizar();
     enviar();
     await fixture.whenStable();
@@ -204,12 +214,13 @@ describe('Asesoria', () => {
     const enviarProspecto = spyOn(
       TestBed.inject(ProspectosService),
       'enviar',
-    ).and.callThrough();
+    ).and.resolveTo();
     elegirTipo('Libre inversión');
     escribir('#asCiudad', 'Medellín');
     escribir('#asNombres', 'Ana María');
     escribir('#asApellidos', 'Gómez Rojas');
     escribir('#asCel', '300 123 4567');
+    escribir('#asCorreo', ' ana@ejemplo.com ');
     autorizar();
     enviar();
     await fixture.whenStable();
@@ -224,17 +235,20 @@ describe('Asesoria', () => {
     expect(prospecto.nombres).toBe('Ana María');
     expect(prospecto.apellidos).toBe('Gómez Rojas');
     expect(prospecto.celular).toBe('3001234567');
+    expect(prospecto.correo).toBe('ana@ejemplo.com');
     expect(prospecto.autorizacion.texto).toContain('Autorizo a Credimetría');
   });
 
   it('sin urgencia en el enlace dice "pronto"', async () => {
     crear();
+    spyOn(TestBed.inject(ProspectosService), 'enviar').and.resolveTo();
     elegirTipo('Libranza');
     escribir('#asMonto', '10.000.000');
     escribir('#asCiudad', 'Cali');
     escribir('#asNombres', 'Luis');
     escribir('#asApellidos', 'Pérez');
     escribir('#asCel', '3109876543');
+    escribir('#asCorreo', 'luis@ejemplo.com');
     autorizar();
     enviar();
     await fixture.whenStable();
@@ -255,13 +269,63 @@ describe('Asesoria', () => {
     expect(bloque.querySelector('#asCel')).not.toBeNull();
   });
 
-  it('pide el correo si marca Correo', () => {
+  it('el correo siempre está y se pide (allí llega la confirmación)', () => {
     crear();
-    const casillas = html.querySelectorAll<HTMLInputElement>(
-      '[formGroupName=canales] input',
-    );
-    casillas[2].click();
-    fixture.detectChanges();
     expect(html.querySelector('#asCorreo')).not.toBeNull();
+    expect(html.textContent).toContain('Allí te llega la confirmación.');
+    escribir('#asCorreo', 'sin-arroba');
+    autorizar();
+    enviar();
+    expect(html.querySelector('#errCorreo')?.textContent).toContain(
+      'Escribe un correo válido.',
+    );
+  });
+
+  /** Llena lo mínimo para poder enviar. */
+  function llenar() {
+    elegirTipo('Libranza');
+    escribir('#asCiudad', 'Cali');
+    escribir('#asNombres', 'Luis');
+    escribir('#asApellidos', 'Pérez');
+    escribir('#asCel', '3109876543');
+    escribir('#asCorreo', 'luis@ejemplo.com');
+    autorizar();
+  }
+
+  it('manda la solicitud a /api/prospectos', async () => {
+    crear();
+    const http = TestBed.inject(HttpTestingController);
+    llenar();
+    enviar();
+    expect(html.querySelector('button[type=submit]')?.textContent?.trim()).toBe(
+      'Enviando…',
+    );
+    const pedido = http.expectOne('/api/prospectos');
+    expect(pedido.request.method).toBe('POST');
+    expect(pedido.request.body.correo).toBe('luis@ejemplo.com');
+    pedido.flush({ ok: true }, { status: 201, statusText: 'Created' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(html.querySelector('.listo')).not.toBeNull();
+    expect(html.textContent).not.toContain('Versión de prueba');
+  });
+
+  it('si el servidor falla se queda en el formulario y lo dice', async () => {
+    crear();
+    const http = TestBed.inject(HttpTestingController);
+    llenar();
+    enviar();
+    http
+      .expectOne('/api/prospectos')
+      .flush({}, { status: 503, statusText: 'Service Unavailable' });
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(html.querySelector('.listo')).toBeNull();
+    expect(html.querySelector('.fallo')?.textContent).toContain(
+      'No pudimos enviar tu solicitud',
+    );
+    expect(
+      html.querySelector<HTMLButtonElement>('button[type=submit]')!.disabled,
+    ).toBeFalse();
   });
 });

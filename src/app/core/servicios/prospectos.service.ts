@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { DatosProspecto, Prospecto } from '../modelos/prospecto';
 
 /** Versión de la política de tratamiento de datos que acepta la persona. */
@@ -9,13 +11,13 @@ export const TEXTO_AUTORIZACION =
   'Autorizo a Credimetría a compartir mis datos con los asesores de crédito aliados publicados en credimetria.co/aliados, para que me contacten y me ofrezcan créditos. Me contactarán máximo 2 asesores. Acepto la política de tratamiento de datos.';
 
 /**
- * Arma el prospecto con la prueba de la autorización. Mientras no exista la
- * base de datos no envía nada: el servidor deberá guardarlo y agregar la IP.
+ * Arma el prospecto con la prueba de la autorización y lo manda a
+ * /api/prospectos: el servidor le agrega la IP, lo guarda en Directus y
+ * manda el correo a la persona y al administrador.
  */
 @Injectable({ providedIn: 'root' })
 export class ProspectosService {
-  /** `false` hasta que el formulario guarde de verdad en la base de datos. */
-  readonly conectado = false;
+  private readonly http = inject(HttpClient);
 
   armar(datos: DatosProspecto, paginaOrigen: string): Prospecto {
     return {
@@ -29,8 +31,8 @@ export class ProspectosService {
     };
   }
 
-  async enviar(prospecto: Prospecto): Promise<Prospecto> {
-    // Pendiente: POST a la API de prospectos cuando exista la base de datos.
-    return prospecto;
+  /** Lanza error si el servidor no lo pudo guardar. */
+  async enviar(prospecto: Prospecto): Promise<void> {
+    await firstValueFrom(this.http.post('/api/prospectos', prospecto));
   }
 }

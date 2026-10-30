@@ -259,8 +259,8 @@ fieldset .error {
   accent-color: var(--cm-marca-700);
 }
 
-.correo {
-  margin-top: -10px;
+.contacto .campo .nota {
+  margin-top: 0;
 }
 
 .autoriza {
