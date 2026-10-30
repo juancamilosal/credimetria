@@ -111,6 +111,7 @@
             <th scope="col" class="der" [attr.aria-sort]="ariaSort('cuota')">
               <button type="button" class="orden" (click)="ordenar('cuota')">
                 Cuota estimada <span class="flecha">{{ flecha("cuota") }}</span>
+                <span class="sin-seguros">sin seguros ni gastos</span>
               </button>
             </th>
             <th scope="col" class="der" [attr.aria-sort]="ariaSort('total')">
@@ -136,7 +137,10 @@
             /></span>
           </th>
           @if (completa()) {
-            <th scope="col" class="der">Cuota estimada</th>
+            <th scope="col" class="der">
+              Cuota estimada
+              <span class="sin-seguros">sin seguros ni gastos</span>
+            </th>
             <th scope="col" class="der">Pago total</th>
             <th scope="col"><span class="visualmente-oculto">Acción</span></th>
           }
@@ -375,6 +379,7 @@
           <div class="tarjeta-pie">
             <span class="nota">
               Cuota estimada <b class="cifra">{{ fila.cuota | pesos }}</b>
+              <span class="sin-seguros">(sin seguros ni gastos)</span>
               <span class="total"
                 >Pago total
                 <b class="cifra">{{ fila.total | pesos }}</b> (intereses

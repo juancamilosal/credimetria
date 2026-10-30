@@ -135,8 +135,8 @@
     <span class="solo-escritorio"
       >Toca los títulos de la tabla para ordenar; el embudo de "Tipo" filtra.
     </span>
-    Cuota estimada con {{ monto() | pesos }} a {{ textoPlazo(plazo()) }} ·
-    Promedio de la
+    Cuota estimada con {{ monto() | pesos }} a {{ textoPlazo(plazo()) }}, solo
+    capital e intereses: no incluye seguros ni otros gastos · Promedio de la
     <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
       >{{ fuente.texto }} ↗</a
     >
@@ -199,7 +199,8 @@
       <span class="muted">
         Todo lo que le pagarías a la entidad al terminar: la cuota por el número
         de meses. Lo que pasa del monto prestado son los intereses. No incluye
-        seguros ni otros cargos.
+        seguros (de vida, y en vivienda también de incendio y terremoto),
+        comisiones ni otros gastos, que suben lo que pagas.
       </span>
     </div>
     <div class="tarjeta destacada">

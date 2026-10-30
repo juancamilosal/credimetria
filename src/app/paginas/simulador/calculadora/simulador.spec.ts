@@ -42,6 +42,13 @@ describe('Simulador', () => {
     expect(html.querySelector('.ahorro')?.textContent).toContain('$1.643.800');
   });
 
+  it('aclara que la cuota no incluye seguros ni gastos', () => {
+    const { html } = crear();
+    expect(
+      html.querySelector('.resultado .sin-seguros')?.textContent,
+    ).toContain('Solo capital e intereses: sin seguros ni otros gastos.');
+  });
+
   it('con "Cuota fija" marcada da $648.087, $604.529 y $2.090.784', () => {
     const { fixture, html } = crear();
     marcarCuotaFija(fixture, html);

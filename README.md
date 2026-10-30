@@ -93,6 +93,11 @@ morada y oro del diseño (ver abajo).
   y al administrador (`AVISO_PARA`), con todos los datos y respuesta directa
   a la persona. Máximo 5 solicitudes por IP por hora. Si Directus falla
   responde 503 y no manda correos. Pruebas: `npm run test:servidor`. Usa nodemailer 10 (la 6 tenía fallas al leer direcciones de correo).
+- **La cuota es solo capital e intereses:** el ranking (título "Cuota
+  estimada" con "sin seguros ni gastos", la nota de arriba de la tabla y la
+  tarjeta de celular), el simulador ("Solo capital e intereses: sin seguros
+  ni otros gastos.") y el comparador lo dicen; los seguros de vida (y en
+  vivienda de incendio y terremoto), comisiones y demás gastos no van.
 - **Simular y tabla de amortización** (`paginas/simulador/calculadora/`):
   el botón "Simular" muestra debajo la tabla mes a mes (cuota, intereses,
   abono a capital y saldo, que cierra en $0) con el total de intereses y el

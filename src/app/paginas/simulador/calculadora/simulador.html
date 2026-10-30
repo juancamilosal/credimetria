@@ -159,7 +159,10 @@
           @if (!fija()) {
             Baja cada mes hasta {{ ultimaCuota() | pesos }}.
           }
-          Pagarías en total {{ total() | pesos }}
+          Pagarías en total {{ total() | pesos }}.
+          <span class="sin-seguros"
+            >Solo capital e intereses: sin seguros ni otros gastos.</span
+          >
         } @else {
           Escribe el monto y la tasa para calcular.
         }
@@ -276,8 +279,9 @@
       </table>
     </div>
     <p class="nota">
-      Cálculo aproximado. La cuota real puede incluir seguros y otros cargos que
-      suben lo que pagas.
+      Cálculo aproximado, solo con capital e intereses. La cuota real suma los
+      seguros (de vida, y en vivienda también de incendio y terremoto),
+      comisiones y otros gastos que suben lo que pagas.
     </p>
   </section>
 }

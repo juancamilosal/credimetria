@@ -426,3 +426,17 @@ button {
     animation: none;
   }
 }
+
+/* "sin seguros ni gastos": la cuota que mostramos es solo capital e intereses. */
+.sin-seguros {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--cm-gris);
+}
+.tarjeta-pie .sin-seguros {
+  display: inline;
+  margin-left: 4px;
+}
