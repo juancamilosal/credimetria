@@ -102,13 +102,19 @@
       </div>
     </div>
 
-    <div class="sistema" [class.elegido]="fija()">
+    <div
+      class="sistema"
+      [class.elegido]="fija()"
+      [class.bloqueado]="soloFija()"
+    >
       <label>
         <input
           type="checkbox"
           id="simCuotaFija"
           [checked]="fija()"
-          (change)="fija.set($any($event.target).checked)"
+          [disabled]="soloFija()"
+          [attr.aria-describedby]="soloFija() ? 'notaSoloFija' : null"
+          (change)="fijaElegida.set($any($event.target).checked)"
         />
         <span class="caja" aria-hidden="true"></span>
         Cuota fija
@@ -119,6 +125,11 @@
         [texto]="ayudaCuotaFija"
       />
     </div>
+    @if (soloFija()) {
+      <p class="nota solo-fija" id="notaSoloFija">
+        La libranza siempre es de cuota fija: pagas lo mismo todos los meses.
+      </p>
+    }
 
     @if (superaUsura()) {
       <p class="error" id="avisoUsura">

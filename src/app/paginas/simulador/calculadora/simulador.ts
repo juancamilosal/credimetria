@@ -105,8 +105,14 @@ export class Simulador {
   );
 
   protected readonly ayudaCuotaFija = AYUDA_CUOTA_FIJA;
-  /** Sin marcar, cuota decreciente; marcada, cuota fija (sistema francés). */
-  protected readonly fija = signal(false);
+  /** Lo que marcó la persona: sin marcar, cuota decreciente; marcada, fija. */
+  protected readonly fijaElegida = signal(false);
+  /** La libranza siempre es de cuota fija: la casilla queda marcada y bloqueada. */
+  protected readonly soloFija = computed(() => this.producto() === 'libranza');
+  /** Cuota fija (sistema francés) o decreciente (abono constante a capital). */
+  protected readonly fija = computed(
+    () => this.soloFija() || this.fijaElegida(),
+  );
   protected readonly sistema = computed<SistemaAmortizacion>(() =>
     this.fija() ? 'fija' : 'decreciente',
   );

@@ -96,6 +96,10 @@ morada y oro del diseño (ver abajo).
   3 que menos cobran" usan las tasas de vivienda. **Compara tu oferta**
   también acepta los créditos de vivienda (plazos de 60 a 240 meses, sin
   usura de consumo).
+- **Libranza siempre es cuota fija** (simulador): con libranza, la casilla
+  "Cuota fija" queda marcada y bloqueada, con la nota "La libranza siempre
+  es de cuota fija"; al cambiar de producto vuelve a lo que la persona
+  había marcado (`soloFija`, `fijaElegida`).
 - **Tipo de cuota** (simulador): una sola casilla "Cuota fija", sin marcar.
   Sin marcar, el simulador usa cuota decreciente (abono constante a
   capital); marcada, cuota fija (sistema francés). El botón "?" abre un

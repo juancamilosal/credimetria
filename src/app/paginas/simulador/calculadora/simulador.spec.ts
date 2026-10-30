@@ -148,6 +148,29 @@ describe('Simulador', () => {
       ]);
     });
 
+    it('libranza siempre es cuota fija: la casilla queda marcada y bloqueada', () => {
+      const { fixture, html } = crear();
+      const select = html.querySelector<HTMLSelectElement>('#simProducto')!;
+      select.value = 'libranza';
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      const casilla = html.querySelector<HTMLInputElement>('#simCuotaFija')!;
+      expect(casilla.checked).toBeTrue();
+      expect(casilla.disabled).toBeTrue();
+      expect(html.textContent).toContain(
+        'La libranza siempre es de cuota fija',
+      );
+      expect(html.querySelector('.resultado')?.textContent).toContain(
+        'cuota fija',
+      );
+      // Al volver a libre inversión, la casilla queda como estaba (sin marcar).
+      select.value = 'libre-inversion';
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      expect(casilla.checked).toBeFalse();
+      expect(casilla.disabled).toBeFalse();
+    });
+
     it('al volver a consumo regresa a $20.000.000 a 48 meses', () => {
       const { fixture, html } = crear();
       aVivienda(fixture, html);
