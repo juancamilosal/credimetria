@@ -71,8 +71,9 @@ morada y oro del diseño (ver abajo).
 - **Asesoría corta** (`paginas/asesoria/`): una sola pantalla con lo mínimo
   para que el asesor contacte a la persona: qué crédito le interesa (cuatro
   tarjetas con ícono: Libranza, Libre inversión, Vehículo y Vivienda; en
-  vivienda, debajo, Crédito hipotecario | Leasing habitacional y VIS | No
-  VIS, con textos cortos en celular), monto (opcional, un solo campo con "$"
+  vivienda no se pregunta más: el prospecto dice "vivienda" y el asesor
+  precisa hipotecario o leasing, VIS o No VIS; si llegó del ranking o el
+  simulador con un producto de vivienda exacto, se guarda ese), monto (opcional, un solo campo con "$"
   y puntos de miles), ciudad (un solo campo con sugerencias de las
   principales ciudades, `datalist`), el bloque "Tus datos de
   contacto" (nombres, apellidos, número de celular y canal) y la

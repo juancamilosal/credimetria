@@ -18,8 +18,14 @@ export interface Canales {
  * Lo que la persona llena en el formulario de asesoría: lo mínimo para que
  * un asesor la contacte. Ingresos, reportes y demás los pregunta el asesor.
  */
+/**
+ * Lo que le interesa: un producto o, si eligió "Vivienda" sin más, solo
+ * "vivienda" (el asesor precisa si es hipotecario o leasing, VIS o No VIS).
+ */
+export type ProductoInteres = Producto | 'vivienda';
+
 export interface DatosProspecto {
-  producto: Producto;
+  producto: ProductoInteres;
   /** Monto aproximado; `null` si no lo dijo. */
   monto: number | null;
   ciudad: string;

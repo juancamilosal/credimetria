@@ -16,7 +16,11 @@ import {
 import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
 import { EntradaMoneda } from '../../compartido/entrada-moneda/entrada-moneda';
 import { formatoPesos } from '../../compartido/pipes/formato';
-import { URGENCIAS, Urgencia } from '../../core/modelos/prospecto';
+import {
+  ProductoInteres,
+  URGENCIAS,
+  Urgencia,
+} from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
 import { ProspectosService } from '../../core/servicios/prospectos.service';
 import { TasasService } from '../../core/servicios/tasas.service';
@@ -138,12 +142,13 @@ export class Asesoria {
 
   protected readonly tipos = TIPOS;
   protected readonly ciudades = CIUDADES;
-  /** Tarjeta elegida; en vivienda, además hipotecario o leasing y VIS o No VIS. */
+  /** Tarjeta elegida. */
   protected readonly tipo = signal<TipoCredito | null>(null);
-  protected readonly modalidad = signal<'hipotecario' | 'leasing'>(
-    'hipotecario',
-  );
-  protected readonly vis = signal<'vis' | 'no-vis'>('vis');
+  /**
+   * Producto de vivienda exacto si llegó en el enlace (ranking, simulador):
+   * se guarda sin preguntarlo; si no, el prospecto dice solo "vivienda".
+   */
+  private viviendaDelEnlace: Producto | null = null;
   protected readonly conectado = this.prospectos.conectado;
 
   protected readonly form = this.fb.group(
@@ -194,22 +199,12 @@ export class Asesoria {
     this.actualizarProducto();
   }
 
-  protected elegirModalidad(modalidad: 'hipotecario' | 'leasing'): void {
-    this.modalidad.set(modalidad);
-    this.actualizarProducto();
-  }
-
-  protected elegirVis(vis: 'vis' | 'no-vis'): void {
-    this.vis.set(vis);
-    this.actualizarProducto();
-  }
-
-  /** El producto del prospecto: la tarjeta o, en vivienda, la combinación. */
+  /** El producto del prospecto: el de la tarjeta. */
   private actualizarProducto(): void {
     const tipo = this.tipo();
     const producto =
       tipo === 'vivienda'
-        ? `${this.modalidad() === 'leasing' ? 'leasing' : 'vivienda'}-${this.vis()}`
+        ? (this.viviendaDelEnlace ?? 'vivienda')
         : (tipo ?? '');
     this.form.controls.producto.setValue(producto);
     this.form.controls.producto.markAsTouched();
@@ -227,7 +222,7 @@ export class Asesoria {
     const monto = leerNumero(v.monto);
     const prospecto = this.prospectos.armar(
       {
-        producto: v.producto as Producto,
+        producto: v.producto as ProductoInteres,
         monto: monto > 0 ? monto : null,
         ciudad: v.ciudad.trim(),
         urgencia: this.urgencia,
@@ -260,10 +255,7 @@ export class Asesoria {
       this.form.controls.producto.setValue(producto);
       if (/^(vivienda|leasing)-/.test(producto)) {
         this.tipo.set('vivienda');
-        this.modalidad.set(
-          producto.startsWith('leasing') ? 'leasing' : 'hipotecario',
-        );
-        this.vis.set(producto.endsWith('-no-vis') ? 'no-vis' : 'vis');
+        this.viviendaDelEnlace = producto as Producto;
       } else this.tipo.set(producto as TipoCredito);
     }
     if (monto > 0) {

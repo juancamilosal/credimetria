@@ -46,9 +46,8 @@ describe('Asesoria', () => {
 
   /** Toca el botón con ese texto. */
   function tocar(texto: string) {
-    // Los botones de vivienda traen un texto largo y uno corto (celular).
     const boton = [...html.querySelectorAll<HTMLButtonElement>('button')].find(
-      (b) => (b.querySelector('.largo') ?? b).textContent?.trim() === texto,
+      (b) => b.textContent?.trim() === texto,
     );
     if (!boton) throw new Error(`No hay botón "${texto}"`);
     boton.click();
@@ -144,15 +143,15 @@ describe('Asesoria', () => {
     );
   });
 
-  it('en vivienda se elige hipotecario o leasing, y VIS o No VIS', async () => {
+  it('vivienda no pregunta más: el prospecto dice "vivienda"', async () => {
     crear();
     const enviarProspecto = spyOn(
       TestBed.inject(ProspectosService),
       'enviar',
     ).and.callThrough();
     elegirTipo('Vivienda');
-    tocar('Leasing habitacional');
-    tocar('No VIS');
+    expect(html.querySelector('.segmento')).toBeNull();
+    expect(html.textContent).not.toContain('Leasing habitacional');
     escribir('#asCiudad', 'Pereira');
     escribir('#asNombres', 'Ana');
     escribir('#asApellidos', 'Gómez');
@@ -161,7 +160,7 @@ describe('Asesoria', () => {
     enviar();
     await fixture.whenStable();
     expect(enviarProspecto.calls.mostRecent().args[0].producto).toBe(
-      'leasing-no-vis',
+      'vivienda',
     );
   });
 
@@ -178,15 +177,26 @@ describe('Asesoria', () => {
     );
   });
 
-  it('desde el ranking de vivienda llega con la tarjeta y los filtros', () => {
+  it('desde el ranking de vivienda guarda el producto exacto sin preguntarlo', async () => {
     crear({ producto: 'vivienda-no-vis' });
     expect(html.querySelector('.tipo.elegido .tipo-nombre')?.textContent).toBe(
       'Vivienda',
     );
-    const activos = [...html.querySelectorAll('.segmento button.activo')].map(
-      (b) => (b.querySelector('.largo') ?? b).textContent!.trim(),
+    expect(html.querySelector('.segmento')).toBeNull();
+    const enviarProspecto = spyOn(
+      TestBed.inject(ProspectosService),
+      'enviar',
+    ).and.callThrough();
+    escribir('#asCiudad', 'Cali');
+    escribir('#asNombres', 'Luis');
+    escribir('#asApellidos', 'Pérez');
+    escribir('#asCel', '3109876543');
+    autorizar();
+    enviar();
+    await fixture.whenStable();
+    expect(enviarProspecto.calls.mostRecent().args[0].producto).toBe(
+      'vivienda-no-vis',
     );
-    expect(activos).toEqual(['Crédito hipotecario', 'No VIS']);
   });
 
   it('con lo mínimo envía y guarda la prueba de la autorización', async () => {

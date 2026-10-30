@@ -119,52 +119,6 @@
               </label>
             }
           </div>
-          @if (tipo() === "vivienda") {
-            <div class="vivienda">
-              <div
-                class="segmento"
-                role="group"
-                aria-label="Tipo de crédito de vivienda"
-              >
-                <button
-                  type="button"
-                  [class.activo]="modalidad() === 'hipotecario'"
-                  [attr.aria-pressed]="modalidad() === 'hipotecario'"
-                  (click)="elegirModalidad('hipotecario')"
-                >
-                  <span class="largo">Crédito hipotecario</span
-                  ><span class="corto" aria-hidden="true">Hipotecario</span>
-                </button>
-                <button
-                  type="button"
-                  [class.activo]="modalidad() === 'leasing'"
-                  [attr.aria-pressed]="modalidad() === 'leasing'"
-                  (click)="elegirModalidad('leasing')"
-                >
-                  <span class="largo">Leasing habitacional</span
-                  ><span class="corto" aria-hidden="true">Leasing</span>
-                </button>
-              </div>
-              <div class="segmento" role="group" aria-label="VIS o No VIS">
-                <button
-                  type="button"
-                  [class.activo]="vis() === 'vis'"
-                  [attr.aria-pressed]="vis() === 'vis'"
-                  (click)="elegirVis('vis')"
-                >
-                  VIS
-                </button>
-                <button
-                  type="button"
-                  [class.activo]="vis() === 'no-vis'"
-                  [attr.aria-pressed]="vis() === 'no-vis'"
-                  (click)="elegirVis('no-vis')"
-                >
-                  No VIS
-                </button>
-              </div>
-            </div>
-          }
           @if (mostrarError("producto")) {
             <span class="error" id="errProducto">Elige un crédito.</span>
           }
