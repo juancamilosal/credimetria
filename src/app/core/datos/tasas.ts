@@ -28,12 +28,15 @@ export const esVivienda = (producto: string): boolean =>
 
 /** Plazos (en meses) de los créditos de consumo: hasta 72 meses. */
 export const PLAZOS_CONSUMO = [12, 24, 36, 48, 60, 72];
+/** Plazos de libranza: hasta 120 meses (10 años). */
+export const PLAZOS_LIBRANZA = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120];
 /** Plazos de vivienda (hipotecario y leasing): hasta 240 meses (20 años). */
 export const PLAZOS_VIVIENDA = [60, 120, 180, 240];
 
 /** Los plazos que se ofrecen para un producto. */
 export function plazosDe(producto: string | null | undefined): number[] {
-  return producto && esVivienda(producto) ? PLAZOS_VIVIENDA : PLAZOS_CONSUMO;
+  if (producto && esVivienda(producto)) return PLAZOS_VIVIENDA;
+  return producto === 'libranza' ? PLAZOS_LIBRANZA : PLAZOS_CONSUMO;
 }
 
 /** "48 meses" o "240 meses": el plazo siempre se muestra en meses. */

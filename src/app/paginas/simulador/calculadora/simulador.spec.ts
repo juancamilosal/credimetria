@@ -128,6 +128,26 @@ describe('Simulador', () => {
       expect(html.querySelector('#avisoUsura')).toBeNull();
     });
 
+    it('libranza ofrece plazos hasta 120 meses (10 años)', () => {
+      const { fixture, html } = crear();
+      const select = html.querySelector<HTMLSelectElement>('#simProducto')!;
+      select.value = 'libranza';
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+      expect(opcionesPlazo(html)).toEqual([
+        '12',
+        '24',
+        '36',
+        '48',
+        '60',
+        '72',
+        '84',
+        '96',
+        '108',
+        '120',
+      ]);
+    });
+
     it('al volver a consumo regresa a $20.000.000 a 48 meses', () => {
       const { fixture, html } = crear();
       aVivienda(fixture, html);
