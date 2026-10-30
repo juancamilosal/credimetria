@@ -61,6 +61,18 @@ const POCOS_CREDITOS = 100;
 const SALTO = 2;
 
 const soloMostrar = process.argv.includes("--sin-guardar");
+
+/** Fuentes activas por "entidad:producto" (se piden una vez por corrida). */
+let fuentesActivas = null;
+async function tieneFuente(entidad, producto) {
+  fuentesActivas ??= directus(
+    "GET",
+    "/items/fuentes?filter[estado][_eq]=activa&fields=entidad,producto&limit=-1",
+  )
+    .then((lista) => new Set(lista.map((f) => `${f.entidad}:${f.producto}`)))
+    .catch(() => new Set());
+  return (await fuentesActivas).has(`${entidad}:${producto}`);
+}
 const iProducto = process.argv.indexOf("--producto");
 /** Grupos que se piden juntos en una sola tarea. */
 const GRUPOS = {
@@ -317,8 +329,9 @@ async function main() {
         );
       // Primera vez que reporta este producto (p. ej. Banco de Bogotá en
       // leasing VIS): sale en el ranking con su promedio y falta la tasa que
-      // anuncia.
-      if (tasa !== null && !actual)
+      // anuncia. Si ya tiene fuente (el producto se acaba de abrir, como
+      // vehículo el 30 oct 2026), no hay nada que agregar: no se avisa.
+      if (tasa !== null && !actual && !(await tieneFuente(e.codigo, producto)))
         revisar.push(
           `${NOMBRES[producto]} · ${e.nombre ?? e.codigo}: empezó a reportar créditos (${creditos} en ${SEMANAS} semanas, promedio ${tasa} %). Ya sale en el ranking; revisa si publica su tasa para este producto y agrégale la fuente.`,
         );
