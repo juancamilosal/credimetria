@@ -34,9 +34,8 @@ const MONTOS_RAPIDOS = [5_000_000, 10_000_000, 20_000_000, 50_000_000];
 const CIUDADES = ['Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Bucaramanga'];
 const OTRA = 'Otra';
 
-/** Productos en el orden del formulario: compra de cartera primero. */
+/** Productos en el orden del formulario. */
 const ORDEN_PRODUCTOS: Producto[] = [
-  'compra-cartera',
   'libranza',
   'libre-inversion',
   'vehiculo',

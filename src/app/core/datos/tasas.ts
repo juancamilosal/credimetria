@@ -4,7 +4,6 @@ import { InfoProducto, Producto } from '../modelos/tasa';
 export const PRODUCTOS: InfoProducto[] = [
   { id: 'libre-inversion', nombre: 'Libre inversión' },
   { id: 'libranza', nombre: 'Libranza' },
-  { id: 'compra-cartera', nombre: 'Compra de cartera' },
   { id: 'vehiculo', nombre: 'Vehículo' },
   { id: 'vivienda-vis', nombre: 'Crédito hipotecario VIS' },
   { id: 'vivienda-no-vis', nombre: 'Crédito hipotecario No VIS' },

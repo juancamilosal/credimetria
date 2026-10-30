@@ -2,7 +2,6 @@
 export type Producto =
   | 'libre-inversion'
   | 'libranza'
-  | 'compra-cartera'
   | 'vehiculo'
   | 'vivienda-vis'
   | 'vivienda-no-vis'

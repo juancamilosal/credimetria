@@ -114,36 +114,6 @@ export const TASAS_PRUEBA: TasaEntidad[] = [
     tasaAnunciada: null,
   },
 
-  // Compra de cartera
-  {
-    entidad: 'AV Villas',
-    tipo: 'Banco',
-    producto: 'compra-cartera',
-    tasaReal: 19.8,
-    tasaAnunciada: 14.1,
-  },
-  {
-    entidad: 'Davivienda',
-    tipo: 'Banco',
-    producto: 'compra-cartera',
-    tasaReal: 20.6,
-    tasaAnunciada: 16.9,
-  },
-  {
-    entidad: 'Confiar',
-    tipo: 'Cooperativa',
-    producto: 'compra-cartera',
-    tasaReal: 21.1,
-    tasaAnunciada: 17.5,
-  },
-  {
-    entidad: 'Bancolombia',
-    tipo: 'Banco',
-    producto: 'compra-cartera',
-    tasaReal: 21.7,
-    tasaAnunciada: 17.8,
-  },
-
   // Vehículo
   {
     entidad: 'Banco de Occidente',

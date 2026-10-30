@@ -392,6 +392,10 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   publica la tasa más alta"): la tasa se guarda sin desde y la columna
   Anuncia dice "hasta 24,60 % · solo publica la máxima". La diferencia queda
   en "—" y no lleva "★ Mejor tasa ★".
+- **Productos:** libre inversión, libranza, vehículo y vivienda (hipotecario
+  y leasing, VIS y No VIS). **Compra de cartera se descartó** (30 oct
+  2026): la Superfinanciera no la reporta por separado; la de libranza
+  sigue contando dentro de libranza.
 - **Vivienda** (`vivienda-vis`, `vivienda-no-vis`, `leasing-vis`,
   `leasing-no-vis`; `VIVIENDA` y `esVivienda` en `core/datos/tasas.ts`):
   crédito hipotecario y leasing habitacional, VIS y No VIS, solo en pesos.

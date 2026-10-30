@@ -12,7 +12,7 @@ export const ALIADOS_EJEMPLO: Aliado[] = [
     empresa: 'Fuerza de ventas de ejemplo',
     verificado: true,
     entidades: ['Banco Popular', 'Banco de Occidente'],
-    productos: ['Libranza', 'Compra de cartera'],
+    productos: ['Libranza', 'Libre inversión'],
     ciudades: ['Bogotá', 'Medellín'],
   },
   {
