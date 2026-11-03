@@ -688,34 +688,51 @@
         }
       </select>
     </div>
-    <div class="campo">
-      <label for="tfDesde">Publica desde (%)</label>
-      <input id="tfDesde" inputmode="decimal" formControlName="valor_desde" />
+    <div class="fila-ea ancho">
+      <div class="campo">
+        <label for="tfEaDesde">E.A. desde (%)</label>
+        <input id="tfEaDesde" inputmode="decimal" formControlName="ea_desde" />
+      </div>
+      <div class="campo calcular">
+        <button
+          type="button"
+          class="btn btn-claro"
+          (click)="calcularPublica('desde')"
+        >
+          Calcular
+        </button>
+      </div>
+      <div class="campo">
+        <label for="tfDesde">Publica desde (%)</label>
+        <input id="tfDesde" inputmode="decimal" formControlName="valor_desde" />
+      </div>
+    </div>
+    <div class="fila-ea ancho">
+      <div class="campo">
+        <label for="tfEaHasta">E.A. hasta (%)</label>
+        <input id="tfEaHasta" inputmode="decimal" formControlName="ea_hasta" />
+      </div>
+      <div class="campo calcular">
+        <button
+          type="button"
+          class="btn btn-claro"
+          (click)="calcularPublica('hasta')"
+        >
+          Calcular
+        </button>
+      </div>
+      <div class="campo">
+        <label for="tfHasta">Publica hasta (%)</label>
+        <input id="tfHasta" inputmode="decimal" formControlName="valor_hasta" />
+      </div>
     </div>
     <div class="campo">
-      <label for="tfHasta">Hasta (%)</label>
-      <input id="tfHasta" inputmode="decimal" formControlName="valor_hasta" />
-    </div>
-    <div class="campo">
-      <label for="tfUnidad">Unidad</label>
+      <label for="tfUnidad">Unidad que publica</label>
       <select id="tfUnidad" formControlName="unidad">
         @for (u of unidades; track u.id) {
           <option [value]="u.id">{{ u.texto }}</option>
         }
       </select>
-    </div>
-    <div class="campo">
-      <label for="tfEaDesde">E.A. desde (%)</label>
-      <input id="tfEaDesde" inputmode="decimal" formControlName="ea_desde" />
-    </div>
-    <div class="campo">
-      <label for="tfEaHasta">E.A. hasta (%)</label>
-      <input id="tfEaHasta" inputmode="decimal" formControlName="ea_hasta" />
-    </div>
-    <div class="campo calcular">
-      <button type="button" class="btn btn-claro" (click)="calcularEa()">
-        Calcular E.A.
-      </button>
     </div>
     <div class="campo">
       <label for="tfOrigen">El "hasta"</label>

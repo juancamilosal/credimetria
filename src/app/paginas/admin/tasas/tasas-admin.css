@@ -415,6 +415,23 @@ blockquote {
   min-height: 48px;
 }
 
+/* E.A. desde / hasta, su botón "Calcular" y la tasa que publica el banco */
+.fila-ea {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) auto minmax(140px, 1fr);
+  gap: 12px 14px;
+  align-items: end;
+}
+
+@media (max-width: 520px) {
+  .fila-ea {
+    grid-template-columns: 1fr auto;
+  }
+  .fila-ea > :last-child {
+    grid-column: 1 / -1;
+  }
+}
+
 /* Los dos PDF lado a lado, encima de todo */
 .comparar {
   position: fixed;

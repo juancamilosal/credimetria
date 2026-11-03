@@ -409,14 +409,28 @@ describe('TasasAdmin', () => {
       .find((b) => b.textContent!.trim() === 'Editar')!
       .click();
     fixture.detectChanges();
-    const desde = bbva.querySelector<HTMLInputElement>('#tfDesde')!;
-    desde.value = '1,25';
-    desde.dispatchEvent(new Event('input'));
-    boton(bbva, 'Calcular E.A.').click();
-    fixture.detectChanges();
-    expect(bbva.querySelector<HTMLInputElement>('#tfEaDesde')!.value).toBe(
-      '16,08',
+    // La E.A. va primero y la mensual que publica se calcula sola.
+    const campos = [...bbva.querySelectorAll('.formulario input')].map(
+      (i) => i.id,
     );
+    expect(campos.indexOf('tfEaDesde')).toBeLessThan(campos.indexOf('tfDesde'));
+    expect(campos.indexOf('tfEaDesde')).toBeLessThan(
+      campos.indexOf('tfEaHasta'),
+    );
+    const eaDesde = bbva.querySelector<HTMLInputElement>('#tfEaDesde')!;
+    eaDesde.value = '16,08';
+    eaDesde.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(bbva.querySelector<HTMLInputElement>('#tfDesde')!.value).toBe(
+      '1,25',
+    );
+    // "Calcular" lo vuelve a sacar de la E.A. si se tocó la mensual.
+    const desde = bbva.querySelector<HTMLInputElement>('#tfDesde')!;
+    desde.value = '9';
+    desde.dispatchEvent(new Event('input'));
+    boton(bbva, 'Calcular').click();
+    fixture.detectChanges();
+    expect(desde.value).toBe('1,25');
     bbva.querySelector<HTMLFormElement>('.formulario')!.requestSubmit();
     await esperar();
     expect(admin.guardar).toHaveBeenCalledWith(
