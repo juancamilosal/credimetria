@@ -415,21 +415,21 @@ blockquote {
   min-height: 48px;
 }
 
-/* E.A. desde / hasta, su botón "Calcular" y la tasa que publica el banco */
+/* E.A. desde / hasta, la tasa que publica el banco y, debajo, "Calcular" */
 .fila-ea {
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) auto minmax(140px, 1fr);
-  gap: 12px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
   align-items: end;
 }
 
-@media (max-width: 520px) {
-  .fila-ea {
-    grid-template-columns: 1fr auto;
-  }
-  .fila-ea > :last-child {
-    grid-column: 1 / -1;
-  }
+.calcular-ea {
+  grid-column: 1 / -1;
+}
+
+.calcular-ea .btn {
+  min-height: 40px;
+  padding-inline: 16px;
 }
 
 /* Los dos PDF lado a lado, encima de todo */
