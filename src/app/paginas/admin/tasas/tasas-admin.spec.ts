@@ -131,6 +131,8 @@ describe('TasasAdmin', () => {
       'unirDocumento',
       'eliminar',
       'restaurar',
+      'usura',
+      'guardarUsura',
     ]);
     docs = jasmine.createSpyObj<DocumentosAdminService>(
       'DocumentosAdminService',
@@ -148,6 +150,7 @@ describe('TasasAdmin', () => {
       ],
     );
     admin.listar.and.resolveTo(lista);
+    admin.usura.and.resolveTo({ tasa: 28.59, mes: '2026-10-01' });
     docs.entidades.and.resolveTo([
       BBVA,
       { codigo: 'davivienda', nombre: 'Davivienda', logo: null },
@@ -438,7 +441,7 @@ describe('TasasAdmin', () => {
     hasta.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     expect(bbva.querySelector<HTMLInputElement>('#tfEaHasta')!.value).toBe(
-      '28,6',
+      '28,60',
     );
     bbva.querySelector<HTMLFormElement>('.formulario')!.requestSubmit();
     await esperar();
@@ -749,6 +752,63 @@ describe('TasasAdmin', () => {
     expect(nombres().length).toBe(2);
   });
 
+  it('"Máximo de usura" muestra la del mes y la cambia para todos', async () => {
+    await crear();
+    const seccion = html.querySelector('.usura')!;
+    expect(seccion.querySelector('h2')!.textContent).toContain(
+      'Máximo de usura',
+    );
+    expect(seccion.textContent).toContain('28,59 % E.A.');
+    expect(seccion.textContent).toContain('2,12 % M.V.');
+    expect(seccion.textContent).toContain('octubre de 2026');
+    const cambiada = { ...porAprobar, hasta_origen: 'usura' as const };
+    admin.guardarUsura.and.resolveTo([
+      { ...cambiada, ea_hasta: 28.34, valor_hasta: 2.1 },
+    ]);
+    boton(seccion, 'Cambiar usura').click();
+    fixture.detectChanges();
+    const tasa = seccion.querySelector<HTMLInputElement>('#usTasa')!;
+    expect(tasa.value).toBe('28,59');
+    tasa.value = '28,34';
+    tasa.dispatchEvent(new Event('input'));
+    const mes = seccion.querySelector<HTMLInputElement>('#usMes')!;
+    mes.value = '2026-11';
+    mes.dispatchEvent(new Event('input'));
+    seccion.querySelector<HTMLFormElement>('.usura-form')!.requestSubmit();
+    await esperar();
+    expect(admin.guardarUsura).toHaveBeenCalledWith(
+      { tasa: 28.34, mes: '2026-11-01' },
+      jasmine.any(Array),
+    );
+    expect(seccion.textContent).toContain('28,34 % E.A.');
+    expect(seccion.textContent).toContain('2,10 % M.V.');
+    expect(seccion.textContent).toContain('noviembre de 2026');
+    expect(html.querySelector('.aviso-ok')!.textContent).toContain(
+      'Se actualizó el "hasta" de 1 tasa',
+    );
+  });
+
+  it('los números del formulario van siempre con 2 decimales', async () => {
+    await crear();
+    const bbva = html.querySelector('.banco')!;
+    [...bbva.querySelectorAll<HTMLButtonElement>('button')]
+      .find((b) => b.textContent!.trim() === 'Editar')!
+      .click();
+    fixture.detectChanges();
+    const ea = bbva.querySelector<HTMLInputElement>('#tfEaDesde')!;
+    ea.value = '18';
+    ea.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(bbva.querySelector<HTMLInputElement>('#tfDesde')!.value).toBe(
+      '1,39',
+    );
+    const mv = bbva.querySelector<HTMLInputElement>('#tfDesde')!;
+    mv.value = '1,2';
+    mv.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    expect(ea.value).toBe('15,39');
+  });
+
   it('lee decimales con coma o punto', () => {
     expect(leerDecimal('1,3')).toBe(1.3);
     expect(leerDecimal('16.77 %')).toBe(16.77);
@@ -777,7 +837,7 @@ describe('TasasAdmin', () => {
     boton(bbva, 'Usar tope de usura').click();
     fixture.detectChanges();
     expect(bbva.querySelector<HTMLInputElement>('#tfHasta')!.value).toBe(
-      '2,118',
+      '2,12',
     );
     expect(bbva.querySelector<HTMLInputElement>('#tfEaHasta')!.value).toBe(
       '28,59',
@@ -790,7 +850,7 @@ describe('TasasAdmin', () => {
     expect(admin.guardar).toHaveBeenCalledWith(
       2,
       jasmine.objectContaining({
-        valor_hasta: 2.118,
+        valor_hasta: 2.12,
         ea_hasta: 28.59,
         hasta_origen: 'usura',
       }),

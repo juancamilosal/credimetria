@@ -5,6 +5,57 @@
   gap: 16px;
 }
 
+/* Máximo de usura: el tope del mes, editable */
+.usura {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  background: var(--cm-fondo);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-tarjeta);
+}
+
+.usura h2 {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cm-gris);
+  margin-bottom: 4px;
+}
+
+.usura .cifra {
+  font-size: 22px;
+}
+
+.usura-dato {
+  flex: 1 1 280px;
+}
+
+.usura-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.usura-form .campo {
+  width: 150px;
+}
+
+.usura-form .campo:has(input[type="month"]) {
+  width: 190px;
+}
+
+.usura-form .acciones {
+  display: flex;
+  gap: 8px;
+}
+
 .barra {
   display: flex;
   flex-wrap: wrap;

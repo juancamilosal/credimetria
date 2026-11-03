@@ -9,7 +9,7 @@ import {
   TransferState,
 } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { PRODUCTOS } from '../datos/tasas';
+import { PRODUCTOS, Usura, USURA_CONSUMO } from '../datos/tasas';
 import {
   CorteTasas,
   InfoProducto,
@@ -28,6 +28,8 @@ export const TASAS_INICIALES = new InjectionToken<{
 export interface DatosTasas {
   corte: CorteTasas;
   tasas: TasaEntidad[];
+  /** La usura del mes (la de Directus; sin ella, la de `usura.json`). */
+  usura?: Usura;
 }
 
 /**
@@ -63,6 +65,8 @@ export class TasasService {
       ejemplo: false,
     },
   );
+  /** Tasa de usura del mes: la del admin ("Máximo de usura"). */
+  readonly usura = signal<Usura>(USURA_CONSUMO);
   /** Todavía se están trayendo las tasas (la tabla muestra el esqueleto). */
   readonly cargando = signal(!this.iniciales);
   /** No se pudieron leer las tasas. */
@@ -114,6 +118,7 @@ export class TasasService {
       }
       this.todas.set(datos.tasas);
       this.corte.set(datos.corte);
+      if (datos.usura) this.usura.set(datos.usura);
       this.sinConexion.set(false);
     } catch {
       this.sinConexion.set(true);

@@ -133,7 +133,9 @@
 
     @if (superaUsura()) {
       <p class="error" id="avisoUsura">
-        Esa tasa supera la de usura de {{ usura.mes }} ({{ usura.tasa | tasa }}
+        Esa tasa supera la de usura de {{ usura().mes }} ({{
+          usura().tasa | tasa
+        }}
         E.A.). Ninguna entidad puede cobrarla: revisa el dato.
       </p>
     }

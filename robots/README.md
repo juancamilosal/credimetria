@@ -233,10 +233,11 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
   encontró), lo leído no tiene sentido, o hay una tasa nueva por aprobar.
   El robot del promedio también avisa si falla, si un banco no reportó o si
   el promedio saltó más de 2 puntos.
-- **Usura:** el "hasta" de los bancos que no publican máxima es la usura de
-  `src/app/core/datos/usura.json` (la misma que usa la página). **Hay que
-  actualizarla cada mes**; si no, el robot rechaza tasas por encima de la
-  usura vieja.
+- **Usura:** el "hasta" de los bancos que no publican máxima es la usura
+  del mes que se pone en `/admin/tasas` → "Máximo de usura" (colección
+  `usura` de Directus, que el usuario Robot solo lee; `comun/usura.mjs`).
+  Si Directus no responde, usa `src/app/core/datos/usura.json`. Si la
+  usura del admin está vieja, el robot rechaza tasas por encima de ella.
 - **Sin navegador:** pide el PDF como un navegador (sin Playwright). Si un
   banco lo bloquea, llega el correo de "no encontré el PDF" y se carga a
   mano en `/admin/tasas`.

@@ -188,7 +188,7 @@
                 }
                 @if (mensaje.usura !== null) {
                   <div class="fila">
-                    <dt>Tasa de usura de {{ mesUsura }}</dt>
+                    <dt>Tasa de usura de {{ mesUsura() }}</dt>
                     <dd class="cifra">{{ mensaje.usura | tasa }} E.A.</dd>
                   </div>
                 }

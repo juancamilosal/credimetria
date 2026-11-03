@@ -4,6 +4,7 @@
 //
 // Variables: DIRECTUS_TOKEN (obligatoria) y DIRECTUS_URL (opcional).
 
+import USURA_RESPALDO from "../src/app/core/datos/usura.json" with { type: "json" };
 import { cargarEnv } from "./env.mjs";
 
 // En desarrollo (`npm start`) la parte de la página que se arma en el
@@ -50,6 +51,39 @@ const VIVIENDA = [
 
 const numero = (v) => (v === null || v === undefined ? null : Number(v));
 
+const MESES = [
+  "enero",
+  "febrero",
+  "marzo",
+  "abril",
+  "mayo",
+  "junio",
+  "julio",
+  "agosto",
+  "septiembre",
+  "octubre",
+  "noviembre",
+  "diciembre",
+];
+
+/**
+ * La usura del mes de la colección `usura` de Directus (la cambia el admin
+ * en "Máximo de usura"): E.A., su mensual con 2 decimales y el mes en
+ * palabras. Sin dato, la de `usura.json`.
+ */
+export function usuraDe(fila) {
+  const tasa = numero(fila?.tasa_ea);
+  const [anio, mes] = String(fila?.mes ?? "")
+    .split("-")
+    .map(Number);
+  if (tasa === null || !anio || !mes) return USURA_RESPALDO;
+  return {
+    tasa,
+    mv: +((Math.pow(1 + tasa / 100, 1 / 12) - 1) * 100).toFixed(2),
+    mes: `${MESES[mes - 1]} de ${anio}`,
+  };
+}
+
 /**
  * Enlace de una tasa publicada: la página de tasas del banco (`url_indice`
  * de su fuente, o la página de donde se leyó) y, si no hay, el PDF.
@@ -89,30 +123,42 @@ async function soloPromedio() {
 }
 
 async function leer() {
-  const [publicadas, promedios, sinTasa, entidadesVivienda, fuentesVivienda] =
-    await Promise.all([
-      pedir(
-        "/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1" +
-          "&fields=producto,ea_desde,ea_hasta,hasta_origen,vigente_desde,enlace,enlace_es_pagina," +
-          "entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,fuente.*",
-      ).then((r) => r.json()),
-      pedir(
-        "/items/tasas_promedio?limit=-1&fields=entidad,producto,tasa_ea,corte",
-      ).then((r) => r.json()),
-      soloPromedio(),
-      pedir(
-        "/items/entidades?filter[activa][_eq]=true&limit=-1&fields=codigo,nombre,tipo,logo,activa",
-      )
-        .then((r) => r.json())
-        .then((r) => r.data)
-        .catch(() => []),
-      pedir(
-        `/items/fuentes?filter[estado][_eq]=activa&filter[producto][_in]=${VIVIENDA.join(",")}&limit=-1&fields=entidad,producto`,
-      )
-        .then((r) => r.json())
-        .then((r) => r.data)
-        .catch(() => []),
-    ]);
+  const [
+    publicadas,
+    promedios,
+    sinTasa,
+    entidadesVivienda,
+    fuentesVivienda,
+    usura,
+  ] = await Promise.all([
+    pedir(
+      "/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1" +
+        "&fields=producto,ea_desde,ea_hasta,hasta_origen,vigente_desde,enlace,enlace_es_pagina," +
+        "entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,fuente.*",
+    ).then((r) => r.json()),
+    pedir(
+      "/items/tasas_promedio?limit=-1&fields=entidad,producto,tasa_ea,corte",
+    ).then((r) => r.json()),
+    soloPromedio(),
+    pedir(
+      "/items/entidades?filter[activa][_eq]=true&limit=-1&fields=codigo,nombre,tipo,logo,activa",
+    )
+      .then((r) => r.json())
+      .then((r) => r.data)
+      .catch(() => []),
+    pedir(
+      `/items/fuentes?filter[estado][_eq]=activa&filter[producto][_in]=${VIVIENDA.join(",")}&limit=-1&fields=entidad,producto`,
+    )
+      .then((r) => r.json())
+      .then((r) => r.data)
+      .catch(() => []),
+    // Si el Lector web no puede leer la usura, la página sigue con la del
+    // archivo.
+    pedir("/items/usura?fields=tasa_ea,mes")
+      .then((r) => r.json())
+      .then((r) => usuraDe(r.data))
+      .catch(() => USURA_RESPALDO),
+  ]);
   const idsLogo = new Map();
   const tasas = [];
   for (const p of publicadas.data) {
@@ -226,6 +272,7 @@ async function leer() {
         ejemplo: false,
       },
       tasas,
+      usura,
     },
     logos: idsLogo,
   };

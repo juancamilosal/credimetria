@@ -6,6 +6,7 @@ import { isPlatformBrowser } from '@angular/common';
 import {
   afterNextRender,
   Component,
+  computed,
   ElementRef,
   inject,
   Injector,
@@ -20,12 +21,7 @@ import {
   PesosPipe,
   TasaPipe,
 } from '../../compartido/pipes/formato';
-import {
-  esVivienda,
-  plazosDe,
-  textoPlazo,
-  USURA_CONSUMO,
-} from '../../core/datos/tasas';
+import { esVivienda, plazosDe, textoPlazo } from '../../core/datos/tasas';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
 import { TasasService } from '../../core/servicios/tasas.service';
@@ -114,7 +110,7 @@ export class ComparaOferta {
 
   protected readonly corte = this.tasas.corte;
   protected readonly textoPlazo = textoPlazo;
-  protected readonly mesUsura = USURA_CONSUMO.mes;
+  protected readonly mesUsura = computed(() => this.tasas.usura().mes);
   protected readonly mensajes = signal<Mensaje[]>([]);
   protected readonly zona = signal<Zona>({ tipo: 'nada' });
   protected readonly valorEntrada = signal('');
@@ -318,7 +314,7 @@ export class ComparaOferta {
   private mostrarResultado(ejemplo = false): void {
     const datos = this.datos as DatosOferta;
     // La usura de consumo no aplica a vivienda, que tiene su propio límite.
-    const usura = esVivienda(datos.producto) ? null : USURA_CONSUMO.tasa;
+    const usura = esVivienda(datos.producto) ? null : this.tasas.usura().tasa;
     const resultado = calcularOferta(
       datos,
       this.tasas.mejor(datos.producto),

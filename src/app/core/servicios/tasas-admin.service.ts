@@ -1,7 +1,17 @@
 import { inject, Injectable } from '@angular/core';
 import { DocumentoPdf, FuenteAdmin } from '../modelos/documento';
 import { CambiosTasa, EstadoTasa, TasaAdmin } from '../modelos/tasa-admin';
+import { esVivienda } from '../datos/tasas';
+import { tasaMensual } from '../utilidades/credito';
 import { SesionAdmin } from './sesion-admin.service';
+
+/** La usura guardada en Directus (colección `usura`, un solo registro). */
+export interface UsuraAdmin {
+  /** E.A. en porcentaje (28.34). */
+  tasa: number;
+  /** Primer día del mes: "2026-11-01". */
+  mes: string;
+}
 
 const CAMPOS_TASA = [
   'id',
@@ -100,6 +110,51 @@ export class TasasAdminService {
   /** Borra una tasa (por ejemplo, una publicada con un PDF equivocado). */
   async eliminar(id: number): Promise<void> {
     await this.sesion.pedir('DELETE', `/items/tasas_publicadas/${id}`);
+  }
+
+  /** La usura del mes; `null` si todavía no hay. */
+  async usura(): Promise<UsuraAdmin | null> {
+    const fila = await this.sesion.pedir<{
+      tasa_ea: string | number | null;
+      mes: string | null;
+    } | null>('GET', '/items/usura?fields=tasa_ea,mes');
+    if (!fila || fila.tasa_ea === null || !fila.mes) return null;
+    return { tasa: Number(fila.tasa_ea), mes: fila.mes.slice(0, 10) };
+  }
+
+  /**
+   * Guarda la usura nueva y la pone de "hasta" en las tasas que usan el tope
+   * de usura (publicadas y por aprobar; en vivienda no aplica). Devuelve las
+   * tasas cambiadas.
+   */
+  async guardarUsura(
+    usura: UsuraAdmin,
+    tasas: TasaAdmin[],
+  ): Promise<TasaAdmin[]> {
+    await this.sesion.pedir('PATCH', '/items/usura', {
+      tasa_ea: usura.tasa,
+      mes: usura.mes,
+    });
+    const mensual = +(tasaMensual(usura.tasa) * 100).toFixed(2);
+    const cambios = tasas
+      .filter(
+        (t) =>
+          t.hasta_origen === 'usura' &&
+          (t.estado === 'publicada' || t.estado === 'por_revisar') &&
+          !esVivienda(t.producto),
+      )
+      .map((t) => ({
+        id: t.id,
+        ea_hasta: usura.tasa,
+        valor_hasta: t.unidad === 'EA' ? usura.tasa : mensual,
+      }));
+    if (!cambios.length) return [];
+    const cambiadas = await this.sesion.pedir<TasaAdmin[]>(
+      'PATCH',
+      `/items/tasas_publicadas?fields=${CAMPOS_TASA}`,
+      cambios,
+    );
+    return cambiadas.map(leerTasa);
   }
 
   guardar(id: number, cambios: CambiosTasa): Promise<TasaAdmin> {

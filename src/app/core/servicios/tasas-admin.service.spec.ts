@@ -40,4 +40,50 @@ describe('TasasAdminService', () => {
     expect(pedir.calls.mostRecent().args[2].revisada_por).toBe('u1');
     expect(aprobada.valor_desde).toBe(1.77);
   });
+
+  it('al guardar la usura pone el "hasta" nuevo solo donde es el tope', async () => {
+    const pedir = jasmine
+      .createSpy('pedir')
+      .and.callFake(async (_m: string, ruta: string, cuerpo: unknown) =>
+        ruta.startsWith('/items/tasas_publicadas')
+          ? (cuerpo as object[]).map((c) => ({ ...c, ea_desde: '20.0000' }))
+          : null,
+      );
+    TestBed.configureTestingModule({
+      providers: [{ provide: SesionAdmin, useValue: { pedir } }],
+    });
+    const servicio = TestBed.inject(TasasAdminService);
+    const tasa = (cambios: Partial<TasaAdmin>) =>
+      ({
+        producto: 'libranza',
+        hasta_origen: 'usura',
+        estado: 'publicada',
+        unidad: 'MV',
+        ...cambios,
+      }) as TasaAdmin;
+    const tasas = [
+      tasa({ id: 1 }),
+      tasa({ id: 2, estado: 'por_revisar', unidad: 'EA' }),
+      tasa({ id: 3, hasta_origen: 'entidad' }),
+      tasa({ id: 4, estado: 'anterior' }),
+      tasa({ id: 5, producto: 'vivienda-vis' }),
+    ];
+
+    const cambiadas = await servicio.guardarUsura(
+      { tasa: 28.34, mes: '2026-11-01' },
+      tasas,
+    );
+
+    expect(pedir.calls.argsFor(0)).toEqual([
+      'PATCH',
+      '/items/usura',
+      { tasa_ea: 28.34, mes: '2026-11-01' },
+    ]);
+    expect(pedir.calls.argsFor(1)[2]).toEqual([
+      { id: 1, ea_hasta: 28.34, valor_hasta: 2.1 },
+      { id: 2, ea_hasta: 28.34, valor_hasta: 28.34 },
+    ]);
+    expect(cambiadas.map((t) => t.id)).toEqual([1, 2]);
+    expect(cambiadas[0].ea_desde).toBe(20);
+  });
 });

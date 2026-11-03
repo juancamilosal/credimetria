@@ -44,12 +44,21 @@ export function textoPlazo(meses: number): string {
   return `${meses} meses`;
 }
 
+/** Tasa de usura: E.A., su mensual (2 decimales) y el mes en palabras. */
+export interface Usura {
+  tasa: number;
+  mv: number;
+  mes: string;
+}
+
 /**
  * Tasa de usura del mes para crédito de consumo ordinario (certificada por
- * la Superfinanciera). Ninguna entidad puede cobrar más. Se actualiza cada
- * mes en `usura.json`, que también lee el robot de los PDF.
+ * la Superfinanciera). Ninguna entidad puede cobrar más. La de verdad la
+ * cambia el admin en "Máximo de usura" (colección `usura` de Directus) y
+ * llega con las tasas (`TasasService.usura`); esta, de `usura.json`, es el
+ * respaldo si Directus no responde.
  */
-export const USURA_CONSUMO: { tasa: number; mv: number; mes: string } = usura;
+export const USURA_CONSUMO: Usura = usura;
 
 /**
  * De dónde sale la tasa "Cobra en promedio": el reporte semanal de tasas

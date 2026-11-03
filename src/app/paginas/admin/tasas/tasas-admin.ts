@@ -35,7 +35,10 @@ import {
   mensajeError,
   SesionAdmin,
 } from '../../../core/servicios/sesion-admin.service';
-import { TasasAdminService } from '../../../core/servicios/tasas-admin.service';
+import {
+  TasasAdminService,
+  UsuraAdmin,
+} from '../../../core/servicios/tasas-admin.service';
 import { TasasService } from '../../../core/servicios/tasas.service';
 import { esVivienda, USURA_CONSUMO } from '../../../core/datos/tasas';
 import {
@@ -60,9 +63,9 @@ export function leerDecimal(texto: string): number | null {
   return Number.isFinite(valor) ? valor : null;
 }
 
-/** 1.3 → "1,3" para escribir en un campo. */
+/** 1.3 → "1,30" para escribir en un campo: siempre 2 decimales. */
 function escribirDecimal(valor: number | null): string {
-  return valor === null ? '' : String(+valor.toFixed(4)).replace('.', ',');
+  return valor === null ? '' : valor.toFixed(2).replace('.', ',');
 }
 
 /** El PDF que se muestra: la copia resaltada si la hay, si no el original. */
@@ -152,6 +155,22 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected readonly cargando = signal(true);
   protected readonly error = signal('');
   protected readonly aviso = signal('');
+  /**
+   * La usura del mes ("Máximo de usura"): la de Directus; mientras no llega,
+   * la de `usura.json`.
+   */
+  protected readonly usura = signal<UsuraAdmin>({
+    tasa: USURA_CONSUMO.tasa,
+    mes: '',
+  });
+  protected readonly usuraMensual = computed(
+    () => +(tasaMensual(this.usura().tasa) * 100).toFixed(2),
+  );
+  protected readonly editandoUsura = signal(false);
+  protected readonly formUsura = inject(FormBuilder).nonNullable.group({
+    tasa: [''],
+    mes: [''],
+  });
   /** Qué tarjetas se ven: todas, las que esperan aprobación o las por cargar. */
   protected readonly vista = signal<'todos' | 'aprobar' | 'cargar'>('todos');
   /** Texto del buscador por nombre de entidad. */
@@ -315,6 +334,59 @@ export class TasasAdmin implements OnInit, OnDestroy {
     } finally {
       this.cargando.set(false);
     }
+    try {
+      const usura = await this.admin.usura();
+      if (usura) this.usura.set(usura);
+    } catch {
+      // Sin la usura de Directus queda la del archivo.
+    }
+  }
+
+  /** "noviembre de 2026" para el mes "2026-11-01". */
+  protected mesUsura(mes: string): string {
+    return mes
+      ? formatDate(mes + 'T12:00:00', "MMMM 'de' y", this.locale)
+      : 'sin mes';
+  }
+
+  protected abrirUsura(): void {
+    const u = this.usura();
+    this.formUsura.reset({
+      tasa: escribirDecimal(u.tasa),
+      mes: u.mes.slice(0, 7),
+    });
+    this.editandoUsura.set(true);
+  }
+
+  /**
+   * Guarda la usura nueva para todos: la página, el simulador, el robot y
+   * las tasas que la usan de "hasta".
+   */
+  protected async guardarUsura(): Promise<void> {
+    const v = this.formUsura.getRawValue();
+    const tasa = leerDecimal(v.tasa);
+    if (
+      tasa === null ||
+      tasa <= 0 ||
+      tasa >= 100 ||
+      !/^\d{4}-\d{2}$/.test(v.mes)
+    ) {
+      this.error.set('Escribe la usura E.A. (por ejemplo 28,34) y el mes.');
+      return;
+    }
+    const usura = { tasa: +tasa.toFixed(2), mes: `${v.mes}-01` };
+    await this.trabajar('usura', async () => {
+      const cambiadas = await this.admin.guardarUsura(usura, this.tasas());
+      this.usura.set(usura);
+      for (const t of cambiadas) this.reemplazar(t);
+      this.editandoUsura.set(false);
+      this.aviso.set(
+        `Usura de ${this.mesUsura(usura.mes)} guardada: ${formatoTasa(usura.tasa)} E.A.` +
+          (cambiadas.length
+            ? ` Se actualizó el "hasta" de ${cambiadas.length} ${cambiadas.length === 1 ? 'tasa' : 'tasas'} que usan el tope de usura.`
+            : ''),
+      );
+    });
   }
 
   ngOnDestroy(): void {
@@ -498,7 +570,6 @@ export class TasasAdmin implements OnInit, OnDestroy {
     return unidad ? UNIDAD_TEXTO[unidad] : 'Publica';
   }
 
-  protected readonly usura = USURA_CONSUMO;
   protected readonly esVivienda = esVivienda;
 
   /**
@@ -507,16 +578,14 @@ export class TasasAdmin implements OnInit, OnDestroy {
    */
   protected usarUsura(): void {
     const { unidad } = this.form.getRawValue();
-    const mensual = +(tasaMensual(USURA_CONSUMO.tasa) * 100).toFixed(3);
+    const { tasa } = this.usura();
+    const mensual = +(tasaMensual(tasa) * 100).toFixed(2);
     this.form.patchValue(
       {
-        valor_hasta: escribirDecimal(
-          unidad === 'EA' ? USURA_CONSUMO.tasa : mensual,
-        ),
-        ea_hasta: escribirDecimal(USURA_CONSUMO.tasa),
+        valor_hasta: escribirDecimal(unidad === 'EA' ? tasa : mensual),
+        ea_hasta: escribirDecimal(tasa),
         hasta_origen: 'usura',
       },
-      // La mensual de la usura va con 3 decimales, sin recalcular.
       { emitEvent: false },
     );
   }

@@ -43,6 +43,7 @@ import { directus, hayToken, subirArchivo } from "./comun/directus.mjs";
 import * as navegador from "./comun/pantallazo.mjs";
 import * as pdf from "./comun/pdf.mjs";
 import { pendienteDelMes } from "./comun/mes.mjs";
+import { leerUsura } from "./comun/usura.mjs";
 import { cifrasPublicadas, resaltarPdf } from "./comun/resaltar.mjs";
 import {
   masReciente,
@@ -52,12 +53,8 @@ import {
   revisar,
 } from "./reglas.mjs";
 
-const USURA = JSON.parse(
-  await readFile(
-    new URL("../src/app/core/datos/usura.json", import.meta.url),
-    "utf8",
-  ),
-);
+// La del admin ("Máximo de usura"); si Directus no responde, usura.json.
+const USURA = await leerUsura();
 const soloMirar = process.argv.includes("--sin-guardar");
 // --hoy AAAA-MM-DD simula la fecha (para probar los recordatorios); solo
 // cambia qué se avisa, no las fechas que se guardan.

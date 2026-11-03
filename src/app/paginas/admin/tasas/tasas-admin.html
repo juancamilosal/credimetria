@@ -4,6 +4,60 @@
 />
 
 <div class="wrap contenido">
+  <section class="usura" aria-labelledby="tituloUsura">
+    <div class="usura-dato">
+      <h2 id="tituloUsura">Máximo de usura</h2>
+      <p>
+        <b class="cifra">{{ usura().tasa | tasa }} E.A.</b>
+        <span class="muted">
+          ({{ usuraMensual() | tasa }} M.V.) · {{ mesUsura(usura().mes) }}
+        </span>
+      </p>
+      <p class="nota">
+        Tope de la Superfinanciera para crédito de consumo. Lo usan la página,
+        el simulador, Compara tu oferta, el robot y las tasas cuyo "hasta" es la
+        usura.
+      </p>
+    </div>
+    @if (editandoUsura()) {
+      <form
+        class="usura-form"
+        [formGroup]="formUsura"
+        (ngSubmit)="guardarUsura()"
+        novalidate
+      >
+        <div class="campo">
+          <label for="usTasa">Usura E.A. (%)</label>
+          <input id="usTasa" inputmode="decimal" formControlName="tasa" />
+        </div>
+        <div class="campo">
+          <label for="usMes">Mes</label>
+          <input id="usMes" type="month" formControlName="mes" />
+        </div>
+        <div class="acciones">
+          <button
+            type="submit"
+            class="btn btn-principal"
+            [disabled]="ocupado() !== null"
+          >
+            Guardar
+          </button>
+          <button
+            type="button"
+            class="btn btn-borde"
+            (click)="editandoUsura.set(false)"
+          >
+            Cancelar
+          </button>
+        </div>
+      </form>
+    } @else {
+      <button type="button" class="btn btn-borde" (click)="abrirUsura()">
+        Cambiar usura
+      </button>
+    }
+  </section>
+
   <div class="barra">
     <div class="filtros" role="group" aria-label="Mostrar">
       <button
@@ -726,7 +780,7 @@
     @if (!esVivienda(c.producto)) {
       <div class="campo calcular">
         <button type="button" class="btn btn-claro" (click)="usarUsura()">
-          Usar tope de usura ({{ usura.tasa | tasa }})
+          Usar tope de usura ({{ usura().tasa | tasa }})
         </button>
       </div>
     }

@@ -17,7 +17,7 @@ import {
   PesosPipe,
   TasaPipe,
 } from '../../../compartido/pipes/formato';
-import { esVivienda, plazosDe, USURA_CONSUMO } from '../../../core/datos/tasas';
+import { esVivienda, plazosDe } from '../../../core/datos/tasas';
 import {
   MONTO_RANKING,
   MONTO_VIVIENDA,
@@ -161,10 +161,10 @@ export class Simulador {
   private readonly tablaCaja = viewChild<ElementRef<HTMLElement>>('tablaCaja');
   private readonly injector = inject(Injector);
 
-  protected readonly usura = USURA_CONSUMO;
+  protected readonly usura = this.tasas.usura;
   /** La usura de consumo no aplica a vivienda. */
   protected readonly superaUsura = computed(
-    () => !esVivienda(this.producto()) && this.tasa() > USURA_CONSUMO.tasa,
+    () => !esVivienda(this.producto()) && this.tasa() > this.usura().tasa,
   );
 
   protected cambiarProducto(valor: string): void {

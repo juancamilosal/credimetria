@@ -142,8 +142,21 @@ morada y oro del diseño (ver abajo).
   de $2.090.784, como pide el documento (hay pruebas que lo revisan). Por
   defecto, con cuota decreciente, da $810.703 la primera cuota y $1.643.800
   de ahorro.
-- Si la tasa escrita supera la usura del mes, el simulador lo avisa
-  (`USURA_CONSUMO` en `core/datos/tasas.ts`; se actualiza cada mes).
+- Si la tasa escrita supera la usura del mes, el simulador lo avisa (la de
+  "Máximo de usura" del admin, que llega con las tasas:
+  `TasasService.usura`).
+- **Máximo de usura** (arriba en `/admin/tasas`): la tasa de usura E.A. del
+  mes y el mes, en la colección `usura` de Directus (un solo registro;
+  "Lector web" y "Robot" solo la leen). Muestra la E.A. y su M.V. y se
+  cambia con **Cambiar usura**. Al guardar, el "hasta" de las tasas que usan
+  el tope de usura (publicadas y por aprobar; no vivienda) pasa a la nueva
+  en un solo PATCH, y el aviso dice cuántas cambiaron. La usan la página
+  (`/api/tasas` la entrega con las tasas), el simulador, Compara tu oferta,
+  "Usar tope de usura" y el robot de los PDF. `core/datos/usura.json` queda
+  de respaldo si Directus no responde (actualizarlo de vez en cuando).
+- **Números con 2 decimales:** los campos de tasas del admin siempre
+  muestran 2 decimales (2,10 y no 2,1), y las conversiones E.A. ↔ mensual
+  redondean a 2.
 - En celular: menú en botón de 44 px, ranking en tarjetas y chips de producto
   que se desplazan de lado. Revisado a 390 px sin desplazamiento horizontal.
 
@@ -258,8 +271,8 @@ pantalla lo aclara ("Máxima: tope de usura, el banco no la publica").
 Si publica por segmentos (Personas, Preferente, Premium…), "desde" es la
 más baja y los segmentos van en las notas. Ejemplo: Banco de Bogotá, libre
 inversión, desde 1,13 % (Premium e Insigne; Personas desde 1,85 %) hasta
-2,118 % M.V. por usura. En la edición, "Usar tope de usura" llena el hasta
-con `USURA_CONSUMO` (no se ofrece en vivienda).
+la usura M.V. En la edición, "Usar tope de usura" llena el hasta con la de
+"Máximo de usura" (no se ofrece en vivienda).
 
 ### Colecciones en Directus
 
@@ -311,8 +324,8 @@ src/app/
                   (pesos: $20.000.000, tasa: 21,48 %, puntos: +7,38 pts)
   core/
     modelos/      tasa, prospecto y aliado
-    datos/        productos, usura del mes (usura.json, la lee también el
-                  robot de los PDF), aliados de ejemplo y tasas
+    datos/        productos, usura de respaldo (usura.json; la de verdad
+                  está en Directus), aliados de ejemplo y tasas
                   solo para las pruebas
     servicios/    TasasService, AliadosService, ProspectosService
     utilidades/   cálculos de crédito (tasa mensual, cuota, ahorro, tasa
