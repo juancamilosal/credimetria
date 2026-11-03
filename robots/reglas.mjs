@@ -611,18 +611,36 @@ export const REGLAS = {
     // fija por línea: desde = "PERSONAL - LIBRE DESTINO" (oficina) y hasta =
     // "CREDITO DIGITAL LIBRE INVERSIÓN" (decisión del 26 oct 2026).
     enlace: /[^"'\s<>()]*Tasas[_-]colocaciones[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
-    // El más nuevo es el que empieza más tarde: "del_26oct_al_01nov_2026".
+    // El más nuevo es el que empieza más tarde: "del_26oct_al_01nov_2026" o,
+    // desde noviembre de 2026, "del_02_al_08nov_2026" (el mes solo al
+    // final). La página trae el enlace (/system/files/…) y el nombre suelto
+    // como texto: con la misma semana gana el que tiene carpeta.
     elegir: (enlaces) => {
       const inicio = (e) => {
         const m = decodeURIComponent(e)
           .toLowerCase()
-          .match(/del_(\d{1,2})([a-z]{3})_al_\d{1,2}[a-z]{3}_(\d{4})/);
+          .match(/del_(\d{1,2})([a-z]{3})?_al_(\d{1,2})([a-z]{3})_(\d{4})/);
         if (!m) return "";
-        const mes = MESES.findIndex((x) => x.startsWith(m[2])) + 1;
-        return `${m[3]}-${String(mes).padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+        let mes = MESES.findIndex((x) => x.startsWith(m[2] ?? m[4])) + 1;
+        let año = Number(m[5]);
+        // "del_29_al_04ene_2027" no pasa en el formato nuevo (cruza de mes y
+        // el banco escribe los dos meses), pero si el día de inicio es mayor
+        // que el de fin, la semana empezó el mes anterior.
+        if (!m[2] && Number(m[1]) > Number(m[3])) {
+          mes -= 1;
+          if (mes === 0) {
+            mes = 12;
+            año -= 1;
+          }
+        }
+        return `${año}-${String(mes).padStart(2, "0")}-${m[1].padStart(2, "0")}`;
       };
+      const conCarpeta = (e) => (e.includes("/") ? 1 : 0);
       return (
-        [...enlaces].sort((a, b) => (inicio(b) > inicio(a) ? 1 : -1))[0] ?? null
+        [...enlaces].sort(
+          (a, b) =>
+            inicio(b).localeCompare(inicio(a)) || conCarpeta(b) - conCarpeta(a),
+        )[0] ?? null
       );
     },
     leer(texto) {

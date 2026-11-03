@@ -238,6 +238,15 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
   `usura` de Directus, que el usuario Robot solo lee; `comun/usura.mjs`).
   Si Directus no responde, usa `src/app/core/datos/usura.json`. Si la
   usura del admin está vieja, el robot rechaza tasas por encima de ella.
+- **Enlaces sin dominio y PDF que no baja** (3 nov 2026): si la página de
+  tasas trae el enlace como `/system/files/…`, el robot lo completa con el
+  dominio de la página. Si encuentra un PDF en la página y no lo puede
+  bajar, revisa el guardado pero ya no dice "sin cambios": manda el aviso
+  de que la página muestra otro PDF, para subirlo a mano.
+- **Banco Agrario** cambió el nombre del PDF semanal en noviembre de 2026:
+  de `Tasas_colocaciones_del_26oct_al_01nov_2026.pdf` a
+  `Tasas_colocaciones_del_02_al_08nov_2026.pdf` (el mes solo al final). La
+  regla entiende los dos.
 - **Sin navegador:** pide el PDF como un navegador (sin Playwright). Si un
   banco lo bloquea, llega el correo de "no encontré el PDF" y se carga a
   mano en `/admin/tasas`.

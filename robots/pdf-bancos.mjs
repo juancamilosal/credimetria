@@ -168,7 +168,8 @@ async function direcciones(fuente, regla, notas) {
         : masReciente(
             encontrados.map((e) => new URL(e, fuente.url_indice).href),
           );
-      if (nuevo) lista.unshift(nuevo);
+      // La página puede traer el enlace sin dominio ("/system/files/…").
+      if (nuevo) lista.unshift(new URL(nuevo, fuente.url_indice).href);
       else notas.push(`No vi el enlace al PDF en ${fuente.url_indice}.`);
     } catch (error) {
       notas.push(`No pude abrir ${fuente.url_indice}: ${error.message}.`);
@@ -410,6 +411,17 @@ async function revisarFuente(fuente) {
     } else {
       marca = huella(datos);
       if (await yaVisto(marca)) {
+        // La página de tasas mostraba otro PDF que no se pudo bajar y se
+        // revisó el guardado: no es "sin cambios", puede haber uno nuevo.
+        if (fallos.length && url === fuente.url) {
+          console.log(
+            `${nombre}: el PDF guardado sigue igual, pero no pude bajar el de la página.`,
+          );
+          await sinCambios(url, marca);
+          return {
+            problema: `${nombre}: la página de tasas muestra otro PDF y no lo pude bajar (${fallos.join(" · ")}). Revisé el guardado, que sigue igual. Puede que haya tasas nuevas: revísalo y súbelo a mano en /admin/tasas.`,
+          };
+        }
         console.log(`${nombre}: sin cambios.`);
         return sinCambios(url, marca);
       }

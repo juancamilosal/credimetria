@@ -344,6 +344,25 @@ describe("ayudas", () => {
       ]),
       "/doc/Tasas_colocaciones_del_26oct_al_01nov_2026.pdf",
     );
+    // Desde noviembre de 2026 el mes va solo al final ("del_02_al_08nov") y
+    // la página trae también el nombre suelto: gana el enlace con carpeta.
+    assert.equal(
+      REGLAS["banco-agrario"].elegir([
+        "Tasas_colocaciones_del_02_al_08nov_2026.pdf",
+        "/system/files/2026-10/Tasas_colocaciones_del_26oct_al_01nov_2026.pdf",
+        "/system/files/2026-11/Tasas_colocaciones_del_02_al_08nov_2026.pdf",
+      ]),
+      "/system/files/2026-11/Tasas_colocaciones_del_02_al_08nov_2026.pdf",
+    );
+    // Semana que empieza el mes anterior sin decirlo: "del_30_al_05nov".
+    assert.equal(
+      REGLAS["banco-agrario"].elegir([
+        "/f/Tasas_colocaciones_del_30_al_05nov_2026.pdf",
+        "/f/Tasas_colocaciones_del_26oct_al_01nov_2026.pdf",
+        "/f/Tasas_colocaciones_del_02_al_08nov_2026.pdf",
+      ]),
+      "/f/Tasas_colocaciones_del_02_al_08nov_2026.pdf",
+    );
     // Números largos en la dirección no cuentan como año.
     assert.equal(
       masReciente([
