@@ -413,13 +413,13 @@ async function revisarFuente(fuente) {
       if (await yaVisto(marca)) {
         // La página de tasas mostraba otro PDF que no se pudo bajar y se
         // revisó el guardado: no es "sin cambios", puede haber uno nuevo.
-        if (fallos.length && url === fuente.url) {
+        if ((fallos.length || notas.length) && url === fuente.url) {
           console.log(
-            `${nombre}: el PDF guardado sigue igual, pero no pude bajar el de la página.`,
+            `${nombre}: el PDF guardado sigue igual, pero no vi el de la página.`,
           );
           await sinCambios(url, marca);
           return {
-            problema: `${nombre}: la página de tasas muestra otro PDF y no lo pude bajar (${fallos.join(" · ")}). Revisé el guardado, que sigue igual. Puede que haya tasas nuevas: revísalo y súbelo a mano en /admin/tasas.`,
+            problema: `${nombre}: revisé el PDF guardado, que sigue igual, pero en la página de tasas ${fallos.length ? `hay otro PDF que no pude bajar (${fallos.join(" · ")})` : notas.join(" ")} Puede que el banco haya publicado uno nuevo con otro nombre: revísalo y súbelo a mano en /admin/tasas.`,
           };
         }
         console.log(`${nombre}: sin cambios.`);
