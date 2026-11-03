@@ -15,6 +15,9 @@ export interface TasasPublicas {
 export function usuraDe(fila: unknown): Usura;
 
 export function tasasPublicas(): Promise<TasasPublicas>;
+export function documentoTasa(
+  id: string,
+): Promise<{ datos: Buffer; tipo: string } | null>;
 export function logoEntidad(
   codigo: string,
 ): Promise<{ datos: Buffer; tipo: string; en: number } | null>;

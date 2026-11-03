@@ -60,6 +60,25 @@ describe('Ranking', () => {
     ).toBe('ascending');
   });
 
+  it('debajo de "Página" enlaza el PDF o el pantallazo guardado', () => {
+    const enlaces = (entidad: string) => {
+      const fila = [...html.querySelectorAll('tbody tr')].find((tr) =>
+        tr.textContent!.includes(entidad),
+      )!;
+      return [...fila.querySelectorAll<HTMLAnchorElement>('a.pdf')].map((a) => [
+        a.textContent!.trim(),
+        a.getAttribute('href'),
+      ]);
+    };
+    // Con PDF del banco: el PDF guardado (con las cifras resaltadas).
+    expect(enlaces('AV Villas')).toEqual([['PDF ↗', '/api/documentos/7']]);
+    // Con página: la página y, debajo, el pantallazo.
+    expect(enlaces('Confiar')).toEqual([
+      ['Página ↗', 'https://ejemplo.com/confiar/tasas'],
+      ['Pantallazo ↗', '/api/documentos/8'],
+    ]);
+  });
+
   it('ordena desde el título y cambia de sentido al tocarlo otra vez', () => {
     tocar(titulo('Cobra en promedio'));
     expect(entidades()[0]).toBe('Banco de Bogotá');

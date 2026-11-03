@@ -298,8 +298,10 @@ th[aria-sort="descending"] .flecha {
   font-size: 12px;
 }
 
+/* "Página ↗" y, debajo, "PDF ↗" o "Pantallazo ↗" */
 .pdf {
-  display: inline-block;
+  display: block;
+  width: fit-content;
   margin-top: 2px;
   font-family: var(--cm-f-texto, inherit);
   font-size: 12px;
@@ -418,4 +420,8 @@ tr.cargando:hover td {
   .esqueleto {
     animation: none;
   }
+}
+
+td.der .pdf {
+  margin-left: auto;
 }

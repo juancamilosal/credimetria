@@ -17,7 +17,7 @@ const DIRECTUS =
 /** Cada cuánto se vuelve a preguntar a Directus. */
 const VIGENCIA_MS = 10 * 60 * 1000;
 
-let guardado = null; // { datos, logos: Map<codigo, idArchivo>, en }
+let guardado = null; // { datos, logos: Map<codigo, idArchivo>, documentos: Map<id, idArchivo>, en }
 let pidiendo = null;
 const logos = new Map(); // codigo → { datos, tipo, en }
 
@@ -98,6 +98,26 @@ function enlaceDe(p) {
 }
 
 /**
+ * El documento guardado de una tasa publicada (el PDF que bajó el robot o el
+ * que se subió a mano, con las cifras resaltadas si las tiene; o el
+ * pantallazo de la página): `/api/documentos/<id>` y si es imagen. Lo anota
+ * en `ids` para que la ruta solo entregue documentos de tasas publicadas.
+ */
+function documentoDe(p, ids) {
+  const d = p.documento;
+  const original = d?.archivo?.id ?? d?.archivo ?? null;
+  const archivo = d?.archivo_resaltado ?? original;
+  if (!d?.id || !archivo) return { documento: null };
+  const esImagen =
+    !d.archivo_resaltado && String(d.archivo?.type ?? "").startsWith("image/");
+  ids.set(String(d.id), archivo);
+  return {
+    documento: `/api/documentos/${d.id}`,
+    ...(esImagen ? { documentoEsImagen: true } : {}),
+  };
+}
+
+/**
  * Bancos que en un producto no publican su tasa (fuente con `como_extraer`
  * "solo_promedio", p. ej. Banco Popular en libranza): salen solo con el
  * promedio de la Superfinanciera. Si no se pueden leer, la página sigue sin
@@ -134,7 +154,8 @@ async function leer() {
     pedir(
       "/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1" +
         "&fields=producto,ea_desde,ea_hasta,hasta_origen,vigente_desde,enlace,enlace_es_pagina," +
-        "entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,fuente.*",
+        "entidad.codigo,entidad.nombre,entidad.tipo,entidad.logo,fuente.*," +
+        "documento.id,documento.archivo.id,documento.archivo.type,documento.archivo_resaltado",
     ).then((r) => r.json()),
     pedir(
       "/items/tasas_promedio?limit=-1&fields=entidad,producto,tasa_ea,corte",
@@ -160,6 +181,9 @@ async function leer() {
       .catch(() => USURA_RESPALDO),
   ]);
   const idsLogo = new Map();
+  // Documento de cada tasa publicada (id → archivo): la copia resaltada si
+  // la hay; si no, el original (PDF o pantallazo de la página).
+  const idsDocumento = new Map();
   const tasas = [];
   for (const p of publicadas.data) {
     if (!p.entidad) continue;
@@ -193,6 +217,7 @@ async function leer() {
       // tasas (la que enlaza el PDF, o la página de donde se leyó) y no el
       // PDF suelto; el PDF solo si no hay página guardada.
       ...enlaceDe(p),
+      ...documentoDe(p, idsDocumento),
       logo: p.entidad.logo ? `/api/logos/${p.entidad.codigo}` : null,
     });
   }
@@ -275,6 +300,7 @@ async function leer() {
       usura,
     },
     logos: idsLogo,
+    documentos: idsDocumento,
   };
 }
 
@@ -300,6 +326,21 @@ export async function tasasPublicas() {
     return guardado.datos;
   }
   return renovar;
+}
+
+/**
+ * El documento de una tasa publicada (PDF o pantallazo); `null` si el id no
+ * es de una tasa publicada (la ruta no entrega otros archivos).
+ */
+export async function documentoTasa(id) {
+  await tasasPublicas();
+  const archivo = guardado?.documentos?.get(String(id));
+  if (!archivo) return null;
+  const r = await pedir(`/assets/${archivo}`);
+  return {
+    datos: Buffer.from(await r.arrayBuffer()),
+    tipo: r.headers.get("content-type") ?? "application/pdf",
+  };
 }
 
 /** El logo de una entidad, reducido; `null` si no tiene. */
@@ -349,6 +390,20 @@ export function rutasTasas(app) {
     } catch (error) {
       console.error("No se pudieron leer las tasas:", error.message);
       res.status(503).json({ error: "Las tasas no están disponibles" });
+    }
+  });
+  app.get("/api/documentos/:id", async (req, res) => {
+    try {
+      if (!/^\d+$/.test(req.params.id)) return res.status(404).end();
+      const doc = await documentoTasa(req.params.id);
+      if (!doc) return res.status(404).end();
+      res.set("Content-Type", doc.tipo);
+      res.set("Content-Disposition", "inline");
+      res.set("Cache-Control", "public, max-age=3600");
+      res.end(doc.datos);
+    } catch (error) {
+      console.error("No se pudo leer el documento:", error.message);
+      res.status(503).end();
     }
   });
   app.get("/api/logos/:codigo", async (req, res) => {

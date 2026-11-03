@@ -213,7 +213,9 @@
               @if (fila.pdf) {
                 <a
                   class="pdf"
-                  [href]="fila.pdf"
+                  [href]="
+                    fila.enPagina ? fila.pdf : (fila.documento ?? fila.pdf)
+                  "
                   target="_blank"
                   rel="noopener noreferrer"
                   [attr.aria-label]="
@@ -222,6 +224,20 @@
                       : 'PDF de tasas de ') + fila.entidad
                   "
                   >{{ fila.enPagina ? "Página" : "PDF" }} ↗</a
+                >
+              }
+              @if (fila.enPagina && fila.documento) {
+                <a
+                  class="pdf"
+                  [href]="fila.documento"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="
+                    (fila.documentoEsImagen
+                      ? 'Pantallazo de las tasas de '
+                      : 'PDF de tasas de ') + fila.entidad
+                  "
+                  >{{ fila.documentoEsImagen ? "Pantallazo" : "PDF" }} ↗</a
                 >
               }
             </td>
@@ -338,13 +354,27 @@
             @if (fila.pdf) {
               <a
                 class="pdf"
-                [href]="fila.pdf"
+                [href]="fila.enPagina ? fila.pdf : (fila.documento ?? fila.pdf)"
                 target="_blank"
                 rel="noopener noreferrer"
                 >{{
                   fila.enPagina
                     ? "Tasas en la página del banco"
                     : "PDF del banco"
+                }}
+                ↗</a
+              >
+            }
+            @if (fila.enPagina && fila.documento) {
+              <a
+                class="pdf"
+                [href]="fila.documento"
+                target="_blank"
+                rel="noopener noreferrer"
+                >{{
+                  fila.documentoEsImagen
+                    ? "Pantallazo de las tasas"
+                    : "PDF de las tasas"
                 }}
                 ↗</a
               >

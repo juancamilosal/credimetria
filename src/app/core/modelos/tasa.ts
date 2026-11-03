@@ -40,6 +40,13 @@ export interface TasaEntidad {
   pdf?: string | null;
   /** La entidad no publica PDF: `pdf` es su página de tasas. */
   enPagina?: boolean;
+  /**
+   * El documento guardado de la tasa (`/api/documentos/<id>`): el PDF con
+   * las cifras resaltadas o, si la tasa salió de la página, su pantallazo.
+   */
+  documento?: string | null;
+  /** El documento es el pantallazo de la página (no un PDF). */
+  documentoEsImagen?: boolean;
   /** Logo de la entidad (dirección de la imagen). */
   logo?: string | null;
 }

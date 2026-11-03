@@ -398,6 +398,15 @@ en `public/imagenes/` y su entrada en `FOTOS`.
   celular (`enlaceDe` en `servidor/tasas.mjs`, `enPagina` en
   `TasaEntidad`). La página de cada banco se corrige en el admin con
   "Editar direcciones" (campo "Página de tasas y tarifas").
+- **PDF o pantallazo debajo de "Página"** (3 nov 2026): debajo de "Página ↗"
+  va "PDF ↗" (en el celular "PDF de las tasas ↗") con el documento
+  guardado de la tasa publicada: la copia con las cifras resaltadas en
+  verde o, si no hay, el original. Si la tasa salió de la página del banco
+  dice "Pantallazo ↗". Si no hay página, el único enlace "PDF ↗" va a ese
+  documento. Lo entrega `/api/documentos/<id>` (`documentoTasa` en
+  `servidor/tasas.mjs`), solo para documentos de tasas publicadas; el
+  Lector web lee `documentos` (archivo, archivo resaltado y vigencia), el
+  campo `documento` de las publicadas y baja imágenes y PDF.
 - **Fuente del promedio a la vista**: el inicio y el ranking enlazan el
   conjunto de la Superfinanciera en datos.gov.co (`FUENTE_PROMEDIO` en
   `core/datos/tasas.ts`) de donde sale "Cobra en promedio". Las tarjetas del
