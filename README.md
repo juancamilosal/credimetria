@@ -484,6 +484,13 @@ npm run build                  # compila (sin prerenderizar: las tasas cambian)
 npm run serve:ssr:credimetria  # sirve la compilación con SSR
 npm test                       # pruebas con Karma
 npm run test:servidor          # pruebas de servidor/ (node --test)
+```
+
+El `.env` lo lee `servidor/env.mjs`, que aguanta los archivos que guardan
+algunos editores de Windows (con BOM, en UTF-16 o con `\r\n`). Si falta el
+archivo o el token, la terminal de `npm start` lo dice.
+
+```
 npx prettier --write "src/**/*.{ts,html,css}"
 ```
 

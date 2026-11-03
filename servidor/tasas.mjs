@@ -4,16 +4,12 @@
 //
 // Variables: DIRECTUS_TOKEN (obligatoria) y DIRECTUS_URL (opcional).
 
+import { cargarEnv } from "./env.mjs";
+
 // En desarrollo (`npm start`) la parte de la página que se arma en el
 // servidor también necesita el token del .env; en Coolify no hay .env y se
 // usan las variables del recurso.
-if (!process.env.DIRECTUS_TOKEN) {
-  try {
-    process.loadEnvFile(".env");
-  } catch {
-    // Sin .env: la página sale sin tasas (y lo dice el log).
-  }
-}
+if (!process.env.DIRECTUS_TOKEN) cargarEnv();
 
 const DIRECTUS =
   process.env.DIRECTUS_URL ?? "https://credimetria-api.valkiriacode.com";
