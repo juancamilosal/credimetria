@@ -2339,7 +2339,8 @@ export function mismasTasas(leida, guardada) {
         (guardada[c] === null || guardada[c] === undefined)) ||
       (guardada[c] !== null &&
         guardada[c] !== undefined &&
-        Math.abs(Number(guardada[c]) - leida[c]) < 0.0001),
+        // Con 2 decimales, como se guardan desde el admin (1,05 = 1,0534).
+        Math.abs(Number(guardada[c]) - leida[c]) < 0.006),
   );
 }
 

@@ -403,6 +403,27 @@ describe("mismasTasas", () => {
     );
     assert.equal(mismasTasas(leida, { ...guardada, valor_hasta: null }), false);
   });
+
+  it("la guardada con 2 decimales (desde el admin) es la misma", () => {
+    // AV Villas VIS: publicada 1,05 % a 1,20 %; el robot lee 1,0534 a 1,2044.
+    assert.equal(
+      mismasTasas(
+        {
+          valor_desde: 1.0534,
+          valor_hasta: 1.2044,
+          ea_desde: 13.4,
+          ea_hasta: 15.45,
+        },
+        {
+          valor_desde: "1.0500",
+          valor_hasta: "1.2000",
+          ea_desde: "13.4000",
+          ea_hasta: "15.4500",
+        },
+      ),
+      true,
+    );
+  });
 });
 
 describe("páginas web", () => {
