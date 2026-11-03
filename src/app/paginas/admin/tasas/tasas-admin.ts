@@ -38,7 +38,10 @@ import {
 import { TasasAdminService } from '../../../core/servicios/tasas-admin.service';
 import { TasasService } from '../../../core/servicios/tasas.service';
 import { esVivienda, USURA_CONSUMO } from '../../../core/datos/tasas';
-import { tasaMensual } from '../../../core/utilidades/credito';
+import {
+  efectivaAnualDeMensual,
+  tasaMensual,
+} from '../../../core/utilidades/credito';
 import { pendienteDelMes } from '../../../core/utilidades/mes';
 import { CabeceraAdmin } from '../cabecera/cabecera-admin';
 import { EsqueletoImagen } from '../../../compartido/esqueleto-imagen/esqueleto-imagen';
@@ -274,8 +277,8 @@ export class TasasAdmin implements OnInit, OnDestroy {
 
   constructor() {
     inject(Meta).updateTag({ name: 'robots', content: 'noindex' });
-    // La E.A. manda: al escribirla (o cambiar la unidad) se calcula sola la
-    // tasa que publica el banco.
+    // La E.A. y la tasa que publica el banco se calculan entre sí: al
+    // escribir una se llena la otra; al cambiar la unidad, la E.A. manda.
     const c = this.form.controls;
     c.ea_desde.valueChanges
       .pipe(takeUntilDestroyed())
@@ -283,6 +286,12 @@ export class TasasAdmin implements OnInit, OnDestroy {
     c.ea_hasta.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.calcularPublica('hasta'));
+    c.valor_desde.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.calcularEa('desde'));
+    c.valor_hasta.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.calcularEa('hasta'));
     c.unidad.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       this.calcularPublica('desde');
       this.calcularPublica('hasta');
@@ -453,7 +462,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
    * la misma E.A. o la mensual equivalente (M.V. o N.M.V., que los bancos
    * usan como mensual: 1,39 % N.M.V. = 18,02 % E.A.), con 2 decimales.
    */
-  protected calcularPublica(cual: 'desde' | 'hasta'): void {
+  private calcularPublica(cual: 'desde' | 'hasta'): void {
     const v = this.form.getRawValue();
     const ea = leerDecimal(cual === 'desde' ? v.ea_desde : v.ea_hasta);
     let publica = '';
@@ -466,6 +475,27 @@ export class TasasAdmin implements OnInit, OnDestroy {
       cual === 'desde' ? { valor_desde: publica } : { valor_hasta: publica },
       { emitEvent: false },
     );
+  }
+  /** Con la tasa que publica el banco escrita, llena la E.A. (2 decimales). */
+  private calcularEa(cual: 'desde' | 'hasta'): void {
+    const v = this.form.getRawValue();
+    const valor = leerDecimal(cual === 'desde' ? v.valor_desde : v.valor_hasta);
+    let ea = '';
+    if (valor !== null) {
+      ea = escribirDecimal(
+        v.unidad === 'EA' ? valor : +efectivaAnualDeMensual(valor).toFixed(2),
+      );
+    }
+    this.form.patchValue(
+      cual === 'desde' ? { ea_desde: ea } : { ea_hasta: ea },
+      { emitEvent: false },
+    );
+  }
+
+  /** "M.V.", "N.M.V." o "E.A.": el nombre del campo de la tasa que publica. */
+  protected unidadElegida(): string {
+    const unidad = this.form.controls.unidad.value;
+    return unidad ? UNIDAD_TEXTO[unidad] : 'Publica';
   }
 
   protected readonly usura = USURA_CONSUMO;

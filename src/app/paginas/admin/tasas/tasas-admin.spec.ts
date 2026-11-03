@@ -424,13 +424,22 @@ describe('TasasAdmin', () => {
     expect(bbva.querySelector<HTMLInputElement>('#tfDesde')!.value).toBe(
       '1,25',
     );
-    // "Calcular" lo vuelve a sacar de la E.A. si se tocó la mensual.
-    const desde = bbva.querySelector<HTMLInputElement>('#tfDesde')!;
-    desde.value = '9';
-    desde.dispatchEvent(new Event('input'));
-    boton(bbva, 'Calcular').click();
+    // Sin botón "Calcular": escribir la mensual también llena la E.A.
+    expect(
+      [...bbva.querySelectorAll('.formulario button')].some(
+        (b) => b.textContent!.trim() === 'Calcular desde la E.A.',
+      ),
+    ).toBeFalse();
+    expect(bbva.querySelector('label[for=tfDesde]')!.textContent).toContain(
+      'M.V. desde',
+    );
+    const hasta = bbva.querySelector<HTMLInputElement>('#tfHasta')!;
+    hasta.value = '2,118';
+    hasta.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(desde.value).toBe('1,25');
+    expect(bbva.querySelector<HTMLInputElement>('#tfEaHasta')!.value).toBe(
+      '28,6',
+    );
     bbva.querySelector<HTMLFormElement>('.formulario')!.requestSubmit();
     await esperar();
     expect(admin.guardar).toHaveBeenCalledWith(
@@ -439,6 +448,8 @@ describe('TasasAdmin', () => {
         documento: 11,
         valor_desde: 1.25,
         ea_desde: 16.08,
+        valor_hasta: 2.118,
+        ea_hasta: 28.6,
       }),
     );
   });

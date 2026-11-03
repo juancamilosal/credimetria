@@ -172,11 +172,11 @@ Directus. No está en el menú: se entra por `/admin`.
   - **Por aprobar**: la tasa nueva con su PDF, lo que cambia frente a la
     publicada (mín. ▲ +1,05 pts) y los botones **Aprobar** (pide al menos
     el desde o el hasta: GNB en libranza solo publica la máxima),
-    **Editar** (primero "E.A. desde" y al lado "Publica desde", con
-    **Calcular desde la E.A.** debajo, y luego lo mismo para el hasta; la tasa que publica el banco se calcula sola
-    desde la E.A. en la unidad elegida: la misma E.A. o la mensual de M.V. o
-    N.M.V. con 2 decimales; lo guardado se muestra tal cual al abrir, y el
-    PDF de donde sale) y **Comparar
+    **Editar** (primero "E.A. desde" y al lado la tasa que publica el
+    banco, con el nombre de la unidad: "M.V. desde", "N.M.V. desde" o "E.A.
+    desde"; debajo lo mismo para el hasta. Se calculan entre sí al escribir
+    cualquiera de las dos, con 2 decimales; al cambiar la unidad manda la
+    E.A.; lo guardado se muestra tal cual al abrir; y el PDF de donde sale) y **Comparar
     PDF**, que muestra el PDF actual y el nuevo lado a lado (se bajan con
     el token y se ven como blob dentro de la página; si aún no hay PDF
     actual, el nuevo ocupa todo el ancho). Al lado de los PDF va la misma

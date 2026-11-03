@@ -694,17 +694,8 @@
         <input id="tfEaDesde" inputmode="decimal" formControlName="ea_desde" />
       </div>
       <div class="campo">
-        <label for="tfDesde">Publica desde (%)</label>
+        <label for="tfDesde">{{ unidadElegida() }} desde (%)</label>
         <input id="tfDesde" inputmode="decimal" formControlName="valor_desde" />
-      </div>
-      <div class="calcular-ea">
-        <button
-          type="button"
-          class="btn btn-claro"
-          (click)="calcularPublica('desde')"
-        >
-          Calcular desde la E.A.
-        </button>
       </div>
     </div>
     <div class="fila-ea ancho">
@@ -713,17 +704,8 @@
         <input id="tfEaHasta" inputmode="decimal" formControlName="ea_hasta" />
       </div>
       <div class="campo">
-        <label for="tfHasta">Publica hasta (%)</label>
+        <label for="tfHasta">{{ unidadElegida() }} hasta (%)</label>
         <input id="tfHasta" inputmode="decimal" formControlName="valor_hasta" />
-      </div>
-      <div class="calcular-ea">
-        <button
-          type="button"
-          class="btn btn-claro"
-          (click)="calcularPublica('hasta')"
-        >
-          Calcular desde la E.A.
-        </button>
       </div>
     </div>
     <div class="campo">
