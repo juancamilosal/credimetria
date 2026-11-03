@@ -66,10 +66,13 @@ Davivienda 22,71 % E.A.
   cada banco (`reglas.mjs`), busca y baja su PDF. Si la huella SHA-256 es la
   misma de la última vez (o ya está en `documentos`), solo marca la
   revisión. Si el PDF cambió pero las tasas leídas son **las mismas** de la
-  publicada (3 nov 2026), sube el PDF nuevo y deja la tasa **por aprobar**
-  con esas mismas tasas y la nota "Documento actualizado: las tasas no
-  cambiaron"; el correo lo marca aparte ("📄 Documento actualizado, mismas
-  tasas") para aprobarlo de una y que la página muestre el PDF nuevo. Si
+  publicada (3 nov 2026), sube el PDF nuevo y **lo pone en la tasa
+  publicada** (documento, vigencia y enlace; el PDF anterior pasa a
+  "anterior"), sin mandar nada a aprobar: las tasas no cambian. El correo
+  lo cuenta aparte ("📄 Documento actualizado, mismas tasas"). Para esto el
+  usuario Robot puede editar en `tasas_publicadas` solo `documento`,
+  `vigente_desde`, `enlace`, `enlace_es_pagina`, `capturada` y `notas`, y
+  el `estado` de `documentos`. Si
   son las de una que ya espera aprobación, no crea otra. Si es nuevo: lo sube a `documentos` (origen `robot`), lee la
   tasa del producto de la fuente y crea la tasa **por aprobar** unida al PDF. Nunca
   publica: siempre se aprueba en `/admin/tasas`.

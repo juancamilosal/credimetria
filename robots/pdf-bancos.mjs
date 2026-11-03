@@ -8,10 +8,10 @@
 //   1. Busca el PDF con la regla del banco (reglas.mjs) y lo baja.
 //   2. Si la huella SHA-256 es la misma de la última vez, no hace nada. Si
 //      el PDF cambió pero las tasas leídas son las mismas de la publicada,
-//      deja el PDF nuevo por aprobar con esas mismas tasas y el correo lo
-//      dice aparte ("se actualizó el documento, las tasas no cambiaron"),
-//      para aprobarlo de una. Si son las de una que ya espera aprobación, no
-//      crea otra.
+//      cambia el PDF de la publicada por el nuevo (sin aprobación: las tasas
+//      no cambian) y el correo lo cuenta aparte ("se actualizó el
+//      documento, las tasas no cambiaron"). Si son las de una que ya espera
+//      aprobación, no crea otra.
 //   3. Si es nuevo, lo sube a `documentos` (origen robot; de una página, un
 //      pantallazo de la tabla), con una copia que tiene las cifras leídas
 //      resaltadas en verde (`archivo_resaltado`), y crea en
@@ -452,15 +452,15 @@ async function revisarFuente(fuente) {
 
   // Si las tasas son las mismas de una que ya espera aprobación, no se crea
   // nada. Si son las de la publicada, el banco solo actualizó el documento:
-  // se deja por aprobar con el PDF nuevo (las mismas tasas) y el correo lo
-  // dice aparte, para aprobarlo de una.
+  // la publicada pasa a usar el PDF nuevo (no hay nada que aprobar) y el
+  // correo lo cuenta aparte.
   let conPdfOficial = false;
   let soloDocumento = false;
   if (leida) {
     const guardadas = await directus(
       "GET",
       `/items/tasas_publicadas?filter[fuente][_eq]=${fuente.id}&filter[estado][_in]=publicada,por_revisar` +
-        "&fields=estado,valor_desde,valor_hasta,ea_desde,ea_hasta,enlace_es_pagina&limit=-1",
+        "&fields=id,estado,valor_desde,valor_hasta,ea_desde,ea_hasta,enlace_es_pagina,notas&limit=-1",
     );
     // Si la guardada salió de la página y ahora llega el PDF oficial con lo
     // mismo, sí se crea: así la prueba queda con el PDF.
@@ -480,7 +480,7 @@ async function revisarFuente(fuente) {
       );
       return sinCambios(url, marca);
     }
-    soloDocumento = Boolean(igual);
+    soloDocumento = igual?.estado === "publicada" ? igual : false;
   }
 
   const queEs = soloDocumento
@@ -494,7 +494,7 @@ async function revisarFuente(fuente) {
       ? { problema: `${nombre}: ${queEs}, pero ${problemas.join(" ")}` }
       : soloDocumento
         ? {
-            documento: `${nombre}: se actualizó el documento (rige desde ${tasa.vigencia}), pero las tasas no cambiaron (sin guardar, --sin-guardar).`,
+            documento: `${nombre}: el documento cambió (rige desde ${tasa.vigencia}), pero las tasas no; se cambiaría el PDF de la publicada (sin guardar, --sin-guardar).`,
           }
         : { nuevo: `${nombre}: ${queEs} (sin guardar, --sin-guardar).` };
 
@@ -540,12 +540,45 @@ async function revisarFuente(fuente) {
     fuente: fuente.id,
     archivo,
     archivo_resaltado: archivoResaltado ?? null,
-    estado: "nuevo",
+    // Con las mismas tasas el PDF nuevo pasa directo a ser el actual.
+    estado: soloDocumento ? "actual" : "nuevo",
     vigente_desde: tasa?.vigencia ?? null,
     origen: "robot",
     huella: marca,
     notas: copia.nota,
   });
+
+  if (soloDocumento) {
+    // Las tasas no cambian: la publicada pasa a mostrar el PDF nuevo y el
+    // que era actual queda de anterior. No hay nada que aprobar.
+    const actuales = await directus(
+      "GET",
+      `/items/documentos?filter[fuente][_eq]=${fuente.id}&filter[estado][_eq]=actual&filter[id][_neq]=${documento.id}&fields=id&limit=-1`,
+    );
+    for (const d of actuales)
+      await directus("PATCH", `/items/documentos/${d.id}`, {
+        estado: "anterior",
+      });
+    await directus("PATCH", `/items/tasas_publicadas/${soloDocumento.id}`, {
+      documento: documento.id,
+      vigente_desde: tasa.vigencia ?? null,
+      enlace: url,
+      enlace_es_pagina: false,
+      capturada: ahora,
+      notas:
+        `${soloDocumento.notas ? soloDocumento.notas + " " : ""}Documento actualizado por el robot el ${cuando()} (las tasas no cambiaron).`.slice(
+          -1000,
+        ),
+    });
+    await directus("PATCH", `/items/fuentes/${fuente.id}`, {
+      url,
+      ultimo_hash: marca,
+      ultima_revision: ahora,
+    });
+    return {
+      documento: `${nombre}: se actualizó el documento (rige desde ${tasa.vigencia}), pero las tasas no cambiaron. Ya quedó en la tasa publicada; no hay nada que aprobar.`,
+    };
+  }
 
   // Tipo de tasa y sistema se copian de la publicada o, si no hay, de la
   // última anterior (el PDF no los cambia). Con -estado, "publicada" va
@@ -577,7 +610,7 @@ async function revisarFuente(fuente) {
               ? null
               : "entidad",
           frase: tasa.frase,
-          notas: `${soloDocumento ? "Documento actualizado: las tasas no cambiaron frente a la publicada. " : ""}Leída por el robot el ${cuando()}${tasa.soloMaxima ? " El banco solo publica la tasa máxima (no hay desde)." : ""}${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
+          notas: `Leída por el robot el ${cuando()}${tasa.soloMaxima ? " El banco solo publica la tasa máxima (no hay desde)." : ""}${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
         }
       : {
           notas: `El robot no pudo leer la tasa (${cuando()}): ${problemas.join(" ")} Llénala mirando el PDF.`,
@@ -591,10 +624,6 @@ async function revisarFuente(fuente) {
     ultima_revision: ahora,
   });
 
-  if (soloDocumento)
-    return {
-      documento: `${nombre}: se actualizó el documento (rige desde ${tasa.vigencia}), pero las tasas no cambiaron. Apruébala para que la página muestre el PDF nuevo.`,
-    };
   return leida
     ? {
         nuevo: `${nombre}: ${queEs} (rige desde ${tasa.vigencia}). Leí ${tasa.soloMaxima ? `hasta ${tasa.mvHasta} % M.V. (solo publica la máxima)` : `${tasa.mvDesde} %${sinMaxima ? ` a ${USURA.mv} % (usura)` : tasa.mvHasta === null ? " (solo desde)" : ` a ${tasa.mvHasta} %`} M.V.`}; está por aprobar.`,
@@ -693,10 +722,10 @@ async function main() {
   else if (documentos.length)
     await avisar(
       asunto(
-        `Se actualizó el documento, pero las tasas no cambiaron (${documentos.length} por aprobar)`,
+        `Se actualizó el documento, pero las tasas no cambiaron (${documentos.length === 1 ? "1 banco" : `${documentos.length} bancos`})`,
       ),
       marcados,
-      "El banco publicó un documento nuevo con las mismas tasas. Quedan por aprobar para que la página muestre el PDF nuevo: puedes aprobarlas de una.",
+      "El banco publicó un documento nuevo con las mismas tasas. El robot ya cambió el PDF de la tasa publicada; no hay nada que aprobar.",
     );
   else console.log("Sin cambios.");
 
