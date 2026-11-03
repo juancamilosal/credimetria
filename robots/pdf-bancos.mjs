@@ -7,8 +7,11 @@
 // productos salen del mismo PDF, el archivo se guarda una sola vez:
 //   1. Busca el PDF con la regla del banco (reglas.mjs) y lo baja.
 //   2. Si la huella SHA-256 es la misma de la última vez, no hace nada. Si
-//      el PDF cambió pero las tasas leídas son las mismas de la publicada (o
-//      de una por aprobar), tampoco: solo anota la huella nueva.
+//      el PDF cambió pero las tasas leídas son las mismas de la publicada,
+//      deja el PDF nuevo por aprobar con esas mismas tasas y el correo lo
+//      dice aparte ("se actualizó el documento, las tasas no cambiaron"),
+//      para aprobarlo de una. Si son las de una que ya espera aprobación, no
+//      crea otra.
 //   3. Si es nuevo, lo sube a `documentos` (origen robot; de una página, un
 //      pantallazo de la tabla), con una copia que tiene las cifras leídas
 //      resaltadas en verde (`archivo_resaltado`), y crea en
@@ -447,9 +450,12 @@ async function revisarFuente(fuente) {
     ea_hasta: sinMaxima ? USURA.tasa : tasa.eaHasta,
   };
 
-  // Si las tasas son las mismas de la publicada (o de una que ya espera
-  // aprobación), no se crea nada: el banco solo volvió a subir el PDF.
+  // Si las tasas son las mismas de una que ya espera aprobación, no se crea
+  // nada. Si son las de la publicada, el banco solo actualizó el documento:
+  // se deja por aprobar con el PDF nuevo (las mismas tasas) y el correo lo
+  // dice aparte, para aprobarlo de una.
   let conPdfOficial = false;
+  let soloDocumento = false;
   if (leida) {
     const guardadas = await directus(
       "GET",
@@ -465,20 +471,32 @@ async function revisarFuente(fuente) {
     );
     conPdfOficial =
       !igual && !enPagina && guardadas.some((g) => mismasTasas(valores, g));
-    if (igual) {
+    const esperando = guardadas.find(
+      (g) => g.estado === "por_revisar" && mismasTasas(valores, g),
+    );
+    if (esperando || (igual && enPagina)) {
       console.log(
-        `${nombre}: el PDF cambió, pero las tasas son las mismas de la ${igual.estado === "publicada" ? "publicada" : "que espera aprobación"}; no se crea nada.`,
+        `${nombre}: ${enPagina ? "la página cambió" : "el PDF cambió"}, pero las tasas son las mismas de la ${esperando ? "que espera aprobación" : "publicada"}; no se crea nada.`,
       );
       return sinCambios(url, marca);
     }
+    soloDocumento = Boolean(igual);
   }
 
-  const queEs = enPagina ? "tasa nueva en su página" : "PDF nuevo";
+  const queEs = soloDocumento
+    ? "documento actualizado con las mismas tasas"
+    : enPagina
+      ? "tasa nueva en su página"
+      : "PDF nuevo";
   console.log(`${nombre}: ${queEs}`, tasa ?? "", problemas);
   if (soloMirar)
     return problemas.length
       ? { problema: `${nombre}: ${queEs}, pero ${problemas.join(" ")}` }
-      : { nuevo: `${nombre}: ${queEs} (sin guardar, --sin-guardar).` };
+      : soloDocumento
+        ? {
+            documento: `${nombre}: se actualizó el documento (rige desde ${tasa.vigencia}), pero las tasas no cambiaron (sin guardar, --sin-guardar).`,
+          }
+        : { nuevo: `${nombre}: ${queEs} (sin guardar, --sin-guardar).` };
 
   const copia = await prueba();
   // Si el mismo archivo ya está guardado para otro producto del banco (un
@@ -559,7 +577,7 @@ async function revisarFuente(fuente) {
               ? null
               : "entidad",
           frase: tasa.frase,
-          notas: `Leída por el robot el ${cuando()}${tasa.soloMaxima ? " El banco solo publica la tasa máxima (no hay desde)." : ""}${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
+          notas: `${soloDocumento ? "Documento actualizado: las tasas no cambiaron frente a la publicada. " : ""}Leída por el robot el ${cuando()}${tasa.soloMaxima ? " El banco solo publica la tasa máxima (no hay desde)." : ""}${sinMaxima ? ` El banco no publica máxima: hasta = usura de ${USURA.mes}.` : ""}${conPdfOficial ? " Mismas tasas que la tomada de su página; ahora con el PDF oficial." : ""}`,
         }
       : {
           notas: `El robot no pudo leer la tasa (${cuando()}): ${problemas.join(" ")} Llénala mirando el PDF.`,
@@ -573,6 +591,10 @@ async function revisarFuente(fuente) {
     ultima_revision: ahora,
   });
 
+  if (soloDocumento)
+    return {
+      documento: `${nombre}: se actualizó el documento (rige desde ${tasa.vigencia}), pero las tasas no cambiaron. Apruébala para que la página muestre el PDF nuevo.`,
+    };
   return leida
     ? {
         nuevo: `${nombre}: ${queEs} (rige desde ${tasa.vigencia}). Leí ${tasa.soloMaxima ? `hasta ${tasa.mvHasta} % M.V. (solo publica la máxima)` : `${tasa.mvDesde} %${sinMaxima ? ` a ${USURA.mv} % (usura)` : tasa.mvHasta === null ? " (solo desde)" : ` a ${tasa.mvHasta} %`} M.V.`}; está por aprobar.`,
@@ -622,6 +644,7 @@ async function main() {
         ".",
     );
   const nuevos = [];
+  const documentos = [];
   const problemas = [];
   const manuales = [];
   const vencidos = [];
@@ -629,6 +652,7 @@ async function main() {
     try {
       const r = await revisarFuente(fuente);
       if (r.nuevo) nuevos.push(r.nuevo);
+      if (r.documento) documentos.push(r.documento);
       if (r.problema) problemas.push(r.problema);
       // Sin ninguna tasa cargada: a diario; si ya tiene, solo los lunes.
       if (r.manual?.sinTasa) vencidos.push(r.manual.texto);
@@ -647,19 +671,32 @@ async function main() {
       problemas.push(`${nombreDe(fuente)}: error inesperado: ${error.message}`);
     }
   }
+  // Los documentos nuevos con las mismas tasas van al final y marcados, para
+  // aprobarlos de una.
+  const marcados = documentos.map(
+    (d) => `📄 Documento actualizado, mismas tasas · ${d}`,
+  );
   if (problemas.length)
     await avisar(
       asunto(
         `${problemas.length === 1 ? "Un banco necesita" : `${problemas.length} bancos necesitan`} revisión`,
       ),
-      [...problemas, ...nuevos],
+      [...problemas, ...nuevos, ...marcados],
     );
   else if (nuevos.length)
     await avisar(
       asunto(
         `${nuevos.length === 1 ? "Hay una tasa nueva" : `Hay ${nuevos.length} tasas nuevas`} por aprobar`,
       ),
-      nuevos,
+      [...nuevos, ...marcados],
+    );
+  else if (documentos.length)
+    await avisar(
+      asunto(
+        `Se actualizó el documento, pero las tasas no cambiaron (${documentos.length} por aprobar)`,
+      ),
+      marcados,
+      "El banco publicó un documento nuevo con las mismas tasas. Quedan por aprobar para que la página muestre el PDF nuevo: puedes aprobarlas de una.",
     );
   else console.log("Sin cambios.");
 
