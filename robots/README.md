@@ -254,6 +254,10 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
   de `Tasas_colocaciones_del_26oct_al_01nov_2026.pdf` a
   `Tasas_colocaciones_del_02_al_08nov_2026.pdf` (el mes solo al final). La
   regla entiende los dos.
+- **Davibank** (5 nov 2026): desde noviembre de 2026, por la integración con
+  Davivienda, la dirección de su PDF (`Tasas-y-productos-credito-2026.pdf`)
+  trae el tarifario de Davivienda. Si el PDF no tiene "Vigentes mes de…"
+  (el formato viejo de Davibank), sus reglas usan las de Davivienda.
 - **Sin navegador:** pide el PDF como un navegador (sin Playwright). Si un
   banco lo bloquea, llega el correo de "no encontré el PDF" y se carga a
   mano en `/admin/tasas`.

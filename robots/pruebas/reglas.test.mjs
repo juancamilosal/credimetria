@@ -54,6 +54,24 @@ describe("reglas por banco", () => {
     });
   }
 
+  it("davibank: desde noviembre de 2026 su PDF es el tarifario de Davivienda", () => {
+    const t = texto("davibank-noviembre");
+    const libre = REGLAS.davibank.leer(t);
+    assert.deepEqual(
+      [libre.eaDesde, libre.mvDesde, libre.vigencia],
+      [17.87, 1.38, "2026-11-01"],
+    );
+    for (const [producto, ea] of [
+      ["vivienda-vis", 14.3],
+      ["vivienda-no-vis", 14.35],
+      ["leasing-no-vis", 13.95],
+    ]) {
+      const v = REGLAS[`davibank:${producto}`].leer(t);
+      assert.equal(v.eaDesde, ea, producto);
+      assert.deepEqual(revisar(v, USURA), [], producto);
+    }
+  });
+
   it("banco-popular: lee la tabla de su página (no publica PDF)", () => {
     const html = readFileSync(
       new URL("./textos/banco-popular.html", import.meta.url),

@@ -323,6 +323,9 @@ export const REGLAS = {
       /[^"'\s<>()]*Tasas-y-productos-credito[^"'\s<>()]*\.pdf[^"'\s<>()]*/gi,
     leer(texto) {
       const t = plano(texto);
+      // Desde noviembre de 2026 (integración con Davivienda) la misma
+      // dirección trae el tarifario de Davivienda: se lee con su regla.
+      if (!/Vigentes mes de/.test(t)) return REGLAS.davivienda.leer(texto);
       // "Vigentes mes de Octubre (del día 1 al día 31) 2026"
       const vig = exigir(
         t,
@@ -1365,6 +1368,9 @@ function viviendaDavibank(producto) {
     ancla: /Hipotecario y leasing habitacional/,
     leer(texto) {
       const t = plano(texto);
+      // Tarifario de Davivienda (desde noviembre de 2026): su regla.
+      if (!/Vigentes mes de/.test(t))
+        return viviendaDavivienda(producto).leer(texto);
       const vig = exigir(
         t,
         /Vigentes mes de (\p{L}+) \(del día (\d{1,2}) al día \d{1,2}\) (\d{4})/u,
