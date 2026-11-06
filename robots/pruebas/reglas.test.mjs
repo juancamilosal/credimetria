@@ -72,6 +72,17 @@ describe("reglas por banco", () => {
     }
   });
 
+  it("banco-de-occidente: libranza, columna Libre inversión del mismo PDF", () => {
+    const t = REGLAS["banco-de-occidente:libranza"].leer(
+      texto("banco-de-occidente-noviembre"),
+    );
+    assert.deepEqual(
+      [t.mvDesde, t.eaDesde, t.mvHasta, t.eaHasta, t.vigencia],
+      [1.2, 15.39, 1.83, 24.31, "2026-11-01"],
+    );
+    assert.deepEqual(revisar(t, USURA), []);
+  });
+
   it("banco-popular: lee la tabla de su página (no publica PDF)", () => {
     const html = readFileSync(
       new URL("./textos/banco-popular.html", import.meta.url),

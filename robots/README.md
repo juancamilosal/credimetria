@@ -258,6 +258,10 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
   Davivienda, la dirección de su PDF (`Tasas-y-productos-credito-2026.pdf`)
   trae el tarifario de Davivienda. Si el PDF no tiene "Vigentes mes de…"
   (el formato viejo de Davibank), sus reglas usan las de Davivienda.
+- **Banco de Occidente, libranza** (6 nov 2026): ya no es "solo promedio".
+  Lee el mismo PDF de sus otros productos (`tasas-personas-bdo`), tabla
+  "Crédito de Libranza", columna **Libre inversión** (desde y hasta; no
+  compra de cartera ni retanqueo).
 - **Sin navegador:** pide el PDF como un navegador (sin Playwright). Si un
   banco lo bloquea, llega el correo de "no encontré el PDF" y se carga a
   mano en `/admin/tasas`.

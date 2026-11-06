@@ -2244,6 +2244,49 @@ REGLAS["bbva:vehiculo"] = vehiculoBbva;
 REGLAS["banco-finandina:vehiculo"] = vehiculoFinandina;
 REGLAS["banco-de-bogota:vehiculo"] = vehiculoBogota;
 REGLAS["banco-de-occidente:vehiculo"] = vehiculoOccidente;
+
+/**
+ * Banco de Occidente, libranza: el mismo PDF (tasas-personas-bdo), tabla
+ * "Crédito de Libranza" con columnas LIBRE INVERSIÓN, COMPRA DE CARTERA y
+ * RETANQUEO (desde y hasta). Se lee la de libre inversión, como en el
+ * crédito de libre inversión (decisión del 6 nov 2026). Vigencia "*Vigencia
+ * del 01 al 30 de Noviembre de 2026" debajo de la tabla.
+ */
+REGLAS["banco-de-occidente:libranza"] = {
+  ...REGLAS["banco-de-occidente"],
+  ancla: /Crédito de Libranza/,
+  leer(texto) {
+    const t = plano(texto);
+    const bloque = despuesDe(
+      t,
+      /\nCrédito de Libranza\n/,
+      'la tabla "Crédito de Libranza"',
+    );
+    const mv = exigir(
+      bloque,
+      /Tasa M\.V ([\d,]+)% ([\d,]+)%/,
+      'la fila "Tasa M.V" de libranza',
+    );
+    const ea = exigir(
+      bloque,
+      /Tasa E\.A ([\d,]+)% ([\d,]+)%/,
+      'la fila "Tasa E.A" de libranza',
+    );
+    const vig = exigir(
+      bloque,
+      /Vigencia del (\d{1,2}) al \d{1,2} de ([^\n]+)/,
+      "la vigencia de libranza",
+    );
+    return {
+      mvDesde: numero(mv[1]),
+      mvHasta: numero(mv[2]),
+      eaDesde: numero(ea[1]),
+      eaHasta: numero(ea[2]),
+      vigencia: fecha(`${vig[1]} de ${vig[2]}`),
+      frase: `Libranza, libre inversión: ${mv[0]} · ${ea[0]}`,
+    };
+  },
+};
 REGLAS["banco-agrario:vehiculo"] = vehiculoAgrario;
 REGLAS["bancoomeva:vehiculo"] = vehiculoBancoomeva;
 REGLAS["banco-serfinanza:vehiculo"] = vehiculoSerfinanza;
