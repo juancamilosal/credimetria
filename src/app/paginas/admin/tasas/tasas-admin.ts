@@ -61,6 +61,25 @@ const UNIDAD_TEXTO: Record<UnidadTasa, string> = {
   EA: 'E.A.',
 };
 
+/**
+ * La consulta del robot del promedio (JSON de datos.gov.co) abierta en la
+ * vista de exploración de datos.gov.co, ya filtrada por el banco, el
+ * producto y las semanas del promedio: la misma condición `$where`.
+ */
+export function exploraSuper(consultaUrl: string | null): string | null {
+  if (!consultaUrl) return null;
+  try {
+    const url = new URL(consultaUrl);
+    const donde = url.searchParams.get('$where');
+    const id = url.pathname.match(/\/resource\/([\w-]+)\.json/)?.[1];
+    if (!donde || !id) return consultaUrl;
+    const consulta = `SELECT * WHERE ${donde} ORDER BY fecha_corte DESC`;
+    return `${url.origin}/d/${id}/explore/query/${encodeURIComponent(consulta)}/page/filter`;
+  } catch {
+    return consultaUrl;
+  }
+}
+
 /** "1,3" o "1.3" → 1.3; vacío → null. */
 export function leerDecimal(texto: string): number | null {
   const limpio = texto.trim().replace('%', '').replace(',', '.');
@@ -155,6 +174,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
   private readonly locale = inject(LOCALE_ID);
 
   protected readonly unidades = UNIDADES_TASA;
+  protected readonly exploraSuper = exploraSuper;
   protected readonly productos = this.tasasPublicas.productos;
 
   protected readonly entidades = signal<EntidadAdmin[]>([]);

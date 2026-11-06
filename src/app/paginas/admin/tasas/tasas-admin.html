@@ -182,13 +182,18 @@
                       · {{ p.creditos | number: "1.0-0" }}
                       créditos
                     }
-                    @if (p.consulta_url) {
+                    @if (exploraSuper(p.consulta_url); as datos) {
                       ·
                       <a
-                        [href]="p.consulta_url"
+                        [href]="datos"
                         target="_blank"
                         rel="noopener noreferrer"
-                        >datos ↗</a
+                        [attr.aria-label]="
+                          'Datos de ' +
+                          c.entidad.nombre +
+                          ' en la Superfinanciera'
+                        "
+                        >ver en la Superfinanciera ↗</a
                       >
                     }
                   } @else {

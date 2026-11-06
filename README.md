@@ -242,8 +242,10 @@ Directus. No está en el menú: se entra por `/admin`.
   - Debajo del nombre del banco y el producto, el **promedio de la
     Superfinanciera** (`tasas_promedio`): la E.A. ponderada de 4 semanas, la
     **fecha de corte**, cuántos créditos tiene detrás y el enlace a la
-    consulta en datos.gov.co ("sin reporte" o "no reporta este producto" si
-    no hay).
+    consulta: "ver en la Superfinanciera ↗" abre datos.gov.co en su vista
+    de exploración, ya filtrada por el banco, el producto y las semanas del
+    promedio (`exploraSuper`). "Sin reporte" o "no reporta este producto"
+    si no hay.
   - Cada tasa muestra **Vigente desde** (la fecha que dice el banco) y,
     aparte, **Documento cargado** (cuándo se subió su PDF o pantallazo) y
     "Revisado el …" (la última revisión de su fuente: el robot cada día; en

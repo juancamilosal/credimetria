@@ -11,7 +11,7 @@ import {
 } from '../../../core/servicios/documentos-admin.service';
 import { SesionAdmin } from '../../../core/servicios/sesion-admin.service';
 import { TasasAdminService } from '../../../core/servicios/tasas-admin.service';
-import { leerDecimal, TasasAdmin } from './tasas-admin';
+import { exploraSuper, leerDecimal, TasasAdmin } from './tasas-admin';
 
 registerLocaleData(localeEsCo);
 
@@ -860,6 +860,21 @@ describe('TasasAdmin', () => {
     expect(cabeza).toContain('21,81 % E.A.');
     expect(cabeza).toMatch(/corte 23 oct 2026/);
     expect(cabeza).toContain('créditos');
+    expect(cabeza).toContain('ver en la Superfinanciera');
+  });
+
+  it('el enlace a la Superfinanciera abre datos.gov.co filtrado por el banco', () => {
+    const consulta =
+      'https://www.datos.gov.co/resource/qzsc-9esp.json?%24select=nombre_entidad&%24where=producto_de_cr_dito%3D%27Libre+inversi%C3%B3n%27+AND+tipo_entidad%3D%271%27+AND+codigo_entidad%3D%2713%27+AND+fecha_corte+%3E%3D+%272026-09-26%27&%24limit=100';
+    const url = exploraSuper(consulta)!;
+    expect(url).toMatch(
+      /^https:\/\/www\.datos\.gov\.co\/d\/qzsc-9esp\/explore\/query\/.+\/page\/filter$/,
+    );
+    const sql = decodeURIComponent(url.split('/query/')[1].split('/page/')[0]);
+    expect(sql).toBe(
+      "SELECT * WHERE producto_de_cr_dito='Libre inversión' AND tipo_entidad='1' AND codigo_entidad='13' AND fecha_corte >= '2026-09-26' ORDER BY fecha_corte DESC",
+    );
+    expect(exploraSuper(null)).toBeNull();
   });
 
   it('lee decimales con coma o punto', () => {
