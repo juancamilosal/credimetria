@@ -633,6 +633,27 @@ async function revisarFuente(fuente) {
       };
 }
 
+/**
+ * Ids de las fuentes cuya tasa publicada tiene un documento cargado este mes
+ * (desde el día 1, hora de Colombia), por el robot o a mano.
+ */
+async function fuentesConDocumentoDelMes() {
+  const publicadas = await directus(
+    "GET",
+    "/items/tasas_publicadas?filter[estado][_eq]=publicada&limit=-1&fields=fuente,documento.date_created",
+  );
+  return new Set(
+    publicadas
+      .filter(
+        (t) =>
+          t.fuente &&
+          t.documento?.date_created &&
+          !pendienteDelMes(t.documento.date_created, HOY),
+      )
+      .map((t) => t.fuente),
+  );
+}
+
 async function main() {
   // Probar solo la regla con un PDF del disco.
   const i = process.argv.indexOf("--probar");
@@ -677,16 +698,26 @@ async function main() {
   const problemas = [];
   const manuales = [];
   const vencidos = [];
+  // Fuentes cuya tasa publicada ya tiene el documento cargado este mes: de
+  // esas no llegan correos (avisos, recordatorios ni "documento
+  // actualizado"), salvo una tasa distinta por aprobar (6 nov 2026).
+  const delMes = await fuentesConDocumentoDelMes();
   for (const fuente of fuentes) {
     try {
       const r = await revisarFuente(fuente);
+      const callar = delMes.has(fuente.id);
+      if (callar && (r.problema || r.documento || r.manual))
+        console.log(
+          `${nombreDe(fuente)}: ya tiene el documento de este mes; no va en el correo.`,
+        );
       if (r.nuevo) nuevos.push(r.nuevo);
-      if (r.documento) documentos.push(r.documento);
-      if (r.problema) problemas.push(r.problema);
+      if (r.documento && !callar) documentos.push(r.documento);
+      if (r.problema && !callar) problemas.push(r.problema);
       // Sin ninguna tasa cargada: a diario; si ya tiene, solo los lunes.
-      if (r.manual?.sinTasa) vencidos.push(r.manual.texto);
-      else if (r.manual) manuales.push(r.manual.texto);
+      if (r.manual?.sinTasa && !callar) vencidos.push(r.manual.texto);
+      else if (r.manual && !callar) manuales.push(r.manual.texto);
       if (
+        !callar &&
         fuente.como_extraer !== "manual" &&
         reglaDe(fuente.entidad?.codigo, fuente.producto)?.mensual
       ) {

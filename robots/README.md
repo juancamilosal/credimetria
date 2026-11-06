@@ -262,6 +262,13 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
   Lee el mismo PDF de sus otros productos (`tasas-personas-bdo`), tabla
   "Crédito de Libranza", columna **Libre inversión** (desde y hasta; no
   compra de cartera ni retanqueo).
+- **Sin correos del banco que ya tiene el documento del mes** (6 nov 2026):
+  si la tasa publicada de una fuente tiene un documento cargado este mes
+  (desde el día 1, hora de Colombia; por el robot o a mano), sus avisos no
+  van en el correo: ni "no encontré el PDF", ni recordatorios, ni
+  "documento actualizado, mismas tasas" (el PDF de la publicada sí se
+  cambia). Solo se avisa si trae una tasa distinta por aprobar. En la
+  consola queda "ya tiene el documento de este mes; no va en el correo".
 - **Sin navegador:** pide el PDF como un navegador (sin Playwright). Si un
   banco lo bloquea, llega el correo de "no encontré el PDF" y se carga a
   mano en `/admin/tasas`.
