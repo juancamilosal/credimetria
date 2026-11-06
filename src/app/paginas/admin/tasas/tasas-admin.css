@@ -589,3 +589,16 @@ blockquote {
   border: 1px solid #1aa61a;
   vertical-align: -1px;
 }
+
+/* Rechazar: borde rojo; al confirmar, rojo lleno */
+.btn-rechazar {
+  background: var(--cm-blanco);
+  color: var(--cm-error, #b42318);
+  border: 1px solid currentColor;
+}
+
+.btn-rechazar.confirmar {
+  background: var(--cm-error, #b42318);
+  color: #fff;
+  border-color: var(--cm-error, #b42318);
+}

@@ -556,13 +556,6 @@ describe('TasasAdmin', () => {
     expect(boton(nueva, 'Aprobar').disabled).toBeTrue();
   });
 
-  it('no tiene botón de rechazar: lo que está mal se corrige', async () => {
-    await crear();
-    const nueva = html.querySelector('[aria-label="Por aprobar"]')!;
-    expect(nueva.textContent).not.toContain('Rechazar');
-    expect(nueva.textContent).toContain('Editar');
-  });
-
   it('deja al final los bancos sin nada por aprobar', async () => {
     await crearCon([
       tasa({
@@ -807,6 +800,36 @@ describe('TasasAdmin', () => {
     mv.dispatchEvent(new Event('input'));
     fixture.detectChanges();
     expect(ea.value).toBe('15,39');
+  });
+
+  it('"Rechazar" pide confirmar y borra la tasa con su PDF', async () => {
+    await crear();
+    admin.eliminar.and.resolveTo();
+    docs.descartar.and.resolveTo();
+    const bbva = html.querySelector('.banco')!;
+    const rechazar = () =>
+      [
+        ...bbva
+          .querySelector('[aria-label="Por aprobar"]')!
+          .querySelectorAll<HTMLButtonElement>('button'),
+      ].find((b) => b.classList.contains('btn-rechazar'))!;
+    expect(rechazar().textContent!.trim()).toBe('Rechazar');
+    rechazar().click();
+    fixture.detectChanges();
+    expect(rechazar().textContent).toContain('¿Seguro?');
+    expect(admin.eliminar).not.toHaveBeenCalled();
+    rechazar().click();
+    await esperar();
+    expect(admin.eliminar).toHaveBeenCalledWith(2);
+    expect(docs.descartar).toHaveBeenCalledWith(
+      jasmine.objectContaining({ id: 11 }),
+    );
+    expect(
+      bbva.querySelector('[aria-label="Por aprobar"]')!.textContent,
+    ).toContain('Nada por aprobar.');
+    expect(html.querySelector('.aviso-ok')!.textContent).toContain(
+      'rechazada y eliminada con su PDF',
+    );
   });
 
   it('lee decimales con coma o punto', () => {

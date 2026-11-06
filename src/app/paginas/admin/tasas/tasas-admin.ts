@@ -202,6 +202,8 @@ export class TasasAdmin implements OnInit, OnDestroy {
   });
   /** Tasa cuyo PDF se pidió eliminar y espera el segundo toque. */
   protected readonly confirmandoBorrar = signal<number | null>(null);
+  /** Tasa por aprobar con "Rechazar" tocado una vez (pide confirmar). */
+  protected readonly confirmandoRechazo = signal<number | null>(null);
   private enlacesBlob: string[] = [];
   private archivo: File | null = null;
   private vigencia = '';
@@ -685,6 +687,41 @@ export class TasasAdmin implements OnInit, OnDestroy {
         if (!(error instanceof DocumentoRepetido)) throw error;
         this.error.set('Ese PDF ya está guardado en otro registro.');
       }
+    });
+  }
+
+  /**
+   * Rechaza una tasa por aprobar: la borra con su PDF (el registro, el
+   * archivo si nadie más lo usa y la copia resaltada). Pide un segundo
+   * toque. El PDF de la publicada nunca se toca. El robot no la vuelve a
+   * crear: la fuente conserva la huella de ese PDF.
+   */
+  protected async rechazar(c: TarjetaTasa, t: TasaAdmin): Promise<void> {
+    if (this.confirmandoRechazo() !== t.id) {
+      this.confirmandoRechazo.set(t.id);
+      return;
+    }
+    const documento = this.documentoDe(t);
+    // Solo si el PDF es de esta tasa: ni el actual ni uno que use otra.
+    const borrarPdf =
+      documento &&
+      documento.estado !== 'actual' &&
+      !this.tasas().some(
+        (x) => x.id !== t.id && x.documento?.id === documento.id,
+      );
+    await this.trabajar(c.clave, async () => {
+      await this.admin.eliminar(t.id);
+      if (borrarPdf) await this.docs.descartar(documento);
+      this.tasas.update((lista) => lista.filter((x) => x.id !== t.id));
+      if (borrarPdf)
+        this.documentos.update((lista) =>
+          lista.filter((d) => d.id !== documento.id),
+        );
+      this.confirmandoRechazo.set(null);
+      this.cerrarComparacionDe(t.id);
+      this.aviso.set(
+        `Tasa de ${c.entidad.nombre} rechazada${borrarPdf ? ' y eliminada con su PDF' : ' y eliminada'}.`,
+      );
     });
   }
 

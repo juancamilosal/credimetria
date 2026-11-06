@@ -232,9 +232,13 @@ Directus. No está en el menú: se entra por `/admin`.
     PDF), **Cambiar archivo** sube el PDF correcto en lugar del equivocado
     (borra el anterior; avisa si ya existe en otro registro) y **Eliminar
     tasa y PDF** (con un segundo toque) borra las dos; si había una tasa
-    anterior, vuelve a quedar publicada con su PDF como actual. Por aprobar
-    no se rechaza: se corrige con **Editar** o **Cargar PDF nuevo** (que
-    conserva los valores) y se aprueba.
+    anterior, vuelve a quedar publicada con su PDF como actual.
+  - **Rechazar** (al lado de Aprobar, también en Comparar PDF; 6 nov 2026):
+    con un segundo toque ("¿Seguro?…") borra la tasa por aprobar con su PDF:
+    el registro de `documentos`, el archivo si ningún otro documento lo usa
+    y la copia resaltada. Nunca borra el PDF actual ni uno que use otra
+    tasa. El robot no la vuelve a crear, porque la fuente conserva la
+    huella de ese PDF; vuelve a revisar cuando el banco publique otro.
   - La frase del PDF, las notas y quién aprobó van ocultas en **"Ver más
     detalle"**, para que la tarjeta muestre solo lo principal.
   - **Aprobar** deja la tasa publicada y su PDF como actual; la tasa que

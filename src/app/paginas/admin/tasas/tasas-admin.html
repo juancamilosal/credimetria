@@ -344,6 +344,20 @@
                     </button>
                     <button
                       type="button"
+                      class="btn btn-rechazar"
+                      [class.confirmar]="confirmandoRechazo() === t.id"
+                      [disabled]="ocupado() === c.clave"
+                      (click)="rechazar(c, t)"
+                      (blur)="confirmandoRechazo.set(null)"
+                    >
+                      {{
+                        confirmandoRechazo() === t.id
+                          ? "¿Seguro? Toca otra vez para eliminarla con su PDF"
+                          : "Rechazar"
+                      }}
+                    </button>
+                    <button
+                      type="button"
                       class="btn btn-claro"
                       [disabled]="ocupado() === c.clave"
                       (click)="editar(t)"
@@ -559,6 +573,20 @@
                 (click)="aprobar(cm.c, cm.t)"
               >
                 Aprobar
+              </button>
+              <button
+                type="button"
+                class="btn btn-rechazar"
+                [class.confirmar]="confirmandoRechazo() === cm.t.id"
+                [disabled]="ocupado() === cm.c.clave"
+                (click)="rechazar(cm.c, cm.t)"
+                (blur)="confirmandoRechazo.set(null)"
+              >
+                {{
+                  confirmandoRechazo() === cm.t.id
+                    ? "¿Seguro? Toca otra vez para eliminarla con su PDF"
+                    : "Rechazar"
+                }}
               </button>
               <button
                 type="button"
