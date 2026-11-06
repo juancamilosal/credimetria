@@ -167,6 +167,34 @@
               <div>
                 <h2>{{ c.entidad.nombre }}</h2>
                 <span class="nota">{{ nombreProducto(c.producto) }}</span>
+                <span class="promedio-sfc">
+                  @if (c.promedio; as p) {
+                    @if (p.tasa_ea !== null && p.estado !== "sin_reporte") {
+                      Promedio Superfinanciera
+                      <b class="cifra">{{ p.tasa_ea | tasa }} E.A.</b>
+                    } @else {
+                      Superfinanciera: <b>sin reporte</b>
+                    }
+                    @if (p.corte) {
+                      · corte {{ p.corte | date: "d MMM y" : "UTC" }}
+                    }
+                    @if (p.creditos) {
+                      · {{ p.creditos | number: "1.0-0" }}
+                      créditos
+                    }
+                    @if (p.consulta_url) {
+                      ·
+                      <a
+                        [href]="p.consulta_url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >datos ↗</a
+                      >
+                    }
+                  } @else {
+                    Superfinanciera: no reporta este producto
+                  }
+                </span>
               </div>
             </div>
             <div class="enlaces">

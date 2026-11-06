@@ -607,3 +607,15 @@ blockquote {
   font-size: 12px;
   color: var(--cm-gris);
 }
+
+/* Promedio de la Superfinanciera y su corte, debajo del producto */
+.promedio-sfc {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--cm-gris);
+}
+
+.promedio-sfc b {
+  color: var(--cm-tinta);
+}

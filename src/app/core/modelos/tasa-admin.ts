@@ -74,3 +74,22 @@ export const UNIDADES_TASA: { id: UnidadTasa; texto: string }[] = [
   { id: 'NMV', texto: 'N.M.V.' },
   { id: 'EA', texto: 'E.A.' },
 ];
+
+/**
+ * Lo que cobra en promedio una entidad en un producto según la
+ * Superfinanciera (colección `tasas_promedio`, la llena el robot del
+ * promedio): ponderado por monto de las últimas 4 semanas hasta `corte`.
+ */
+export interface PromedioAdmin {
+  entidad: string;
+  producto: Producto;
+  /** E.A. en porcentaje; `null` si no reportó. */
+  tasa_ea: number | null;
+  /** Última semana de datos: "2026-10-23". */
+  corte: string | null;
+  estado: 'al_dia' | 'sin_reporte' | string | null;
+  /** Créditos detrás del promedio (pocos = poco confiable). */
+  creditos: number | null;
+  /** La consulta en datos.gov.co. */
+  consulta_url: string | null;
+}

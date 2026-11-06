@@ -1,6 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { DocumentoPdf, FuenteAdmin } from '../modelos/documento';
-import { CambiosTasa, EstadoTasa, TasaAdmin } from '../modelos/tasa-admin';
+import {
+  CambiosTasa,
+  EstadoTasa,
+  PromedioAdmin,
+  TasaAdmin,
+} from '../modelos/tasa-admin';
 import { esVivienda } from '../datos/tasas';
 import { tasaMensual } from '../utilidades/credito';
 import { SesionAdmin } from './sesion-admin.service';
@@ -110,6 +115,19 @@ export class TasasAdminService {
   /** Borra una tasa (por ejemplo, una publicada con un PDF equivocado). */
   async eliminar(id: number): Promise<void> {
     await this.sesion.pedir('DELETE', `/items/tasas_publicadas/${id}`);
+  }
+
+  /** El promedio de la Superfinanciera de cada entidad y producto. */
+  async promedios(): Promise<PromedioAdmin[]> {
+    const filas = await this.sesion.pedir<PromedioAdmin[]>(
+      'GET',
+      '/items/tasas_promedio?limit=-1&fields=entidad,producto,tasa_ea,corte,estado,creditos,consulta_url',
+    );
+    return filas.map((p) => ({
+      ...p,
+      tasa_ea: p.tasa_ea === null ? null : Number(p.tasa_ea),
+      creditos: p.creditos === null ? null : Number(p.creditos),
+    }));
   }
 
   /** La usura del mes; `null` si todavía no hay. */

@@ -133,6 +133,7 @@ describe('TasasAdmin', () => {
       'restaurar',
       'usura',
       'guardarUsura',
+      'promedios',
     ]);
     docs = jasmine.createSpyObj<DocumentosAdminService>(
       'DocumentosAdminService',
@@ -151,6 +152,17 @@ describe('TasasAdmin', () => {
     );
     admin.listar.and.resolveTo(lista);
     admin.usura.and.resolveTo({ tasa: 28.59, mes: '2026-10-01' });
+    admin.promedios.and.resolveTo([
+      {
+        entidad: 'bbva',
+        producto: 'libre-inversion',
+        tasa_ea: 21.81,
+        corte: '2026-10-23',
+        estado: 'al_dia',
+        creditos: 4017,
+        consulta_url: 'https://www.datos.gov.co/x',
+      },
+    ]);
     docs.entidades.and.resolveTo([
       BBVA,
       { codigo: 'davivienda', nombre: 'Davivienda', logo: null },
@@ -839,6 +851,15 @@ describe('TasasAdmin', () => {
     expect(datos).toContain('Vigente desde');
     expect(datos).toContain('Documento cargado');
     expect(datos).toMatch(/2 sept 2026/);
+  });
+
+  it('cada banco muestra el promedio de la Superfinanciera con su corte', async () => {
+    await crear();
+    const cabeza = html.querySelector('.banco .promedio-sfc')!.textContent!;
+    expect(cabeza).toContain('Promedio Superfinanciera');
+    expect(cabeza).toContain('21,81 % E.A.');
+    expect(cabeza).toMatch(/corte 23 oct 2026/);
+    expect(cabeza).toContain('créditos');
   });
 
   it('lee decimales con coma o punto', () => {

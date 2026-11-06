@@ -1,4 +1,9 @@
-import { DatePipe, formatDate, NgTemplateOutlet } from '@angular/common';
+import {
+  DatePipe,
+  DecimalPipe,
+  formatDate,
+  NgTemplateOutlet,
+} from '@angular/common';
 import {
   Component,
   computed,
@@ -20,6 +25,7 @@ import {
 import { Producto } from '../../../core/modelos/tasa';
 import {
   CambiosTasa,
+  PromedioAdmin,
   SistemaTasa,
   TasaAdmin,
   TipoTasa,
@@ -93,6 +99,8 @@ interface TarjetaTasa {
   manuales: FuenteAdmin[];
   /** Manual y nadie la ha revisado este mes: hay que cargarla. */
   porCargar: boolean;
+  /** Lo que cobra en promedio según la Superfinanciera (si reporta). */
+  promedio: PromedioAdmin | null;
 }
 
 /** "Bogotá" → "bogota", para buscar sin importar tildes ni mayúsculas. */
@@ -128,6 +136,7 @@ interface Comparacion {
   selector: 'app-tasas-admin',
   imports: [
     DatePipe,
+    DecimalPipe,
     NgTemplateOutlet,
     ReactiveFormsModule,
     TasaPipe,
@@ -152,6 +161,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
   protected readonly fuentes = signal<FuenteAdmin[]>([]);
   protected readonly documentos = signal<DocumentoPdf[]>([]);
   protected readonly tasas = signal<TasaAdmin[]>([]);
+  protected readonly promedios = signal<PromedioAdmin[]>([]);
   protected readonly cargando = signal(true);
   protected readonly error = signal('');
   protected readonly aviso = signal('');
@@ -215,6 +225,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
     const fuentes = this.fuentes();
     const tasas = this.tasas();
     const documentos = this.documentos();
+    const promedios = this.promedios();
     return this.entidades().flatMap((entidad) => {
       const propias = fuentes.filter((f) => f.entidad === entidad.codigo);
       const productos = new Set<Producto>(propias.map((f) => f.producto));
@@ -247,6 +258,10 @@ export class TasasAdmin implements OnInit, OnDestroy {
           documentos: documentos.filter((d) => ids.includes(d.fuente)),
           manuales,
           porCargar: manuales.some((f) => pendienteDelMes(f.ultima_revision)),
+          promedio:
+            promedios.find(
+              (p) => p.entidad === entidad.codigo && p.producto === producto,
+            ) ?? null,
         };
       });
     });
@@ -335,6 +350,11 @@ export class TasasAdmin implements OnInit, OnDestroy {
       this.error.set(mensajeError(error));
     } finally {
       this.cargando.set(false);
+    }
+    try {
+      this.promedios.set(await this.admin.promedios());
+    } catch {
+      // Sin promedios la tarjeta sale sin ellos.
     }
     try {
       const usura = await this.admin.usura();
@@ -469,6 +489,7 @@ export class TasasAdmin implements OnInit, OnDestroy {
         documentos: [],
         manuales: [],
         porCargar: false,
+        promedio: null,
       }
     );
   }

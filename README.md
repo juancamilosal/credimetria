@@ -239,6 +239,11 @@ Directus. No está en el menú: se entra por `/admin`.
     y la copia resaltada. Nunca borra el PDF actual ni uno que use otra
     tasa. El robot no la vuelve a crear, porque la fuente conserva la
     huella de ese PDF; vuelve a revisar cuando el banco publique otro.
+  - Debajo del nombre del banco y el producto, el **promedio de la
+    Superfinanciera** (`tasas_promedio`): la E.A. ponderada de 4 semanas, la
+    **fecha de corte**, cuántos créditos tiene detrás y el enlace a la
+    consulta en datos.gov.co ("sin reporte" o "no reporta este producto" si
+    no hay).
   - Cada tasa muestra **Vigente desde** (la fecha que dice el banco) y,
     aparte, **Documento cargado** (cuándo se subió su PDF o pantallazo) y
     "Revisado el …" (la última revisión de su fuente: el robot cada día; en
