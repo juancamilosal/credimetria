@@ -602,3 +602,8 @@ blockquote {
   color: #fff;
   border-color: var(--cm-error, #b42318);
 }
+
+.datos .revisado {
+  font-size: 12px;
+  color: var(--cm-gris);
+}

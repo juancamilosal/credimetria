@@ -239,6 +239,11 @@ Directus. No está en el menú: se entra por `/admin`.
     y la copia resaltada. Nunca borra el PDF actual ni uno que use otra
     tasa. El robot no la vuelve a crear, porque la fuente conserva la
     huella de ese PDF; vuelve a revisar cuando el banco publique otro.
+  - Cada tasa muestra **Vigente desde** (la fecha que dice el banco) y,
+    aparte, **Documento cargado** (cuándo se subió su PDF o pantallazo) y
+    "Revisado el …" (la última revisión de su fuente: el robot cada día; en
+    las manuales, tú). Así se ve que el documento es de este mes aunque la
+    vigencia del banco sea más vieja (6 nov 2026).
   - La frase del PDF, las notas y quién aprobó van ocultas en **"Ver más
     detalle"**, para que la tarjeta muestre solo lo principal.
   - **Aprobar** deja la tasa publicada y su PDF como actual; la tasa que

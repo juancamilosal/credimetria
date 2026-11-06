@@ -646,6 +646,19 @@
         }}
       </dd>
     </div>
+    <div>
+      <dt>Documento cargado</dt>
+      <dd>
+        {{
+          documentoDe(t)?.date_created
+            ? (documentoDe(t)!.date_created | date: "d MMM y")
+            : "Sin documento"
+        }}
+      </dd>
+      @if (revisadoEl(t); as revisado) {
+        <dd class="revisado">Revisado el {{ revisado | date: "d MMM y" }}</dd>
+      }
+    </div>
   </dl>
 
   @if (t.documento; as d) {

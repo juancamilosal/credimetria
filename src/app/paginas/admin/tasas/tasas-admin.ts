@@ -477,6 +477,16 @@ export class TasasAdmin implements OnInit, OnDestroy {
     return this.documentos().find((d) => d.id === t.documento?.id);
   }
 
+  /**
+   * Última revisión de la fuente de la tasa (el robot cada día; en las
+   * manuales, la persona): dice que el documento se miró aunque no cambió.
+   */
+  protected revisadoEl(t: TasaAdmin): string | null {
+    return (
+      this.fuentes().find((f) => f.id === t.fuente?.id)?.ultima_revision ?? null
+    );
+  }
+
   // Aprobar, rechazar y editar
 
   protected async aprobar(c: TarjetaTasa, t: TasaAdmin): Promise<void> {

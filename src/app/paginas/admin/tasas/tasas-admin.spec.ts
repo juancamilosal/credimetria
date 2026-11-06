@@ -832,6 +832,15 @@ describe('TasasAdmin', () => {
     );
   });
 
+  it('muestra la vigencia y, aparte, cuándo se cargó el documento', async () => {
+    await crear();
+    const publicada = html.querySelector('[aria-label="Publicada hoy"]')!;
+    const datos = publicada.querySelector('.datos')!.textContent!;
+    expect(datos).toContain('Vigente desde');
+    expect(datos).toContain('Documento cargado');
+    expect(datos).toMatch(/2 sept 2026/);
+  });
+
   it('lee decimales con coma o punto', () => {
     expect(leerDecimal('1,3')).toBe(1.3);
     expect(leerDecimal('16.77 %')).toBe(16.77);
