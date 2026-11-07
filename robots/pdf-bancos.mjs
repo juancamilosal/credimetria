@@ -540,8 +540,9 @@ async function revisarFuente(fuente) {
     fuente: fuente.id,
     archivo,
     archivo_resaltado: archivoResaltado ?? null,
-    // Con las mismas tasas el PDF nuevo pasa directo a ser el actual.
-    estado: soloDocumento ? "actual" : "nuevo",
+    // El usuario Robot solo puede crear documentos "nuevo"; con las mismas
+    // tasas pasa a "actual" justo después (abajo).
+    estado: "nuevo",
     vigente_desde: tasa?.vigencia ?? null,
     origen: "robot",
     huella: marca,
@@ -559,6 +560,9 @@ async function revisarFuente(fuente) {
       await directus("PATCH", `/items/documentos/${d.id}`, {
         estado: "anterior",
       });
+    await directus("PATCH", `/items/documentos/${documento.id}`, {
+      estado: "actual",
+    });
     await directus("PATCH", `/items/tasas_publicadas/${soloDocumento.id}`, {
       documento: documento.id,
       vigente_desde: tasa.vigencia ?? null,
