@@ -57,25 +57,17 @@ describe('Inicio', () => {
     expect(html.querySelector('.primero .destacado')?.textContent).toContain(
       'Mejor tasa',
     );
-    // Cada tarjeta trae lo que cobra, la cuota de ejemplo y el rango.
+    // Tarjeta corta: lo que cobra, la cuota de ejemplo, el ahorro y "Quiero esta".
     const primera = html.querySelector('.primero')!;
     expect(primera.querySelector('.cobra')?.textContent).toContain(
       'Cuota de $',
     );
-    expect(primera.querySelector('.total')?.textContent).toContain(
-      'Pagarías en total $',
+    expect(primera.querySelector('.ahorro')?.textContent).toContain(
+      'menos que con el #2',
     );
-    expect(primera.querySelector('.total')?.textContent).toContain(
-      'de intereses $',
-    );
-    expect(primera.querySelector('.detalle')?.textContent).toContain('Anuncia');
-    // La diferencia se explica en palabras y con un globo de ayuda.
-    expect(primera.querySelector('.dif-texto')?.textContent).toMatch(
-      /(más|menos) de lo que\s+anuncia/,
-    );
-    expect(primera.querySelector('#tipDiferencia0')?.textContent).toContain(
-      'cobra en promedio menos la tasa más baja',
-    );
+    expect(primera.querySelector('.total')).toBeNull();
+    expect(primera.querySelector('.detalle')).toBeNull();
+    expect(primera.querySelectorAll('.banco-pie a').length).toBe(1);
     expect(
       html.querySelector<HTMLAnchorElement>('.top-cabeza .nota a')?.href,
     ).toContain('datos.gov.co');
@@ -84,26 +76,13 @@ describe('Inicio', () => {
     ).toContain('origen=inicio');
   });
 
-  it('enlaza el PDF del banco o, si no publica PDF, su página de tasas', () => {
-    const pies = [...crear().querySelectorAll('.banco-pie a:first-child')].map(
-      (a) => a.textContent!.replace(/\s+/g, ' ').trim(),
-    );
-    expect(pies[0]).toBe('PDF del banco ↗');
-    expect(pies[1]).toBe('Tasas en la página del banco ↗');
-  });
-
-  it('las 3 tasas más bajas tienen una pestaña por producto', () => {
+  it('no muestra la lista de productos: se cambia con las flechas', () => {
     const html = crear();
-    const pestanas = [...html.querySelectorAll('.pestana')].map((b) =>
-      b.textContent!.trim(),
-    );
-    expect(pestanas[0]).toBe('Libre inversión');
-    expect(pestanas).toContain('Libranza');
+    expect(html.querySelector('.pestana, [role=tablist]')).toBeNull();
     expect(titulo(html)).toBe('Las 3 tasas más bajas en libre inversión');
-    // Al tocar Libranza se ven las 3 de libranza.
-    [...html.querySelectorAll<HTMLButtonElement>('.pestana')]
-      .find((b) => b.textContent!.trim() === 'Libranza')!
-      .click();
+    const flecha = (nombre: string) =>
+      html.querySelector<HTMLButtonElement>(`[aria-label="${nombre}"]`)!;
+    flecha('Producto siguiente').click();
     fixture.detectChanges();
     expect(titulo(html)).toBe('Las 3 tasas más bajas en libranza');
     const esperados = TestBed.inject(TasasService)
@@ -112,38 +91,36 @@ describe('Inicio', () => {
       .map((t) => t.entidad);
     expect(tarjetas(html)).toEqual(esperados);
     expect(
-      html.querySelector('.pestana[aria-selected="true"]')!.textContent,
-    ).toContain('Libranza');
-    expect(
       html
         .querySelector<HTMLAnchorElement>('.top-cabeza > a')!
         .getAttribute('href'),
     ).toContain('producto=libranza');
+    flecha('Producto anterior').click();
+    flecha('Producto anterior').click();
+    fixture.detectChanges();
+    // Desde el primero, "anterior" da la vuelta al último.
+    expect(
+      html.querySelector('.cuenta')!.textContent!.replace(/\s+/g, ' ').trim(),
+    ).toMatch(/^(\d+) de \1$/);
   });
 
-  it('pasa sola al siguiente producto cada 10 segundos y se puede pausar', async () => {
+  it('pasa solo al siguiente producto cada 7 segundos y se puede pausar', async () => {
     jasmine.clock().install();
     try {
       const html = crear();
       await fixture.whenStable();
-      const segundo = html.querySelectorAll('.pestana')[1].textContent!.trim();
-      jasmine.clock().tick(10_000);
+      jasmine.clock().tick(6_999);
       fixture.detectChanges();
-      expect(
-        html
-          .querySelector('.pestana[aria-selected="true"]')!
-          .textContent!.trim(),
-      ).toBe(segundo);
+      expect(titulo(html)).toBe('Las 3 tasas más bajas en libre inversión');
+      jasmine.clock().tick(1);
+      fixture.detectChanges();
+      expect(titulo(html)).toBe('Las 3 tasas más bajas en libranza');
       // En pausa no cambia.
       html.querySelector<HTMLButtonElement>('.pausa')!.click();
       fixture.detectChanges();
       jasmine.clock().tick(30_000);
       fixture.detectChanges();
-      expect(
-        html
-          .querySelector('.pestana[aria-selected="true"]')!
-          .textContent!.trim(),
-      ).toBe(segundo);
+      expect(titulo(html)).toBe('Las 3 tasas más bajas en libranza');
     } finally {
       jasmine.clock().uninstall();
     }

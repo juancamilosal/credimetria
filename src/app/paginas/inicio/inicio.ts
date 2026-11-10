@@ -4,20 +4,13 @@ import {
   Component,
   computed,
   DestroyRef,
-  ElementRef,
   inject,
   signal,
-  viewChild,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Ayuda } from '../../compartido/ayuda/ayuda';
 import { Chips } from '../../compartido/chips/chips';
 import { Foto } from '../../compartido/foto/foto';
-import {
-  PesosPipe,
-  PuntosPipe,
-  TasaPipe,
-} from '../../compartido/pipes/formato';
+import { PesosPipe, TasaPipe } from '../../compartido/pipes/formato';
 import {
   MONTO_RANKING,
   MONTO_VIVIENDA,
@@ -25,11 +18,7 @@ import {
   PLAZO_VIVIENDA,
 } from '../../compartido/tabla-ranking/tabla-ranking';
 import { cuotaMensual } from '../../core/utilidades/credito';
-import {
-  AYUDA_DIFERENCIA,
-  esVivienda,
-  FUENTE_PROMEDIO,
-} from '../../core/datos/tasas';
+import { esVivienda, FUENTE_PROMEDIO } from '../../core/datos/tasas';
 import { FOTOS } from '../../core/datos/fotos';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
@@ -37,11 +26,11 @@ import { TasasService } from '../../core/servicios/tasas.service';
 import { EsqueletoImagen } from '../../compartido/esqueleto-imagen/esqueleto-imagen';
 
 /** Cada cuánto pasa al siguiente producto "Las 3 tasas más bajas". */
-export const ROTAR_CADA_MS = 10_000;
+export const ROTAR_CADA_MS = 7_000;
 
 /**
  * Inicio: qué hace Credimetría, las 3 tasas más bajas de cada producto (van
- * rotando cada 10 segundos),
+ * rotando cada 7 segundos, con flechas),
  * cómo funciona, con qué entidades comparamos y la entrada a la asesoría.
  */
 @Component({
@@ -49,11 +38,9 @@ export const ROTAR_CADA_MS = 10_000;
   imports: [
     DatePipe,
     RouterLink,
-    Ayuda,
     Chips,
     Foto,
     PesosPipe,
-    PuntosPipe,
     TasaPipe,
     EsqueletoImagen,
   ],
@@ -115,14 +102,9 @@ export class Inicio {
   /** Cambia cada vez que arranca un intervalo (la barra vuelve a empezar). */
   protected readonly vuelta = signal(0);
   private reloj: ReturnType<typeof setInterval> | null = null;
-  private readonly pestanas = viewChild<ElementRef<HTMLElement>>('pestanas');
-  protected readonly hayUsura = computed(() =>
-    this.mejores().some((t) => t.hastaUsura),
-  );
   protected readonly entidades = this.tasas.entidadesConLogo;
   protected readonly fotos = FOTOS;
   protected readonly fuente = FUENTE_PROMEDIO;
-  protected readonly ayudaDiferencia = AYUDA_DIFERENCIA;
 
   /** Tarjetas con foto por tipo de crédito; cada una lleva a su ranking. */
   protected readonly productos = computed(() =>
@@ -177,26 +159,20 @@ export class Inicio {
     inject(DestroyRef).onDestroy(() => this.parar());
   }
 
-  /** Muestra el producto de la pestaña tocada y vuelve a contar 10 s. */
-  protected elegir(posicion: number): void {
-    this.actual.set(posicion);
-    this.arrancar();
-    this.verPestana();
+  /** Con las flechas: el producto anterior o el siguiente, y vuelve a contar. */
+  protected anterior(): void {
+    this.mover(-1);
   }
 
-  /**
-   * En el celular las pestañas no caben: desplaza la fila (no la página)
-   * para que se vea la del producto que se muestra.
-   */
-  private verPestana(): void {
-    setTimeout(() => {
-      const fila = this.pestanas()?.nativeElement;
-      const activa = fila?.querySelector<HTMLElement>('[aria-selected="true"]');
-      if (!fila || !activa) return;
-      const izquierda =
-        activa.offsetLeft - (fila.clientWidth - activa.offsetWidth) / 2;
-      fila.scrollTo({ left: Math.max(0, izquierda), behavior: 'smooth' });
-    });
+  protected siguiente(): void {
+    this.mover(1);
+  }
+
+  private mover(paso: number): void {
+    const cuantos = this.productosTop().length;
+    if (!cuantos) return;
+    this.actual.update((i) => (i + paso + cuantos) % cuantos);
+    this.arrancar();
   }
 
   protected alternarPausa(): void {
@@ -220,7 +196,6 @@ export class Inicio {
       if (typeof document !== 'undefined' && document.hidden) return;
       this.actual.update((i) => (i + 1) % cuantos);
       this.vuelta.update((v) => v + 1);
-      this.verPestana();
     }, ROTAR_CADA_MS);
   }
 
