@@ -87,7 +87,10 @@ morada y oro del diseño (ver abajo).
   autorización (`paso` en `asesoria.ts`; lo que ya apareció no se esconde).
   El botón **"Quiero que me asesoren"** se ve siempre: si falta algo,
   muestra todo el formulario con lo que falta marcado (también "Marca la
-  autorización para continuar"). Al enviar, el botón dice "Enviando…"; si el servidor falla, se queda en el formulario con el
+  autorización para continuar"). El texto de la autorización dice
+  "credimetria.com/aliados" (versión de la política `2026-11-borrador`;
+  las solicitudes anteriores guardan "credimetria.co/aliados" y
+  `2026-10-borrador`). Al enviar, el botón dice "Enviando…"; si el servidor falla, se queda en el formulario con el
   aviso "No pudimos enviar tu solicitud".
 - **Solicitudes de asesoría** (`servidor/prospectos.mjs`, `POST
 /api/prospectos`): el servidor revisa los datos (nunca confía en el
