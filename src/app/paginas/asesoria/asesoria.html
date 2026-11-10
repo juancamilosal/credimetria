@@ -120,184 +120,194 @@
           }
         </fieldset>
 
-        <div class="fila-datos">
-          <div class="campo">
-            <label for="asMonto"
-              >¿Cuánto necesitas?
-              <span class="opcional">(opcional)</span></label
-            >
-            <div class="con-prefijo">
-              <span aria-hidden="true">$</span>
-              <input
-                id="asMonto"
-                formControlName="monto"
-                appMoneda
-                inputmode="decimal"
-                placeholder="Ej. 20.000.000"
-                autocomplete="off"
-                [attr.aria-invalid]="mostrarError('monto')"
-                aria-describedby="errMonto"
-              />
-            </div>
-            @if (mostrarError("monto")) {
-              <span class="error" id="errMonto">
-                Si escribes un monto, que sea de al menos $1.000.000.
-              </span>
-            }
-          </div>
-
-          <div class="campo">
-            <label for="asCiudad">¿En qué ciudad vives?</label>
-            <input
-              id="asCiudad"
-              formControlName="ciudad"
-              list="asCiudades"
-              placeholder="Ej. Bogotá"
-              autocomplete="address-level2"
-              [attr.aria-invalid]="mostrarError('ciudad')"
-              aria-describedby="errCiudad"
-            />
-            <datalist id="asCiudades">
-              @for (c of ciudades; track c) {
-                <option [value]="c"></option>
-              }
-            </datalist>
-            @if (mostrarError("ciudad")) {
-              <span class="error" id="errCiudad">Escribe tu ciudad.</span>
-            }
-          </div>
-        </div>
-
-        <section class="contacto" aria-labelledby="tituloContacto">
-          <h2 id="tituloContacto">Tus datos de contacto</h2>
-          <p class="nota">Para que el asesor sepa a quién llamar.</p>
-          <div class="rejilla">
+        @if (paso() >= 2) {
+          <div class="fila-datos aparece">
             <div class="campo">
-              <label for="asNombres">Nombres</label>
-              <input
-                id="asNombres"
-                formControlName="nombres"
-                placeholder="Ej. Ana María"
-                autocomplete="given-name"
-                [attr.aria-invalid]="mostrarError('nombres')"
-                aria-describedby="errNombres"
-              />
-              @if (mostrarError("nombres")) {
-                <span class="error" id="errNombres">Escribe tus nombres.</span>
-              }
-            </div>
-            <div class="campo">
-              <label for="asApellidos">Apellidos</label>
-              <input
-                id="asApellidos"
-                formControlName="apellidos"
-                placeholder="Ej. Gómez Rojas"
-                autocomplete="family-name"
-                [attr.aria-invalid]="mostrarError('apellidos')"
-                aria-describedby="errApellidos"
-              />
-              @if (mostrarError("apellidos")) {
-                <span class="error" id="errApellidos"
-                  >Escribe tus apellidos.</span
-                >
-              }
-            </div>
-          </div>
-          <div class="rejilla">
-            <div class="campo">
-              <label for="asCel">Número de contacto (celular)</label>
-              <input
-                id="asCel"
-                formControlName="celular"
-                type="tel"
-                inputmode="tel"
-                placeholder="300 000 0000"
-                autocomplete="tel-national"
-                [attr.aria-invalid]="mostrarError('celular')"
-                aria-describedby="errCel"
-              />
-              @if (mostrarError("celular")) {
-                <span class="error" id="errCel">
-                  Escribe un celular de 10 dígitos que empiece por 3.
+              <label for="asMonto"
+                >¿Cuánto necesitas?
+                <span class="opcional">(opcional)</span></label
+              >
+              <div class="con-prefijo">
+                <span aria-hidden="true">$</span>
+                <input
+                  id="asMonto"
+                  formControlName="monto"
+                  appMoneda
+                  inputmode="decimal"
+                  placeholder="Ej. 20.000.000"
+                  autocomplete="off"
+                  [attr.aria-invalid]="mostrarError('monto')"
+                  aria-describedby="errMonto"
+                />
+              </div>
+              @if (mostrarError("monto")) {
+                <span class="error" id="errMonto">
+                  Si escribes un monto, que sea de al menos $1.000.000.
                 </span>
               }
             </div>
+
             <div class="campo">
-              <label for="asCorreo">Correo</label>
+              <label for="asCiudad">¿En qué ciudad vives?</label>
               <input
-                id="asCorreo"
-                type="email"
-                formControlName="correo"
-                placeholder="tu@correo.com"
-                autocomplete="email"
-                [attr.aria-invalid]="mostrarError('correo')"
-                aria-describedby="errCorreo"
+                id="asCiudad"
+                formControlName="ciudad"
+                list="asCiudades"
+                placeholder="Ej. Bogotá"
+                autocomplete="address-level2"
+                [attr.aria-invalid]="mostrarError('ciudad')"
+                aria-describedby="errCiudad"
               />
-              @if (mostrarError("correo")) {
-                <span class="error" id="errCorreo"
-                  >Escribe un correo válido.</span
-                >
-              } @else {
-                <span class="nota">Allí te llega la confirmación.</span>
+              <datalist id="asCiudades">
+                @for (c of ciudades; track c) {
+                  <option [value]="c"></option>
+                }
+              </datalist>
+              @if (mostrarError("ciudad")) {
+                <span class="error" id="errCiudad">Escribe tu ciudad.</span>
               }
             </div>
           </div>
+        }
 
-          <fieldset formGroupName="canales" class="canales">
-            <legend>¿Por dónde te contactamos?</legend>
-            <div class="opciones">
-              <label
-                ><input
-                  type="checkbox"
-                  formControlName="whatsapp"
-                />WhatsApp</label
-              >
-              <label
-                ><input
-                  type="checkbox"
-                  formControlName="llamada"
-                />Llamada</label
-              >
-              <label
-                ><input type="checkbox" formControlName="correo" />Correo</label
-              >
+        @if (paso() >= 3) {
+          <section class="contacto aparece" aria-labelledby="tituloContacto">
+            <h2 id="tituloContacto">Tus datos de contacto</h2>
+            <p class="nota">Para que el asesor sepa a quién llamar.</p>
+            <div class="rejilla">
+              <div class="campo">
+                <label for="asNombres">Nombres</label>
+                <input
+                  id="asNombres"
+                  formControlName="nombres"
+                  placeholder="Ej. Ana María"
+                  autocomplete="given-name"
+                  [attr.aria-invalid]="mostrarError('nombres')"
+                  aria-describedby="errNombres"
+                />
+                @if (mostrarError("nombres")) {
+                  <span class="error" id="errNombres"
+                    >Escribe tus nombres.</span
+                  >
+                }
+              </div>
+              <div class="campo">
+                <label for="asApellidos">Apellidos</label>
+                <input
+                  id="asApellidos"
+                  formControlName="apellidos"
+                  placeholder="Ej. Gómez Rojas"
+                  autocomplete="family-name"
+                  [attr.aria-invalid]="mostrarError('apellidos')"
+                  aria-describedby="errApellidos"
+                />
+                @if (mostrarError("apellidos")) {
+                  <span class="error" id="errApellidos"
+                    >Escribe tus apellidos.</span
+                  >
+                }
+              </div>
             </div>
-            <span class="nota">
-              Solo por los canales que marques, de lunes a viernes de 7 a. m. a
-              7 p. m. y sábados de 8 a. m. a 3 p. m.
-            </span>
-          </fieldset>
-          @if (errorCanales()) {
-            <span class="error">Marca al menos un canal.</span>
-          }
-        </section>
+            <div class="rejilla">
+              <div class="campo">
+                <label for="asCel">Número de contacto (celular)</label>
+                <input
+                  id="asCel"
+                  formControlName="celular"
+                  type="tel"
+                  inputmode="tel"
+                  placeholder="300 000 0000"
+                  autocomplete="tel-national"
+                  [attr.aria-invalid]="mostrarError('celular')"
+                  aria-describedby="errCel"
+                />
+                @if (mostrarError("celular")) {
+                  <span class="error" id="errCel">
+                    Escribe un celular de 10 dígitos que empiece por 3.
+                  </span>
+                }
+              </div>
+              <div class="campo">
+                <label for="asCorreo">Correo</label>
+                <input
+                  id="asCorreo"
+                  type="email"
+                  formControlName="correo"
+                  placeholder="tu@correo.com"
+                  autocomplete="email"
+                  [attr.aria-invalid]="mostrarError('correo')"
+                  aria-describedby="errCorreo"
+                />
+                @if (mostrarError("correo")) {
+                  <span class="error" id="errCorreo"
+                    >Escribe un correo válido.</span
+                  >
+                } @else {
+                  <span class="nota">Allí te llega la confirmación.</span>
+                }
+              </div>
+            </div>
 
-        <label class="autoriza">
-          <input type="checkbox" formControlName="autorizo" />
-          <span>
-            Autorizo a Credimetría a compartir mis datos con los asesores de
-            crédito aliados publicados en
-            <a routerLink="/aliados">credimetria.co/aliados</a>, para que me
-            contacten y me ofrezcan créditos. Me contactarán máximo 2 asesores.
-            Acepto la
-            <a routerLink="/politica-de-datos"
-              >política de tratamiento de datos</a
-            >.
-          </span>
-        </label>
+            <fieldset formGroupName="canales" class="canales">
+              <legend>¿Por dónde te contactamos?</legend>
+              <div class="opciones">
+                <label
+                  ><input
+                    type="checkbox"
+                    formControlName="whatsapp"
+                  />WhatsApp</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    formControlName="llamada"
+                  />Llamada</label
+                >
+                <label
+                  ><input
+                    type="checkbox"
+                    formControlName="correo"
+                  />Correo</label
+                >
+              </div>
+              <span class="nota">
+                Solo por los canales que marques, de lunes a viernes de 7 a. m.
+                a 7 p. m. y sábados de 8 a. m. a 3 p. m.
+              </span>
+            </fieldset>
+            @if (errorCanales()) {
+              <span class="error">Marca al menos un canal.</span>
+            }
+          </section>
+        }
+
+        @if (paso() >= 4) {
+          <label class="autoriza aparece">
+            <input type="checkbox" formControlName="autorizo" />
+            <span>
+              Autorizo a Credimetría a compartir mis datos con los asesores de
+              crédito aliados publicados en
+              <a routerLink="/aliados">credimetria.co/aliados</a>, para que me
+              contacten y me ofrezcan créditos. Me contactarán máximo 2
+              asesores. Acepto la
+              <a routerLink="/politica-de-datos"
+                >política de tratamiento de datos</a
+              >.
+            </span>
+          </label>
+          @if (mostrarError("autorizo")) {
+            <span class="error" id="errAutoriza"
+              >Marca la autorización para continuar.</span
+            >
+          }
+        }
 
         <button
           class="btn btn-principal enviar"
           type="submit"
-          [disabled]="!autorizo() || enviando()"
+          [disabled]="enviando()"
         >
-          {{
-            enviando()
-              ? "Enviando…"
-              : autorizo()
-                ? "Quiero que me asesoren"
-                : "Marca la autorización para continuar"
-          }}
+          {{ enviando() ? "Enviando…" : "Quiero que me asesoren" }}
         </button>
         @if (fallo()) {
           <p class="error fallo" role="alert">

@@ -153,15 +153,6 @@ ol {
   font-weight: 600;
 }
 
-.cartel {
-  background: var(--cm-aviso-100);
-  color: var(--cm-aviso-800);
-  border-radius: var(--cm-r-boton);
-  padding: 10px 14px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
 @keyframes aparece {
   from {
     transform: translateY(6px);

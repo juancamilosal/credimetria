@@ -5,7 +5,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormBuilder,
@@ -170,11 +170,6 @@ export class Asesoria {
     { validators: canalesValidos },
   );
 
-  protected readonly autorizo = toSignal(
-    this.form.controls.autorizo.valueChanges,
-    { initialValue: false },
-  );
-
   /** Texto que explica de dónde viene la persona. */
   protected readonly vieneDe = signal<string | null>(null);
   protected readonly intentoEnviar = signal(false);
@@ -182,9 +177,36 @@ export class Asesoria {
   protected readonly enviando = signal(false);
   /** El servidor no la pudo guardar: se queda en el formulario. */
   protected readonly fallo = signal(false);
+  /**
+   * Hasta dónde se ve el formulario: 1 el tipo de crédito; 2 monto y ciudad;
+   * 3 los datos de contacto; 4 la autorización. Avanza a medida que la
+   * persona llena lo anterior y nunca se devuelve.
+   */
+  protected readonly paso = signal(1);
 
   constructor() {
     this.llenarDesdeEnlace(inject(ActivatedRoute).snapshot.queryParamMap);
+    this.avanzar();
+    this.form.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.avanzar());
+  }
+
+  /** Muestra la parte siguiente cuando lo anterior ya está lleno. */
+  private avanzar(): void {
+    const c = this.form.controls;
+    let hasta = 1;
+    if (c.producto.valid) hasta = 2;
+    if (hasta === 2 && c.ciudad.value.trim().length >= 3) hasta = 3;
+    if (
+      hasta === 3 &&
+      c.nombres.valid &&
+      c.apellidos.valid &&
+      c.celular.valid &&
+      c.correo.valid
+    )
+      hasta = 4;
+    if (hasta > this.paso()) this.paso.set(hasta);
   }
 
   /** Muestra el error de un campo solo después de tocarlo o de intentar enviar. */
@@ -216,8 +238,10 @@ export class Asesoria {
   protected async enviar(): Promise<void> {
     this.intentoEnviar.set(true);
     this.form.markAllAsTouched();
-    if (!this.form.controls.autorizo.value || this.enviando()) return;
+    if (this.enviando()) return;
     if (this.form.invalid) {
+      // Si falta algo, se ve todo el formulario con lo que falta marcado.
+      this.paso.set(4);
       this.enfocarPrimerError();
       return;
     }

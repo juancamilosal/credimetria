@@ -16,7 +16,6 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import {
-  formatoPesos,
   formatoTasa,
   PesosPipe,
   TasaPipe,
@@ -48,7 +47,6 @@ interface Parte {
 type Mensaje =
   | { id: number; tipo: 'bot'; partes: Parte[] }
   | { id: number; tipo: 'yo'; texto: string }
-  | { id: number; tipo: 'cartel'; texto: string }
   | {
       id: number;
       tipo: 'resultado';
@@ -69,7 +67,6 @@ interface Opcion {
 /** Lo que se muestra abajo del chat para responder. */
 type Zona =
   | { tipo: 'nada' }
-  | { tipo: 'empezar' }
   | {
       tipo: 'opciones';
       pregunta: string;
@@ -119,8 +116,14 @@ export class ComparaOferta {
   private datos: Partial<DatosOferta> = {};
   private siguienteId = 0;
 
+  /** Al abrir la página no se mueve el foco ni la pantalla. */
+  private abriendo = true;
+
   constructor() {
-    this.cargarEjemplo();
+    // Abre directo con el saludo y la primera pregunta; la persona va
+    // respondiendo.
+    this.iniciar();
+    this.abriendo = false;
   }
 
   /** Empieza una conversación nueva con los datos de la persona. */
@@ -311,7 +314,7 @@ export class ComparaOferta {
 
   // Resultado y cierre
 
-  private mostrarResultado(ejemplo = false): void {
+  private mostrarResultado(): void {
     const datos = this.datos as DatosOferta;
     // La usura de consumo no aplica a vivienda, que tiene su propio límite.
     const usura = esVivienda(datos.producto) ? null : this.tasas.usura().tasa;
@@ -322,7 +325,6 @@ export class ComparaOferta {
     );
     this.bot('Listo. Esto es lo que encontré:');
     this.agregar({ tipo: 'resultado', datos: { ...datos }, resultado, usura });
-    if (ejemplo) return;
 
     this.bot(
       resultado.veredicto === 'bien'
@@ -368,44 +370,6 @@ export class ComparaOferta {
     );
   }
 
-  /** Conversación ya resuelta que se ve al abrir la página. */
-  private cargarEjemplo(): void {
-    this.mensajes.set([]);
-    this.agregar({
-      tipo: 'cartel',
-      texto:
-        'Ejemplo de una conversación. Toca "Comparar mi oferta" para hacerlo con tus datos.',
-    });
-    this.bot(
-      'Hola. Cuéntame qué te ofrecieron y te digo cuánto te cobran de verdad.',
-    );
-    this.bot('¿Qué crédito te ofrecieron?');
-    this.yo(this.tasas.nombre('libre-inversion'));
-    this.bot('¿Cuánto dinero te prestan?');
-    this.yo(formatoPesos(20_000_000));
-    this.bot('¿A cuántos meses?');
-    this.yo('48 meses');
-    this.bot('¿Qué te dijo el asesor?');
-    this.yo('Una tasa efectiva anual (E.A.)');
-    this.bot('¿Qué tasa efectiva anual te dijeron?');
-    this.yo(`${formatoTasa(26.38)} E.A.`);
-    this.bot('¿Te dijeron la cuota mensual, con seguros incluidos?');
-    this.yo('Sí');
-    this.bot('Escribe la cuota mensual, con seguros incluidos.');
-    this.yo(formatoPesos(700_000));
-    this.datos = {
-      producto: 'libre-inversion',
-      monto: 20_000_000,
-      plazo: 48,
-      tipo: 'ea',
-      tasaDicha: 26.38,
-      tasaMensualDicha: null,
-      cuota: 700_000,
-    };
-    this.mostrarResultado(true);
-    this.zona.set({ tipo: 'empezar' });
-  }
-
   // Piezas del chat
 
   private agregar(mensaje: SinId<Mensaje>): void {
@@ -445,7 +409,7 @@ export class ComparaOferta {
 
   /** Pone el foco en la respuesta nueva y la deja a la vista. */
   private enfocarRespuesta(): void {
-    if (!this.enNavegador) return;
+    if (!this.enNavegador || this.abriendo) return;
     afterNextRender(
       () => {
         const zona = this.respuesta()?.nativeElement;

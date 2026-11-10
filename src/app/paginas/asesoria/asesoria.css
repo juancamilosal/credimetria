@@ -375,3 +375,25 @@ ul {
     padding: 20px;
   }
 }
+
+/* Cada parte del formulario aparece cuando lo anterior ya está lleno */
+.aparece {
+  animation: aparece 0.25s ease-out;
+}
+
+@keyframes aparece {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aparece {
+    animation: none;
+  }
+}

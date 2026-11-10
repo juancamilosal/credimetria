@@ -75,23 +75,46 @@ describe('Asesoria', () => {
     crear();
     expect(html.textContent).not.toContain('¿De dónde vienen tus ingresos?');
     expect(html.textContent).not.toContain('reportes negativos');
-    // Solo el tipo de crédito y los canales de contacto (la ciudad es un campo).
+    // Con todo a la vista: solo el tipo de crédito y los canales de
+    // contacto (la ciudad es un campo).
+    enviar();
     expect(html.querySelectorAll('fieldset').length).toBe(2);
   });
 
-  it('el botón queda bloqueado hasta marcar la autorización', () => {
+  it('arranca solo con el tipo de crédito y muestra lo demás a medida que llena', () => {
+    crear();
+    const hay = (sel: string) => html.querySelector(sel) !== null;
+    expect(hay('.tipos')).toBeTrue();
+    expect(hay('#asMonto') || hay('#asCiudad')).toBeFalse();
+    expect(hay('.contacto') || hay('.autoriza')).toBeFalse();
+    elegirTipo('Libranza');
+    expect(hay('#asMonto') && hay('#asCiudad')).toBeTrue();
+    expect(hay('.contacto')).toBeFalse();
+    escribir('#asCiudad', 'Cal');
+    expect(hay('.contacto')).toBeTrue();
+    expect(hay('.autoriza')).toBeFalse();
+    escribir('#asNombres', 'Luis');
+    escribir('#asApellidos', 'Pérez');
+    escribir('#asCel', '3109876543');
+    expect(hay('.autoriza')).toBeFalse();
+    escribir('#asCorreo', 'luis@ejemplo.com');
+    expect(hay('.autoriza')).toBeTrue();
+  });
+
+  it('el botón "Quiero que me asesoren" siempre se ve y sin autorización avisa', () => {
     crear();
     const boton = html.querySelector<HTMLButtonElement>('button[type=submit]')!;
-    expect(boton.disabled).toBeTrue();
-    expect(boton.textContent).toContain('Marca la autorización');
-    autorizar();
     expect(boton.disabled).toBeFalse();
-    expect(boton.textContent).toContain('Quiero que me asesoren');
+    expect(boton.textContent!.trim()).toBe('Quiero que me asesoren');
+    enviar();
+    expect(html.querySelector('#errAutoriza')?.textContent).toContain(
+      'Marca la autorización',
+    );
+    expect(html.querySelector('.listo')).toBeNull();
   });
 
   it('pide crédito, ciudad, nombre y celular, pero no el monto', () => {
     crear();
-    autorizar();
     enviar();
     expect(html.querySelector('#errProducto')).not.toBeNull();
     expect(html.querySelector('#errCiudad')).not.toBeNull();
@@ -112,21 +135,21 @@ describe('Asesoria', () => {
 
   it('el monto es un solo campo con "$" y valida el mínimo', () => {
     crear();
+    elegirTipo('Libranza');
     expect(html.querySelector('.con-prefijo span')?.textContent).toBe('$');
     escribir('#asMonto', '500.000');
-    autorizar();
     enviar();
     expect(html.querySelector('#errMonto')).not.toBeNull();
   });
 
   it('la ciudad es un solo campo con sugerencias', () => {
     crear();
+    elegirTipo('Libranza');
     const ciudad = html.querySelector<HTMLInputElement>('#asCiudad')!;
     expect(ciudad.getAttribute('list')).toBe('asCiudades');
     expect(html.querySelectorAll('#asCiudades option').length).toBeGreaterThan(
       10,
     );
-    autorizar();
     enviar();
     expect(html.querySelector('#errCiudad')?.textContent).toContain(
       'Escribe tu ciudad.',
@@ -260,6 +283,8 @@ describe('Asesoria', () => {
 
   it('muestra el bloque "Tus datos de contacto"', () => {
     crear();
+    elegirTipo('Libranza');
+    escribir('#asCiudad', 'Cali');
     const bloque = html.querySelector('.contacto')!;
     expect(bloque.querySelector('h2')?.textContent).toContain(
       'Tus datos de contacto',
@@ -271,10 +296,11 @@ describe('Asesoria', () => {
 
   it('el correo siempre está y se pide (allí llega la confirmación)', () => {
     crear();
+    elegirTipo('Libranza');
+    escribir('#asCiudad', 'Cali');
     expect(html.querySelector('#asCorreo')).not.toBeNull();
     expect(html.textContent).toContain('Allí te llega la confirmación.');
     escribir('#asCorreo', 'sin-arroba');
-    autorizar();
     enviar();
     expect(html.querySelector('#errCorreo')?.textContent).toContain(
       'Escribe un correo válido.',

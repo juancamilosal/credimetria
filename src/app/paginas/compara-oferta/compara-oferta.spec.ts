@@ -49,16 +49,21 @@ describe('ComparaOferta', () => {
   }
 
   function empezarHastaQueDijeron(monto = '20.000.000') {
-    tocar('Comparar mi oferta');
     tocar('Libre inversión');
     escribir(monto);
     tocar('48 meses');
   }
 
-  it('abre con la conversación de ejemplo resuelta', () => {
-    expect(html.querySelector('.cartel')?.textContent).toContain('Ejemplo');
-    expect(ultimoResultado().textContent).toContain('32,22 %');
-    expect(boton('Comparar mi oferta')).toBeTruthy();
+  it('abre solo con el saludo y la primera pregunta, sin ejemplo', () => {
+    const mensajes = [...html.querySelectorAll('.mensajes li')].map((li) =>
+      li.textContent!.trim(),
+    );
+    expect(mensajes).toEqual([
+      'Hola. Cuéntame qué te ofrecieron y te digo cuánto te cobran de verdad.',
+      '¿Qué crédito te ofrecieron?',
+    ]);
+    expect(html.querySelector('.resultado')).toBeNull();
+    expect(boton('Libre inversión')).toBeTruthy();
   });
 
   it('flujo E.A. con cuota: 32,22 %, $51.913 de costos y veredicto', () => {
@@ -90,7 +95,6 @@ describe('ComparaOferta', () => {
   });
 
   it('en vivienda ofrece plazos hasta 240 meses', () => {
-    tocar('Comparar mi oferta');
     tocar('Crédito hipotecario VIS');
     escribir('150.000.000');
     for (const meses of ['60 meses', '120 meses', '180 meses', '240 meses'])
@@ -104,7 +108,6 @@ describe('ComparaOferta', () => {
   });
 
   it('valida el monto, la tasa mensual y la cuota', () => {
-    tocar('Comparar mi oferta');
     tocar('Libre inversión');
     escribir('500.000');
     expect(error()).toBe('Escribe un monto de al menos $1.000.000.');
@@ -147,7 +150,6 @@ describe('ComparaOferta', () => {
   it('"Empezar de nuevo" borra la conversación', () => {
     html.querySelector<HTMLButtonElement>('.reiniciar')!.click();
     fixture.detectChanges();
-    expect(html.querySelector('.cartel')).toBeNull();
     expect(html.querySelectorAll('.mensajes li').length).toBe(2);
   });
 });

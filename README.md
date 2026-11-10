@@ -58,9 +58,10 @@ morada y oro del diseño (ver abajo).
   solo la cuota). Convierte la tasa mensual a E.A., saca la tasa real de la
   cuota (`tasaDeCuota`, búsqueda binaria), muestra los costos dentro de la
   cuota, el ahorro frente a la mejor entidad y si supera la usura (de
-  consumo; no aplica a vivienda). Al abrir muestra un ejemplo resuelto
-  (20.000.000 a 48 meses, 26,38 % E.A., cuota 700.000 → 32,22 % E.A. y
-  $51.913 al mes de costos). Nada se guarda ni se envía: si la persona quiere
+  consumo; no aplica a vivienda). Al abrir muestra solo el saludo ("Hola.
+  Cuéntame qué te ofrecieron…") y la primera pregunta ("¿Qué crédito te
+  ofrecieron?"); la persona va respondiendo (10 nov 2026: ya no abre con
+  un ejemplo resuelto). Nada se guarda ni se envía: si la persona quiere
   asesoría, va a `/asesoria` con `origen=oferta`, así la autorización de
   datos sigue en un solo formulario. El cálculo está en `oferta.ts`.
 - **Comparar dos entidades** (`paginas/simulador/comparador/`): en
@@ -79,8 +80,14 @@ morada y oro del diseño (ver abajo).
   contacto" (nombres, apellidos, celular, correo y canal) y la
   autorización. Ingresos, reportes y demás los pregunta el asesor. La
   urgencia solo se guarda si llega en el enlace (inicio o Compara tu oferta).
-  El correo es obligatorio: allí llega la confirmación. Al enviar, el botón
-  dice "Enviando…"; si el servidor falla, se queda en el formulario con el
+  El correo es obligatorio: allí llega la confirmación. El formulario se va
+  mostrando por partes (10 nov 2026): arranca con "¿Qué crédito te
+  interesa?"; al elegir la tarjeta aparecen monto y ciudad; con la ciudad,
+  los datos de contacto; con nombres, apellidos, celular y correo, la
+  autorización (`paso` en `asesoria.ts`; lo que ya apareció no se esconde).
+  El botón **"Quiero que me asesoren"** se ve siempre: si falta algo,
+  muestra todo el formulario con lo que falta marcado (también "Marca la
+  autorización para continuar"). Al enviar, el botón dice "Enviando…"; si el servidor falla, se queda en el formulario con el
   aviso "No pudimos enviar tu solicitud".
 - **Solicitudes de asesoría** (`servidor/prospectos.mjs`, `POST
 /api/prospectos`): el servidor revisa los datos (nunca confía en el

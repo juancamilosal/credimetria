@@ -102,9 +102,6 @@
     <ol class="mensajes" aria-live="polite" aria-label="Conversación">
       @for (mensaje of mensajes(); track mensaje.id) {
         @switch (mensaje.tipo) {
-          @case ("cartel") {
-            <li class="cartel">{{ mensaje.texto }}</li>
-          }
           @case ("bot") {
             <li class="bot">
               @for (parte of mensaje.partes; track $index) {
@@ -237,14 +234,7 @@
 
     <div class="respuesta" #respuesta [hidden]="zona().tipo === 'nada'">
       @let z = zona();
-      @if (z.tipo === "empezar") {
-        <span class="pregunta">¿Te ofrecieron un crédito?</span>
-        <div class="opciones">
-          <button type="button" class="op principal" (click)="iniciar()">
-            Comparar mi oferta
-          </button>
-        </div>
-      } @else if (z.tipo === "opciones") {
+      @if (z.tipo === "opciones") {
         <span class="pregunta" id="preguntaActual">{{ z.pregunta }}</span>
         <div class="opciones" role="group" aria-labelledby="preguntaActual">
           @for (opcion of z.opciones; track opcion.valor) {
