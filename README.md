@@ -167,6 +167,9 @@ morada y oro del diseño (ver abajo).
 - **Números con 2 decimales:** los campos de tasas del admin siempre
   muestran 2 decimales (2,10 y no 2,1), y las conversiones E.A. ↔ mensual
   redondean a 2.
+- Menú de arriba: Ranking de tasas, Simulador, Compara tu oferta, Aliados y
+  Asesoría gratis (10 nov 2026: se quitó "Cómo funciona", que solo bajaba a
+  esa sección del inicio; la sección sigue en el inicio).
 - En celular: menú en botón de 44 px, ranking en tarjetas y chips de producto
   que se desplazan de lado. Revisado a 390 px sin desplazamiento horizontal.
 
