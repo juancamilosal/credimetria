@@ -98,13 +98,22 @@ describe('Inicio', () => {
     flecha('Producto anterior').click();
     flecha('Producto anterior').click();
     fixture.detectChanges();
-    // Desde el primero, "anterior" da la vuelta al último.
-    expect(
-      html.querySelector('.cuenta')!.textContent!.replace(/\s+/g, ' ').trim(),
-    ).toMatch(/^(\d+) de \1$/);
+    // Desde el primero, "anterior" da la vuelta al último y las tarjetas
+    // entran desde la izquierda.
+    expect(titulo(html)).not.toBe('Las 3 tasas más bajas en libre inversión');
+    expect(html.querySelector('.bancos.desde-izquierda')).not.toBeNull();
+    // Sin pausa, barra ni cuenta: solo las dos flechas a los lados.
+    expect(html.querySelector('.pausa, .progreso, .cuenta')).toBeNull();
+    const carrusel = html.querySelector('.carrusel')!;
+    expect(carrusel.firstElementChild!.getAttribute('aria-label')).toBe(
+      'Producto anterior',
+    );
+    expect(carrusel.lastElementChild!.getAttribute('aria-label')).toBe(
+      'Producto siguiente',
+    );
   });
 
-  it('pasa solo al siguiente producto cada 7 segundos y se puede pausar', async () => {
+  it('pasa solo al siguiente producto cada 7 segundos y se detiene con el cursor encima', async () => {
     jasmine.clock().install();
     try {
       const html = crear();
@@ -115,8 +124,8 @@ describe('Inicio', () => {
       jasmine.clock().tick(1);
       fixture.detectChanges();
       expect(titulo(html)).toBe('Las 3 tasas más bajas en libranza');
-      // En pausa no cambia.
-      html.querySelector<HTMLButtonElement>('.pausa')!.click();
+      // Con el cursor encima no cambia.
+      html.querySelector('section.top')!.dispatchEvent(new Event('mouseenter'));
       fixture.detectChanges();
       jasmine.clock().tick(30_000);
       fixture.detectChanges();

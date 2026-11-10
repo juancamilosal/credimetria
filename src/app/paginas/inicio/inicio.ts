@@ -30,7 +30,7 @@ export const ROTAR_CADA_MS = 7_000;
 
 /**
  * Inicio: qué hace Credimetría, las 3 tasas más bajas de cada producto (van
- * rotando cada 7 segundos, con flechas),
+ * rotando cada 7 segundos; flechas a los lados),
  * cómo funciona, con qué entidades comparamos y la entrada a la asesoría.
  */
 @Component({
@@ -61,9 +61,12 @@ export class Inicio {
   );
   /** Posición del producto que se ve. */
   protected readonly actual = signal(0);
-  /** La rotación está detenida (cursor o foco encima, o el botón de pausa). */
+  /** La rotación se detiene con el cursor o el foco encima. */
   protected readonly encima = signal(false);
-  protected readonly enPausa = signal(false);
+  /** Con "reducir movimiento" no rota sola. */
+  private quieta = false;
+  /** Hacia dónde entran las tarjetas: la flecha que se tocó. */
+  protected readonly direccion = signal<'derecha' | 'izquierda'>('derecha');
   protected readonly producto = computed<Producto>(
     () =>
       this.productosTop()[this.actual() % (this.productosTop().length || 1)]
@@ -98,9 +101,6 @@ export class Inicio {
         };
       });
   });
-  protected readonly rotarCadaMs = ROTAR_CADA_MS;
-  /** Cambia cada vez que arranca un intervalo (la barra vuelve a empezar). */
-  protected readonly vuelta = signal(0);
   private reloj: ReturnType<typeof setInterval> | null = null;
   protected readonly entidades = this.tasas.entidadesConLogo;
   protected readonly fotos = FOTOS;
@@ -153,7 +153,7 @@ export class Inicio {
     afterNextRender(() => {
       // Con "reducir movimiento" no rota sola: se cambia con las pestañas.
       if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
-        this.enPausa.set(true);
+        this.quieta = true;
       this.arrancar();
     });
     inject(DestroyRef).onDestroy(() => this.parar());
@@ -171,12 +171,8 @@ export class Inicio {
   private mover(paso: number): void {
     const cuantos = this.productosTop().length;
     if (!cuantos) return;
+    this.direccion.set(paso < 0 ? 'izquierda' : 'derecha');
     this.actual.update((i) => (i + paso + cuantos) % cuantos);
-    this.arrancar();
-  }
-
-  protected alternarPausa(): void {
-    this.enPausa.update((p) => !p);
     this.arrancar();
   }
 
@@ -187,15 +183,14 @@ export class Inicio {
 
   private arrancar(): void {
     this.parar();
-    this.vuelta.update((v) => v + 1);
-    if (this.enPausa() || this.encima()) return;
+    if (this.quieta || this.encima()) return;
     this.reloj = setInterval(() => {
       // Las tasas pueden llegar después de arrancar: sin dos productos, espera.
       const cuantos = this.productosTop().length;
       if (cuantos < 2) return;
       if (typeof document !== 'undefined' && document.hidden) return;
+      this.direccion.set('derecha');
       this.actual.update((i) => (i + 1) % cuantos);
-      this.vuelta.update((v) => v + 1);
     }, ROTAR_CADA_MS);
   }
 

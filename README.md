@@ -169,10 +169,12 @@ morada y oro del diseño (ver abajo).
   redondean a 2.
 - **Las 3 tasas más bajas en el inicio** (10 nov 2026): rotan por producto
   con tasas (libre inversión, libranza, vehículo, hipotecario y leasing VIS
-  y No VIS) cada 7 segundos (`ROTAR_CADA_MS`), sin lista de productos: dos
-  flechas (anterior y siguiente, dan la vuelta), una barra que muestra
-  cuánto falta, "2 de 7" y pausa. El nombre del producto entra con un
-  fundido y las tres tarjetas una tras otra. Se detiene con el cursor o el
+  y No VIS) cada 7 segundos (`ROTAR_CADA_MS`), como un carrusel: sin lista
+  de productos, barra ni pausa, solo dos flechas, ‹ a la izquierda de la
+  primera tarjeta y › a la derecha de la última (dan la vuelta; en el
+  celular quedan a la altura de la primera). Las tarjetas entran
+  deslizándose desde el lado de la flecha (al pasar solas, desde la
+  derecha) y el nombre del producto con un fundido. Se detiene con el cursor o el
   foco encima; con "reducir movimiento" no rota sola ni anima. Tarjeta
   corta: puesto, logo, cobra en promedio, cuota de ejemplo, el ahorro
   frente al #2 (en la primera) y "Quiero esta"; el resto (pago total,

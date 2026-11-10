@@ -55,16 +55,16 @@
       </a>
     </div>
 
-    <div class="rotador">
+    <div class="carrusel">
       <button
         type="button"
-        class="flecha"
+        class="flecha izq"
         (click)="anterior()"
         aria-label="Producto anterior"
       >
         <svg
-          width="18"
-          height="18"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -76,28 +76,79 @@
           <path d="M15 6l-6 6 6 6" />
         </svg>
       </button>
-      <span class="avance" aria-hidden="true">
-        @for (v of [vuelta()]; track v) {
-          <span
-            class="progreso"
-            [class.quieto]="enPausa() || encima()"
-            [style.animation-duration.ms]="rotarCadaMs"
-          ></span>
-        }
-      </span>
-      <span class="cuenta nota"
-        >{{ (actual() % (productosTop().length || 1)) + 1 }} de
-        {{ productosTop().length }}</span
-      >
+      @for (prod of [producto()]; track prod) {
+        <ol
+          class="bancos"
+          [class.desde-izquierda]="direccion() === 'izquierda'"
+        >
+          @for (banco of mejores(); track banco.entidad; let i = $index) {
+            <li
+              class="banco"
+              [class.primero]="i === 0 && banco.tasaAnunciada !== null"
+            >
+              @if (i === 0 && banco.tasaAnunciada !== null) {
+                <span class="destacado cinta"
+                  ><span class="estrella" aria-hidden="true">★</span> Mejor tasa
+                  <span class="estrella" aria-hidden="true">★</span></span
+                >
+              }
+              <div class="banco-cabeza">
+                <span class="puesto cifra">#{{ i + 1 }}</span>
+                <span class="nota">{{ banco.tipo }}</span>
+              </div>
+
+              <div class="marca">
+                @if (banco.logo) {
+                  <span class="logo"
+                    ><img appEsqueleto [src]="banco.logo" alt="" height="28"
+                  /></span>
+                }
+                <h3 [class.visualmente-oculto]="banco.logo">
+                  {{ banco.entidad }}
+                </h3>
+              </div>
+
+              <div class="cobra">
+                <span class="nota">Cobra en promedio</span>
+                <strong class="cifra">{{ banco.tasaReal | tasa }}</strong>
+                <span class="nota"
+                  >Cuota de <b class="cifra">{{ banco.cuota | pesos }}</b> por
+                  {{ monto() | pesos }} a {{ plazo() }} meses</span
+                >
+              </div>
+
+              @if (i === 0 && mejores()[1]; as segundo) {
+                <p class="ahorro">
+                  {{ segundo.total - banco.total | pesos }} menos que con el #2
+                </p>
+              }
+
+              <div class="banco-pie">
+                <a
+                  class="quiero"
+                  routerLink="/asesoria"
+                  [queryParams]="{
+                    producto: prod,
+                    entidad: banco.entidad,
+                    monto: monto(),
+                    origen: 'inicio',
+                  }"
+                  >Quiero esta →</a
+                >
+              </div>
+            </li>
+          }
+        </ol>
+      }
       <button
         type="button"
-        class="flecha"
+        class="flecha der"
         (click)="siguiente()"
         aria-label="Producto siguiente"
       >
         <svg
-          width="18"
-          height="18"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -109,79 +160,7 @@
           <path d="M9 6l6 6-6 6" />
         </svg>
       </button>
-      <button
-        type="button"
-        class="pausa"
-        (click)="alternarPausa()"
-        [attr.aria-label]="
-          enPausa() ? 'Seguir pasando los productos' : 'Pausar'
-        "
-      >
-        {{ enPausa() ? "▶" : "❚❚" }}
-      </button>
     </div>
-
-    @for (prod of [producto()]; track prod) {
-      <ol class="bancos">
-        @for (banco of mejores(); track banco.entidad; let i = $index) {
-          <li
-            class="banco"
-            [class.primero]="i === 0 && banco.tasaAnunciada !== null"
-          >
-            @if (i === 0 && banco.tasaAnunciada !== null) {
-              <span class="destacado cinta"
-                ><span class="estrella" aria-hidden="true">★</span> Mejor tasa
-                <span class="estrella" aria-hidden="true">★</span></span
-              >
-            }
-            <div class="banco-cabeza">
-              <span class="puesto cifra">#{{ i + 1 }}</span>
-              <span class="nota">{{ banco.tipo }}</span>
-            </div>
-
-            <div class="marca">
-              @if (banco.logo) {
-                <span class="logo"
-                  ><img appEsqueleto [src]="banco.logo" alt="" height="28"
-                /></span>
-              }
-              <h3 [class.visualmente-oculto]="banco.logo">
-                {{ banco.entidad }}
-              </h3>
-            </div>
-
-            <div class="cobra">
-              <span class="nota">Cobra en promedio</span>
-              <strong class="cifra">{{ banco.tasaReal | tasa }}</strong>
-              <span class="nota"
-                >Cuota de <b class="cifra">{{ banco.cuota | pesos }}</b> por
-                {{ monto() | pesos }} a {{ plazo() }} meses</span
-              >
-            </div>
-
-            @if (i === 0 && mejores()[1]; as segundo) {
-              <p class="ahorro">
-                {{ segundo.total - banco.total | pesos }} menos que con el #2
-              </p>
-            }
-
-            <div class="banco-pie">
-              <a
-                class="quiero"
-                routerLink="/asesoria"
-                [queryParams]="{
-                  producto: prod,
-                  entidad: banco.entidad,
-                  monto: monto(),
-                  origen: 'inicio',
-                }"
-                >Quiero esta →</a
-              >
-            </div>
-          </li>
-        }
-      </ol>
-    }
 
     @if (corte().ejemplo) {
       <p class="etq etq-aviso ejemplo">
