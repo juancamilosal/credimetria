@@ -21,7 +21,7 @@ morada y oro del diseño (ver abajo).
 
 | Ruta                 | Pantalla          | Qué hace                                                                                                                                                                            |
 | -------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de libre inversión, cómo funciona, entidades y asesoría                                                    |
+| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de cada producto (rotan cada 10 s), cómo funciona, entidades y asesoría                                    |
 | `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas                                      |
 | `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                                     |
 | `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                                             |
@@ -167,6 +167,16 @@ morada y oro del diseño (ver abajo).
 - **Números con 2 decimales:** los campos de tasas del admin siempre
   muestran 2 decimales (2,10 y no 2,1), y las conversiones E.A. ↔ mensual
   redondean a 2.
+- **Las 3 tasas más bajas en el inicio** (10 nov 2026): una pestaña por
+  producto con tasas (libre inversión, libranza, vehículo, hipotecario y
+  leasing VIS y No VIS). Cada 10 segundos (`ROTAR_CADA_MS`) pasa sola al
+  siguiente, con una barra que muestra cuánto falta, el nombre del
+  producto que entra con un fundido y las tres tarjetas una tras otra. Se
+  detiene con el cursor o el foco encima y con el botón de pausa; con
+  "reducir movimiento" no rota sola ni anima. Al tocar una pestaña cambia
+  de una y vuelve a contar. En vivienda la cuota se calcula con
+  $150.000.000 a 240 meses. En el celular la fila de pestañas se desplaza
+  para que se vea la activa.
 - Sin avisos de "versión de prueba" (10 nov 2026): el pie ya no dice que
   los asesores son de ejemplo (solo avisa si las tasas fueran de ejemplo,
   `corte.ejemplo`), y `/aliados` muestra "Próximamente tus asesores" en vez

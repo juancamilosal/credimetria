@@ -2,7 +2,7 @@ import { TASAS_DE_PRUEBA } from '../../core/datos/tasas-prueba';
 import { registerLocaleData } from '@angular/common';
 import localeEsCo from '@angular/common/locales/es-CO';
 import { LOCALE_ID } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { Inicio } from './inicio';
@@ -18,9 +18,24 @@ describe('Inicio', () => {
         TASAS_DE_PRUEBA,
       ],
     });
-    const fixture = TestBed.createComponent(Inicio);
+    fixture = TestBed.createComponent(Inicio);
     fixture.detectChanges();
     return fixture.nativeElement as HTMLElement;
+  }
+  let fixture: ComponentFixture<Inicio>;
+
+  /** Entidades de las tarjetas, en orden. */
+  function tarjetas(html: HTMLElement): string[] {
+    return [...html.querySelectorAll('.banco h3')].map((h) =>
+      h.textContent!.trim(),
+    );
+  }
+
+  function titulo(html: HTMLElement): string {
+    return html
+      .querySelector('#tituloTop')!
+      .textContent!.replace(/\s+/g, ' ')
+      .trim();
   }
 
   it('dice qué hace Credimetría', () => {
@@ -75,6 +90,63 @@ describe('Inicio', () => {
     );
     expect(pies[0]).toBe('PDF del banco ↗');
     expect(pies[1]).toBe('Tasas en la página del banco ↗');
+  });
+
+  it('las 3 tasas más bajas tienen una pestaña por producto', () => {
+    const html = crear();
+    const pestanas = [...html.querySelectorAll('.pestana')].map((b) =>
+      b.textContent!.trim(),
+    );
+    expect(pestanas[0]).toBe('Libre inversión');
+    expect(pestanas).toContain('Libranza');
+    expect(titulo(html)).toBe('Las 3 tasas más bajas en libre inversión');
+    // Al tocar Libranza se ven las 3 de libranza.
+    [...html.querySelectorAll<HTMLButtonElement>('.pestana')]
+      .find((b) => b.textContent!.trim() === 'Libranza')!
+      .click();
+    fixture.detectChanges();
+    expect(titulo(html)).toBe('Las 3 tasas más bajas en libranza');
+    const esperados = TestBed.inject(TasasService)
+      .ranking('libranza')
+      .slice(0, 3)
+      .map((t) => t.entidad);
+    expect(tarjetas(html)).toEqual(esperados);
+    expect(
+      html.querySelector('.pestana[aria-selected="true"]')!.textContent,
+    ).toContain('Libranza');
+    expect(
+      html
+        .querySelector<HTMLAnchorElement>('.top-cabeza > a')!
+        .getAttribute('href'),
+    ).toContain('producto=libranza');
+  });
+
+  it('pasa sola al siguiente producto cada 10 segundos y se puede pausar', async () => {
+    jasmine.clock().install();
+    try {
+      const html = crear();
+      await fixture.whenStable();
+      const segundo = html.querySelectorAll('.pestana')[1].textContent!.trim();
+      jasmine.clock().tick(10_000);
+      fixture.detectChanges();
+      expect(
+        html
+          .querySelector('.pestana[aria-selected="true"]')!
+          .textContent!.trim(),
+      ).toBe(segundo);
+      // En pausa no cambia.
+      html.querySelector<HTMLButtonElement>('.pausa')!.click();
+      fixture.detectChanges();
+      jasmine.clock().tick(30_000);
+      fixture.detectChanges();
+      expect(
+        html
+          .querySelector('.pestana[aria-selected="true"]')!
+          .textContent!.trim(),
+      ).toBe(segundo);
+    } finally {
+      jasmine.clock().uninstall();
+    }
   });
 
   it('no muestra el simulador', () => {

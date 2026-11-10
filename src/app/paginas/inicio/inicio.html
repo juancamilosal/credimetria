@@ -25,10 +25,22 @@
 </section>
 
 <div class="wrap">
-  <section class="top tarjeta" aria-labelledby="tituloTop">
+  <section
+    class="top tarjeta"
+    aria-labelledby="tituloTop"
+    (mouseenter)="ponerEncima(true)"
+    (mouseleave)="ponerEncima(false)"
+    (focusin)="ponerEncima(true)"
+    (focusout)="ponerEncima(false)"
+  >
     <div class="top-cabeza">
       <div>
-        <h2 id="tituloTop">Las 3 tasas más bajas en libre inversión</h2>
+        <h2 id="tituloTop" aria-live="polite">
+          Las 3 tasas más bajas en
+          @for (n of [nombreProducto()]; track n) {
+            <span class="producto-top">{{ n }}</span>
+          }
+        </h2>
         <p class="nota">
           Tasa efectiva anual que cobran en promedio, según la
           <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
@@ -38,127 +50,166 @@
           {{ corte().fecha | date: "d MMM y" : "UTC" }}
         </p>
       </div>
-      <a routerLink="/ranking" [queryParams]="{ producto: 'libre-inversion' }">
+      <a routerLink="/ranking" [queryParams]="{ producto: producto() }">
         Ver ranking completo
       </a>
     </div>
 
-    <ol class="bancos">
-      @for (banco of mejores(); track banco.entidad; let i = $index) {
-        <li
-          class="banco"
-          [class.primero]="i === 0 && banco.tasaAnunciada !== null"
-        >
-          @if (i === 0 && banco.tasaAnunciada !== null) {
-            <span class="destacado cinta"
-              ><span class="estrella" aria-hidden="true">★</span> Mejor tasa
-              <span class="estrella" aria-hidden="true">★</span></span
-            >
-          }
-          <div class="banco-cabeza">
-            <span class="puesto cifra">#{{ i + 1 }}</span>
-            <span class="nota">{{ banco.tipo }}</span>
-          </div>
-
-          <div class="marca">
-            @if (banco.logo) {
-              <span class="logo"
-                ><img appEsqueleto [src]="banco.logo" alt="" height="28"
-              /></span>
+    <div class="rotador">
+      <div class="pestanas" role="tablist" aria-label="Producto" #pestanas>
+        @for (p of productosTop(); track p.id; let i = $index) {
+          <button
+            type="button"
+            role="tab"
+            class="pestana"
+            [attr.aria-selected]="p.id === producto()"
+            [attr.aria-controls]="'top-' + p.id"
+            (click)="elegir(i)"
+          >
+            {{ p.nombre }}
+            @if (p.id === producto()) {
+              @for (v of [vuelta()]; track v) {
+                <span
+                  class="progreso"
+                  [class.quieto]="enPausa() || encima()"
+                  [style.animation-duration.ms]="rotarCadaMs"
+                  aria-hidden="true"
+                ></span>
+              }
             }
-            <h3 [class.visualmente-oculto]="banco.logo">
-              {{ banco.entidad }}
-            </h3>
-          </div>
+          </button>
+        }
+      </div>
+      <button
+        type="button"
+        class="pausa"
+        (click)="alternarPausa()"
+        [attr.aria-label]="
+          enPausa() ? 'Seguir pasando los productos' : 'Pausar'
+        "
+      >
+        {{ enPausa() ? "▶" : "❚❚" }}
+      </button>
+    </div>
 
-          <div class="cobra">
-            <span class="nota">Cobra en promedio</span>
-            <strong class="cifra">{{ banco.tasaReal | tasa }}</strong>
-            <span class="nota"
-              >Cuota de <b class="cifra">{{ banco.cuota | pesos }}</b> por
-              {{ monto | pesos }} a {{ plazo }} meses</span
-            >
-          </div>
-
-          <p class="total">
-            Pagarías en total <b class="cifra">{{ banco.total | pesos }}</b>
-            <span class="nota"
-              >de intereses {{ banco.total - monto | pesos }}</span
-            >
-          </p>
-          @if (i === 0 && mejores()[1]; as segundo) {
-            <p class="ahorro">
-              {{ segundo.total - banco.total | pesos }} menos que con el #2
-            </p>
-          }
-
-          <dl class="detalle">
-            <div>
-              <dt>Anuncia</dt>
-              <dd class="cifra">
-                @if (banco.tasaAnunciada !== null) {
-                  {{ banco.tasaAnunciada | tasa }}
-                  @if (banco.tasaHasta) {
-                    a {{ banco.tasaHasta | tasa
-                    }}{{ banco.hastaUsura ? "*" : "" }}
-                  }
-                } @else if (banco.tasaHasta) {
-                  hasta {{ banco.tasaHasta | tasa }}
-                  <span class="no-publica">solo publica la máxima</span>
-                } @else {
-                  <span class="no-publica">No publica su tasa</span>
-                }
-              </dd>
-            </div>
-            @if (banco.diferencia !== null) {
-              <div>
-                <dt>
-                  Diferencia
-                  <app-ayuda
-                    [globo]="'tipDiferencia' + i"
-                    etiqueta="Qué es la diferencia"
-                    [texto]="ayudaDiferencia"
-                  />
-                </dt>
-                <dd>
-                  <span class="etq etq-aviso">{{
-                    banco.diferencia | puntos
-                  }}</span>
-                  <span class="dif-texto"
-                    >{{ banco.diferencia >= 0 ? "más" : "menos" }} de lo que
-                    anuncia</span
-                  >
-                </dd>
-              </div>
-            }
-          </dl>
-
-          <div class="banco-pie">
-            @if (banco.pdf) {
-              <a [href]="banco.pdf" target="_blank" rel="noopener noreferrer"
-                >{{
-                  banco.enPagina
-                    ? "Tasas en la página del banco"
-                    : "PDF del banco"
-                }}
-                ↗</a
+    @for (prod of [producto()]; track prod) {
+      <ol class="bancos" [id]="'top-' + prod" role="tabpanel">
+        @for (banco of mejores(); track banco.entidad; let i = $index) {
+          <li
+            class="banco"
+            [class.primero]="i === 0 && banco.tasaAnunciada !== null"
+          >
+            @if (i === 0 && banco.tasaAnunciada !== null) {
+              <span class="destacado cinta"
+                ><span class="estrella" aria-hidden="true">★</span> Mejor tasa
+                <span class="estrella" aria-hidden="true">★</span></span
               >
             }
-            <a
-              class="quiero"
-              routerLink="/asesoria"
-              [queryParams]="{
-                producto: 'libre-inversion',
-                entidad: banco.entidad,
-                monto: monto,
-                origen: 'inicio',
-              }"
-              >Quiero esta →</a
-            >
-          </div>
-        </li>
-      }
-    </ol>
+            <div class="banco-cabeza">
+              <span class="puesto cifra">#{{ i + 1 }}</span>
+              <span class="nota">{{ banco.tipo }}</span>
+            </div>
+
+            <div class="marca">
+              @if (banco.logo) {
+                <span class="logo"
+                  ><img appEsqueleto [src]="banco.logo" alt="" height="28"
+                /></span>
+              }
+              <h3 [class.visualmente-oculto]="banco.logo">
+                {{ banco.entidad }}
+              </h3>
+            </div>
+
+            <div class="cobra">
+              <span class="nota">Cobra en promedio</span>
+              <strong class="cifra">{{ banco.tasaReal | tasa }}</strong>
+              <span class="nota"
+                >Cuota de <b class="cifra">{{ banco.cuota | pesos }}</b> por
+                {{ monto() | pesos }} a {{ plazo() }} meses</span
+              >
+            </div>
+
+            <p class="total">
+              Pagarías en total <b class="cifra">{{ banco.total | pesos }}</b>
+              <span class="nota"
+                >de intereses {{ banco.total - monto() | pesos }}</span
+              >
+            </p>
+            @if (i === 0 && mejores()[1]; as segundo) {
+              <p class="ahorro">
+                {{ segundo.total - banco.total | pesos }} menos que con el #2
+              </p>
+            }
+
+            <dl class="detalle">
+              <div>
+                <dt>Anuncia</dt>
+                <dd class="cifra">
+                  @if (banco.tasaAnunciada !== null) {
+                    {{ banco.tasaAnunciada | tasa }}
+                    @if (banco.tasaHasta) {
+                      a {{ banco.tasaHasta | tasa
+                      }}{{ banco.hastaUsura ? "*" : "" }}
+                    }
+                  } @else if (banco.tasaHasta) {
+                    hasta {{ banco.tasaHasta | tasa }}
+                    <span class="no-publica">solo publica la máxima</span>
+                  } @else {
+                    <span class="no-publica">No publica su tasa</span>
+                  }
+                </dd>
+              </div>
+              @if (banco.diferencia !== null) {
+                <div>
+                  <dt>
+                    Diferencia
+                    <app-ayuda
+                      [globo]="'tipDiferencia' + i"
+                      etiqueta="Qué es la diferencia"
+                      [texto]="ayudaDiferencia"
+                    />
+                  </dt>
+                  <dd>
+                    <span class="etq etq-aviso">{{
+                      banco.diferencia | puntos
+                    }}</span>
+                    <span class="dif-texto"
+                      >{{ banco.diferencia >= 0 ? "más" : "menos" }} de lo que
+                      anuncia</span
+                    >
+                  </dd>
+                </div>
+              }
+            </dl>
+
+            <div class="banco-pie">
+              @if (banco.pdf) {
+                <a [href]="banco.pdf" target="_blank" rel="noopener noreferrer"
+                  >{{
+                    banco.enPagina
+                      ? "Tasas en la página del banco"
+                      : "PDF del banco"
+                  }}
+                  ↗</a
+                >
+              }
+              <a
+                class="quiero"
+                routerLink="/asesoria"
+                [queryParams]="{
+                  producto: prod,
+                  entidad: banco.entidad,
+                  monto: monto(),
+                  origen: 'inicio',
+                }"
+                >Quiero esta →</a
+              >
+            </div>
+          </li>
+        }
+      </ol>
+    }
     @if (hayUsura()) {
       <p class="nota">
         * Tope de usura del mes: el banco no publica una tasa máxima.
