@@ -10,14 +10,18 @@
 </section>
 
 <div class="wrap contenido">
-  @if (ejemplo) {
-    <p class="etq etq-aviso aviso-ejemplo">
-      Versión de prueba: estos asesores son de ejemplo.
-    </p>
-  }
-
   <ul class="aliados">
-    @for (aliado of aliados; track aliado.id) {
+    @if (ejemplo) {
+      <!-- Mientras no estén los asesores reales, no se muestran los de ejemplo. -->
+      <li class="tarjeta aliado proximamente">
+        <b>Próximamente tus asesores</b>
+        <span class="muted">
+          Estamos verificando a los primeros asesores aliados. Aquí verás
+          quiénes son, con qué entidades trabajan y en qué ciudades atienden.
+        </span>
+      </li>
+    }
+    @for (aliado of ejemplo ? [] : aliados; track aliado.id) {
       <li class="tarjeta aliado">
         <div class="aliado-top">
           <div class="quien">

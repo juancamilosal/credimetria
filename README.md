@@ -26,7 +26,7 @@ morada y oro del diseño (ver abajo).
 | `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                                     |
 | `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                                             |
 | `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular, correo y autorización; lo guarda en Directus y manda los correos                       |
-| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos, compromisos y reporte                                                                                                            |
+| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos (mientras no hay asesores reales: "Próximamente tus asesores"), compromisos y reporte                                             |
 | `/politica-de-datos` | Política          | Borrador: el texto legal falta y debe estar antes de abrir el formulario                                                                                                            |
 | `/admin/tasas`       | Configuración     | Solo administradores de Directus: por banco, la tasa publicada y la que espera aprobación, cada una con su PDF; comparar los PDF, editar, aprobar y cargar PDF o pantallazos nuevos |
 
@@ -167,6 +167,10 @@ morada y oro del diseño (ver abajo).
 - **Números con 2 decimales:** los campos de tasas del admin siempre
   muestran 2 decimales (2,10 y no 2,1), y las conversiones E.A. ↔ mensual
   redondean a 2.
+- Sin avisos de "versión de prueba" (10 nov 2026): el pie ya no dice que
+  los asesores son de ejemplo (solo avisa si las tasas fueran de ejemplo,
+  `corte.ejemplo`), y `/aliados` muestra "Próximamente tus asesores" en vez
+  de los asesores de ejemplo mientras `AliadosService.ejemplo` sea `true`.
 - Menú de arriba: Ranking de tasas, Simulador, Compara tu oferta, Aliados y
   Asesoría gratis (10 nov 2026: se quitó "Cómo funciona", que solo bajaba a
   esa sección del inicio; la sección sigue en el inicio).
