@@ -69,7 +69,7 @@ describe('Inicio', () => {
     expect(primera.querySelector('.detalle')).toBeNull();
     expect(primera.querySelectorAll('.banco-pie a').length).toBe(1);
     expect(
-      html.querySelector<HTMLAnchorElement>('.top-cabeza .nota a')?.href,
+      html.querySelector<HTMLAnchorElement>('.top-pie .nota a')?.href,
     ).toContain('datos.gov.co');
     expect(
       primera.querySelector<HTMLAnchorElement>('.quiero')?.getAttribute('href'),
@@ -92,7 +92,7 @@ describe('Inicio', () => {
     expect(tarjetas(html)).toEqual(esperados);
     expect(
       html
-        .querySelector<HTMLAnchorElement>('.top-cabeza > a')!
+        .querySelector<HTMLAnchorElement>('.top-pie > a')!
         .getAttribute('href'),
     ).toContain('producto=libranza');
     flecha('Producto anterior').click();

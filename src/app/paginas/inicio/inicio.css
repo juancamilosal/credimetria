@@ -56,20 +56,30 @@
 }
 
 .top-cabeza {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 12px 24px;
-  flex-wrap: wrap;
+  text-align: center;
 }
 
 .top-cabeza h2 {
-  font-size: clamp(20px, 2.6vw, 24px);
+  font-size: clamp(24px, 3.2vw, 32px);
   font-weight: 800;
-  margin-bottom: 4px;
+  line-height: 1.2;
+  margin-bottom: 8px;
 }
 
-.top-cabeza a {
+/* Debajo de las tarjetas, centrados: de dónde sale el promedio y el ranking */
+.top-pie {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.top-pie .nota {
+  max-width: 62ch;
+}
+
+.top-pie > a {
   font-weight: 700;
 }
 

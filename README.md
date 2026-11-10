@@ -174,7 +174,9 @@ morada y oro del diseño (ver abajo).
   primera tarjeta y › a la derecha de la última (dan la vuelta; en el
   celular quedan a la altura de la primera). Las tarjetas entran
   deslizándose desde el lado de la flecha (al pasar solas, desde la
-  derecha) y el nombre del producto con un fundido. Se detiene con el cursor o el
+  derecha) y el nombre del producto con un fundido. El título va centrado y más
+  grande; debajo de las tarjetas, centrados, de dónde sale el promedio
+  (Superfinanciera, corte) y "Ver ranking completo". Se detiene con el cursor o el
   foco encima; con "reducir movimiento" no rota sola ni anima. Tarjeta
   corta: puesto, logo, cobra en promedio, cuota de ejemplo, el ahorro
   frente al #2 (en la primera) y "Quiero esta"; el resto (pago total,

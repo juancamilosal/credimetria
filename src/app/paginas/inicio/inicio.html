@@ -34,25 +34,12 @@
     (focusout)="ponerEncima(false)"
   >
     <div class="top-cabeza">
-      <div>
-        <h2 id="tituloTop" aria-live="polite">
-          Las 3 tasas más bajas en
-          @for (n of [nombreProducto()]; track n) {
-            <span class="producto-top">{{ n }}</span>
-          }
-        </h2>
-        <p class="nota">
-          Tasa efectiva anual que cobran en promedio, según la
-          <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
-            >{{ fuente.texto }} ↗</a
-          >
-          (ponderado por monto, últimas 4 semanas), corte
-          {{ corte().fecha | date: "d MMM y" : "UTC" }}
-        </p>
-      </div>
-      <a routerLink="/ranking" [queryParams]="{ producto: producto() }">
-        Ver ranking completo
-      </a>
+      <h2 id="tituloTop" aria-live="polite">
+        Las 3 tasas más bajas en
+        @for (n of [nombreProducto()]; track n) {
+          <span class="producto-top">{{ n }}</span>
+        }
+      </h2>
     </div>
 
     <div class="carrusel">
@@ -160,6 +147,20 @@
           <path d="M9 6l6 6-6 6" />
         </svg>
       </button>
+    </div>
+
+    <div class="top-pie">
+      <p class="nota">
+        Tasa efectiva anual que cobran en promedio, según la
+        <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
+          >{{ fuente.texto }} ↗</a
+        >
+        (ponderado por monto, últimas 4 semanas), corte
+        {{ corte().fecha | date: "d MMM y" : "UTC" }}
+      </p>
+      <a routerLink="/ranking" [queryParams]="{ producto: producto() }">
+        Ver ranking completo
+      </a>
     </div>
 
     @if (corte().ejemplo) {
