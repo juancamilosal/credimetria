@@ -13,13 +13,22 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 // Dominios desde los que se arma la página en el servidor (protección contra
-// SSRF). Otro dominio se agrega con la variable NG_ALLOWED_HOSTS.
+// SSRF). Otros dominios se agregan con la variable NG_ALLOWED_HOSTS
+// (lista separada por comas).
+const hostsExtra = (process.env['NG_ALLOWED_HOSTS'] ?? '')
+  .split(',')
+  .map((h) => h.trim())
+  .filter(Boolean);
+
 const angularApp = new AngularNodeAppEngine({
   allowedHosts: [
     'localhost',
     'credimetria.co',
     '*.credimetria.co',
+    'credimetria.com',
+    '*.credimetria.com',
     '*.valkiriacode.com',
+    ...hostsExtra,
   ],
 });
 
