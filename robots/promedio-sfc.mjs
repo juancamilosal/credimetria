@@ -7,7 +7,7 @@
 // `tasas_promedio` (una por entidad y producto, sin historial).
 //
 // Uso:
-//   DIRECTUS_URL=https://credimetria-api.valkiriacode.com \
+//   DIRECTUS_URL=https://api.credimetria.com \
 //   DIRECTUS_TOKEN=<token del usuario robot> node robots/promedio-sfc.mjs
 //   node robots/promedio-sfc.mjs --sin-guardar   (solo muestra los promedios)
 //   node robots/promedio-sfc.mjs --producto libranza   (solo ese producto: así

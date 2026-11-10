@@ -292,7 +292,7 @@ la usura M.V. En la edición, "Usar tope de usura" llena el hasta con la de
 
 ### Colecciones en Directus
 
-`credimetria-api.valkiriacode.com` (Directus 11):
+`api.credimetria.com` (Directus 11):
 
 - `entidades`: código (llave), nombre, razón social, NIT (único) y dígito de
   verificación, código SFC, tipo, sitio web, logo y activa.
@@ -501,7 +501,7 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   (465 por defecto), `SMTP_USUARIO`, `SMTP_CLAVE`, `AVISO_PARA` (a quién le
   llega cada solicitud), `CORREO_DE` (remitente, p. ej. `Credimetría
 <hola@credimetria.co>`; si no, el usuario SMTP) y `SITIO_URL` (enlaces y
-  logo; por defecto `https://credimetria.valkiriacode.com`). Sin
+  logo; por defecto `https://credimetria.com`). Sin
   `SMTP_HOST` la solicitud se guarda igual y los correos solo salen en el
   log.
 - **Prospectos en Directus:** la política "Lector web" solo puede _crear_
@@ -548,7 +548,9 @@ rutas. El SSR se prueba con `npm run build` y
 `npm run serve:ssr:credimetria` (http://localhost:4000).
 
 En producción, el servidor solo arma páginas para los dominios permitidos
-(`allowedHosts` en `src/server.ts`: localhost, credimetria.co y
-\*.valkiriacode.com); otro dominio se agrega con la variable
-`NG_ALLOWED_HOSTS`. `DIRECTUS_URL` cambia, en el servidor, de qué Directus se
+(`allowedHosts` en `src/server.ts`: localhost, credimetria.com,
+credimetria.co y \*.valkiriacode.com, con sus subdominios); otros se
+agregan con la variable `NG_ALLOWED_HOSTS` (separados por comas). Confía en
+los encabezados `x-forwarded-*` de Coolify (`trustProxyHeaders`); sin eso,
+Angular entrega la página vacía. Directus está en `https://api.credimetria.com`. `DIRECTUS_URL` cambia, en el servidor, de qué Directus se
 leen las tasas.

@@ -12,11 +12,11 @@
 
 import express from "express";
 
-const DIRECTUS =
-  process.env.DIRECTUS_URL ?? "https://credimetria-api.valkiriacode.com";
-const SITIO = (
-  process.env.SITIO_URL ?? "https://credimetria.valkiriacode.com"
-).replace(/\/$/, "");
+const DIRECTUS = process.env.DIRECTUS_URL ?? "https://api.credimetria.com";
+const SITIO = (process.env.SITIO_URL ?? "https://credimetria.com").replace(
+  /\/$/,
+  "",
+);
 
 export const PRODUCTOS = {
   libranza: "Libranza",

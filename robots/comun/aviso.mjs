@@ -6,7 +6,7 @@
 // SMTP_CLAVE, AVISO_PARA (a quién) y AVISO_DE (opcional; si no, el usuario).
 // Sin SMTP_HOST el aviso solo se escribe en la consola.
 
-const ADMIN = "https://credimetria.valkiriacode.com/admin/tasas";
+const ADMIN = "https://credimetria.com/admin/tasas";
 
 /**
  * Manda un correo con los puntos de `lineas` (y antes, si llega, `intro`). Nunca lanza error: si el

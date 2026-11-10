@@ -1,7 +1,7 @@
 # Robots de Credimetría
 
 Dónde busca cada robot y qué guarda en Directus
-(`credimetria-api.valkiriacode.com`). Corren en el VPS como tareas
+(`api.credimetria.com`). Corren en el VPS como tareas
 programadas de Coolify, con el token de un usuario "Robot" que solo puede
 crear tasas por aprobar, actualizar fuentes y promedios, y subir archivos.
 

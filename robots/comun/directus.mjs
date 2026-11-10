@@ -1,8 +1,7 @@
 // Cliente mínimo de Directus para los robots, con el token del usuario
 // "Robot" (DIRECTUS_TOKEN) y la dirección DIRECTUS_URL (opcional).
 
-const DIRECTUS =
-  process.env.DIRECTUS_URL ?? "https://credimetria-api.valkiriacode.com";
+const DIRECTUS = process.env.DIRECTUS_URL ?? "https://api.credimetria.com";
 
 export const hayToken = () => Boolean(process.env.DIRECTUS_TOKEN);
 

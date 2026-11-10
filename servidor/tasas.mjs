@@ -12,8 +12,7 @@ import { cargarEnv } from "./env.mjs";
 // usan las variables del recurso.
 if (!process.env.DIRECTUS_TOKEN) cargarEnv();
 
-const DIRECTUS =
-  process.env.DIRECTUS_URL ?? "https://credimetria-api.valkiriacode.com";
+const DIRECTUS = process.env.DIRECTUS_URL ?? "https://api.credimetria.com";
 /** Cada cuánto se vuelve a preguntar a Directus. */
 const VIGENCIA_MS = 10 * 60 * 1000;
 
