@@ -30,6 +30,16 @@ const angularApp = new AngularNodeAppEngine({
     '*.valkiriacode.com',
     ...hostsExtra,
   ],
+  // Coolify (Traefik) y Cloudflare mandan estos encabezados. Si alguno no es
+  // de confianza, Angular deja de armar la página en el servidor y la
+  // entrega vacía (solo se arma en el navegador).
+  trustProxyHeaders: [
+    'x-forwarded-host',
+    'x-forwarded-proto',
+    'x-forwarded-for',
+    'x-forwarded-port',
+    'x-forwarded-server',
+  ],
 });
 
 /**
