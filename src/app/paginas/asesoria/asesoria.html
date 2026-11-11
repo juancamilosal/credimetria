@@ -1,5 +1,5 @@
 <div class="wrap ases">
-  <div class="ases-form" #formulario>
+  <div class="ases-form">
     @if (enviado(); as cuando) {
       <div class="listo" role="status">
         <svg
@@ -295,20 +295,20 @@
               >.
             </span>
           </label>
-          @if (mostrarError("autorizo")) {
-            <span class="error" id="errAutoriza"
-              >Marca la autorización para continuar.</span
-            >
-          }
         }
 
         <button
           class="btn btn-principal enviar"
           type="submit"
-          [disabled]="enviando()"
+          [disabled]="!completo() || enviando()"
         >
           {{ enviando() ? "Enviando…" : "Quiero que me asesoren" }}
         </button>
+        @if (!completo()) {
+          <p class="nota falta">
+            Llena tus datos y marca la autorización para continuar.
+          </p>
+        }
         @if (fallo()) {
           <p class="error fallo" role="alert">
             No pudimos enviar tu solicitud. Revisa tu conexión e intenta de

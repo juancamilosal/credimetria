@@ -66,6 +66,12 @@ describe('Asesoria', () => {
     fixture.detectChanges();
   }
 
+  /** Sale del campo (así se marca como tocado y muestra su error). */
+  function salir(id: string) {
+    html.querySelector<HTMLElement>(id)!.dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+  }
+
   function enviar() {
     html.querySelector<HTMLButtonElement>('button[type=submit]')!.click();
     fixture.detectChanges();
@@ -77,7 +83,8 @@ describe('Asesoria', () => {
     expect(html.textContent).not.toContain('reportes negativos');
     // Con todo a la vista: solo el tipo de crédito y los canales de
     // contacto (la ciudad es un campo).
-    enviar();
+    elegirTipo('Libranza');
+    escribir('#asCiudad', 'Cali');
     expect(html.querySelectorAll('fieldset').length).toBe(2);
   });
 
@@ -101,22 +108,40 @@ describe('Asesoria', () => {
     expect(hay('.autoriza')).toBeTrue();
   });
 
-  it('el botón "Quiero que me asesoren" siempre se ve y sin autorización avisa', () => {
+  it('el botón siempre se ve y se habilita solo con todo lleno y la autorización', () => {
     crear();
-    const boton = html.querySelector<HTMLButtonElement>('button[type=submit]')!;
-    expect(boton.disabled).toBeFalse();
-    expect(boton.textContent!.trim()).toBe('Quiero que me asesoren');
-    enviar();
-    expect(html.querySelector('#errAutoriza')?.textContent).toContain(
-      'Marca la autorización',
+    const boton = () =>
+      html.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    expect(boton().textContent!.trim()).toBe('Quiero que me asesoren');
+    expect(boton().disabled).toBeTrue();
+    expect(html.querySelector('.falta')?.textContent).toContain(
+      'marca la autorización',
     );
+    // Tocarlo deshabilitado no muestra nada nuevo ni envía.
+    enviar();
+    expect(html.querySelector('.contacto')).toBeNull();
     expect(html.querySelector('.listo')).toBeNull();
+    elegirTipo('Libranza');
+    escribir('#asCiudad', 'Cali');
+    escribir('#asNombres', 'Luis');
+    escribir('#asApellidos', 'Pérez');
+    escribir('#asCel', '3109876543');
+    escribir('#asCorreo', 'luis@ejemplo.com');
+    expect(boton().disabled).toBeTrue();
+    autorizar();
+    expect(boton().disabled).toBeFalse();
+    expect(html.querySelector('.falta')).toBeNull();
   });
 
-  it('pide crédito, ciudad, nombre y celular, pero no el monto', () => {
+  it('pide ciudad, nombre, celular y correo al salir de cada campo, pero no el monto', () => {
     crear();
-    enviar();
-    expect(html.querySelector('#errProducto')).not.toBeNull();
+    elegirTipo('Libranza');
+    salir('#asMonto');
+    escribir('#asCiudad', 'Cali');
+    escribir('#asCiudad', '');
+    salir('#asCiudad');
+    for (const id of ['#asNombres', '#asApellidos', '#asCel', '#asCorreo'])
+      salir(id);
     expect(html.querySelector('#errCiudad')).not.toBeNull();
     expect(html.querySelector('#errNombres')).not.toBeNull();
     expect(html.querySelector('#errApellidos')).not.toBeNull();
@@ -138,7 +163,7 @@ describe('Asesoria', () => {
     elegirTipo('Libranza');
     expect(html.querySelector('.con-prefijo span')?.textContent).toBe('$');
     escribir('#asMonto', '500.000');
-    enviar();
+    salir('#asMonto');
     expect(html.querySelector('#errMonto')).not.toBeNull();
   });
 
@@ -150,7 +175,7 @@ describe('Asesoria', () => {
     expect(html.querySelectorAll('#asCiudades option').length).toBeGreaterThan(
       10,
     );
-    enviar();
+    salir('#asCiudad');
     expect(html.querySelector('#errCiudad')?.textContent).toContain(
       'Escribe tu ciudad.',
     );
@@ -303,7 +328,7 @@ describe('Asesoria', () => {
     expect(html.querySelector('#asCorreo')).not.toBeNull();
     expect(html.textContent).toContain('Allí te llega la confirmación.');
     escribir('#asCorreo', 'sin-arroba');
-    enviar();
+    salir('#asCorreo');
     expect(html.querySelector('#errCorreo')?.textContent).toContain(
       'Escribe un correo válido.',
     );

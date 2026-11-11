@@ -85,9 +85,10 @@ morada y oro del diseño (ver abajo).
   interesa?"; al elegir la tarjeta aparecen monto y ciudad; con la ciudad,
   los datos de contacto; con nombres, apellidos, celular y correo, la
   autorización (`paso` en `asesoria.ts`; lo que ya apareció no se esconde).
-  El botón **"Quiero que me asesoren"** se ve siempre: si falta algo,
-  muestra todo el formulario con lo que falta marcado (también "Marca la
-  autorización para continuar"). El texto de la autorización dice
+  El botón **"Quiero que me asesoren"** se ve siempre, pero se habilita
+  solo con todo lleno y la autorización marcada (`completo`; 11 nov 2026);
+  mientras tanto debajo dice "Llena tus datos y marca la autorización para
+  continuar". Cada campo muestra su error al salir de él. El texto de la autorización dice
   "credimetria.com/aliados" (versión de la política `2026-11-borrador`;
   las solicitudes anteriores guardan "credimetria.co/aliados" y
   `2026-10-borrador`). Al enviar, el botón dice "Enviando…"; si el servidor falla, se queda en el formulario con el
@@ -190,6 +191,9 @@ morada y oro del diseño (ver abajo).
   nombre, empresa, "Verificado" (solo si mostró su vínculo con las
   entidades), entidades, productos, ciudades y foto opcional en
   `public/aliados/` (solo con su autorización; si no hay foto, iniciales).
+  La tarjeta muestra la foto grande (120 px, en círculo) con un sello verde
+  si está verificado ("Verificado por Credimetría"), y las entidades,
+  productos y ciudades como etiquetas.
   Primera aliada (11 nov 2026): Alexandra Rojas García, fuerza de ventas,
   verificada: Banco Popular, GNB Sudameris, BBVA, AV Villas, Banco de
   Bogotá y Banco Pichincha; libranza, consumo, tarjeta de crédito,

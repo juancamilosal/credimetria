@@ -19,62 +19,119 @@ ol {
 }
 
 .aliado {
-  gap: 12px;
+  gap: 18px;
 }
 
+/* Foto grande para reconocer al asesor, con el sello de verificado */
 .aliado-top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: 20px;
 }
 
-.quien {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  min-width: 0;
+.retrato {
+  position: relative;
+  flex: none;
+}
+
+.foto,
+.iniciales {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
 }
 
 .foto {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
+  display: block;
   object-fit: cover;
-  flex: none;
-  border: 2px solid var(--cm-marca-100);
+  border: 4px solid var(--cm-blanco);
+  box-shadow:
+    0 0 0 2px var(--cm-marca-100),
+    0 10px 24px -12px rgb(15 27 42 / 0.45);
 }
 
 .iniciales {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--cm-r-boton);
   background: var(--cm-marca-100);
   color: var(--cm-enlace);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 36px;
   font-weight: 800;
-  flex: none;
+}
+
+.sello {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--cm-ahorro-600);
+  color: #ffffff;
+  border: 3px solid var(--cm-blanco);
+}
+
+.quien {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.quien h2 {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.quien .etq {
+  margin-top: 4px;
 }
 
 dl {
   margin: 0;
-  font-size: 14px;
-}
-
-dl div {
   display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 12px;
 }
 
 dt {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--cm-gris);
+  margin-bottom: 6px;
 }
 
 dd {
   margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--cm-fondo);
+  border: 1px solid var(--cm-linea);
+}
+
+@media (max-width: 520px) {
+  .aliado-top {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .quien {
+    align-items: center;
+  }
 }
 
 .proximamente {

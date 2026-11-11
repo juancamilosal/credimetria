@@ -26,7 +26,8 @@ describe('Aliados', () => {
     const tarjeta = html.querySelector('.aliado:not(.vacio)')!;
     expect(tarjeta.textContent).toContain('Alexandra Rojas García');
     expect(tarjeta.textContent).toContain('Fuerza de ventas');
-    expect(tarjeta.textContent).toContain('Verificado');
+    expect(tarjeta.textContent).toContain('Verificado por Credimetría');
+    expect(tarjeta.querySelectorAll('.chip').length).toBe(17);
     expect(tarjeta.textContent).toContain('GNB Sudameris');
     expect(tarjeta.textContent).toContain('Préstamos con reportes');
     expect(tarjeta.textContent).toContain('Pasto');

@@ -397,3 +397,8 @@ ul {
     animation: none;
   }
 }
+
+.falta {
+  margin-top: -8px;
+  text-align: center;
+}

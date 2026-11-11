@@ -1,10 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
@@ -138,8 +132,6 @@ export class Asesoria {
   private readonly prospectos = inject(ProspectosService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder).nonNullable;
-  private readonly formulario =
-    viewChild.required<ElementRef<HTMLElement>>('formulario');
   /** Entidad elegida en el ranking, si llegó desde allí. */
   private entidad: string | null = null;
   /** Urgencia, solo si la trae el enlace (inicio o Compara tu oferta). */
@@ -183,6 +175,8 @@ export class Asesoria {
    * persona llena lo anterior y nunca se devuelve.
    */
   protected readonly paso = signal(1);
+  /** Todo lleno y la autorización marcada: el botón se habilita. */
+  protected readonly completo = signal(false);
 
   constructor() {
     this.llenarDesdeEnlace(inject(ActivatedRoute).snapshot.queryParamMap);
@@ -194,6 +188,7 @@ export class Asesoria {
 
   /** Muestra la parte siguiente cuando lo anterior ya está lleno. */
   private avanzar(): void {
+    this.completo.set(this.form.valid);
     const c = this.form.controls;
     let hasta = 1;
     if (c.producto.valid) hasta = 2;
@@ -216,7 +211,10 @@ export class Asesoria {
   }
 
   protected errorCanales(): boolean {
-    return this.form.hasError('sinCanal') && this.intentoEnviar();
+    return (
+      this.form.hasError('sinCanal') &&
+      (this.form.controls.canales.touched || this.intentoEnviar())
+    );
   }
 
   protected elegirTipo(tipo: TipoCredito): void {
@@ -236,15 +234,9 @@ export class Asesoria {
   }
 
   protected async enviar(): Promise<void> {
+    // El botón solo se habilita con todo lleno (ver `completo`).
+    if (this.enviando() || this.form.invalid) return;
     this.intentoEnviar.set(true);
-    this.form.markAllAsTouched();
-    if (this.enviando()) return;
-    if (this.form.invalid) {
-      // Si falta algo, se ve todo el formulario con lo que falta marcado.
-      this.paso.set(4);
-      this.enfocarPrimerError();
-      return;
-    }
     const v = this.form.getRawValue();
     const monto = leerNumero(v.monto);
     const prospecto = this.prospectos.armar(
@@ -313,16 +305,5 @@ export class Asesoria {
     } else if (origen === 'ranking' && this.entidad && nombre) {
       this.vieneDe.set(`Desde el ranking: ${this.entidad}, ${nombre}.`);
     }
-  }
-
-  private enfocarPrimerError(): void {
-    queueMicrotask(() => {
-      const campo = this.formulario().nativeElement.querySelector<HTMLElement>(
-        '[aria-invalid="true"], .error',
-      );
-      campo?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      if (campo instanceof HTMLInputElement)
-        campo.focus({ preventScroll: true });
-    });
   }
 }

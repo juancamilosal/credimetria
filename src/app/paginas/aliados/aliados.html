@@ -24,41 +24,69 @@
     @for (aliado of ejemplo ? [] : aliados; track aliado.id) {
       <li class="tarjeta aliado">
         <div class="aliado-top">
-          <div class="quien">
+          <div class="retrato">
             @if (aliado.foto) {
               <img
                 class="foto"
                 [src]="aliado.foto"
                 [alt]="'Foto de ' + aliado.nombre"
-                width="56"
-                height="56"
+                width="120"
+                height="120"
               />
             } @else {
               <span class="iniciales" aria-hidden="true">{{
                 iniciales(aliado.nombre)
               }}</span>
             }
-            <div>
-              <b>{{ aliado.nombre }}</b>
-              <div class="nota">{{ aliado.empresa }}</div>
-            </div>
+            @if (aliado.verificado) {
+              <span class="sello" aria-hidden="true">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M5 12l4 4 10-10" />
+                </svg>
+              </span>
+            }
           </div>
-          @if (aliado.verificado) {
-            <span class="etq etq-ahorro">Verificado</span>
-          }
+          <div class="quien">
+            <h2>{{ aliado.nombre }}</h2>
+            <span class="muted">{{ aliado.empresa }}</span>
+            @if (aliado.verificado) {
+              <span class="etq etq-ahorro">Verificado por Credimetría</span>
+            }
+          </div>
         </div>
         <dl>
           <div>
-            <dt>Trabaja con:</dt>
-            <dd>{{ aliado.entidades.join(", ") }}</dd>
+            <dt>Trabaja con</dt>
+            <dd>
+              @for (e of aliado.entidades; track e) {
+                <span class="chip">{{ e }}</span>
+              }
+            </dd>
           </div>
           <div>
-            <dt>Productos:</dt>
-            <dd>{{ aliado.productos.join(", ") }}</dd>
+            <dt>Productos</dt>
+            <dd>
+              @for (p of aliado.productos; track p) {
+                <span class="chip">{{ p }}</span>
+              }
+            </dd>
           </div>
           <div>
-            <dt>Ciudades:</dt>
-            <dd>{{ aliado.ciudades.join(", ") }}</dd>
+            <dt>Ciudades</dt>
+            <dd>
+              @for (c of aliado.ciudades; track c) {
+                <span class="chip">{{ c }}</span>
+              }
+            </dd>
           </div>
         </dl>
       </li>
