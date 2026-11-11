@@ -1,0 +1,364 @@
+<section class="cabecera">
+  <div class="wrap cabecera-texto">
+    <h1>Política de tratamiento de datos personales</h1>
+    <p>
+      Cómo recogemos, usamos, compartimos y protegemos tus datos, según la Ley
+      1581 de 2012 y sus normas reglamentarias.
+    </p>
+  </div>
+</section>
+
+<div class="wrap contenido">
+  <article class="politica tarjeta">
+    <p class="meta nota">
+      Versión {{ version }} · vigente desde el
+      {{ vigenteDesde.split("-").reverse().join("/") }}
+    </p>
+    @if (pendiente) {
+      <p class="etq etq-aviso pendiente">
+        Borrador: faltan los datos del responsable del tratamiento.
+      </p>
+    }
+
+    <nav class="indice" aria-label="Contenido">
+      <ol>
+        <li><a href="#responsable">Responsable del tratamiento</a></li>
+        <li><a href="#normas">Normas que aplicamos</a></li>
+        <li><a href="#definiciones">Definiciones</a></li>
+        <li><a href="#datos">Qué datos recogemos</a></li>
+        <li><a href="#finalidades">Para qué los usamos</a></li>
+        <li><a href="#compartir">Con quién los compartimos</a></li>
+        <li><a href="#contacto">Cómo te contactan los asesores</a></li>
+        <li><a href="#derechos">Tus derechos</a></li>
+        <li><a href="#procedimiento">Cómo ejercer tus derechos</a></li>
+        <li><a href="#seguridad">Seguridad</a></li>
+        <li><a href="#conservacion">Cuánto tiempo guardamos los datos</a></li>
+        <li><a href="#menores">Menores de edad</a></li>
+        <li><a href="#cambios">Cambios a esta política</a></li>
+      </ol>
+    </nav>
+
+    <section id="responsable">
+      <h2>1. Responsable del tratamiento</h2>
+      <dl class="ficha">
+        <div>
+          <dt>Nombre</dt>
+          <dd>{{ responsable.nombre || "Pendiente" }}</dd>
+        </div>
+        <div>
+          <dt>Identificación</dt>
+          <dd>{{ responsable.identificacion || "Pendiente" }}</dd>
+        </div>
+        <div>
+          <dt>Domicilio</dt>
+          <dd>{{ responsable.domicilio || "Pendiente" }}</dd>
+        </div>
+        <div>
+          <dt>Correo</dt>
+          <dd>
+            <a [href]="'mailto:' + responsable.correo">{{
+              responsable.correo
+            }}</a>
+          </dd>
+        </div>
+        <div>
+          <dt>Sitio web</dt>
+          <dd>{{ responsable.sitio }}</dd>
+        </div>
+      </dl>
+      <p>
+        Credimetría compara las tasas de crédito de las entidades vigiladas por
+        la Superintendencia Financiera y, si la persona lo pide, la pone en
+        contacto con un asesor de crédito aliado. Credimetría no es una entidad
+        financiera, no presta dinero ni estudia ni aprueba créditos.
+      </p>
+    </section>
+
+    <section id="normas">
+      <h2>2. Normas que aplicamos</h2>
+      <ul>
+        <li>
+          Artículo 15 de la Constitución Política (derecho a la intimidad y al
+          habeas data).
+        </li>
+        <li>
+          Ley Estatutaria 1581 de 2012, de protección de datos personales.
+        </li>
+        <li>
+          Decreto 1074 de 2015, capítulo 25 (antes Decreto 1377 de 2013), que la
+          reglamenta.
+        </li>
+        <li>
+          Ley 2300 de 2023, sobre los horarios y la forma en que se puede
+          contactar a los consumidores.
+        </li>
+        <li>
+          Las instrucciones de la Superintendencia de Industria y Comercio
+          (SIC), autoridad de protección de datos en Colombia.
+        </li>
+      </ul>
+    </section>
+
+    <section id="definiciones">
+      <h2>3. Definiciones</h2>
+      <dl class="definiciones">
+        <div>
+          <dt>Titular</dt>
+          <dd>La persona a quien pertenecen los datos: tú.</dd>
+        </div>
+        <div>
+          <dt>Dato personal</dt>
+          <dd>
+            Cualquier información que te identifica o te puede identificar, como
+            tu nombre, tu celular o tu correo.
+          </dd>
+        </div>
+        <div>
+          <dt>Tratamiento</dt>
+          <dd>Recoger, guardar, usar, compartir o borrar datos personales.</dd>
+        </div>
+        <div>
+          <dt>Autorización</dt>
+          <dd>
+            Tu consentimiento previo, expreso e informado para tratar tus datos.
+            En Credimetría la das marcando la casilla del formulario de
+            asesoría.
+          </dd>
+        </div>
+        <div>
+          <dt>Responsable</dt>
+          <dd>Quien decide sobre el tratamiento: Credimetría.</dd>
+        </div>
+        <div>
+          <dt>Encargado</dt>
+          <dd>
+            Quien trata los datos por cuenta del responsable, por ejemplo el
+            proveedor del servidor o del correo.
+          </dd>
+        </div>
+        <div>
+          <dt>Asesor aliado</dt>
+          <dd>
+            El asesor de crédito publicado en
+            <a routerLink="/aliados">credimetria.com/aliados</a> que recibe tus
+            datos para ofrecerte créditos. Al recibirlos, responde también por
+            ellos.
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section id="datos">
+      <h2>4. Qué datos recogemos</h2>
+      <h3>Cuando pides asesoría</h3>
+      <ul>
+        <li>
+          El crédito que te interesa, el monto (si lo escribes) y tu ciudad.
+        </li>
+        <li>Tus nombres, apellidos, celular y correo electrónico.</li>
+        <li>Los canales por los que quieres que te contacten.</li>
+        <li>
+          Si llegas desde otra parte de la página: la entidad que elegiste en el
+          ranking o cuándo necesitas el crédito.
+        </li>
+        <li>
+          La prueba de tu autorización: la fecha y hora, el texto exacto que
+          aceptaste, la versión de esta política, la página desde la que la
+          diste y la dirección IP.
+        </li>
+      </ul>
+      <h3>Cuando usas el simulador o Compara tu oferta</h3>
+      <p>
+        Los cálculos se hacen en tu navegador. Lo que escribes no se guarda ni
+        se envía.
+      </p>
+      <h3>Cuando navegas</h3>
+      <p>
+        El servidor guarda registros técnicos (como la dirección IP y la página
+        pedida) para que el sitio funcione y para su seguridad. Tu navegador
+        guarda si prefieres el modo claro u oscuro. No usamos cookies de
+        publicidad ni de rastreo.
+      </p>
+      <p>
+        <b>No pedimos datos sensibles</b> (salud, origen étnico, creencias,
+        datos biométricos, etc.) ni tu información financiera, como ingresos o
+        reportes en centrales de riesgo. Si el asesor la necesita para estudiar
+        un crédito, te la pide directamente.
+      </p>
+    </section>
+
+    <section id="finalidades">
+      <h2>5. Para qué usamos tus datos</h2>
+      <ol>
+        <li>
+          Compartirlos con máximo 2 asesores aliados para que te contacten y te
+          ofrezcan créditos de las entidades con las que trabajan.
+        </li>
+        <li>
+          Enviarte la confirmación de tu solicitud y la información sobre las
+          reglas que cumplen los asesores.
+        </li>
+        <li>Guardar la prueba de tu autorización.</li>
+        <li>
+          Atender tus consultas, reclamos y solicitudes de borrar o corregir tus
+          datos.
+        </li>
+        <li>
+          Revisar que los asesores cumplan sus compromisos y atender los
+          reportes en su contra.
+        </li>
+        <li>
+          Hacer estadísticas generales sin identificar a nadie (por ejemplo,
+          cuántas solicitudes llegan por producto o ciudad).
+        </li>
+        <li>Proteger la seguridad del sitio y prevenir fraudes.</li>
+      </ol>
+      <p>
+        No usamos tus datos para nada distinto sin volver a pedirte
+        autorización. <b>Nunca los vendemos.</b>
+      </p>
+    </section>
+
+    <section id="compartir">
+      <h2>6. Con quién compartimos tus datos</h2>
+      <ul>
+        <li>
+          <b>Asesores aliados:</b> solo los publicados en
+          <a routerLink="/aliados">credimetria.com/aliados</a>, máximo 2 por
+          solicitud y solo si marcaste la autorización. Cada uno se compromete a
+          usar tus datos únicamente para ofrecerte crédito, no revenderlos ni
+          compartirlos, respetar los horarios y los canales que elegiste, no
+          cobrarte nada por adelantado y borrarlos si lo pides.
+        </li>
+        <li>
+          <b>Proveedores que nos prestan servicios (encargados):</b> el servidor
+          donde se guardan los datos, el servicio de correo con el que te
+          enviamos la confirmación y el servicio que protege y entrega el sitio
+          web. Solo pueden usar los datos para prestarnos ese servicio. Algunos
+          tienen sus servidores fuera de Colombia; en ese caso la transmisión se
+          hace con las garantías que exigen la Ley 1581 y el Decreto 1074 de
+          2015.
+        </li>
+        <li>
+          <b>Autoridades:</b> cuando una autoridad competente lo pida por ley o
+          por orden judicial.
+        </li>
+      </ul>
+    </section>
+
+    <section id="contacto">
+      <h2>7. Cómo te contactan los asesores</h2>
+      <p>
+        Solo por los canales que marcaste (WhatsApp, llamada o correo) y en los
+        horarios que permite la Ley 2300 de 2023: de lunes a viernes de 7:00 a.
+        m. a 7:00 p. m. y los sábados de 8:00 a. m. a 3:00 p. m. Nunca en
+        domingos ni festivos. Puedes pedir en cualquier momento que no te
+        contacten más.
+      </p>
+      <p>
+        <b>Ningún asesor aliado puede cobrarte por adelantado</b> por estudiar o
+        aprobar un crédito. Si alguien lo hace, es estafa: no pagues y repórtalo
+        en <a routerLink="/aliados">credimetria.com/aliados</a> o al correo
+        <a [href]="'mailto:' + responsable.correo">{{ responsable.correo }}</a
+        >.
+      </p>
+    </section>
+
+    <section id="derechos">
+      <h2>8. Tus derechos</h2>
+      <p>Como titular de los datos tienes derecho a:</p>
+      <ol>
+        <li>Conocer, actualizar y corregir tus datos.</li>
+        <li>Pedir la prueba de la autorización que diste.</li>
+        <li>Saber, si lo pides, cómo se han usado tus datos.</li>
+        <li>
+          Revocar la autorización y pedir que borremos tus datos, siempre que no
+          exista un deber legal o contractual de conservarlos.
+        </li>
+        <li>Consultar tus datos gratis.</li>
+        <li>
+          Presentar quejas ante la Superintendencia de Industria y Comercio
+          (SIC), después de haber hecho tu reclamo ante nosotros.
+        </li>
+      </ol>
+    </section>
+
+    <section id="procedimiento">
+      <h2>9. Cómo ejercer tus derechos</h2>
+      <p>
+        Escríbenos a
+        <a [href]="'mailto:' + responsable.correo">{{ responsable.correo }}</a>
+        con tu nombre, el correo o celular que usaste en la solicitud, lo que
+        pides y, si quieres, los documentos que lo apoyen. Puedes hacerlo tú o
+        alguien que te represente, demostrando que lo hace.
+      </p>
+      <dl class="plazos">
+        <div>
+          <dt>Consultas</dt>
+          <dd>
+            Te respondemos en máximo 10 días hábiles. Si no alcanzamos, te
+            avisamos el motivo y te respondemos en los 5 días hábiles
+            siguientes.
+          </dd>
+        </div>
+        <div>
+          <dt>Reclamos</dt>
+          <dd>
+            Para corregir, actualizar o borrar datos, o si crees que no
+            cumplimos la ley. Te respondemos en máximo 15 días hábiles; si no
+            alcanzamos, te avisamos el motivo y te respondemos en los 8 días
+            hábiles siguientes. Si al reclamo le falta información, te la
+            pedimos en los 5 días siguientes; si no la envías en 2 meses,
+            entendemos que desististe.
+          </dd>
+        </div>
+      </dl>
+      <p>
+        Cuando borramos tus datos te avisamos. También pedimos a los asesores
+        aliados que los tengan que los borren.
+      </p>
+    </section>
+
+    <section id="seguridad">
+      <h2>10. Seguridad</h2>
+      <p>
+        Usamos medidas técnicas y administrativas para proteger tus datos:
+        conexión cifrada (https), acceso restringido a la base de datos con
+        usuarios y permisos separados (el sitio web solo puede guardar
+        solicitudes, no leerlas), copias de seguridad y revisión de los accesos.
+        Ningún sistema es infalible; si ocurre un incidente que afecte tus
+        datos, te informaremos y lo reportaremos a la SIC como exige la ley.
+      </p>
+    </section>
+
+    <section id="conservacion">
+      <h2>11. Cuánto tiempo guardamos los datos</h2>
+      <p>
+        Los guardamos mientras sean necesarios para las finalidades de esta
+        política y para atender reclamos: hasta 2 años desde tu última
+        solicitud, salvo que pidas borrarlos antes o que una norma nos obligue a
+        conservarlos por más tiempo. La prueba de la autorización se guarda
+        mientras tratemos tus datos.
+      </p>
+    </section>
+
+    <section id="menores">
+      <h2>12. Menores de edad</h2>
+      <p>
+        El formulario de asesoría es solo para mayores de 18 años. No recogemos
+        a sabiendas datos de menores de edad; si llegamos a recibirlos, los
+        borramos.
+      </p>
+    </section>
+
+    <section id="cambios">
+      <h2>13. Cambios a esta política</h2>
+      <p>
+        Si cambiamos esta política, publicamos la nueva versión en esta página
+        con su fecha. Si el cambio afecta las finalidades o con quién
+        compartimos tus datos, te pediremos de nuevo la autorización. Cada
+        solicitud de asesoría guarda la versión que aceptaste.
+      </p>
+    </section>
+  </article>
+</div>

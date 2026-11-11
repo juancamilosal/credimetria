@@ -3,55 +3,39 @@ import { RouterLink } from '@angular/router';
 import { VERSION_POLITICA } from '../../core/servicios/prospectos.service';
 
 /**
- * Lugar de la política de tratamiento de datos. El texto legal aún no está
- * escrito; debe publicarse aquí antes de abrir el formulario de asesoría.
+ * Quién responde por los datos (Ley 1581 de 2012, art. 17 y Decreto 1074 de
+ * 2015, art. 2.2.2.25.3.1): nombre o razón social, identificación, domicilio
+ * y canales. Mientras falte alguno, la página lo dice.
+ */
+export const RESPONSABLE = {
+  nombre: '',
+  identificacion: '',
+  domicilio: '',
+  correo: 'soporte@credimetria.com',
+  sitio: 'credimetria.com',
+};
+
+/** Fecha desde la que rige esta versión de la política. */
+export const VIGENTE_DESDE = '2026-11-11';
+
+/**
+ * Política de tratamiento de datos personales de Credimetría según la Ley
+ * 1581 de 2012, el Decreto 1074 de 2015 (capítulo 25, antes Decreto 1377 de
+ * 2013) y, para el contacto de los asesores, la Ley 2300 de 2023.
  */
 @Component({
   selector: 'app-politica-datos',
   imports: [RouterLink],
-  template: `
-    <section class="cabecera">
-      <div class="wrap cabecera-texto">
-        <h1>Política de tratamiento de datos</h1>
-        <p>Cómo cuidamos tus datos personales, según la Ley 1581 de 2012.</p>
-      </div>
-    </section>
-    <div class="wrap contenido">
-      <div class="tarjeta">
-        <span class="etq etq-aviso">Borrador · versión {{ version }}</span>
-        <p>
-          Estamos terminando el texto completo de la política. Mientras tanto,
-          esto es lo esencial:
-        </p>
-        <ul>
-          <li>
-            Solo compartimos tus datos con los
-            <a routerLink="/aliados">asesores aliados publicados</a>, y solo si
-            marcas la autorización.
-          </li>
-          <li>Te contactan máximo 2 asesores, por los canales que elijas.</li>
-          <li>Puedes pedir que borremos tus datos cuando quieras.</li>
-        </ul>
-      </div>
-    </div>
-  `,
-  styles: `
-    .contenido {
-      padding-top: 32px;
-    }
-    .tarjeta {
-      max-width: 72ch;
-      gap: 12px;
-    }
-    ul {
-      margin: 0;
-      padding-left: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-  `,
+  templateUrl: './politica-datos.html',
+  styleUrl: './politica-datos.css',
 })
 export class PoliticaDatos {
   protected readonly version = VERSION_POLITICA;
+  protected readonly responsable = RESPONSABLE;
+  protected readonly vigenteDesde = VIGENTE_DESDE;
+  /** Faltan datos del responsable: la política no está completa. */
+  protected readonly pendiente =
+    !RESPONSABLE.nombre ||
+    !RESPONSABLE.identificacion ||
+    !RESPONSABLE.domicilio;
 }
