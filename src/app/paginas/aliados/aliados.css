@@ -36,6 +36,15 @@ ol {
   min-width: 0;
 }
 
+.foto {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: none;
+  border: 2px solid var(--cm-marca-100);
+}
+
 .iniciales {
   width: 48px;
   height: 48px;

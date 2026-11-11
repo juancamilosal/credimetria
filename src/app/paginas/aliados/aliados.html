@@ -25,9 +25,19 @@
       <li class="tarjeta aliado">
         <div class="aliado-top">
           <div class="quien">
-            <span class="iniciales" aria-hidden="true">{{
-              iniciales(aliado.nombre)
-            }}</span>
+            @if (aliado.foto) {
+              <img
+                class="foto"
+                [src]="aliado.foto"
+                [alt]="'Foto de ' + aliado.nombre"
+                width="56"
+                height="56"
+              />
+            } @else {
+              <span class="iniciales" aria-hidden="true">{{
+                iniciales(aliado.nombre)
+              }}</span>
+            }
             <div>
               <b>{{ aliado.nombre }}</b>
               <div class="nota">{{ aliado.empresa }}</div>

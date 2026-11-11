@@ -1,22 +1,49 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { ALIADOS } from '../../core/datos/aliados';
+import { AliadosService } from '../../core/servicios/aliados.service';
 import { Aliados } from './aliados';
 
 describe('Aliados', () => {
-  it('mientras no hay asesores reales dice "Próximamente tus asesores"', () => {
+  function crear(lista = ALIADOS) {
     TestBed.configureTestingModule({
       imports: [Aliados],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AliadosService,
+          useValue: { ejemplo: lista.length === 0, lista: () => lista },
+        },
+      ],
     });
     const fixture = TestBed.createComponent(Aliados);
     fixture.detectChanges();
-    const html = fixture.nativeElement as HTMLElement;
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  it('muestra a Alexandra Rojas García con su foto, bancos, productos y ciudades', () => {
+    const html = crear();
+    const tarjeta = html.querySelector('.aliado:not(.vacio)')!;
+    expect(tarjeta.textContent).toContain('Alexandra Rojas García');
+    expect(tarjeta.textContent).toContain('Fuerza de ventas');
+    expect(tarjeta.textContent).toContain('Verificado');
+    expect(tarjeta.textContent).toContain('GNB Sudameris');
+    expect(tarjeta.textContent).toContain('Préstamos con reportes');
+    expect(tarjeta.textContent).toContain('Pasto');
+    const foto = tarjeta.querySelector<HTMLImageElement>('img.foto')!;
+    expect(foto.getAttribute('src')).toBe(
+      '/aliados/alexandra-rojas-garcia.webp',
+    );
+    expect(foto.alt).toBe('Foto de Alexandra Rojas García');
+    expect(html.querySelector('.proximamente')).toBeNull();
+    expect(html.textContent).toContain('¿Eres asesor de crédito?');
+  });
+
+  it('sin aliados dice "Próximamente tus asesores"', () => {
+    const html = crear([]);
     expect(html.querySelector('.proximamente')?.textContent).toContain(
       'Próximamente tus asesores',
     );
-    // No se muestran los asesores de ejemplo ni el aviso de prueba.
-    expect(html.textContent).not.toContain('de ejemplo');
     expect(html.textContent).not.toContain('Versión de prueba');
-    expect(html.textContent).toContain('¿Eres asesor de crédito?');
   });
 });

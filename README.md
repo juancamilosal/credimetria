@@ -184,8 +184,17 @@ morada y oro del diseño (ver abajo).
   vivienda la cuota se calcula con $150.000.000 a 240 meses.
 - Sin avisos de "versión de prueba" (10 nov 2026): el pie ya no dice que
   los asesores son de ejemplo (solo avisa si las tasas fueran de ejemplo,
-  `corte.ejemplo`), y `/aliados` muestra "Próximamente tus asesores" en vez
-  de los asesores de ejemplo mientras `AliadosService.ejemplo` sea `true`.
+  `corte.ejemplo`), y `/aliados` muestra "Próximamente tus asesores" si no
+  hay aliados.
+- **Asesores aliados** (`core/datos/aliados.ts`, `ALIADOS`): cada uno con
+  nombre, empresa, "Verificado" (solo si mostró su vínculo con las
+  entidades), entidades, productos, ciudades y foto opcional en
+  `public/aliados/` (solo con su autorización; si no hay foto, iniciales).
+  Primera aliada (11 nov 2026): Alexandra Rojas García, fuerza de ventas,
+  verificada: Banco Popular, GNB Sudameris, BBVA, AV Villas, Banco de
+  Bogotá y Banco Pichincha; libranza, consumo, tarjeta de crédito,
+  hipotecario y préstamos con reportes; Bogotá, Medellín, Cali,
+  Barranquilla, Cartagena y Pasto.
 - Menú de arriba: Ranking de tasas, Simulador, Compara tu oferta, Aliados y
   Asesoría gratis (10 nov 2026: se quitó "Cómo funciona", que solo bajaba a
   esa sección del inicio; la sección sigue en el inicio).

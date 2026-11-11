@@ -1,27 +1,42 @@
 import { Aliado } from '../modelos/aliado';
 
 /*
- * Asesores de ejemplo para ver la pantalla. Antes de publicar el formulario
- * de asesoría esta lista debe venir de la base de datos con los aliados
- * reales y verificados, porque la autorización de datos la nombra.
+ * Asesores aliados publicados en /aliados: las únicas personas que pueden
+ * recibir los datos de quien pide asesoría (la autorización los nombra).
+ * Solo se agregan con su autorización para publicar nombre y foto, y con
+ * "verificado" cuando mostraron su vínculo con las entidades (carta o
+ * certificado).
  */
-export const ALIADOS_EJEMPLO: Aliado[] = [
+export const ALIADOS: Aliado[] = [
   {
-    id: 'ejemplo-1',
-    nombre: 'Asesor de ejemplo',
-    empresa: 'Fuerza de ventas de ejemplo',
+    // Primera aliada (11 nov 2026).
+    id: 'alexandra-rojas-garcia',
+    nombre: 'Alexandra Rojas García',
+    empresa: 'Fuerza de ventas',
     verificado: true,
-    entidades: ['Banco Popular', 'Banco de Occidente'],
-    productos: ['Libranza', 'Libre inversión'],
-    ciudades: ['Bogotá', 'Medellín'],
-  },
-  {
-    id: 'ejemplo-2',
-    nombre: 'Asesora de ejemplo',
-    empresa: 'Asesoría independiente de ejemplo',
-    verificado: true,
-    entidades: ['AV Villas', 'Bancolombia'],
-    productos: ['Libre inversión', 'Vehículo'],
-    ciudades: ['Cali', 'Barranquilla'],
+    entidades: [
+      'Banco Popular',
+      'GNB Sudameris',
+      'BBVA',
+      'AV Villas',
+      'Banco de Bogotá',
+      'Banco Pichincha',
+    ],
+    productos: [
+      'Libranza',
+      'Consumo',
+      'Tarjeta de crédito',
+      'Hipotecario',
+      'Préstamos con reportes',
+    ],
+    ciudades: [
+      'Bogotá',
+      'Medellín',
+      'Cali',
+      'Barranquilla',
+      'Cartagena',
+      'Pasto',
+    ],
+    foto: '/aliados/alexandra-rojas-garcia.webp',
   },
 ];
