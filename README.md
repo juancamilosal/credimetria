@@ -21,16 +21,16 @@ Siguen el documento "Credimetría · Pantallas a desarrollar en Angular" y el
 diseño "Credimetría · Marca y página web", con una paleta más sobria que la
 morada y oro del diseño (ver abajo).
 
-| Ruta                 | Pantalla          | Qué hace                                                                                                                                                                                                                                                                                                          |
-| -------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de cada producto (rotan cada 7 s, con flechas), cómo funciona, entidades y asesoría                                                                                                                                                      |
-| `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas                                                                                                                                                                    |
-| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                                                                                                                                                                   |
-| `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                                                                                                                                                                           |
-| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular, correo y autorización; lo guarda en Directus y manda los correos                                                                                                                                                     |
-| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos (mientras no hay asesores reales: "Próximamente tus asesores"), compromisos y reporte                                                                                                                                                                           |
-| `/politica-de-datos` | Política          | Política de tratamiento de datos (Ley 1581 de 2012, Decreto 1074 de 2015 cap. 25, Ley 2300 de 2023), 13 secciones con índice. Responsable: Juan Camilo Salazar Rojas, `gerencia@credimetria.com`. Muestra "Borrador" hasta llenar en `RESPONSABLE` (`politica-datos.ts`) el domicilio, la dirección y el teléfono |
-| `/admin/tasas`       | Configuración     | Solo administradores de Directus: por banco, la tasa publicada y la que espera aprobación, cada una con su PDF; comparar los PDF, editar, aprobar y cargar PDF o pantallazos nuevos                                                                                                                               |
+| Ruta                 | Pantalla          | Qué hace                                                                                                                                                                                                                                                                                                                                                                    |
+| -------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                  | Inicio            | "Compara con datos, no con promesas": qué hacemos, las 3 tasas más bajas de cada producto (rotan cada 7 s, con flechas), cómo funciona, entidades y asesoría                                                                                                                                                                                                                |
+| `/ranking`           | Ranking de tasas  | Tabla que se ordena y se filtra por tipo desde los títulos (como en Excel), con producto, monto y plazo arriba para calcular la cuota de todas                                                                                                                                                                                                                              |
+| `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                                                                                                                                                                                                                             |
+| `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                                                                                                                                                                                                                                     |
+| `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular, correo y autorización; lo guarda en Directus y manda los correos                                                                                                                                                                                                               |
+| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos (mientras no hay asesores reales: "Próximamente tus asesores"), compromisos y reporte                                                                                                                                                                                                                                     |
+| `/politica-de-datos` | Política          | Política de tratamiento de datos (Ley 1581 de 2012, Decreto 1074 de 2015 cap. 25, Ley 2300 de 2023), 13 secciones con índice, versión `2026-11-12` (vigente desde el 12 nov 2026). Responsable: Juan Camilo Salazar Rojas, Cali; correo `gerencia@credimetria.com` (datos en `RESPONSABLE`, `politica-datos.ts`). Conserva los datos hasta 2 años desde la última solicitud |
+| `/admin/tasas`       | Configuración     | Solo administradores de Directus: por banco, la tasa publicada y la que espera aprobación, cada una con su PDF; comparar los PDF, editar, aprobar y cargar PDF o pantallazos nuevos                                                                                                                                                                                         |
 
 - **Ranking como en Excel** (`paginas/ranking/` y
   `compartido/tabla-ranking/`): cada título ordena la tabla al tocarlo (↑/↓,
@@ -93,9 +93,9 @@ morada y oro del diseño (ver abajo).
   solo con todo lleno y la autorización marcada (`completo`; 11 nov 2026);
   mientras tanto debajo dice "Llena tus datos y marca la autorización para
   continuar". Cada campo muestra su error al salir de él. El texto de la autorización dice
-  "credimetria.com/aliados" (versión de la política `2026-11-borrador`;
-  las solicitudes anteriores guardan "credimetria.co/aliados" y
-  `2026-10-borrador`). Al enviar, el botón dice "Enviando…"; si el servidor falla, se queda en el formulario con el
+  "credimetria.com/aliados" (versión de la política `2026-11-12`, la
+  definitiva; antes `2026-11-borrador`, y las solicitudes más viejas
+  guardan "credimetria.co/aliados" y `2026-10-borrador`). Al enviar, el botón dice "Enviando…"; si el servidor falla, se queda en el formulario con el
   aviso "No pudimos enviar tu solicitud".
 - **Solicitudes de asesoría** (`servidor/prospectos.mjs`, `POST
 /api/prospectos`): el servidor revisa los datos (nunca confía en el
@@ -596,8 +596,8 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   en `prospectos` (no leer, editar ni borrar), así el token de la página no
   sirve para sacar los datos. Se ven y se marcan desde el panel de
   Directus con el usuario administrador.
-- Antes de publicar el formulario: la política de tratamiento de datos real
-  y los aliados reales en `/aliados`.
+- La política de tratamiento de datos (versión `2026-11-12`) y la primera
+  aliada real en `/aliados` ya están publicadas.
 - **Para abrir vivienda u otra línea:** si un mismo PDF trae varios
   productos (Banco de Bogotá, AV Villas), cambiar en `fuentes` el campo
   `producto` por una lista `productos`, para subir el PDF una vez y sacar

@@ -10,15 +10,15 @@ import { VERSION_POLITICA } from '../../core/servicios/prospectos.service';
 export const RESPONSABLE = {
   nombre: 'Juan Camilo Salazar Rojas',
   /** Ciudad. */
-  domicilio: '',
-  direccion: '',
-  telefono: '',
+  domicilio: 'Cali, Valle del Cauca',
+  direccion: 'Calle 60 # 98B-05, Cali',
+  telefono: '+57 318 022 2868',
   correo: 'gerencia@credimetria.com',
   sitio: 'credimetria.com',
 };
 
 /** Fecha desde la que rige esta versión de la política. */
-export const VIGENTE_DESDE = '2026-11-11';
+export const VIGENTE_DESDE = '2026-11-12';
 
 /**
  * Política de tratamiento de datos personales de Credimetría según la Ley
