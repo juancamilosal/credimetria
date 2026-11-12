@@ -10,7 +10,7 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Verificacion } from '../../compartido/verificacion/verificacion';
-import { REGLAS_ALIADOS } from '../../core/datos/reglas-aliados';
+import { REGLAS_PARA_ASESOR } from '../../core/datos/reglas-aliados';
 import {
   PRODUCTOS_ALIADO,
   SolicitudesAliadosService,
@@ -57,7 +57,7 @@ export class QuieroSerAliado {
   protected readonly tipos = TIPOS_ALIADO;
   protected readonly vinculos = VINCULOS;
   protected readonly productos = PRODUCTOS_ALIADO;
-  protected readonly reglas = REGLAS_ALIADOS;
+  protected readonly reglas = REGLAS_PARA_ASESOR;
   protected readonly entidadesConocidas = inject(TasasService).listaEntidades;
   protected readonly textoAutorizacion = TEXTO_AUTORIZACION_ALIADO.replace(
     'política de tratamiento de datos.',

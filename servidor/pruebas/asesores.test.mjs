@@ -329,3 +329,26 @@ test("POST /api/solicitudes-aliados: sin Turnstile 400; válida se guarda y mand
     srv.close();
   }
 });
+
+import { correoSolicitudAsesor } from "../asesores.mjs";
+
+test("el correo al asesor tiene el logo, lo que contó, que lo contactaremos y las reglas", () => {
+  process.env.AVISO_PARA = "gerencia@ejemplo.com";
+  const { solicitud: s } = validarSolicitudAliado({
+    ...solicitud(),
+    nombre: "CARLOS ANDRÉS PÉREZ",
+  });
+  const c = correoSolicitudAsesor(s);
+  assert.equal(c.to, "carlos@ejemplo.com");
+  assert.equal(c.replyTo, "gerencia@ejemplo.com");
+  assert.match(c.subject, /asesor aliado de Credimetría/);
+  assert.match(c.html, /Hola, Carlos: recibimos tu solicitud/);
+  assert.match(c.html, /nos pondremos en contacto contigo/);
+  assert.match(c.html, /Lo que nos contaste/);
+  assert.match(c.html, /BBVA, Davivienda/);
+  assert.match(c.html, /Usar los datos solo para ofrecer crédito/);
+  assert.match(c.html, /src="cid:logo@credimetria"/);
+  assert.equal(c.attachments[0].cid, "logo@credimetria");
+  assert.doesNotMatch(c.html, /1020304050/);
+  assert.match(c.text, /Qué sigue:/);
+});

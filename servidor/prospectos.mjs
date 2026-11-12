@@ -259,7 +259,7 @@ export function correoCliente(p, logo = logoCorreo()) {
         <tr><td style="padding:16px 32px 8px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fff4e5;border-left:4px solid #e08a00;border-radius:6px">
             <tr><td style="padding:14px 18px;font:14px/1.5 Arial,sans-serif;color:${tinta}">
-              <b>Si alguien te pide dinero para "aprobar" o estudiar tu crédito, es estafa.</b> No pagues nada y cuéntanos en <a href="mailto:reportes@credimetria.co" style="color:${azul}">reportes@credimetria.co</a>. Retiramos de la lista a quien incumpla.
+              <b>Si alguien te pide dinero para "aprobar" o estudiar tu crédito, es estafa.</b> No pagues nada y <a href="${SITIO}/aliados/reportar" style="color:${azul}">repórtalo aquí</a>. Retiramos de la lista a quien incumpla.
             </td></tr>
           </table>
         </td></tr>
@@ -286,7 +286,7 @@ export function correoCliente(p, logo = logoCorreo()) {
     "Lo que todo asesor aliado se compromete a cumplir:",
     ...REGLAS.map(([t, d], i) => `${i + 1}. ${t} ${d}`),
     "",
-    'Si alguien te pide dinero para "aprobar" o estudiar tu crédito, es estafa. No pagues nada y cuéntanos en reportes@credimetria.co.',
+    `Si alguien te pide dinero para "aprobar" o estudiar tu crédito, es estafa. No pagues nada y repórtalo en ${SITIO}/aliados/reportar.`,
     "",
     `Lista de asesores aliados: ${SITIO}/aliados`,
     `Política de tratamiento de datos: ${SITIO}/politica-de-datos`,

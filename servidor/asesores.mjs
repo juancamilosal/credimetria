@@ -13,7 +13,12 @@
 
 import express from "express";
 import { cargarEnv } from "./env.mjs";
-import { mandarCorreo, verificarTurnstile } from "./prospectos.mjs";
+import {
+  CID_LOGO,
+  logoCorreo,
+  mandarCorreo,
+  verificarTurnstile,
+} from "./prospectos.mjs";
 
 if (!process.env.DIRECTUS_TOKEN) cargarEnv();
 
@@ -512,28 +517,172 @@ ${s.mensaje ? `<p style="white-space:pre-wrap;background:#f3f6f9;padding:12px;bo
   };
 }
 
-/** Confirmación al asesor: recibimos su solicitud y qué sigue. */
-export function correoSolicitudAsesor(s) {
-  const nombre = s.nombre.split(/\s+/)[0];
-  const lineas = [
-    `Hola, ${nombre}: recibimos tu solicitud para ser asesor aliado de Credimetría.`,
-    "",
-    "La revisamos y te escribimos a este correo para pedirte el documento que demuestre tu vínculo con las entidades (carta, certificado o contrato).",
-    "",
-    "Recuerda las reglas que aceptaste: nunca cobrar por adelantado, usar los datos solo para ofrecer crédito, respetar horarios y canales, demostrar tu vínculo con la entidad y borrar los datos si te lo piden.",
-    "",
-    `Credimetría · ${SITIO}`,
+/** Las 5 reglas de /aliados, dichas al asesor (no a la persona). */
+export const REGLAS_ASESOR = [
+  [
+    "Nunca cobrar por adelantado.",
+    'Ni por estudio, ni por "aprobar" el crédito.',
+  ],
+  [
+    "Usar los datos solo para ofrecer crédito.",
+    "No revenderlos ni compartirlos con nadie.",
+  ],
+  [
+    "Respetar horarios y canales.",
+    "Solo por el canal que eligió la persona, en los horarios de la ley.",
+  ],
+  ["Demostrar tu vínculo con la entidad.", "Con carta o certificado."],
+  ["Borrar los datos de quien lo pida.", "Y avisarnos cuando esté hecho."],
+];
+
+/** "CARLOS ANDRÉS PÉREZ" o "carlos" → "Carlos". */
+const primerNombre = (nombre) => {
+  const n = nombre.trim().split(/\s+/)[0].toLocaleLowerCase("es-CO");
+  return n.charAt(0).toLocaleUpperCase("es-CO") + n.slice(1);
+};
+
+/**
+ * Confirmación al asesor, con el mismo diseño del correo al cliente: el logo
+ * adjunto, lo que nos contó, qué sigue (nos pondremos en contacto con él) y
+ * las reglas que aceptó. Las respuestas llegan a AVISO_PARA.
+ */
+export function correoSolicitudAsesor(s, logo = logoCorreo()) {
+  const srcLogo = logo ? `cid:${CID_LOGO}` : `${SITIO}/correo/credimetria.png`;
+  const nombre = primerNombre(s.nombre);
+  const azul = "#0b4f8c";
+  const tinta = "#1b2733";
+  const suave = "#5b6b7b";
+  const anios = `${s.experiencia} ${s.experiencia === 1 ? "año" : "años"}`;
+  const resumen = [
+    ["Eres", TIPOS_ALIADO[s.tipo]],
+    ...(s.empresa ? [["Empresa", s.empresa]] : []),
+    ["Experiencia", anios],
+    ["Entidades", s.entidades.join(", ")],
+    ["Productos", s.productos.join(", ")],
+    ["Atiendes en", s.ciudades.join(", ")],
+    ["Tu vínculo", `Lo demuestras con: ${VINCULOS[s.vinculo].toLowerCase()}`],
+    ["Te contactamos", `${s.correo} · ${s.celular}`],
   ];
+  const pasos = [
+    [
+      "Revisamos tu solicitud.",
+      "Miramos tu experiencia y las entidades con las que trabajas.",
+    ],
+    [
+      "Nos ponemos en contacto contigo.",
+      "Te escribimos o te llamamos para conocerte y pedirte el documento que demuestre tu vínculo con las entidades.",
+    ],
+    [
+      "Te publicamos en Credimetría.",
+      'Si todo está bien, apareces en credimetria.com/aliados con el sello "Verificado por Credimetría" y empiezas a recibir solicitudes de personas que ya compararon tasas.',
+    ],
+  ];
+  const filas = (lista, numerado) =>
+    lista
+      .map(
+        ([titulo, detalle], i) => `
+              <tr>
+                <td valign="top" style="padding:6px 12px 6px 0;width:26px">
+                  <div style="width:24px;height:24px;border-radius:12px;background:${numerado};color:#fff;font:bold 13px/24px Arial,sans-serif;text-align:center">${i + 1}</div>
+                </td>
+                <td style="padding:6px 0;font:14px/1.5 Arial,sans-serif;color:${tinta}"><b>${escapar(titulo)}</b> <span style="color:${suave}">${escapar(detalle)}</span></td>
+              </tr>`,
+      )
+      .join("");
+  const resumenHtml = resumen
+    .map(
+      ([k, v]) => `
+              <tr>
+                <td valign="top" style="padding:4px 16px 4px 0;font:14px Arial,sans-serif;color:${suave};white-space:nowrap">${k}</td>
+                <td style="padding:4px 0;font:bold 14px/1.5 Arial,sans-serif;color:${tinta}">${escapar(v)}</td>
+              </tr>`,
+    )
+    .join("");
+
+  const html = `<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Recibimos tu solicitud para ser aliado</title></head>
+<body style="margin:0;padding:0;background:#eef3f8">
+  <div style="display:none;max-height:0;overflow:hidden">Revisaremos tu información y nos pondremos en contacto contigo para los siguientes pasos.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef3f8">
+    <tr><td align="center" style="padding:24px 12px">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden">
+        <tr><td style="padding:24px 32px;border-bottom:4px solid ${azul}">
+          <a href="${SITIO}"><img src="${srcLogo}" width="190" alt="Credimetría" style="display:block;border:0;width:190px;height:auto"></a>
+        </td></tr>
+        <tr><td style="padding:32px 32px 8px">
+          <h1 style="margin:0 0 12px;font:bold 22px/1.3 Arial,sans-serif;color:${tinta}">Hola, ${escapar(nombre)}: recibimos tu solicitud</h1>
+          <p style="margin:0 0 16px;font:15px/1.6 Arial,sans-serif;color:${tinta}">Gracias por querer ser <b>asesor aliado de Credimetría</b>. Nuestro equipo va a revisar tu información y <b>nos pondremos en contacto contigo</b> en los próximos días hábiles, a tu correo o a tu celular, para contarte los siguientes pasos.</p>
+        </td></tr>
+        <tr><td style="padding:0 32px 8px">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9f1fa;border-radius:10px">
+            <tr><td style="padding:16px 20px">
+              <div style="font:bold 12px Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:${azul};margin-bottom:6px">Lo que nos contaste</div>
+              <table role="presentation" cellpadding="0" cellspacing="0">${resumenHtml}
+              </table>
+            </td></tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:24px 32px 4px">
+          <h2 style="margin:0 0 8px;font:bold 17px/1.3 Arial,sans-serif;color:${tinta}">Qué sigue</h2>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${filas(pasos, "#187d55")}
+          </table>
+        </td></tr>
+        <tr><td style="padding:20px 32px 4px">
+          <h2 style="margin:0 0 8px;font:bold 17px/1.3 Arial,sans-serif;color:${tinta}">Las reglas que aceptaste</h2>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${filas(REGLAS_ASESOR, azul)}
+          </table>
+        </td></tr>
+        <tr><td style="padding:16px 32px 32px;font:14px/1.6 Arial,sans-serif;color:${tinta}">
+          ¿Algo de tu información cambió o quieres contarnos más? <b>Responde a este correo</b> y lo agregamos a tu solicitud. Mientras tanto, mira cómo te verán las personas en la <a href="${SITIO}/aliados" style="color:${azul}">lista de asesores aliados</a>.
+        </td></tr>
+        <tr><td style="padding:20px 32px;background:#0b2a4a;font:12px/1.6 Arial,sans-serif;color:#c9d6e3">
+          Recibes este correo porque pediste ser asesor aliado en Credimetría y autorizaste el tratamiento de tus datos. Tu cédula no se publica. <a href="${SITIO}/politica-de-datos" style="color:#ffffff">Política de tratamiento de datos</a>.
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  const text = [
+    `Hola, ${nombre}: recibimos tu solicitud`,
+    "",
+    "Gracias por querer ser asesor aliado de Credimetría. Nuestro equipo va a revisar tu información y nos pondremos en contacto contigo en los próximos días hábiles, a tu correo o a tu celular, para contarte los siguientes pasos.",
+    "",
+    "Lo que nos contaste:",
+    ...resumen.map(([k, v]) => `- ${k}: ${v}`),
+    "",
+    "Qué sigue:",
+    ...pasos.map(([t, d], i) => `${i + 1}. ${t} ${d}`),
+    "",
+    "Las reglas que aceptaste:",
+    ...REGLAS_ASESOR.map(([t, d], i) => `${i + 1}. ${t} ${d}`),
+    "",
+    "¿Algo de tu información cambió? Responde a este correo.",
+    `Lista de asesores aliados: ${SITIO}/aliados`,
+    "",
+    "— Equipo de Credimetría",
+  ].join("\n");
+
   return {
     to: s.correo,
-    subject: "Recibimos tu solicitud para ser aliado",
-    text: lineas.join("\n"),
-    html: `<!doctype html><html lang="es"><body style="font:15px/1.6 Arial,sans-serif;color:#1b2733">
-${lineas
-  .filter(Boolean)
-  .map((l) => `<p>${escapar(l)}</p>`)
-  .join("\n")}
-</body></html>`,
+    // Si responde, la respuesta llega a quien revisa las solicitudes.
+    ...(process.env.AVISO_PARA ? { replyTo: process.env.AVISO_PARA } : {}),
+    subject: "Recibimos tu solicitud para ser asesor aliado de Credimetría",
+    html,
+    text,
+    ...(logo && {
+      attachments: [
+        {
+          filename: "credimetria.png",
+          content: logo,
+          contentType: "image/png",
+          cid: CID_LOGO,
+          contentDisposition: "inline",
+        },
+      ],
+    }),
   };
 }
 

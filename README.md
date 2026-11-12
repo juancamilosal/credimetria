@@ -677,8 +677,12 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   de datos, con Turnstile. `POST /api/solicitudes-aliados` (límite por IP,
   Turnstile primero) guarda en la colección `solicitudes_aliados` (estado
   `nueva`; luego `en_revision`, `aprobada` o `rechazada`, y notas) y manda
-  a `AVISO_PARA` toda la información del asesor y al asesor la
-  confirmación. Colección y permiso creados con
+  a `AVISO_PARA` toda la información del asesor y al asesor una
+  confirmación con el mismo diseño del correo al cliente (logo adjunto, "Lo
+  que nos contaste", "Qué sigue": revisamos, nos ponemos en contacto contigo
+  y te publicamos, y las 5 reglas dichas al asesor, `REGLAS_ASESOR`); si
+  responde, la respuesta llega a `AVISO_PARA`. El correo al cliente ya no
+  menciona reportes@credimetria.co: enlaza a `/aliados/reportar`. Colección y permiso creados con
   `servidor/scripts/crear-solicitudes-aliados.mjs`. El widget de Turnstile
   de este formulario es el componente `compartido/verificacion/`. En este formulario y en el de
   reporte, el nombre y el correo van a todo el ancho para que se vean
