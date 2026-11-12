@@ -11,7 +11,7 @@ export const RESPONSABLE = {
   nombre: 'Juan Camilo Salazar Rojas',
   /** Ciudad. */
   domicilio: 'Cali, Valle del Cauca',
-  direccion: 'Calle 60 # 98B-05, Cali',
+  direccion: 'Carrera 84A # 6A-47, Cali',
   telefono: '+57 318 022 2868',
   correo: 'gerencia@credimetria.com',
   sitio: 'credimetria.com',
