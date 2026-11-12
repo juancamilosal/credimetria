@@ -313,29 +313,103 @@ export async function guardarEnDirectus(prospecto) {
   }
 }
 
-/** Manda un correo. Nunca lanza error: si falla, queda en la consola. */
-export async function mandarCorreo(correo) {
+/** Correo a medias para los logs: "an***@gmail.com" (sin datos completos). */
+export function ocultarCorreo(correo) {
+  const texto = String(correo ?? "");
+  const [usuario, dominio] = texto.split("@");
+  if (!dominio) return texto ? "***" : "—";
+  return `${usuario.slice(0, 2)}***@${dominio}`;
+}
+
+/** Destinatarios de un correo para los logs, ocultos. */
+const paraLog = (to) =>
+  [to].flat().filter(Boolean).map(ocultarCorreo).join(", ") || "—";
+
+/**
+ * Resumen de la configuración de correo para el log de arranque. Nunca
+ * muestra la clave: solo si está puesta.
+ */
+export function resumenSmtp(env = process.env) {
+  if (!env.SMTP_HOST) {
+    return "Correos: sin SMTP_HOST, los correos de asesoría solo se escriben en el log.";
+  }
+  const puerto = Number(env.SMTP_PUERTO ?? 465);
+  return [
+    `Correos: SMTP ${env.SMTP_HOST}:${puerto} ` +
+      (puerto === 465 ? "(TLS)" : "(STARTTLS si el servidor lo ofrece)"),
+    `usuario ${env.SMTP_USUARIO ? ocultarCorreo(env.SMTP_USUARIO) : "(ninguno)"}`,
+    `clave ${env.SMTP_CLAVE ? "puesta" : "FALTA"}`,
+    `remitente ${env.CORREO_DE ? "CORREO_DE" : env.AVISO_DE ? "AVISO_DE" : "el usuario SMTP"}`,
+    `aviso a ${env.AVISO_PARA ? ocultarCorreo(env.AVISO_PARA) : "NADIE (falta AVISO_PARA)"}`,
+  ].join(", ");
+}
+
+/**
+ * Datos de un error de SMTP útiles para el log. Nodemailer no pone la clave
+ * en sus errores; igual se borra por si el servidor la devolviera.
+ */
+export function detalleErrorSmtp(error, clave = process.env.SMTP_CLAVE) {
+  const partes = [
+    error?.message,
+    error?.code && `código ${error.code}`,
+    error?.command && `comando ${error.command}`,
+    error?.responseCode && `respuesta ${error.responseCode}`,
+    error?.response && `"${String(error.response).slice(0, 200)}"`,
+  ].filter(Boolean);
+  let texto = partes.join(" · ") || String(error);
+  if (clave) texto = texto.split(clave).join("***");
+  return texto;
+}
+
+/**
+ * Manda un correo. Nunca lanza error: el éxito (con lo que respondió el
+ * servidor SMTP) y cualquier falla quedan en el log, sin la clave ni los
+ * correos completos. `crearTransporte` se cambia en las pruebas.
+ */
+export async function mandarCorreo(correo, { crearTransporte } = {}) {
   const { SMTP_HOST, SMTP_USUARIO, SMTP_CLAVE } = process.env;
-  if (!SMTP_HOST || !correo.to) {
-    console.log(`CORREO (sin SMTP) a ${correo.to ?? "—"}: ${correo.subject}`);
+  const asunto = `"${correo.subject}"`;
+  if (!correo.to) {
+    console.warn(
+      `CORREO no enviado ${asunto}: no hay destinatario (¿falta AVISO_PARA?).`,
+    );
+    return;
+  }
+  if (!SMTP_HOST) {
+    console.log(`CORREO (sin SMTP) a ${paraLog(correo.to)}: ${asunto}`);
     return;
   }
   try {
-    const { createTransport } = await import("nodemailer");
+    const crear =
+      crearTransporte ?? (await import("nodemailer")).createTransport;
     const puerto = Number(process.env.SMTP_PUERTO ?? 465);
-    await createTransport({
+    const info = await crear({
       host: SMTP_HOST,
       port: puerto,
       secure: puerto === 465,
       auth: SMTP_USUARIO ? { user: SMTP_USUARIO, pass: SMTP_CLAVE } : undefined,
+      // Sin estos límites una conexión colgada no deja nada en el log.
+      connectionTimeout: 15_000,
+      greetingTimeout: 15_000,
+      socketTimeout: 30_000,
     }).sendMail({
       from:
         process.env.CORREO_DE ??
         `Credimetría <${process.env.AVISO_DE ?? SMTP_USUARIO}>`,
       ...correo,
     });
+    const rechazados = info?.rejected ?? [];
+    const aceptados = info?.accepted ?? [];
+    const linea =
+      `CORREO enviado ${asunto} a ${paraLog(correo.to)}` +
+      ` · aceptados ${aceptados.length}, rechazados ${rechazados.length}` +
+      ` · id ${info?.messageId ?? "—"}` +
+      ` · SMTP "${String(info?.response ?? "").slice(0, 120)}"`;
+    (rechazados.length ? console.warn : console.log)(linea);
   } catch (error) {
-    console.error(`No se pudo mandar "${correo.subject}":`, error.message);
+    console.error(
+      `CORREO falló ${asunto} a ${paraLog(correo.to)}: ${detalleErrorSmtp(error)}`,
+    );
   }
 }
 
@@ -367,7 +441,10 @@ export async function verificarTurnstile(
   ip,
   { secreto = process.env.TURNSTILE_SECRET_KEY, pedir = fetch } = {},
 ) {
-  if (typeof token !== "string" || !token || token.length > 2048) return false;
+  if (typeof token !== "string" || !token || token.length > 2048) {
+    console.warn("Turnstile: solicitud sin token válido.");
+    return false;
+  }
   if (!secreto) {
     console.error("Falta TURNSTILE_SECRET_KEY: se rechazan las solicitudes.");
     return false;
@@ -381,11 +458,23 @@ export async function verificarTurnstile(
       signal: AbortSignal.timeout(5_000),
     });
     const datos = await r.json();
-    if (datos?.success !== true) return false;
+    if (datos?.success !== true) {
+      // "invalid-input-secret" = TURNSTILE_SECRET_KEY no es la del widget.
+      console.warn(
+        `Turnstile rechazó una solicitud: ${(datos?.["error-codes"] ?? []).join(", ") || "sin código"}.`,
+      );
+      return false;
+    }
     const hosts = SECRETOS_PRUEBA.has(secreto)
       ? [...HOSTS_TURNSTILE, "example.com"]
       : HOSTS_TURNSTILE;
-    return hosts.includes(datos.hostname);
+    if (!hosts.includes(datos.hostname)) {
+      console.warn(
+        `Turnstile rechazó una solicitud: dominio ${datos.hostname} no permitido.`,
+      );
+      return false;
+    }
+    return true;
   } catch (error) {
     console.error("No se pudo verificar Turnstile:", error.message);
     return false;
@@ -410,6 +499,7 @@ export function rutasProspectos(
   } = {},
 ) {
   const intentos = new Map(); // ip → [marcas de tiempo]
+  console.log(resumenSmtp());
   app.post(
     "/api/prospectos",
     express.json({ limit: "10kb" }),
@@ -452,6 +542,9 @@ export function rutasProspectos(
           .json({ error: "No pudimos guardar tu solicitud." });
       }
       res.status(201).json({ ok: true });
+      console.log(
+        `Prospecto guardado: ${prospecto.producto}, ${prospecto.ciudad}; mandando los 2 correos.`,
+      );
       await Promise.all([
         mandar(correoCliente(prospecto)),
         mandar(correoAdmin(prospecto)),
