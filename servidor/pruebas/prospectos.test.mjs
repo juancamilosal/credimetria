@@ -4,6 +4,9 @@ import express from "express";
 import {
   correoAdmin,
   correoCliente,
+  mandarCorreo,
+  ocultarCorreo,
+  resumenSmtp,
   rutasProspectos,
   validarProspecto,
   verificarTurnstile,
@@ -314,4 +317,111 @@ test("el límite por IP también cuenta los intentos con token inválido", async
   } finally {
     cerrar();
   }
+});
+
+/** Corre `fn` guardando lo que escribe en la consola. */
+async function conConsola(fn) {
+  const lineas = [];
+  const originales = {};
+  for (const tipo of ["log", "warn", "error"]) {
+    originales[tipo] = console[tipo];
+    console[tipo] = (...args) => lineas.push(`${tipo}: ${args.join(" ")}`);
+  }
+  const env = { ...process.env };
+  try {
+    await fn();
+  } finally {
+    Object.assign(console, originales);
+    for (const k of ["SMTP_HOST", "SMTP_PUERTO", "SMTP_USUARIO", "SMTP_CLAVE"])
+      if (k in env) process.env[k] = env[k];
+      else delete process.env[k];
+  }
+  return lineas.join("\n");
+}
+
+const smtpDePrueba = () => {
+  process.env.SMTP_HOST = "smtp.ejemplo.com";
+  process.env.SMTP_PUERTO = "465";
+  process.env.SMTP_USUARIO = "envios@credimetria.com";
+  process.env.SMTP_CLAVE = "clave-super-secreta";
+};
+
+test("mandarCorreo deja en el log el envío exitoso, sin la clave ni el correo completo", async () => {
+  let opciones;
+  const log = await conConsola(async () => {
+    smtpDePrueba();
+    await mandarCorreo(
+      { to: "ana@ejemplo.com", subject: "Hola" },
+      {
+        crearTransporte: (o) => {
+          opciones = o;
+          return {
+            sendMail: async () => ({
+              accepted: ["ana@ejemplo.com"],
+              rejected: [],
+              messageId: "<id-1>",
+              response: "250 2.0.0 OK",
+            }),
+          };
+        },
+      },
+    );
+  });
+  assert.match(log, /CORREO enviado "Hola" a an\*\*\*@ejemplo\.com/);
+  assert.match(log, /aceptados 1, rechazados 0/);
+  assert.match(log, /250 2\.0\.0 OK/);
+  assert.doesNotMatch(log, /clave-super-secreta|ana@ejemplo\.com/);
+  assert.equal(opciones.auth.pass, "clave-super-secreta");
+  assert.equal(opciones.secure, true);
+  assert.ok(opciones.connectionTimeout > 0);
+});
+
+test("mandarCorreo deja en el log el error de SMTP sin la clave", async () => {
+  const log = await conConsola(async () => {
+    smtpDePrueba();
+    await mandarCorreo(
+      { to: "ana@ejemplo.com", subject: "Hola" },
+      {
+        crearTransporte: () => ({
+          sendMail: async () => {
+            const e = new Error("Invalid login clave-super-secreta");
+            e.code = "EAUTH";
+            e.command = "AUTH PLAIN";
+            e.responseCode = 535;
+            e.response = "535 5.7.8 Authentication failed";
+            throw e;
+          },
+        }),
+      },
+    );
+  });
+  assert.match(log, /^error: CORREO falló "Hola"/m);
+  assert.match(log, /EAUTH/);
+  assert.match(log, /535 5\.7\.8/);
+  assert.doesNotMatch(log, /clave-super-secreta/);
+});
+
+test("mandarCorreo avisa si no hay destinatario o no hay SMTP", async () => {
+  const log = await conConsola(async () => {
+    delete process.env.SMTP_HOST;
+    await mandarCorreo({ to: undefined, subject: "Aviso" });
+    await mandarCorreo({ to: "ana@ejemplo.com", subject: "Hola" });
+  });
+  assert.match(log, /^warn: CORREO no enviado "Aviso": no hay destinatario/m);
+  assert.match(log, /CORREO \(sin SMTP\) a an\*\*\*@ejemplo\.com/);
+});
+
+test("el resumen de SMTP del arranque no muestra la clave", () => {
+  const r = resumenSmtp({
+    SMTP_HOST: "smtp.ejemplo.com",
+    SMTP_PUERTO: "587",
+    SMTP_USUARIO: "envios@credimetria.com",
+    SMTP_CLAVE: "clave-super-secreta",
+  });
+  assert.match(r, /smtp\.ejemplo\.com:587/);
+  assert.match(r, /clave puesta/);
+  assert.match(r, /falta AVISO_PARA/);
+  assert.doesNotMatch(r, /clave-super-secreta/);
+  assert.match(resumenSmtp({}), /sin SMTP_HOST/);
+  assert.equal(ocultarCorreo("ana@ejemplo.com"), "an***@ejemplo.com");
 });

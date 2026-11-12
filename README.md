@@ -104,7 +104,15 @@ morada y oro del diseño (ver abajo).
   y al administrador (`AVISO_PARA`), con todos los datos y respuesta directa
   a la persona. Máximo 5 solicitudes por IP cada 10 minutos (cuentan
   también las que no pasan Turnstile). Si Directus falla
-  responde 503 y no manda correos. Pruebas: `npm run test:servidor`. Usa nodemailer 10 (la 6 tenía fallas al leer direcciones de correo).
+  responde 503 y no manda correos. **Logs de los correos:** al
+  arrancar, "Correos: SMTP host:puerto…" (usuario a medias, "clave puesta" o
+  "FALTA", y a quién va el aviso); por cada solicitud, "Prospecto guardado"
+  y luego "CORREO enviado" (aceptados, rechazados, id y respuesta del
+  servidor SMTP), "CORREO falló" (código, comando y respuesta SMTP, nunca
+  la clave) o "CORREO no enviado" si falta el destinatario (`AVISO_PARA`).
+  Los correos salen a medias (`an***@gmail.com`). Límites de 15 s para
+  conectar y 30 s por respuesta, así una conexión colgada también queda en
+  el log. Pruebas: `npm run test:servidor`. Usa nodemailer 10 (la 6 tenía fallas al leer direcciones de correo).
 - **Anti-bots con Cloudflare Turnstile** (`core/servicios/turnstile.service.ts`):
   el script (`api.js?render=explicit`) se carga una sola vez y solo en el
   navegador; el widget va justo encima de "Quiero que me asesoren" (tema
