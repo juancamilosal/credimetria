@@ -9,6 +9,10 @@
 // AVISO_DE o el usuario), AVISO_PARA (a quién le llega cada solicitud) y
 // SITIO_URL (para los enlaces y el logo del correo). Sin SMTP_HOST la
 // solicitud se guarda igual y los correos solo se escriben en la consola.
+//
+// Anti-bots: cada solicitud trae `turnstileToken` (Cloudflare Turnstile) y
+// se verifica con TURNSTILE_SECRET_KEY antes de revisar o guardar nada. Sin
+// esa variable, o si Cloudflare no responde, la solicitud se rechaza.
 
 import express from "express";
 
@@ -335,17 +339,75 @@ export async function mandarCorreo(correo) {
   }
 }
 
-/** Máximo de solicitudes por IP en la ventana (contra el spam). */
-const LIMITE = 5;
-const VENTANA_MS = 60 * 60 * 1000;
+const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+/** Dominios desde los que vale un token de Turnstile. */
+export const HOSTS_TURNSTILE = [
+  "credimetria.com",
+  "www.credimetria.com",
+  "localhost",
+];
+/**
+ * Claves secretas de prueba de Cloudflare: responden con el dominio
+ * "example.com", que solo se acepta con ellas (para probar en local).
+ */
+const SECRETOS_PRUEBA = new Set([
+  "1x0000000000000000000000000000000AA",
+  "2x0000000000000000000000000000000AA",
+  "3x0000000000000000000000000000000AA",
+]);
 
 /**
- * POST /api/prospectos. `guardar` y `mandar` se pueden cambiar en las
- * pruebas. Responde apenas se guarda; los correos salen después.
+ * Verifica el token de Turnstile con Cloudflare (siteverify). Devuelve true
+ * solo si Cloudflare dice que es válido y viene de credimetria.com (o
+ * localhost). Nunca lanza error: sin clave, sin respuesta en 5 s o con
+ * cualquier falla, devuelve false (la solicitud se rechaza).
+ */
+export async function verificarTurnstile(
+  token,
+  ip,
+  { secreto = process.env.TURNSTILE_SECRET_KEY, pedir = fetch } = {},
+) {
+  if (typeof token !== "string" || !token || token.length > 2048) return false;
+  if (!secreto) {
+    console.error("Falta TURNSTILE_SECRET_KEY: se rechazan las solicitudes.");
+    return false;
+  }
+  const cuerpo = new URLSearchParams({ secret: secreto, response: token });
+  if (ip) cuerpo.set("remoteip", ip);
+  try {
+    const r = await pedir(SITEVERIFY, {
+      method: "POST",
+      body: cuerpo,
+      signal: AbortSignal.timeout(5_000),
+    });
+    const datos = await r.json();
+    if (datos?.success !== true) return false;
+    const hosts = SECRETOS_PRUEBA.has(secreto)
+      ? [...HOSTS_TURNSTILE, "example.com"]
+      : HOSTS_TURNSTILE;
+    return hosts.includes(datos.hostname);
+  } catch (error) {
+    console.error("No se pudo verificar Turnstile:", error.message);
+    return false;
+  }
+}
+
+/** Máximo de solicitudes por IP en la ventana (contra el spam y los bots). */
+const LIMITE = 5;
+const VENTANA_MS = 10 * 60 * 1000;
+
+/**
+ * POST /api/prospectos. `guardar`, `mandar` y `verificar` se pueden cambiar
+ * en las pruebas. Orden: límite por IP, Turnstile, revisión de los datos y
+ * guardado. Responde apenas se guarda; los correos salen después.
  */
 export function rutasProspectos(
   app,
-  { guardar = guardarEnDirectus, mandar = mandarCorreo } = {},
+  {
+    guardar = guardarEnDirectus,
+    mandar = mandarCorreo,
+    verificar = verificarTurnstile,
+  } = {},
 ) {
   const intentos = new Map(); // ip → [marcas de tiempo]
   app.post(
@@ -368,10 +430,19 @@ export function rutasProspectos(
           .status(429)
           .json({ error: "Demasiadas solicitudes; intenta más tarde." });
       }
-      const { prospecto, error } = validarProspecto(req.body, ip);
-      if (error) return res.status(400).json({ error, campo: error });
+      // Cuenta cada intento (también los que no pasan Turnstile).
       recientes.push(ahora);
       intentos.set(ip, recientes);
+      // Antes de revisar o guardar nada: ¿es una persona? El token no se
+      // guarda (validarProspecto solo copia los campos conocidos).
+      if (!(await verificar(req.body?.turnstileToken, ip))) {
+        return res.status(400).json({
+          error: "verificacion",
+          mensaje: "No pudimos verificar tu solicitud.",
+        });
+      }
+      const { prospecto, error } = validarProspecto(req.body, ip);
+      if (error) return res.status(400).json({ error, campo: error });
       try {
         await guardar(prospecto);
       } catch (e) {

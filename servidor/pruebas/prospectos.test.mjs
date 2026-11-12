@@ -6,6 +6,7 @@ import {
   correoCliente,
   rutasProspectos,
   validarProspecto,
+  verificarTurnstile,
 } from "../prospectos.mjs";
 
 const valido = () => ({
@@ -25,7 +26,34 @@ const valido = () => ({
     versionPolitica: "2026-10-borrador",
     paginaOrigen: "/asesoria",
   },
+  turnstileToken: "token-bueno",
 });
+
+/**
+ * siteverify de mentiras: "token-bueno" pasa desde credimetria.com,
+ * "token-otro-sitio" pasa pero desde otro dominio y lo demás falla. Guarda
+ * lo que se le pidió.
+ */
+function siteverifyFalso(pedidos = []) {
+  return async (url, opciones) => {
+    const cuerpo = new URLSearchParams(opciones.body);
+    pedidos.push({ url, cuerpo });
+    const token = cuerpo.get("response");
+    const respuesta =
+      token === "token-bueno"
+        ? { success: true, hostname: "credimetria.com" }
+        : token === "token-otro-sitio"
+          ? { success: true, hostname: "otro.com" }
+          : { success: false, "error-codes": ["invalid-input-response"] };
+    return new Response(JSON.stringify(respuesta));
+  };
+}
+
+const verificarFalso = (pedidos) => (token, ip) =>
+  verificarTurnstile(token, ip, {
+    secreto: "secreto-de-prueba",
+    pedir: siteverifyFalso(pedidos),
+  });
 
 test("acepta una solicitud completa y le pone la IP y el estado", () => {
   const { prospecto, error } = validarProspecto(valido(), "1.2.3.4");
@@ -85,7 +113,7 @@ test("el correo al administrador trae los datos de contacto", () => {
 
 async function servidor(opciones) {
   const app = express();
-  rutasProspectos(app, opciones);
+  rutasProspectos(app, { verificar: verificarFalso(), ...opciones });
   const s = app.listen(0);
   await new Promise((r) => s.once("listening", r));
   const url = `http://127.0.0.1:${s.address().port}/api/prospectos`;
@@ -146,6 +174,143 @@ test("rechaza datos malos con 400 y limita las solicitudes por IP", async () => 
       assert.equal((await post(valido(), "5.5.5.5")).status, 201);
     assert.equal((await post(valido(), "5.5.5.5")).status, 429);
     assert.equal((await post(valido(), "6.6.6.6")).status, 201);
+  } finally {
+    cerrar();
+  }
+});
+
+test("verificarTurnstile manda la clave, el token y la IP a siteverify", async () => {
+  const pedidos = [];
+  assert.equal(
+    await verificarTurnstile("token-bueno", "1.2.3.4", {
+      secreto: "s3cr3to",
+      pedir: siteverifyFalso(pedidos),
+    }),
+    true,
+  );
+  assert.equal(
+    pedidos[0].url,
+    "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+  );
+  assert.equal(pedidos[0].cuerpo.get("secret"), "s3cr3to");
+  assert.equal(pedidos[0].cuerpo.get("response"), "token-bueno");
+  assert.equal(pedidos[0].cuerpo.get("remoteip"), "1.2.3.4");
+});
+
+test("verificarTurnstile rechaza sin token, sin clave, con otro dominio, si falla o si no responde", async () => {
+  const pedir = siteverifyFalso();
+  const v = (token, opciones = {}) =>
+    verificarTurnstile(token, "1.2.3.4", {
+      secreto: "s3cr3to",
+      pedir,
+      ...opciones,
+    });
+  assert.equal(await v(undefined), false);
+  assert.equal(await v(""), false);
+  assert.equal(await v("token-bueno", { secreto: "" }), false);
+  assert.equal(await v("token-malo"), false);
+  assert.equal(await v("token-otro-sitio"), false);
+  assert.equal(
+    await v("token-bueno", {
+      pedir: async () => {
+        throw new DOMException("tiempo agotado", "TimeoutError");
+      },
+    }),
+    false,
+  );
+  assert.equal(
+    await v("token-bueno", { pedir: async () => new Response("<html>") }),
+    false,
+  );
+});
+
+test("con la clave de prueba de Cloudflare acepta el dominio example.com", async () => {
+  const pedir = async () =>
+    new Response(JSON.stringify({ success: true, hostname: "example.com" }));
+  assert.equal(
+    await verificarTurnstile("XXXX.DUMMY.TOKEN.XXXX", null, {
+      secreto: "1x0000000000000000000000000000000AA",
+      pedir,
+    }),
+    true,
+  );
+  assert.equal(
+    await verificarTurnstile("XXXX.DUMMY.TOKEN.XXXX", null, {
+      secreto: "s3cr3to",
+      pedir,
+    }),
+    false,
+  );
+});
+
+test("POST sin token responde 400 y no guarda", async () => {
+  const guardados = [];
+  const { post, cerrar } = await servidor({
+    guardar: async (p) => guardados.push(p),
+    mandar: async () => {},
+  });
+  try {
+    const { turnstileToken: _, ...sinToken } = valido();
+    const r = await post(sinToken, "7.7.7.1");
+    assert.equal(r.status, 400);
+    assert.equal((await r.json()).error, "verificacion");
+    assert.equal(guardados.length, 0);
+  } finally {
+    cerrar();
+  }
+});
+
+test("POST con token inválido responde 400 y no guarda", async () => {
+  const guardados = [];
+  const { post, cerrar } = await servidor({
+    guardar: async (p) => guardados.push(p),
+    mandar: async () => {},
+  });
+  try {
+    const r = await post(
+      { ...valido(), turnstileToken: "token-malo" },
+      "7.7.7.2",
+    );
+    assert.equal(r.status, 400);
+    assert.equal((await r.json()).error, "verificacion");
+    assert.equal(guardados.length, 0);
+  } finally {
+    cerrar();
+  }
+});
+
+test("POST con token válido guarda el prospecto sin el token", async () => {
+  const guardados = [];
+  const pedidos = [];
+  const { post, cerrar } = await servidor({
+    guardar: async (p) => guardados.push(p),
+    mandar: async () => {},
+    verificar: verificarFalso(pedidos),
+  });
+  try {
+    const r = await post(valido(), "7.7.7.3");
+    assert.equal(r.status, 201);
+    assert.equal(guardados.length, 1);
+    assert.equal(pedidos[0].cuerpo.get("remoteip"), "7.7.7.3");
+    assert.equal(JSON.stringify(guardados[0]).includes("token-bueno"), false);
+    assert.equal("turnstileToken" in guardados[0], false);
+  } finally {
+    cerrar();
+  }
+});
+
+test("el límite por IP también cuenta los intentos con token inválido", async () => {
+  const { post, cerrar } = await servidor({
+    guardar: async () => {},
+    mandar: async () => {},
+  });
+  try {
+    for (let i = 0; i < 5; i++)
+      assert.equal(
+        (await post({ ...valido(), turnstileToken: "x" }, "8.8.8.8")).status,
+        400,
+      );
+    assert.equal((await post(valido(), "8.8.8.8")).status, 429);
   } finally {
     cerrar();
   }

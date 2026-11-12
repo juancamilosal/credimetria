@@ -102,8 +102,28 @@ morada y oro del diseño (ver abajo).
   crédito aliado se contactará contigo", lo que pidió, las 5 reglas de
   `/aliados` y el aviso de estafa (logo en `public/correo/credimetria.png`);
   y al administrador (`AVISO_PARA`), con todos los datos y respuesta directa
-  a la persona. Máximo 5 solicitudes por IP por hora. Si Directus falla
+  a la persona. Máximo 5 solicitudes por IP cada 10 minutos (cuentan
+  también las que no pasan Turnstile). Si Directus falla
   responde 503 y no manda correos. Pruebas: `npm run test:servidor`. Usa nodemailer 10 (la 6 tenía fallas al leer direcciones de correo).
+- **Anti-bots con Cloudflare Turnstile** (`core/servicios/turnstile.service.ts`):
+  el script (`api.js?render=explicit`) se carga una sola vez y solo en el
+  navegador; el widget va justo encima de "Quiero que me asesoren" (tema
+  automático, en español) y se quita al salir de la página. El botón se
+  habilita solo con el formulario válido y el token; el token va en el
+  POST como `turnstileToken` y después de cada envío se pide otro
+  (`turnstile.reset`). Si el widget falla o el servidor rechaza la
+  verificación, dice "No pudimos comprobar que no eres un robot". La clave
+  pública está en `src/environments/environment*.ts` (`turnstileSiteKey`).
+  El servidor, antes de revisar o guardar nada, la verifica en `siteverify`
+  con `TURNSTILE_SECRET_KEY`, el token y la IP; sin token, sin la variable,
+  con `success` distinto de `true`, con un dominio que no sea
+  credimetria.com, www.credimetria.com o localhost, o si Cloudflare no
+  responde en 5 s, responde 400 (`error: "verificacion"`) y no guarda. El
+  token no se guarda. En local sirven las claves de prueba de Cloudflare
+  (pública `1x00000000000000000000AA`, secreta
+  `1x0000000000000000000000000000000AA`, que responde con el dominio
+  example.com y solo con ella se acepta). La página y `/api/prospectos`
+  están en el mismo dominio, así que no hace falta CORS.
 - **La cuota es solo capital e intereses:** el ranking (título "Cuota
   estimada" con "sin seguros ni gastos", la nota de arriba de la tabla y la
   tarjeta de celular), el simulador ("Solo capital e intereses: sin seguros
@@ -548,7 +568,8 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
 <hola@credimetria.co>`; si no, el usuario SMTP) y `SITIO_URL` (enlaces y
   logo; por defecto `https://credimetria.com`). Sin
   `SMTP_HOST` la solicitud se guarda igual y los correos solo salen en el
-  log.
+  log. **`TURNSTILE_SECRET_KEY`** (clave secreta de Cloudflare Turnstile) es
+  obligatoria: sin ella `/api/prospectos` rechaza todas las solicitudes.
 - **Prospectos en Directus:** la política "Lector web" solo puede _crear_
   en `prospectos` (no leer, editar ni borrar), así el token de la página no
   sirve para sacar los datos. Se ven y se marcan desde el panel de

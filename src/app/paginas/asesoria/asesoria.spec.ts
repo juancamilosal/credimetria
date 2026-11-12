@@ -10,11 +10,52 @@ import {
   provideRouter,
 } from '@angular/router';
 import { ProspectosService } from '../../core/servicios/prospectos.service';
+import {
+  EventosTurnstile,
+  TurnstileService,
+} from '../../core/servicios/turnstile.service';
 import { Asesoria } from './asesoria';
 
 describe('Asesoria', () => {
   let fixture: ComponentFixture<Asesoria>;
   let html: HTMLElement;
+  /** Turnstile de mentiras: entrega un token al mostrarse y al reiniciarse. */
+  let turnstile: {
+    eventos: EventosTurnstile | null;
+    tokens: number;
+    reinicios: number;
+    quitados: string[];
+    darToken: boolean;
+  };
+  let falso: Partial<TurnstileService>;
+
+  beforeEach(() => {
+    turnstile = {
+      eventos: null,
+      tokens: 0,
+      reinicios: 0,
+      quitados: [],
+      darToken: true,
+    };
+    const entregar = () => {
+      if (turnstile.darToken)
+        turnstile.eventos?.token(`token-${++turnstile.tokens}`);
+    };
+    falso = {
+      mostrar: (_el: HTMLElement, eventos: EventosTurnstile) => {
+        turnstile.eventos = eventos;
+        entregar();
+        return Promise.resolve('widget-1');
+      },
+      reiniciar: () => {
+        turnstile.reinicios++;
+        entregar();
+      },
+      quitar: (id: string) => {
+        turnstile.quitados.push(id);
+      },
+    };
+  });
 
   function crear(params: Record<string, string> = {}) {
     TestBed.configureTestingModule({
@@ -23,6 +64,7 @@ describe('Asesoria', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
+        { provide: TurnstileService, useValue: falso },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { queryParamMap: convertToParamMap(params) } },
@@ -356,6 +398,7 @@ describe('Asesoria', () => {
     const pedido = http.expectOne('/api/prospectos');
     expect(pedido.request.method).toBe('POST');
     expect(pedido.request.body.correo).toBe('luis@ejemplo.com');
+    expect(pedido.request.body.turnstileToken).toBe('token-1');
     pedido.flush({ ok: true }, { status: 201, statusText: 'Created' });
     await fixture.whenStable();
     fixture.detectChanges();
@@ -380,5 +423,64 @@ describe('Asesoria', () => {
     expect(
       html.querySelector<HTMLButtonElement>('button[type=submit]')!.disabled,
     ).toBeFalse();
+  });
+
+  it('sin token de Turnstile el botón sigue deshabilitado y lo explica', () => {
+    turnstile.darToken = false;
+    crear();
+    llenar();
+    const boton = html.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    expect(boton.disabled).toBeTrue();
+    expect(html.querySelector('.falta')?.textContent).toContain(
+      'no eres un robot',
+    );
+    turnstile.eventos!.token('tarde');
+    fixture.detectChanges();
+    expect(boton.disabled).toBeFalse();
+    turnstile.eventos!.vencido();
+    fixture.detectChanges();
+    expect(boton.disabled).toBeTrue();
+  });
+
+  it('si Turnstile falla muestra el mensaje', () => {
+    turnstile.darToken = false;
+    crear();
+    llenar();
+    turnstile.eventos!.error();
+    fixture.detectChanges();
+    expect(html.querySelector('.fallo')?.textContent).toContain(
+      'No pudimos comprobar que no eres un robot',
+    );
+  });
+
+  it('si el servidor rechaza la verificación lo dice y pide otro token', async () => {
+    crear();
+    const http = TestBed.inject(HttpTestingController);
+    llenar();
+    enviar();
+    http
+      .expectOne('/api/prospectos')
+      .flush(
+        { error: 'verificacion' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(turnstile.reinicios).toBe(1);
+    expect(html.querySelector('.fallo')?.textContent).toContain(
+      'No pudimos comprobar que no eres un robot',
+    );
+    // Con el token nuevo puede volver a enviar.
+    enviar();
+    expect(http.expectOne('/api/prospectos').request.body.turnstileToken).toBe(
+      'token-2',
+    );
+  });
+
+  it('quita el widget al salir de la página', async () => {
+    crear();
+    await fixture.whenStable();
+    fixture.destroy();
+    expect(turnstile.quitados).toEqual(['widget-1']);
   });
 });

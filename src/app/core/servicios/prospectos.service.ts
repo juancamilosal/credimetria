@@ -31,8 +31,13 @@ export class ProspectosService {
     };
   }
 
-  /** Lanza error si el servidor no lo pudo guardar. */
-  async enviar(prospecto: Prospecto): Promise<void> {
-    await firstValueFrom(this.http.post('/api/prospectos', prospecto));
+  /**
+   * Lanza error si el servidor no lo pudo guardar. `turnstileToken` es el de
+   * Cloudflare Turnstile; el servidor lo verifica y no lo guarda.
+   */
+  async enviar(prospecto: Prospecto, turnstileToken: string): Promise<void> {
+    await firstValueFrom(
+      this.http.post('/api/prospectos', { ...prospecto, turnstileToken }),
+    );
   }
 }

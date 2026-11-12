@@ -297,16 +297,27 @@
           </label>
         }
 
+        <div #turnstile class="turnstile"></div>
         <button
           class="btn btn-principal enviar"
           type="submit"
-          [disabled]="!completo() || enviando()"
+          [disabled]="!completo() || !token() || enviando()"
         >
           {{ enviando() ? "Enviando…" : "Quiero que me asesoren" }}
         </button>
         @if (!completo()) {
           <p class="nota falta">
             Llena tus datos y marca la autorización para continuar.
+          </p>
+        } @else if (!token() && !falloVerificacion()) {
+          <p class="nota falta">
+            Estamos comprobando que no eres un robot; espera un momento.
+          </p>
+        }
+        @if (falloVerificacion()) {
+          <p class="error fallo" role="alert">
+            No pudimos comprobar que no eres un robot. Recarga la página e
+            intenta de nuevo.
           </p>
         }
         @if (fallo()) {
