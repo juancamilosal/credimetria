@@ -80,7 +80,11 @@ describe('Reportados', () => {
       const img = html.querySelector<HTMLImageElement>('.entidad img.logo')!;
       expect(img.getAttribute('src')).toBe('/logos-entidades/koa.webp');
       expect(img.alt).toBe('Logo de Koa');
-      expect(html.querySelectorAll('.iniciales').length).toBe(4);
+      const conLogo = ENTIDADES_REPORTADOS.filter((e) => e.logo).length;
+      expect(html.querySelectorAll('img.logo').length).toBe(conLogo);
+      expect(html.querySelectorAll('.iniciales').length).toBe(
+        ENTIDADES_REPORTADOS.length - conLogo,
+      );
     } finally {
       koa.logo = antes;
     }
