@@ -156,6 +156,7 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     nivel: 2,
     tipo: 'Operadora de libranza',
     iniciales: 'BI',
+    logo: '/logos-entidades/biv.webp',
     especialidades: [
       'Préstamos en línea para pensionados',
       'De $1 a $150 millones',
