@@ -7,12 +7,14 @@ import { cargarEnv } from "./env.mjs";
 const archivo = cargarEnv();
 const { rutasTasas } = await import("./tasas.mjs");
 const { rutasProspectos } = await import("./prospectos.mjs");
-const { rutasAsesores } = await import("./asesores.mjs");
+const { rutasAsesores, rutasSolicitudesAliados } =
+  await import("./asesores.mjs");
 
 const app = express();
 rutasTasas(app);
 rutasProspectos(app);
 rutasAsesores(app);
+rutasSolicitudesAliados(app);
 app.listen(4300, () => {
   if (!archivo) {
     console.warn(

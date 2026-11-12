@@ -48,6 +48,10 @@ describe('Aliados', () => {
     expect(html.querySelector('.reportar-este')?.getAttribute('href')).toBe(
       '/aliados/reportar?asesor=alexandra-rojas-garcia',
     );
+    const quiero = [...html.querySelectorAll('a')].find(
+      (a) => a.textContent?.trim() === 'Quiero ser aliado',
+    )!;
+    expect(quiero.getAttribute('href')).toBe('/aliados/quiero-ser-aliado');
   });
 
   it('sin asesores publicados dice "Próximamente tus asesores"', () => {

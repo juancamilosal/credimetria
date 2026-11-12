@@ -67,6 +67,18 @@ export const routes: Routes = [
       import('./paginas/aliados/aliados').then((m) => m.Aliados),
   },
   {
+    path: 'aliados/quiero-ser-aliado',
+    title: 'Quiero ser aliado · Credimetría',
+    data: {
+      descripcion:
+        '¿Eres asesor de crédito? Únete a Credimetría y recibe solicitudes de personas que ya compararon tasas. Verificamos tu vínculo con las entidades.',
+    },
+    loadComponent: () =>
+      import('./paginas/quiero-ser-aliado/quiero-ser-aliado').then(
+        (m) => m.QuieroSerAliado,
+      ),
+  },
+  {
     path: 'aliados/reportar',
     title: 'Reportar un asesor · Credimetría',
     data: {

@@ -5,6 +5,8 @@
 //   GET  /api/asesores            los publicados (solo sus datos públicos)
 //   GET  /api/asesores/:id/foto   la foto de un asesor publicado
 //   POST /api/reportes-asesores   reporte de una persona contra un asesor
+//   POST /api/solicitudes-aliados  "Quiero ser aliado" (colección
+//                                  `solicitudes_aliados`, solo crear)
 //
 // El token es el del "Lector web": lee los asesores publicados (sin cédula,
 // celular, correo ni notas) y solo puede CREAR reportes, no leerlos.
@@ -353,6 +355,242 @@ export function rutasAsesores(
       await Promise.all([
         mandar(correoReporteAdmin(reporte, nombre)),
         mandar(correoReportePersona(reporte)),
+      ]);
+    },
+  );
+}
+
+// ── "Quiero ser aliado": solicitudes de asesores ─────────────────────────
+
+export const TIPOS_ALIADO = {
+  independiente: "Asesor independiente",
+  fuerza_ventas: "Fuerza de ventas",
+  empleado_entidad: "Empleado de la entidad",
+  empresa: "Empresa asesora",
+};
+
+export const VINCULOS = {
+  carta: "Carta de la entidad",
+  certificado: "Certificado",
+  contrato: "Contrato",
+  otro: "Otro",
+};
+
+/** Lista de textos cortos (entidades, productos, ciudades): máximo 40. */
+const textos = (v, max = 60) =>
+  Array.isArray(v)
+    ? [
+        ...new Set(
+          v
+            .filter((x) => typeof x === "string")
+            .map((x) => x.trim())
+            .filter((x) => x && x.length <= max),
+        ),
+      ].slice(0, 40)
+    : [];
+
+/**
+ * Revisa la solicitud "Quiero ser aliado" y devuelve el registro para
+ * Directus, o `{ error }` con el campo que no sirve.
+ */
+export function validarSolicitudAliado(cuerpo, ip = null) {
+  const c = cuerpo ?? {};
+  const nombre = texto(c.nombre, 120);
+  if (!nombre) return { error: "nombre" };
+  const cedula =
+    typeof c.cedula === "string" ? c.cedula.replace(/\D/g, "") : "";
+  if (!/^\d{5,12}$/.test(cedula)) return { error: "cedula" };
+  const celular = typeof c.celular === "string" ? c.celular : "";
+  if (!/^3\d{9}$/.test(celular)) return { error: "celular" };
+  const correo = texto(c.correo, 120);
+  if (!correo || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo))
+    return { error: "correo" };
+  const ciudad = texto(c.ciudad, 80);
+  if (!ciudad) return { error: "ciudad" };
+  const tipo = c.tipo in TIPOS_ALIADO ? c.tipo : null;
+  if (!tipo) return { error: "tipo" };
+  const empresa = texto(c.empresa, 120);
+  const entidades = textos(c.entidades);
+  if (!entidades.length) return { error: "entidades" };
+  const productos = textos(c.productos);
+  if (!productos.length) return { error: "productos" };
+  const ciudades = textos(c.ciudades);
+  if (!ciudades.length) return { error: "ciudades" };
+  const experiencia =
+    Number.isInteger(c.experiencia) && c.experiencia >= 0 && c.experiencia <= 60
+      ? c.experiencia
+      : null;
+  if (experiencia === null) return { error: "experiencia" };
+  const vinculo = c.vinculo in VINCULOS ? c.vinculo : null;
+  if (!vinculo) return { error: "vinculo" };
+  const mensaje = texto(c.mensaje, 2000);
+  if (c.aceptaReglas !== true) return { error: "reglas" };
+  const a = c.autorizacion ?? {};
+  const autorizacion = {
+    fecha: texto(a.fecha, 40),
+    texto: texto(a.texto, 600),
+    versionPolitica: texto(a.versionPolitica, 40),
+    paginaOrigen: texto(a.paginaOrigen, 300),
+  };
+  if (!autorizacion.texto?.startsWith("Autorizo a Credimetría"))
+    return { error: "autorizacion" };
+  return {
+    solicitud: {
+      nombre,
+      cedula,
+      celular,
+      correo,
+      ciudad,
+      tipo,
+      empresa,
+      entidades,
+      productos,
+      ciudades,
+      experiencia,
+      vinculo,
+      mensaje,
+      acepta_reglas: true,
+      autorizacion: {
+        ...autorizacion,
+        recibida: new Date().toISOString(),
+        ip,
+      },
+    },
+  };
+}
+
+/** Guarda la solicitud en Directus. Lanza error si no se pudo. */
+export async function guardarSolicitudAliado(solicitud) {
+  await pedir("/items/solicitudes_aliados", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(solicitud),
+  });
+}
+
+/** Aviso al administrador con toda la información del asesor. */
+export function correoSolicitudAdmin(s) {
+  const filas = [
+    ["Nombre", s.nombre],
+    ["Cédula", s.cedula],
+    ["Celular", s.celular],
+    ["Correo", s.correo],
+    ["Vive en", s.ciudad],
+    ["Tipo", TIPOS_ALIADO[s.tipo]],
+    ["Empresa", s.empresa ?? "—"],
+    ["Entidades", s.entidades.join(", ")],
+    ["Productos", s.productos.join(", ")],
+    ["Atiende en", s.ciudades.join(", ")],
+    ["Experiencia", `${s.experiencia} ${s.experiencia === 1 ? "año" : "años"}`],
+    ["Puede demostrar su vínculo con", VINCULOS[s.vinculo]],
+  ];
+  return {
+    to: process.env.AVISO_PARA,
+    replyTo: s.correo,
+    subject: `Credimetría · Quiere ser aliado: ${s.nombre} (${TIPOS_ALIADO[s.tipo]})`,
+    text: [
+      "Un asesor quiere ser aliado:",
+      "",
+      ...filas.map(([k, v]) => `${k}: ${v}`),
+      ...(s.mensaje ? ["", "Mensaje:", s.mensaje] : []),
+      "",
+      "Aceptó las 5 reglas de los aliados.",
+      `Ver en Directus: ${DIRECTUS}/admin/content/solicitudes_aliados`,
+    ].join("\n"),
+    html: `<!doctype html><html lang="es"><body style="font:14px/1.5 Arial,sans-serif;color:#1b2733">
+<p><b>Un asesor quiere ser aliado.</b></p>
+<table cellpadding="0" cellspacing="0">${filas
+      .map(
+        ([k, v]) =>
+          `<tr><td style="padding:3px 16px 3px 0;color:#5b6b7b;vertical-align:top">${k}</td><td style="padding:3px 0"><b>${escapar(v)}</b></td></tr>`,
+      )
+      .join("")}</table>
+${s.mensaje ? `<p style="white-space:pre-wrap;background:#f3f6f9;padding:12px;border-radius:8px">${escapar(s.mensaje)}</p>` : ""}
+<p>Aceptó las 5 reglas de los aliados.</p>
+<p><a href="${DIRECTUS}/admin/content/solicitudes_aliados">Ver en Directus</a></p>
+</body></html>`,
+  };
+}
+
+/** Confirmación al asesor: recibimos su solicitud y qué sigue. */
+export function correoSolicitudAsesor(s) {
+  const nombre = s.nombre.split(/\s+/)[0];
+  const lineas = [
+    `Hola, ${nombre}: recibimos tu solicitud para ser asesor aliado de Credimetría.`,
+    "",
+    "La revisamos y te escribimos a este correo para pedirte el documento que demuestre tu vínculo con las entidades (carta, certificado o contrato).",
+    "",
+    "Recuerda las reglas que aceptaste: nunca cobrar por adelantado, usar los datos solo para ofrecer crédito, respetar horarios y canales, demostrar tu vínculo con la entidad y borrar los datos si te lo piden.",
+    "",
+    `Credimetría · ${SITIO}`,
+  ];
+  return {
+    to: s.correo,
+    subject: "Recibimos tu solicitud para ser aliado",
+    text: lineas.join("\n"),
+    html: `<!doctype html><html lang="es"><body style="font:15px/1.6 Arial,sans-serif;color:#1b2733">
+${lineas
+  .filter(Boolean)
+  .map((l) => `<p>${escapar(l)}</p>`)
+  .join("\n")}
+</body></html>`,
+  };
+}
+
+/** POST /api/solicitudes-aliados. */
+export function rutasSolicitudesAliados(
+  app,
+  {
+    guardar = guardarSolicitudAliado,
+    mandar = mandarCorreo,
+    verificar = verificarTurnstile,
+  } = {},
+) {
+  const intentos = new Map();
+  app.post(
+    "/api/solicitudes-aliados",
+    express.json({ limit: "20kb" }),
+    async (req, res) => {
+      res.set("Cache-Control", "no-store");
+      const ip =
+        req.get("cf-connecting-ip") ??
+        req.get("x-forwarded-for")?.split(",")[0].trim() ??
+        req.socket.remoteAddress ??
+        null;
+      const ahora = Date.now();
+      const recientes = (intentos.get(ip) ?? []).filter(
+        (t) => ahora - t < VENTANA_MS,
+      );
+      if (recientes.length >= LIMITE) {
+        return res
+          .status(429)
+          .json({ error: "Demasiadas solicitudes; intenta más tarde." });
+      }
+      recientes.push(ahora);
+      intentos.set(ip, recientes);
+      if (!(await verificar(req.body?.turnstileToken, ip))) {
+        return res.status(400).json({
+          error: "verificacion",
+          mensaje: "No pudimos verificar tu solicitud.",
+        });
+      }
+      const { solicitud, error } = validarSolicitudAliado(req.body, ip);
+      if (error) return res.status(400).json({ error, campo: error });
+      try {
+        await guardar(solicitud);
+      } catch (e) {
+        console.error("No se pudo guardar la solicitud de aliado:", e.message);
+        return res
+          .status(503)
+          .json({ error: "No pudimos guardar tu solicitud." });
+      }
+      res.status(201).json({ ok: true });
+      console.log(
+        `Solicitud de aliado guardada (${solicitud.tipo}); mandando los 2 correos.`,
+      );
+      await Promise.all([
+        mandar(correoSolicitudAdmin(solicitud)),
+        mandar(correoSolicitudAsesor(solicitud)),
       ]);
     },
   );

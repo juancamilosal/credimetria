@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { REGLAS_ALIADOS } from '../../core/datos/reglas-aliados';
 import { AliadosService } from '../../core/servicios/aliados.service';
 
 /**
@@ -28,28 +29,7 @@ export class Aliados {
     void this.servicio.cargar();
   }
 
-  protected readonly reglas = [
-    {
-      titulo: 'Nunca cobrar por adelantado.',
-      texto: 'Ni por estudio, ni por "aprobar" el crédito.',
-    },
-    {
-      titulo: 'Usar tus datos solo para ofrecerte crédito.',
-      texto: 'No los revende ni los comparte.',
-    },
-    {
-      titulo: 'Respetar horarios y canales.',
-      texto: 'Solo por el canal que elegiste, en los horarios de la ley.',
-    },
-    {
-      titulo: 'Demostrar su vínculo con la entidad.',
-      texto: 'Con carta o certificado.',
-    },
-    {
-      titulo: 'Borrar tus datos si lo pides.',
-      texto: 'Te avisamos cuando esté hecho.',
-    },
-  ];
+  protected readonly reglas = REGLAS_ALIADOS;
 
   /** "Asesor de ejemplo" → "AE". */
   protected iniciales(nombre: string): string {

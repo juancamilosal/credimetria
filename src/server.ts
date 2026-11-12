@@ -6,7 +6,10 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
-import { rutasAsesores } from '../servidor/asesores.mjs';
+import {
+  rutasAsesores,
+  rutasSolicitudesAliados,
+} from '../servidor/asesores.mjs';
 import { rutasProspectos } from '../servidor/prospectos.mjs';
 import { rutasTasas } from '../servidor/tasas.mjs';
 
@@ -61,6 +64,9 @@ rutasProspectos(app);
  * asesores aliados de Directus y los reportes contra ellos.
  */
 rutasAsesores(app);
+
+/** /api/solicitudes-aliados: el formulario "Quiero ser aliado". */
+rutasSolicitudesAliados(app);
 
 /**
  * Serve static files from /browser

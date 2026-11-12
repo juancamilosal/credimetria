@@ -18,3 +18,17 @@ export function rutasAsesores(
     verificar?: (token: unknown, ip: string | null) => Promise<boolean>;
   },
 ): void;
+
+export function rutasSolicitudesAliados(
+  app: {
+    post(
+      ruta: string,
+      ...manejadores: ((...args: any[]) => unknown)[]
+    ): unknown;
+  },
+  opciones?: {
+    guardar?: (solicitud: object) => Promise<void>;
+    mandar?: (correo: object) => Promise<void>;
+    verificar?: (token: unknown, ip: string | null) => Promise<boolean>;
+  },
+): void;

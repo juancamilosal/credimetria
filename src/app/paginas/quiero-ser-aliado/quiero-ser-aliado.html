@@ -1,0 +1,305 @@
+<div class="wrap pagina">
+  <div class="caja">
+    @if (enviado()) {
+      <div class="listo" role="status">
+        <h1>Recibimos tu solicitud</h1>
+        <p>
+          Gracias por querer ser asesor aliado de Credimetría. La revisamos y te
+          escribimos a tu correo para pedirte el documento que demuestre tu
+          vínculo con las entidades.
+        </p>
+        <a class="btn btn-principal" routerLink="/aliados">Volver a aliados</a>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+        <div class="intro">
+          <h1>Quiero ser aliado</h1>
+          <p class="nota">
+            Recibe solicitudes de personas que ya compararon tasas y saben
+            cuándo necesitan el crédito. Cuéntanos quién eres y con qué
+            entidades trabajas; verificamos tu vínculo antes de publicarte.
+          </p>
+        </div>
+
+        <section class="bloque">
+          <h2>Tus datos</h2>
+          <div class="rejilla">
+            <div class="campo">
+              <label for="saNombre">Nombre completo</label>
+              <input
+                id="saNombre"
+                formControlName="nombre"
+                autocomplete="name"
+                [attr.aria-invalid]="mostrarError('nombre')"
+              />
+              @if (mostrarError("nombre")) {
+                <span class="error">Escribe tu nombre.</span>
+              }
+            </div>
+            <div class="campo">
+              <label for="saCedula">Cédula</label>
+              <input
+                id="saCedula"
+                inputmode="numeric"
+                formControlName="cedula"
+                [attr.aria-invalid]="mostrarError('cedula')"
+              />
+              <span class="nota">No se publica.</span>
+              @if (mostrarError("cedula")) {
+                <span class="error">Escribe tu cédula (solo números).</span>
+              }
+            </div>
+            <div class="campo">
+              <label for="saCelular">Celular</label>
+              <input
+                id="saCelular"
+                type="tel"
+                inputmode="numeric"
+                maxlength="10"
+                formControlName="celular"
+                autocomplete="tel-national"
+                placeholder="3001234567"
+                [attr.aria-invalid]="mostrarError('celular')"
+              />
+              @if (mostrarError("celular")) {
+                <span class="error"
+                  >Escribe un celular de 10 dígitos que empiece por 3.</span
+                >
+              }
+            </div>
+            <div class="campo">
+              <label for="saCorreo">Correo</label>
+              <input
+                id="saCorreo"
+                type="email"
+                formControlName="correo"
+                autocomplete="email"
+                placeholder="tu@correo.com"
+                [attr.aria-invalid]="mostrarError('correo')"
+              />
+              @if (mostrarError("correo")) {
+                <span class="error">Escribe un correo válido.</span>
+              }
+            </div>
+            <div class="campo">
+              <label for="saCiudad">Ciudad donde vives</label>
+              <input
+                id="saCiudad"
+                formControlName="ciudad"
+                autocomplete="address-level2"
+                [attr.aria-invalid]="mostrarError('ciudad')"
+              />
+              @if (mostrarError("ciudad")) {
+                <span class="error">Escribe tu ciudad.</span>
+              }
+            </div>
+          </div>
+        </section>
+
+        <section class="bloque">
+          <h2>Cómo trabajas</h2>
+          <div class="rejilla">
+            <div class="campo">
+              <label for="saTipo">Eres</label>
+              <select
+                id="saTipo"
+                formControlName="tipo"
+                [attr.aria-invalid]="mostrarError('tipo')"
+              >
+                <option value="" disabled>Elige una opción</option>
+                @for (t of tipos; track t.id) {
+                  <option [value]="t.id">{{ t.texto }}</option>
+                }
+              </select>
+              @if (mostrarError("tipo")) {
+                <span class="error">Elige una opción.</span>
+              }
+            </div>
+            <div class="campo">
+              <label for="saEmpresa"
+                >Empresa <span class="opcional">(opcional)</span></label
+              >
+              <input id="saEmpresa" formControlName="empresa" />
+            </div>
+            <div class="campo">
+              <label for="saExperiencia">Años de experiencia</label>
+              <input
+                id="saExperiencia"
+                inputmode="numeric"
+                maxlength="2"
+                formControlName="experiencia"
+                [attr.aria-invalid]="mostrarError('experiencia')"
+              />
+              @if (mostrarError("experiencia")) {
+                <span class="error">Escribe los años (número).</span>
+              }
+            </div>
+          </div>
+
+          <fieldset class="marcas">
+            <legend class="leyenda">Entidades con las que trabajas</legend>
+            <div class="chips">
+              @for (e of entidadesConocidas(); track e) {
+                <label
+                  class="chip-opcion"
+                  [class.activo]="marcado('entidades', e)"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="marcado('entidades', e)"
+                    (change)="alternar('entidades', e)"
+                  />
+                  {{ e }}
+                </label>
+              }
+            </div>
+            <div class="campo">
+              <label for="saOtras">Otras entidades</label>
+              <input
+                id="saOtras"
+                formControlName="otrasEntidades"
+                placeholder="Separadas por coma"
+              />
+            </div>
+            @if (faltaEntidad()) {
+              <span class="error">Elige o escribe al menos una entidad.</span>
+            }
+          </fieldset>
+
+          <fieldset class="marcas">
+            <legend class="leyenda">Productos que ofreces</legend>
+            <div class="chips">
+              @for (p of productos; track p) {
+                <label
+                  class="chip-opcion"
+                  [class.activo]="marcado('productos', p)"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="marcado('productos', p)"
+                    (change)="alternar('productos', p)"
+                  />
+                  {{ p }}
+                </label>
+              }
+            </div>
+            @if (faltaProducto()) {
+              <span class="error">Elige al menos un producto.</span>
+            }
+          </fieldset>
+
+          <div class="campo">
+            <label for="saCiudades">Ciudades donde atiendes</label>
+            <input
+              id="saCiudades"
+              formControlName="ciudades"
+              placeholder="Separadas por coma: Bogotá, Cali, Medellín"
+              [attr.aria-invalid]="mostrarError('ciudades')"
+            />
+            @if (mostrarError("ciudades")) {
+              <span class="error">Escribe al menos una ciudad.</span>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="saVinculo"
+              >¿Cómo puedes demostrar tu vínculo con las entidades?</label
+            >
+            <select
+              id="saVinculo"
+              formControlName="vinculo"
+              [attr.aria-invalid]="mostrarError('vinculo')"
+            >
+              <option value="" disabled>Elige una opción</option>
+              @for (v of vinculos; track v.id) {
+                <option [value]="v.id">{{ v.texto }}</option>
+              }
+            </select>
+            <span class="nota"
+              >Te lo pedimos por correo cuando revisemos tu solicitud.</span
+            >
+            @if (mostrarError("vinculo")) {
+              <span class="error">Elige una opción.</span>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="saMensaje"
+              >¿Algo más que debamos saber?
+              <span class="opcional">(opcional)</span></label
+            >
+            <textarea
+              id="saMensaje"
+              formControlName="mensaje"
+              rows="3"
+              maxlength="2000"
+            ></textarea>
+          </div>
+        </section>
+
+        <section class="bloque reglas">
+          <h2>Las reglas de los aliados</h2>
+          <ol>
+            @for (r of reglas; track r.titulo) {
+              <li>
+                <b>{{ r.titulo }}</b
+                >&nbsp;<span class="nota">{{ r.texto }}</span>
+              </li>
+            }
+          </ol>
+          <label class="autoriza">
+            <input type="checkbox" formControlName="reglas" />
+            <span>Acepto cumplir las 5 reglas de los asesores aliados.</span>
+          </label>
+          @if (mostrarError("reglas")) {
+            <span class="error">Debes aceptar las reglas.</span>
+          }
+        </section>
+
+        <label class="autoriza">
+          <input type="checkbox" formControlName="autorizo" />
+          <span
+            >{{ textoAutorizacion
+            }}<a routerLink="/politica-de-datos"
+              >política de tratamiento de datos</a
+            >.</span
+          >
+        </label>
+        @if (mostrarError("autorizo")) {
+          <span class="error">Marca la autorización para enviar.</span>
+        }
+
+        <app-verificacion [(token)]="token" [(fallo)]="falloWidget" />
+        <button
+          class="btn btn-principal enviar"
+          type="submit"
+          [disabled]="!valido() || !token() || enviando()"
+        >
+          {{ enviando() ? "Enviando…" : "Enviar solicitud" }}
+        </button>
+        @if (!valido()) {
+          <p class="nota falta">
+            Llena tus datos, cómo trabajas, acepta las reglas y la autorización
+            para enviar.
+          </p>
+        } @else if (!token() && !falloVerificacion()) {
+          <p class="nota falta">
+            Estamos comprobando que no eres un robot; espera un momento.
+          </p>
+        }
+        @if (falloVerificacion()) {
+          <p class="error fallo" role="alert">
+            No pudimos comprobar que no eres un robot. Recarga la página e
+            intenta de nuevo.
+          </p>
+        }
+        @if (fallo()) {
+          <p class="error fallo" role="alert">
+            No pudimos enviar tu solicitud. Intenta de nuevo en unos minutos o
+            escríbenos a gerencia&#64;credimetria.com.
+          </p>
+        }
+      </form>
+    }
+  </div>
+</div>
