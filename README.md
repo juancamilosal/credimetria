@@ -231,7 +231,9 @@ morada y oro del diseño (ver abajo).
   carpeta "Asesores" de Directus, solo con su autorización; si no hay foto,
   iniciales) y datos privados que nunca salen en la página (cédula,
   celular, correo, fecha de ingreso y notas). El servidor los lee con el
-  token del "Lector web" (`servidor/asesores.mjs`, caché de 5 minutos):
+  token del "Lector web" (`servidor/asesores.mjs`, caché de 5 minutos; sin
+  filtrar por `estado`, que no es público: el permiso ya entrega solo los
+  publicados):
   `GET /api/asesores` (solo los campos públicos) y
   `GET /api/asesores/<id>/foto`; al armar la página en el servidor se leen
   directo (`CARGADOR_ASESORES`) y pasan al navegador con la página

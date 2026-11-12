@@ -70,11 +70,10 @@ const fotos = new Map(); // id → { datos, tipo, en }
 
 async function leer() {
   if (guardado && Date.now() - guardado.en < CACHE_MS) return guardado;
-  const filtro = encodeURIComponent(
-    JSON.stringify({ estado: { _eq: "publicado" } }),
-  );
+  // Sin filtro por estado: el permiso del "Lector web" ya entrega solo los
+  // publicados, y el campo `estado` no es público (pedirlo da 403).
   const r = await pedir(
-    `/items/asesores?limit=-1&fields=${CAMPOS}&filter=${filtro}&sort=orden,nombre`,
+    `/items/asesores?limit=-1&fields=${CAMPOS}&sort=orden,nombre`,
   );
   const filas = (await r.json()).data ?? [];
   guardado = {
