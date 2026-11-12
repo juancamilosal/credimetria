@@ -68,7 +68,15 @@ describe('Reportados', () => {
     const nombres = [...html.querySelectorAll('.entidad h3')].map((h) =>
       h.textContent?.trim(),
     );
-    expect(nombres).toEqual(['Kala', 'BIV']);
+    expect(nombres).toEqual(['Mission', 'Kala', 'BIV']);
+
+    botones(html, 'Policía y Fuerzas Militares').click();
+    fixture.detectChanges();
+    expect(
+      [...html.querySelectorAll('.entidad h3')].map((h) =>
+        h.textContent?.trim(),
+      ),
+    ).toEqual(['Mission']);
   });
 
   it('con logo muestra la imagen; sin logo, las iniciales', () => {

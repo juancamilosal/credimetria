@@ -35,7 +35,8 @@ export class Reportados {
     { valor: 'todas', texto: 'Todas' },
     { valor: 'pensionados', texto: 'Pensionados' },
     { valor: 'empleados', texto: 'Empleados con convenio' },
-    { valor: 'reportados', texto: 'Atiende reportados' },
+    { valor: 'docentes', texto: 'Docentes' },
+    { valor: 'fuerza-publica', texto: 'Policía y Fuerzas Militares' },
   ];
 
   protected readonly tipo = signal('todas');

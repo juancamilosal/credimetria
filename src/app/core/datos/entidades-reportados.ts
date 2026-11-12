@@ -19,7 +19,11 @@
 export type NivelEntidad = 1 | 2;
 
 /** Para el filtro de especialidad. */
-export type Especialidad = 'pensionados' | 'empleados' | 'reportados';
+export type Especialidad =
+  | 'pensionados'
+  | 'empleados'
+  | 'docentes'
+  | 'fuerza-publica';
 
 export interface DatoRegistro {
   etiqueta: string;
@@ -56,8 +60,13 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     tipo: 'Compañía de financiamiento',
     iniciales: 'KO',
     logo: '/logos-entidades/koa.webp',
-    especialidades: ['Libranza'],
-    filtros: [],
+    especialidades: [
+      'Libranza de libre destino',
+      'Sin codeudor',
+      'Pensionados',
+    ],
+    filtros: ['pensionados'],
+    nota: 'Según Valora Analitik, presta libranza "incluso con reportes en centrales de riesgo".',
     registro: [
       {
         etiqueta: 'Razón social',
@@ -85,9 +94,9 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     logo: '/logos-entidades/vantage.webp',
     especialidades: [
       'Libranza por convenio con tu empresa',
-      'Atiende reportados',
+      'Ayuda a sanear deudas',
     ],
-    filtros: ['empleados', 'reportados'],
+    filtros: ['empleados'],
     nota: 'Según su sitio, su oferta es "ideal para personas que están reportadas negativamente en centrales de riesgo".',
     registro: [
       { etiqueta: 'Razón social', valor: 'VANTAGE THE FINANCE PRACTICE S A S' },
@@ -111,8 +120,15 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     tipo: 'Operadora de libranza',
     iniciales: 'MI',
     logo: '/logos-entidades/mission.webp',
-    especialidades: ['Libranza'],
-    filtros: [],
+    especialidades: [
+      'Policía y Fuerzas Militares',
+      'Docentes y pensionados',
+      'Alcaldías y gobernaciones',
+      'Acepta embargados',
+      'Hasta 94 años',
+    ],
+    filtros: ['fuerza-publica', 'docentes', 'pensionados', 'empleados'],
+    nota: 'Según su sitio: "Atendemos personas reportadas" y presta "con reportes negativos en las centrales de riesgo".',
     registro: [
       { etiqueta: 'Razón social', valor: 'MISSION SAS' },
       { etiqueta: 'NIT', valor: '900698231' },
@@ -134,8 +150,9 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     tipo: 'Operadora de libranza',
     iniciales: 'KA',
     logo: '/logos-entidades/kala.webp',
-    especialidades: ['Libranza para pensionados'],
-    filtros: ['pensionados'],
+    especialidades: ['Libranza para pensionados y trabajadores'],
+    filtros: ['pensionados', 'empleados'],
+    nota: 'Según LatamFintech, se diferencia por su "flexibilidad frente a los reportes negativos en centrales de riesgo".',
     registro: [
       { etiqueta: 'Razón social', valor: 'KALA COLOMBIA SAS' },
       { etiqueta: 'NIT', valor: '901541749' },
@@ -158,10 +175,12 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     iniciales: 'BI',
     logo: '/logos-entidades/biv.webp',
     especialidades: [
-      'Préstamos en línea para pensionados',
+      'Pensionados con convenio de fondos de pensiones',
       'De $1 a $150 millones',
+      'Plazos de 6 a 144 meses',
     ],
     filtros: ['pensionados'],
+    nota: 'Según su sitio: "Sin penalización por reportes en las centrales de riesgo".',
     porConfirmar:
       'El registro está a nombre de Patrimonio Autónomo Marsof BIV. Falta confirmar con la entidad que corresponde a biv.com.co.',
     registro: [
