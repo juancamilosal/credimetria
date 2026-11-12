@@ -1,0 +1,206 @@
+<div class="wrap reportar">
+  <div class="caja">
+    @if (enviado()) {
+      <div class="listo" role="status">
+        <h1>Recibimos tu reporte</h1>
+        <p>
+          Gracias por avisarnos{{
+            nombreAsesor() ? " sobre " + nombreAsesor() : ""
+          }}. Lo revisamos y, si el asesor incumplió las reglas, lo retiramos de
+          la lista de aliados. Te enviamos una confirmación a tu correo.
+        </p>
+        <p class="nota">
+          Recuerda: ningún asesor aliado puede cobrarte por adelantado. Si te
+          pidieron dinero, no pagues.
+        </p>
+        <a class="btn btn-principal" routerLink="/aliados">Volver a aliados</a>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="enviar()" novalidate>
+        <div class="intro">
+          <h1>Reportar un asesor</h1>
+          <p class="nota">
+            ¿Un asesor te pidió dinero o no respetó las reglas de Credimetría?
+            Cuéntanos qué pasó. Revisamos cada reporte.
+          </p>
+        </div>
+
+        <div class="campo">
+          <label for="rpAsesor">¿Qué asesor?</label>
+          <select
+            id="rpAsesor"
+            formControlName="asesor"
+            [attr.aria-invalid]="mostrarError('asesor')"
+          >
+            <option value="" disabled>Elige el asesor</option>
+            @for (a of aliados(); track a.id) {
+              <option [value]="a.id">
+                {{ a.nombre }}{{ a.empresa ? " · " + a.empresa : "" }}
+              </option>
+            }
+            <option [value]="otro">No está en la lista / no sé quién es</option>
+          </select>
+          @if (mostrarError("asesor")) {
+            <span class="error">Elige el asesor.</span>
+          }
+        </div>
+
+        @if (esOtro()) {
+          <div class="campo">
+            <label for="rpAsesorNombre">Nombre del asesor o empresa</label>
+            <input
+              id="rpAsesorNombre"
+              formControlName="asesorNombre"
+              placeholder="Como se presentó contigo"
+              [attr.aria-invalid]="errorNombreAsesor()"
+            />
+            <span class="nota"
+              >Si no está en la lista de aliados, no viene de Credimetría.</span
+            >
+            @if (errorNombreAsesor()) {
+              <span class="error">Escribe cómo se llama.</span>
+            }
+          </div>
+        }
+
+        <fieldset class="motivos">
+          <legend class="leyenda">¿Qué pasó?</legend>
+          @for (m of motivos; track m.id) {
+            <label>
+              <input type="radio" formControlName="motivo" [value]="m.id" />
+              {{ m.texto }}
+            </label>
+          }
+          @if (mostrarError("motivo")) {
+            <span class="error">Elige un motivo.</span>
+          }
+        </fieldset>
+
+        <div class="campo">
+          <label for="rpDescripcion">Cuéntanos con detalle</label>
+          <textarea
+            id="rpDescripcion"
+            formControlName="descripcion"
+            rows="5"
+            maxlength="3000"
+            placeholder="Qué te dijo o pidió, por qué medio y cuánto dinero, si fue el caso."
+            [attr.aria-invalid]="mostrarError('descripcion')"
+          ></textarea>
+          @if (mostrarError("descripcion")) {
+            <span class="error">Escribe al menos unas palabras.</span>
+          }
+        </div>
+
+        <div class="campo fecha">
+          <label for="rpFecha"
+            >¿Cuándo te contactó?
+            <span class="opcional">(opcional)</span></label
+          >
+          <input id="rpFecha" type="date" formControlName="fechaContacto" />
+        </div>
+
+        <section class="tus-datos">
+          <h2>Tus datos</h2>
+          <p class="nota">Para contarte qué hicimos con tu reporte.</p>
+          <div class="rejilla">
+            <div class="campo">
+              <label for="rpNombre">Nombre</label>
+              <input
+                id="rpNombre"
+                formControlName="nombre"
+                autocomplete="name"
+                [attr.aria-invalid]="mostrarError('nombre')"
+              />
+              @if (mostrarError("nombre")) {
+                <span class="error">Escribe tu nombre.</span>
+              }
+            </div>
+            <div class="campo">
+              <label for="rpCorreo">Correo</label>
+              <input
+                id="rpCorreo"
+                type="email"
+                formControlName="correo"
+                autocomplete="email"
+                placeholder="tu@correo.com"
+                [attr.aria-invalid]="mostrarError('correo')"
+              />
+              @if (mostrarError("correo")) {
+                <span class="error">Escribe un correo válido.</span>
+              }
+            </div>
+            <div class="campo">
+              <label for="rpCelular"
+                >Celular <span class="opcional">(opcional)</span></label
+              >
+              <input
+                id="rpCelular"
+                type="tel"
+                inputmode="numeric"
+                maxlength="10"
+                formControlName="celular"
+                autocomplete="tel-national"
+                placeholder="3001234567"
+                [attr.aria-invalid]="mostrarError('celular')"
+              />
+              @if (mostrarError("celular")) {
+                <span class="error"
+                  >Escribe un celular de 10 dígitos que empiece por 3.</span
+                >
+              }
+            </div>
+          </div>
+        </section>
+
+        <label class="autoriza">
+          <input type="checkbox" formControlName="autorizo" />
+          <span>
+            {{
+              textoAutorizacion.replace(
+                "política de tratamiento de datos.",
+                ""
+              )
+            }}<a routerLink="/politica-de-datos"
+              >política de tratamiento de datos</a
+            >.
+          </span>
+        </label>
+        @if (mostrarError("autorizo")) {
+          <span class="error"
+            >Marca la autorización para enviar el reporte.</span
+          >
+        }
+
+        <div #turnstile class="turnstile"></div>
+        <button
+          class="btn btn-tinta enviar"
+          type="submit"
+          [disabled]="!valido() || !token() || enviando()"
+        >
+          {{ enviando() ? "Enviando…" : "Enviar reporte" }}
+        </button>
+        @if (!valido()) {
+          <p class="nota falta">
+            Llena lo que pasó, tus datos y marca la autorización para enviar.
+          </p>
+        } @else if (!token() && !falloVerificacion()) {
+          <p class="nota falta">
+            Estamos comprobando que no eres un robot; espera un momento.
+          </p>
+        }
+        @if (falloVerificacion()) {
+          <p class="error fallo" role="alert">
+            No pudimos comprobar que no eres un robot. Recarga la página e
+            intenta de nuevo.
+          </p>
+        }
+        @if (fallo()) {
+          <p class="error fallo" role="alert">
+            No pudimos enviar tu reporte. Intenta de nuevo en unos minutos o
+            escríbenos a gerencia&#64;credimetria.com.
+          </p>
+        }
+      </form>
+    }
+  </div>
+</div>

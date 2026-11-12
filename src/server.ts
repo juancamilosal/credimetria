@@ -6,6 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { rutasAsesores } from '../servidor/asesores.mjs';
 import { rutasProspectos } from '../servidor/prospectos.mjs';
 import { rutasTasas } from '../servidor/tasas.mjs';
 
@@ -54,6 +55,12 @@ rutasTasas(app);
  * y manda el correo a la persona y al administrador.
  */
 rutasProspectos(app);
+
+/**
+ * /api/asesores, /api/asesores/<id>/foto y /api/reportes-asesores: los
+ * asesores aliados de Directus y los reportes contra ellos.
+ */
+rutasAsesores(app);
 
 /**
  * Serve static files from /browser

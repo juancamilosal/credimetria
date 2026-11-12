@@ -28,7 +28,8 @@ morada y oro del diseño (ver abajo).
 | `/compara-tu-oferta` | Compara tu oferta | Chat guiado (sin IA): la persona escribe lo que le ofrecieron y ve la tasa real, los costos dentro de la cuota y el ahorro; lleva a la asesoría                                                                                                                                                                                                                                                                                                                                    |
 | `/simulador`         | Simulador         | Cuota, total, ahorro y tabla de amortización, comparador de dos entidades y las 3 que menos cobran del producto elegido                                                                                                                                                                                                                                                                                                                                                            |
 | `/asesoria`          | Asesoría          | Formulario corto de prospecto: crédito, monto opcional, ciudad, nombres, apellidos, celular, correo y autorización; lo guarda en Directus y manda los correos                                                                                                                                                                                                                                                                                                                      |
-| `/aliados`           | Asesores aliados  | Lista pública de quienes pueden recibir los datos (mientras no hay asesores reales: "Próximamente tus asesores"), compromisos y reporte                                                                                                                                                                                                                                                                                                                                            |
+| `/aliados`           | Asesores aliados  | Los asesores publicados en Directus (`asesores`), compromisos y "Reportar un asesor"                                                                                                                                                                                                                                                                                                                                                                                               |
+| `/aliados/reportar`  | Reportar asesor   | Formulario de reporte contra un asesor (Directus `reportes_asesores`, con Turnstile y correos)                                                                                                                                                                                                                                                                                                                                                                                     |
 | `/politica-de-datos` | Política          | Política de tratamiento de datos (Ley 1581 de 2012, Decreto 1074 de 2015 cap. 25, Ley 2300 de 2023), 13 secciones con índice, versión `2026-11-12` (vigente desde el 12 nov 2026). Responsable: Juan Camilo Salazar Rojas, Cali; correo `gerencia@credimetria.com` (datos en `RESPONSABLE`, `politica-datos.ts`). Conserva los datos hasta 2 años desde la última solicitud. El índice usa `routerLink` con `fragment` (con `<base href="/">` un `href="#…"` llevaba a la portada) |
 | `/admin/tasas`       | Configuración     | Solo administradores de Directus: por banco, la tasa publicada y la que espera aprobación, cada una con su PDF; comparar los PDF, editar, aprobar y cargar PDF o pantallazos nuevos                                                                                                                                                                                                                                                                                                |
 
@@ -222,20 +223,42 @@ morada y oro del diseño (ver abajo).
   los asesores son de ejemplo (solo avisa si las tasas fueran de ejemplo,
   `corte.ejemplo`), y `/aliados` muestra "Próximamente tus asesores" si no
   hay aliados.
-- **Asesores aliados** (`core/datos/aliados.ts`, `ALIADOS`): cada uno con
-  nombre, empresa, "Verificado" (solo si mostró su vínculo con las
-  entidades), entidades, productos, ciudades y foto opcional en
-  `public/aliados/` (solo con su autorización; si no hay foto, iniciales).
-  La tarjeta muestra la foto grande (120 px, en círculo) con un sello verde
-  si está verificado ("Verificado por Credimetría"), y las entidades,
-  productos y ciudades como etiquetas.
-  Primera aliada (11 nov 2026): Alexandra Rojas García, fuerza de ventas,
-  verificada: Banco Popular, GNB Sudameris, BBVA, AV Villas, Banco de
-  Bogotá y Banco Pichincha; libranza, consumo, tarjeta de crédito,
-  hipotecario y préstamos con reportes; 23 ciudades (12 nov 2026): Bogotá,
-  Medellín, Cali, Armenia, Pereira, Montería, Cúcuta, Villavicencio, Ibagué,
-  Bucaramanga, Cartagena, Santa Marta, Barranquilla, Sincelejo, Riohacha,
-  Yopal, Pasto, Manizales, Girardot, Sogamoso, Neiva, Valledupar y Tunja.
+- **Asesores aliados** (12 nov 2026: salen de Directus, colección
+  `asesores`, ya no de un archivo del código): cada uno con estado
+  (`publicado`, `borrador` o `retirado`; solo los publicados salen y pueden
+  recibir solicitudes), orden, nombre, empresa, "Verificado" (solo si mostró
+  su vínculo con las entidades), entidades, productos, ciudades, foto (en la
+  carpeta "Asesores" de Directus, solo con su autorización; si no hay foto,
+  iniciales) y datos privados que nunca salen en la página (cédula,
+  celular, correo, fecha de ingreso y notas). El servidor los lee con el
+  token del "Lector web" (`servidor/asesores.mjs`, caché de 5 minutos):
+  `GET /api/asesores` (solo los campos públicos) y
+  `GET /api/asesores/<id>/foto`; al armar la página en el servidor se leen
+  directo (`CARGADOR_ASESORES`) y pasan al navegador con la página
+  (`AliadosService`). Para agregar o quitar un asesor basta con Directus:
+  se crea el registro, se sube la foto y se marca `publicado`. La tarjeta
+  muestra la foto grande (120 px, en círculo) con un sello verde si está
+  verificado ("Verificado por Credimetría"), las entidades, productos y
+  ciudades como etiquetas y "Reportar a este asesor". Primera aliada (11 nov
+  2026): Alexandra Rojas García, fuerza de ventas, verificada: Banco
+  Popular, GNB Sudameris, BBVA, AV Villas, Banco de Bogotá y Banco
+  Pichincha; libranza, consumo, tarjeta de crédito, hipotecario y préstamos
+  con reportes; 23 ciudades.
+- **Reportar un asesor** (`/aliados/reportar`, `paginas/reportar-asesor/`):
+  formulario con el asesor (los publicados, o "No está en la lista / no sé
+  quién es" con el nombre que escriba), el motivo (cobro por adelantado,
+  uso de datos sin permiso, contacto fuera de horario o canal, se hizo pasar
+  por el banco o por Credimetría, mal trato o información falsa, otro), qué
+  pasó, cuándo, nombre, correo, celular opcional, la autorización de datos
+  y Turnstile. "Reportar a este asesor" en cada tarjeta lo abre con el
+  asesor ya elegido (`?asesor=<id>`). `POST /api/reportes-asesores`: límite
+  de 5 por IP cada 10 minutos, Turnstile antes de nada, revisa los datos,
+  guarda en `reportes_asesores` (estado `nuevo`; luego `en_revision`,
+  `resuelto` o `descartado`, y notas internas) y manda el aviso a
+  `AVISO_PARA` y la confirmación a quien reporta. Las colecciones, las
+  relaciones, los permisos y la primera aliada se crearon con
+  `servidor/scripts/crear-asesores.mjs` (se puede volver a correr: lo que
+  existe no se toca; necesita `DIRECTUS_ADMIN_TOKEN`).
 - Menú de arriba: Ranking de tasas, Simulador, Compara tu oferta, Aliados y
   Asesoría gratis (10 nov 2026: se quitó "Cómo funciona", que solo bajaba a
   esa sección del inicio; la sección sigue en el inicio).
@@ -630,6 +653,10 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   en `prospectos` (no leer, editar ni borrar), así el token de la página no
   sirve para sacar los datos. Se ven y se marcan desde el panel de
   Directus con el usuario administrador.
+- **Asesores y reportes en Directus:** el "Lector web" solo puede _leer_
+  los asesores publicados y solo sus campos públicos (id, nombre, empresa,
+  verificado, entidades, productos, ciudades, foto y orden), y solo puede
+  _crear_ reportes en `reportes_asesores`, no leerlos.
 - La política de tratamiento de datos (versión `2026-11-12`) y la primera
   aliada real en `/aliados` ya están publicadas.
 - **Para abrir vivienda u otra línea:** si un mismo PDF trae varios

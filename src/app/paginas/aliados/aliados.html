@@ -11,7 +11,13 @@
 
 <div class="wrap contenido">
   <ul class="aliados">
-    @if (ejemplo) {
+    @if (sinConexion()) {
+      <li class="tarjeta aliado proximamente">
+        <b>No pudimos cargar los asesores</b>
+        <span class="muted">Intenta de nuevo en unos minutos.</span>
+      </li>
+    }
+    @if (ejemplo()) {
       <!-- Mientras no estén los asesores reales, no se muestran los de ejemplo. -->
       <li class="tarjeta aliado proximamente">
         <b>Próximamente tus asesores</b>
@@ -21,7 +27,7 @@
         </span>
       </li>
     }
-    @for (aliado of ejemplo ? [] : aliados; track aliado.id) {
+    @for (aliado of aliados(); track aliado.id) {
       <li class="tarjeta aliado">
         <div class="aliado-top">
           <div class="retrato">
@@ -89,6 +95,12 @@
             </dd>
           </div>
         </dl>
+        <a
+          class="reportar-este"
+          routerLink="/aliados/reportar"
+          [queryParams]="{ asesor: aliado.id }"
+          >Reportar a este asesor</a
+        >
       </li>
     }
     <li class="tarjeta aliado vacio">
@@ -128,10 +140,7 @@
         incumpla.
       </p>
     </div>
-    <a
-      class="btn btn-tinta"
-      href="mailto:gerencia@credimetria.com?subject=Reportar%20un%20asesor"
-    >
+    <a class="btn btn-tinta" routerLink="/aliados/reportar">
       Reportar un asesor
     </a>
   </section>

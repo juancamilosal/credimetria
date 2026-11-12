@@ -1,0 +1,139 @@
+.reportar {
+  padding-block: 36px 56px;
+}
+
+.caja {
+  max-width: 720px;
+  margin-inline: auto;
+  background: var(--cm-blanco);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-bloque);
+  padding: 28px;
+}
+
+form,
+.listo {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.listo {
+  align-items: flex-start;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+h1 {
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 800;
+}
+
+h2 {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.campo textarea {
+  font: inherit;
+  color: var(--cm-tinta);
+  background: var(--cm-campo);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-campo);
+  padding: 12px 14px;
+  width: 100%;
+  resize: vertical;
+}
+
+.campo textarea:focus {
+  border-color: var(--cm-marca-600);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--cm-marca-100);
+}
+
+.campo textarea[aria-invalid="true"],
+.campo select[aria-invalid="true"] {
+  border-color: var(--cm-error);
+}
+
+.fecha {
+  max-width: 260px;
+}
+
+.opcional {
+  font-weight: 400;
+  color: var(--cm-gris);
+}
+
+.motivos {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.motivos label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 40px;
+}
+
+.motivos input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  accent-color: var(--cm-marca-700);
+}
+
+.tus-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.autoriza {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 13px;
+  background: var(--cm-fondo);
+  border: 1px solid var(--cm-linea);
+  border-radius: var(--cm-r-boton);
+  padding: 14px;
+}
+
+.autoriza input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-top: 2px;
+  accent-color: var(--cm-marca-700);
+}
+
+.enviar {
+  width: 100%;
+}
+
+.falta {
+  margin: -10px 0 0;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .caja {
+    padding: 20px 16px;
+  }
+}

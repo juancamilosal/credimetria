@@ -7,6 +7,6 @@ export interface Aliado {
   entidades: string[];
   productos: string[];
   ciudades: string[];
-  /** Foto pública (en `public/aliados/`), con su autorización; si no, iniciales. */
+  /** Foto (de Directus, por /api/asesores/<id>/foto), con su autorización; si no, iniciales. */
   foto?: string;
 }

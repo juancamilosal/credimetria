@@ -217,3 +217,9 @@ dd {
     padding: 20px;
   }
 }
+
+.reportar-este {
+  align-self: flex-end;
+  font-size: 13px;
+  color: var(--cm-gris);
+}

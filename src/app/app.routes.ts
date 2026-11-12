@@ -67,6 +67,18 @@ export const routes: Routes = [
       import('./paginas/aliados/aliados').then((m) => m.Aliados),
   },
   {
+    path: 'aliados/reportar',
+    title: 'Reportar un asesor · Credimetría',
+    data: {
+      descripcion:
+        '¿Un asesor te pidió dinero por adelantado o no respetó las reglas? Repórtalo a Credimetría: revisamos cada reporte y retiramos de la lista a quien incumpla.',
+    },
+    loadComponent: () =>
+      import('./paginas/reportar-asesor/reportar-asesor').then(
+        (m) => m.ReportarAsesor,
+      ),
+  },
+  {
     path: 'politica-de-datos',
     title: 'Política de tratamiento de datos · Credimetría',
     data: {
