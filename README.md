@@ -240,6 +240,12 @@ morada y oro del diseño (ver abajo).
   esa sección del inicio; la sección sigue en el inicio).
 - En celular: menú en botón de 44 px, ranking en tarjetas y chips de producto
   que se desplazan de lado. Revisado a 390 px sin desplazamiento horizontal.
+  Cada tarjeta del ranking (12 nov 2026) pone un dato por línea, con la
+  etiqueta a la izquierda y el valor a la derecha: "Cobra en promedio" en
+  grande, "Anuncia", "Más (o menos) de lo que anuncia" con su globo de
+  ayuda, y luego cuota (sin seguros), pago total e intereses; abajo, los
+  enlaces a la página o el PDF del banco y el botón "Quiero esta tasa" a
+  todo el ancho.
 
 ## Configuración de tasas (`/admin`)
 

@@ -333,36 +333,85 @@
           >
           <span class="nota">{{ fila.tipo }}</span>
         </div>
-        <div class="tasas">
-          <div>
-            <span class="nota">Anuncia</span>
-            <span class="cifra muted">
+        <!-- Un dato por línea: etiqueta a la izquierda y valor a la derecha -->
+        <dl class="datos">
+          <div class="dato principal">
+            <dt>Cobra en promedio</dt>
+            <dd>
+              @if (fila.sinReporte) {
+                <span class="no-publica">Sin reporte</span>
+              } @else {
+                <span class="cifra real">{{ fila.tasaReal | tasa }}</span>
+              }
+            </dd>
+          </div>
+          <div class="dato">
+            <dt>Anuncia</dt>
+            <dd>
               @if (fila.tasaAnunciada !== null) {
-                {{ fila.tasaAnunciada | tasa }}
-                @if (fila.tasaHasta) {
-                  a {{ fila.tasaHasta | tasa }}{{ fila.hastaUsura ? "*" : "" }}
-                }
+                <span class="cifra"
+                  >{{ fila.tasaAnunciada | tasa }}
+                  @if (fila.tasaHasta) {
+                    a
+                    {{ fila.tasaHasta | tasa }}{{ fila.hastaUsura ? "*" : "" }}
+                  }
+                </span>
               } @else if (fila.tasaHasta) {
-                hasta {{ fila.tasaHasta | tasa }}
-                <span class="no-publica">solo publica la máxima</span>
+                <span class="cifra">hasta {{ fila.tasaHasta | tasa }}</span>
               } @else if (fila.anunciaPendiente) {
                 <span class="no-publica">Por cargar</span>
               } @else {
                 <span class="no-publica">No publica su tasa</span>
               }
-            </span>
+            </dd>
+          </div>
+          @if (fila.diferencia !== null) {
+            <div class="dato dif">
+              <dt class="con-ayuda">
+                {{ fila.diferencia >= 0 ? "Más" : "Menos" }} de lo que anuncia
+                <app-ayuda
+                  [globo]="'tipDiferenciaCel' + fila.puesto"
+                  etiqueta="Qué es la diferencia"
+                  [texto]="ayudaDiferencia"
+                />
+              </dt>
+              <dd>
+                <span class="etq etq-aviso">{{
+                  fila.diferencia | puntos
+                }}</span>
+              </dd>
+            </div>
+          }
+          @if (completa()) {
+            <div class="dato separa">
+              <dt>Cuota <span class="sin-seg">(sin seguros)</span></dt>
+              <dd>
+                <b class="cifra">{{ fila.cuota | pesos }}</b>
+              </dd>
+            </div>
+            <div class="dato">
+              <dt>Pago total</dt>
+              <dd>
+                <span class="cifra">{{ fila.total | pesos }}</span>
+              </dd>
+            </div>
+            <div class="dato secundario">
+              <dt>Intereses</dt>
+              <dd>
+                <span class="cifra">{{ fila.total - monto() | pesos }}</span>
+              </dd>
+            </div>
+          }
+        </dl>
+        @if (fila.pdf || fila.documento) {
+          <p class="enlaces">
             @if (fila.pdf) {
               <a
                 class="pdf"
                 [href]="fila.enPagina ? fila.pdf : (fila.documento ?? fila.pdf)"
                 target="_blank"
                 rel="noopener noreferrer"
-                >{{
-                  fila.enPagina
-                    ? "Tasas en la página del banco"
-                    : "PDF del banco"
-                }}
-                ↗</a
+                >{{ fila.enPagina ? "Página del banco" : "PDF del banco" }} ↗</a
               >
             }
             @if (fila.enPagina && fila.documento) {
@@ -371,64 +420,24 @@
                 [href]="fila.documento"
                 target="_blank"
                 rel="noopener noreferrer"
-                >{{
-                  fila.documentoEsImagen
-                    ? "Pantallazo de las tasas"
-                    : "PDF de las tasas"
-                }}
-                ↗</a
+                >{{ fila.documentoEsImagen ? "Pantallazo" : "PDF" }} ↗</a
               >
             }
-          </div>
-          <div>
-            <span class="nota">Cobra en promedio</span>
-            @if (fila.sinReporte) {
-              <span class="no-publica">Sin reporte</span>
-            } @else {
-              <span class="cifra real">{{ fila.tasaReal | tasa }}</span>
-            }
-          </div>
-          @if (fila.diferencia !== null) {
-            <div class="dif">
-              <span class="nota con-ayuda"
-                >Diferencia
-                <app-ayuda
-                  [globo]="'tipDiferenciaCel' + fila.puesto"
-                  etiqueta="Qué es la diferencia"
-                  [texto]="ayudaDiferencia"
-              /></span>
-              <span class="etq etq-aviso">{{ fila.diferencia | puntos }}</span>
-              <span class="nota"
-                >{{ fila.diferencia >= 0 ? "más" : "menos" }} de lo que
-                anuncia</span
-              >
-            </div>
-          }
-        </div>
+          </p>
+        }
         @if (completa()) {
-          <div class="tarjeta-pie">
-            <span class="nota">
-              Cuota estimada <b class="cifra">{{ fila.cuota | pesos }}</b>
-              <span class="sin-seguros">(sin seguros ni gastos)</span>
-              <span class="total"
-                >Pago total
-                <b class="cifra">{{ fila.total | pesos }}</b> (intereses
-                {{ fila.total - monto() | pesos }})</span
-              >
-            </span>
-            <a
-              routerLink="/asesoria"
-              [queryParams]="{
-                producto: producto(),
-                entidad: fila.entidad,
-                monto: monto(),
-                origen: 'ranking',
-              }"
-              class="quiero"
-            >
-              Quiero esta
-            </a>
-          </div>
+          <a
+            routerLink="/asesoria"
+            [queryParams]="{
+              producto: producto(),
+              entidad: fila.entidad,
+              monto: monto(),
+              origen: 'ranking',
+            }"
+            class="btn btn-principal quiero"
+          >
+            Quiero esta tasa
+          </a>
         }
       </li>
     } @empty {

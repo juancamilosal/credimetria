@@ -226,24 +226,62 @@ th[aria-sort="descending"] .flecha {
   margin-right: 6px;
 }
 
-.tasas {
+/* Datos de la tarjeta: uno por línea, etiqueta y valor a los lados */
+.datos {
+  margin: 0;
   display: flex;
-  gap: 24px;
-  align-items: flex-end;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
-.tasas span:not(.etq) {
-  display: block;
+.dato {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--cm-linea-suave);
 }
 
-.dif {
-  margin-left: auto;
+.dato:last-child {
+  border-bottom: 0;
+}
+
+.dato dt {
+  font-size: 14px;
+  color: var(--cm-gris);
+}
+
+.dato dd {
+  margin: 0;
   text-align: right;
+  white-space: nowrap;
+  font-size: 15px;
 }
 
-.dif .etq {
-  display: inline-block;
+/* La tasa que cobra en promedio es la cifra grande */
+.dato.principal dt {
+  font-weight: 700;
+  color: inherit;
+}
+
+.dato.principal .cifra {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* Las tasas y los pesos se separan con una línea más marcada */
+.dato:has(+ .separa) {
+  border-bottom-color: var(--cm-linea);
+}
+
+.dato.secundario dt,
+.dato.secundario dd {
+  font-size: 13px;
+  color: var(--cm-gris);
+}
+
+.sin-seg {
+  font-size: 12px;
 }
 
 .con-ayuda {
@@ -252,9 +290,17 @@ th[aria-sort="descending"] .flecha {
   gap: 4px;
 }
 
-.tarjeta-pie {
-  border-top: 1px solid var(--cm-linea-suave);
-  padding-top: 10px;
+.enlaces {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 13px;
+}
+
+.tarjeta .quiero {
+  width: 100%;
+  justify-content: center;
 }
 
 @media (max-width: 760px) {

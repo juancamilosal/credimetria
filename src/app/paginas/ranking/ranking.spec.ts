@@ -165,7 +165,7 @@ describe('Ranking', () => {
     expect(globo.getAttribute('role')).toBe('tooltip');
     expect(globo.textContent).toContain('anuncia desde 16 %');
     expect(html.querySelector('.tarjetas .dif')?.textContent).toMatch(
-      /(más|menos) de lo que\s+anuncia/,
+      /(más|menos) de lo que\s+anuncia/i,
     );
   });
 
