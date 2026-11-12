@@ -61,7 +61,13 @@ export function asesorPublico(fila) {
     entidades: lista(fila.entidades),
     productos: lista(fila.productos),
     ciudades: lista(fila.ciudades),
-    ...(fila.foto ? { foto: `/api/asesores/${fila.id}/foto` } : {}),
+    // `?v=` cambia con cada foto nueva: el navegador guarda la foto un día y
+    // así no se queda con la anterior.
+    ...(fila.foto
+      ? {
+          foto: `/api/asesores/${fila.id}/foto?v=${String(fila.foto).slice(0, 8)}`,
+        }
+      : {}),
   };
 }
 
@@ -91,14 +97,20 @@ export async function asesoresPublicos() {
 
 /** La foto de un asesor publicado: { datos, tipo } o null. */
 export async function fotoAsesor(id) {
-  const lista = fotos.get(id);
-  if (lista && Date.now() - lista.en < CACHE_MS) return lista;
   const archivo = (await leer()).fotos.get(id);
   if (!archivo) return null;
-  const r = await pedir(`/assets/${archivo}?width=320&format=webp`);
+  const lista = fotos.get(id);
+  if (lista?.archivo === archivo && Date.now() - lista.en < CACHE_MS)
+    return lista;
+  // Cuadrada (320 × 320) aunque suban una foto de cuerpo entero: Directus la
+  // recorta alrededor del punto focal del archivo (o del centro si no tiene).
+  const r = await pedir(
+    `/assets/${archivo}?width=320&height=320&fit=cover&format=webp`,
+  );
   const foto = {
     datos: Buffer.from(await r.arrayBuffer()),
     tipo: r.headers.get("content-type") ?? "image/webp",
+    archivo,
     en: Date.now(),
   };
   fotos.set(id, foto);

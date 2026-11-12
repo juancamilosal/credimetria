@@ -235,7 +235,9 @@ morada y oro del diseño (ver abajo).
   filtrar por `estado`, que no es público: el permiso ya entrega solo los
   publicados):
   `GET /api/asesores` (solo los campos públicos) y
-  `GET /api/asesores/<id>/foto`; al armar la página en el servidor se leen
+  `GET /api/asesores/<id>/foto` (cuadrada de 320 × 320, recortada por Directus
+  alrededor del punto focal del archivo; la dirección lleva `?v=` con el
+  archivo, así el navegador no se queda con la foto anterior); al armar la página en el servidor se leen
   directo (`CARGADOR_ASESORES`) y pasan al navegador con la página
   (`AliadosService`). Para agregar o quitar un asesor basta con Directus:
   se crea el registro, se sube la foto y se marca `publicado`. La tarjeta
@@ -247,7 +249,7 @@ morada y oro del diseño (ver abajo).
   Pichincha; libranza, consumo, tarjeta de crédito, hipotecario y préstamos
   con reportes; 23 ciudades.
 - **Reportar un asesor** (`/aliados/reportar`, `paginas/reportar-asesor/`):
-  formulario con el asesor (los publicados, o "No está en la lista / no sé
+  formulario (botón "Enviar reporte" azul, como el de la asesoría) con el asesor (los publicados, o "No está en la lista / no sé
   quién es" con el nombre que escriba), el motivo (cobro por adelantado,
   uso de datos sin permiso, contacto fuera de horario o canal, se hizo pasar
   por el banco o por Credimetría, mal trato o información falsa, otro), qué

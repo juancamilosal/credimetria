@@ -58,7 +58,7 @@ test("de Directus a la página solo pasan los datos públicos y la foto por /api
     entidades: ["BBVA"],
     productos: [],
     ciudades: ["Cali"],
-    foto: "/api/asesores/x/foto",
+    foto: "/api/asesores/x/foto?v=uuid-arc",
   });
 });
 
