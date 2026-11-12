@@ -55,6 +55,7 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     nivel: 1,
     tipo: 'Compañía de financiamiento',
     iniciales: 'KO',
+    logo: '/logos-entidades/koa.webp',
     especialidades: ['Libranza'],
     filtros: [],
     registro: [
