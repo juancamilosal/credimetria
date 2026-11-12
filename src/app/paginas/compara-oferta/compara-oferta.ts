@@ -10,6 +10,7 @@ import {
   ElementRef,
   inject,
   Injector,
+  input,
   PLATFORM_ID,
   signal,
   viewChild,
@@ -99,6 +100,8 @@ type Zona =
   styleUrl: './compara-oferta.css',
 })
 export class ComparaOferta {
+  /** Dentro del simulador: sin la introducción de la página. */
+  readonly incrustado = input(false);
   private readonly tasas = inject(TasasService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);

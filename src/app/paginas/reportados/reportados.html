@@ -257,7 +257,10 @@
         pagarías, con los costos que se esconden en la cuota.
       </p>
     </div>
-    <a class="btn btn-claro" routerLink="/compara-tu-oferta"
+    <a
+      class="btn btn-claro"
+      routerLink="/simulador"
+      [queryParams]="{ modo: 'oferta' }"
       >Comparar mi oferta</a
     >
   </section>

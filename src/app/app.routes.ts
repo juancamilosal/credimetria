@@ -1,5 +1,6 @@
 import { soloAdmin } from './core/guardas/solo-admin';
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
@@ -27,24 +28,20 @@ export const routes: Routes = [
     title: 'Simulador de crédito · Credimetría',
     data: {
       descripcion:
-        'Simula tu crédito: calcula la cuota mensual, el pago total y los intereses con la tasa real que cobra cada banco en Colombia.',
+        '¿Te ofrecieron un crédito? Mira la tasa real y los costos escondidos. O calcula tu cuota, la tabla de pagos y compara entidades con lo que de verdad cobran.',
     },
     loadComponent: () =>
       import('./paginas/simulador/simulador-pagina').then(
         (m) => m.SimuladorPagina,
       ),
   },
+  // Compara tu oferta quedó dentro del simulador (12 nov 2026).
   {
     path: 'compara-tu-oferta',
-    title: 'Compara tu oferta · Credimetría',
-    data: {
-      descripcion:
-        '¿Te ofrecieron un crédito? Escribe la tasa y mira si es buena frente a lo que de verdad cobran los bancos en Colombia.',
-    },
-    loadComponent: () =>
-      import('./paginas/compara-oferta/compara-oferta').then(
-        (m) => m.ComparaOferta,
-      ),
+    redirectTo: () =>
+      inject(Router).createUrlTree(['/simulador'], {
+        queryParams: { modo: 'oferta' },
+      }),
   },
   // Dirección anterior de la página (12 nov 2026).
   { path: 'si-tienes-reportes', redirectTo: 'creditos-para-reportados' },

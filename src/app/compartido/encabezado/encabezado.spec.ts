@@ -13,7 +13,9 @@ describe('Encabezado', () => {
     const enlaces = [
       ...(fixture.nativeElement as HTMLElement).querySelectorAll('nav a'),
     ].map((a) => a.textContent!.trim());
-    expect(enlaces).toContain('Compara tu oferta');
+    // Compara tu oferta quedó dentro del simulador.
+    expect(enlaces).not.toContain('Compara tu oferta');
+    expect(enlaces).toContain('Simulador');
     // "Aliados" pasó al pie de página para que el menú no quede cargado.
     expect(enlaces).not.toContain('Aliados');
     expect(enlaces).toContain('Créditos para reportados');

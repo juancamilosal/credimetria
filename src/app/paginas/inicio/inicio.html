@@ -181,7 +181,11 @@
           tasa que de verdad pagarías y si hay costos escondidos.
         </p>
       </div>
-      <a class="btn btn-principal" routerLink="/compara-tu-oferta">
+      <a
+        class="btn btn-principal"
+        routerLink="/simulador"
+        [queryParams]="{ modo: 'oferta' }"
+      >
         Comparar mi oferta
       </a>
     </div>

@@ -151,7 +151,7 @@ export class Asesoria implements OnDestroy {
   private readonly fb = inject(FormBuilder).nonNullable;
   /** Entidad elegida en el ranking, si llegó desde allí. */
   private entidad: string | null = null;
-  /** Urgencia, solo si la trae el enlace (inicio o Compara tu oferta). */
+  /** Urgencia, solo si la trae el enlace (inicio o la oferta del simulador). */
   private urgencia: Urgencia | null = null;
 
   protected readonly tipos = TIPOS;
@@ -399,7 +399,7 @@ export class Asesoria implements OnDestroy {
     if (origen === 'simulador' && nombre) {
       this.vieneDe.set(`Desde el simulador: ${nombre}${conMonto}.`);
     } else if (origen === 'oferta' && nombre) {
-      this.vieneDe.set(`Desde Compara tu oferta: ${nombre}${conMonto}.`);
+      this.vieneDe.set(`Desde el simulador (tu oferta): ${nombre}${conMonto}.`);
     } else if (origen === 'ranking' && this.entidad && nombre) {
       this.vieneDe.set(`Desde el ranking: ${this.entidad}, ${nombre}.`);
     } else if (origen === 'reportados') {

@@ -366,3 +366,13 @@ ol {
     animation: none;
   }
 }
+
+/* Dentro del simulador: solo el chat, centrado */
+.pagina.incrustado {
+  padding-block: 0;
+  justify-content: center;
+}
+
+.incrustado .chat {
+  max-width: 720px;
+}
