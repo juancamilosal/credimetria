@@ -135,7 +135,7 @@ describe('Simulador', () => {
       expect(html.querySelector('#avisoUsura')).toBeNull();
     });
 
-    it('libranza ofrece plazos hasta 120 meses (10 años)', () => {
+    it('libranza ofrece plazos hasta 144 meses (12 años)', () => {
       const { fixture, html } = crear();
       const select = html.querySelector<HTMLSelectElement>('#simProducto')!;
       select.value = 'libranza';
@@ -152,6 +152,8 @@ describe('Simulador', () => {
         '96',
         '108',
         '120',
+        '132',
+        '144',
       ]);
     });
 
