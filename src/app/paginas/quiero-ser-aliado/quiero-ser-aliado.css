@@ -190,3 +190,8 @@ h2 {
   flex-direction: column;
   gap: 6px;
 }
+
+/* Nombre y correo a todo el ancho: se ven completos */
+.ancho {
+  grid-column: 1 / -1;
+}

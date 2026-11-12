@@ -673,7 +673,9 @@ contain`, así los cortos (como Lulo) se ven del mismo tamaño que los
   a `AVISO_PARA` toda la información del asesor y al asesor la
   confirmación. Colección y permiso creados con
   `servidor/scripts/crear-solicitudes-aliados.mjs`. El widget de Turnstile
-  de este formulario es el componente `compartido/verificacion/`.
+  de este formulario es el componente `compartido/verificacion/`. En este formulario y en el de
+  reporte, el nombre y el correo van a todo el ancho para que se vean
+  completos.
 - **Asesores y reportes en Directus:** el "Lector web" solo puede _leer_
   los asesores publicados y solo sus campos públicos (id, nombre, empresa,
   verificado, entidades, productos, ciudades, foto y orden), y solo puede

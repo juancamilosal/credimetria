@@ -24,7 +24,7 @@
         <section class="bloque">
           <h2>Tus datos</h2>
           <div class="rejilla">
-            <div class="campo">
+            <div class="campo ancho">
               <label for="saNombre">Nombre completo</label>
               <input
                 id="saNombre"
@@ -68,6 +68,18 @@
               }
             </div>
             <div class="campo">
+              <label for="saCiudad">Ciudad donde vives</label>
+              <input
+                id="saCiudad"
+                formControlName="ciudad"
+                autocomplete="address-level2"
+                [attr.aria-invalid]="mostrarError('ciudad')"
+              />
+              @if (mostrarError("ciudad")) {
+                <span class="error">Escribe tu ciudad.</span>
+              }
+            </div>
+            <div class="campo ancho">
               <label for="saCorreo">Correo</label>
               <input
                 id="saCorreo"
@@ -79,18 +91,6 @@
               />
               @if (mostrarError("correo")) {
                 <span class="error">Escribe un correo válido.</span>
-              }
-            </div>
-            <div class="campo">
-              <label for="saCiudad">Ciudad donde vives</label>
-              <input
-                id="saCiudad"
-                formControlName="ciudad"
-                autocomplete="address-level2"
-                [attr.aria-invalid]="mostrarError('ciudad')"
-              />
-              @if (mostrarError("ciudad")) {
-                <span class="error">Escribe tu ciudad.</span>
               }
             </div>
           </div>
