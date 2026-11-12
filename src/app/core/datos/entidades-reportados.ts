@@ -133,6 +133,7 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     nivel: 2,
     tipo: 'Operadora de libranza',
     iniciales: 'KA',
+    logo: '/logos-entidades/kala.webp',
     especialidades: ['Libranza para pensionados'],
     filtros: ['pensionados'],
     registro: [
