@@ -425,3 +425,20 @@ test("el resumen de SMTP del arranque no muestra la clave", () => {
   assert.match(resumenSmtp({}), /sin SMTP_HOST/);
   assert.equal(ocultarCorreo("ana@ejemplo.com"), "an***@ejemplo.com");
 });
+
+test("deja en el log por qué Turnstile rechazó (p. ej. clave secreta equivocada)", async () => {
+  const log = await conConsola(async () => {
+    await verificarTurnstile("t", "1.2.3.4", {
+      secreto: "otra",
+      pedir: async () =>
+        new Response(
+          JSON.stringify({
+            success: false,
+            "error-codes": ["invalid-input-secret"],
+          }),
+        ),
+    });
+  });
+  assert.match(log, /Turnstile rechazó una solicitud: invalid-input-secret/);
+  assert.doesNotMatch(log, /otra/);
+});

@@ -441,7 +441,10 @@ export async function verificarTurnstile(
   ip,
   { secreto = process.env.TURNSTILE_SECRET_KEY, pedir = fetch } = {},
 ) {
-  if (typeof token !== "string" || !token || token.length > 2048) return false;
+  if (typeof token !== "string" || !token || token.length > 2048) {
+    console.warn("Turnstile: solicitud sin token válido.");
+    return false;
+  }
   if (!secreto) {
     console.error("Falta TURNSTILE_SECRET_KEY: se rechazan las solicitudes.");
     return false;
@@ -455,11 +458,23 @@ export async function verificarTurnstile(
       signal: AbortSignal.timeout(5_000),
     });
     const datos = await r.json();
-    if (datos?.success !== true) return false;
+    if (datos?.success !== true) {
+      // "invalid-input-secret" = TURNSTILE_SECRET_KEY no es la del widget.
+      console.warn(
+        `Turnstile rechazó una solicitud: ${(datos?.["error-codes"] ?? []).join(", ") || "sin código"}.`,
+      );
+      return false;
+    }
     const hosts = SECRETOS_PRUEBA.has(secreto)
       ? [...HOSTS_TURNSTILE, "example.com"]
       : HOSTS_TURNSTILE;
-    return hosts.includes(datos.hostname);
+    if (!hosts.includes(datos.hostname)) {
+      console.warn(
+        `Turnstile rechazó una solicitud: dominio ${datos.hostname} no permitido.`,
+      );
+      return false;
+    }
+    return true;
   } catch (error) {
     console.error("No se pudo verificar Turnstile:", error.message);
     return false;

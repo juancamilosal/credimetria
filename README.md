@@ -110,6 +110,8 @@ morada y oro del diseño (ver abajo).
   y luego "CORREO enviado" (aceptados, rechazados, id y respuesta del
   servidor SMTP), "CORREO falló" (código, comando y respuesta SMTP, nunca
   la clave) o "CORREO no enviado" si falta el destinatario (`AVISO_PARA`).
+  Si Turnstile rechaza, el log dice por qué ("Turnstile rechazó una
+  solicitud: invalid-input-secret" = la clave secreta no es la del widget).
   Los correos salen a medias (`an***@gmail.com`). Límites de 15 s para
   conectar y 30 s por respuesta, así una conexión colgada también queda en
   el log. Pruebas: `npm run test:servidor`. Usa nodemailer 10 (la 6 tenía fallas al leer direcciones de correo).
