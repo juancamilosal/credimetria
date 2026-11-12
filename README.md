@@ -38,8 +38,8 @@ morada y oro del diseño (ver abajo).
 - **Créditos si tienes reportes** (`paginas/reportados/`, datos en
   `core/datos/entidades-reportados.ts`): dos grupos, las vigiladas por la
   Superfinanciera (Koa) y las operadoras de libranza inscritas en el RUNEOL
-  (Vantage, Mission, Kala y BIV, esta última "por confirmar" porque el
-  registro está a nombre de Patrimonio Autónomo Marsof BIV). **No muestra
+  (Vantage, Kala y BIV, esta última "por confirmar" porque el
+  registro está a nombre de Patrimonio Autónomo Marsof BIV). Mission está **oculta** (campo `oculta`) desde el 12 nov 2026: publica 34,00 % E.A., por encima de la usura; se vuelve a mostrar quitando ese campo cuando se aclare. **No muestra
   tasas** (decisión del 12 nov 2026): cada tarjeta dice "Presta a personas
   reportadas", su especialidad, la ficha del registro (NIT, número de
   reconocimiento, renovación, sanciones y fecha de consulta) y lleva a

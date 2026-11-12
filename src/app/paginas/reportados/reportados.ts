@@ -5,7 +5,7 @@ import { Chips, OpcionChip } from '../../compartido/chips/chips';
 import {
   ENLACE_RUNEOL,
   ENLACE_SUPERFINANCIERA,
-  ENTIDADES_REPORTADOS,
+  ENTIDADES_VISIBLES,
   EntidadReportados,
   FECHA_CONSULTA_REGISTROS,
   NivelEntidad,
@@ -31,19 +31,26 @@ export class Reportados {
     { valor: '1', texto: 'Vigiladas por la Superfinanciera' },
     { valor: '2', texto: 'Operadoras de libranza' },
   ];
+  /** Solo las especialidades que tiene alguna entidad visible. */
   protected readonly especialidades: OpcionChip[] = [
     { valor: 'todas', texto: 'Todas' },
-    { valor: 'pensionados', texto: 'Pensionados' },
-    { valor: 'empleados', texto: 'Empleados con convenio' },
-    { valor: 'docentes', texto: 'Docentes' },
-    { valor: 'fuerza-publica', texto: 'Policía y Fuerzas Militares' },
+    ...[
+      { valor: 'pensionados', texto: 'Pensionados' },
+      { valor: 'empleados', texto: 'Empleados con convenio' },
+      { valor: 'docentes', texto: 'Docentes' },
+      { valor: 'fuerza-publica', texto: 'Policía y Fuerzas Militares' },
+    ].filter((o) =>
+      ENTIDADES_VISIBLES.some((e) =>
+        e.filtros.includes(o.valor as EntidadReportados['filtros'][number]),
+      ),
+    ),
   ];
 
   protected readonly tipo = signal('todas');
   protected readonly especialidad = signal('todas');
 
   private readonly filtradas = computed(() =>
-    ENTIDADES_REPORTADOS.filter(
+    ENTIDADES_VISIBLES.filter(
       (e) =>
         (this.tipo() === 'todas' || String(e.nivel) === this.tipo()) &&
         (this.especialidad() === 'todas' ||

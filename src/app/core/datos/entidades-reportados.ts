@@ -43,6 +43,8 @@ export interface EntidadReportados {
   nota?: string;
   /** Algo del registro que falta confirmar con la entidad. */
   porConfirmar?: string;
+  /** No se muestra en la página (queda en los datos para volver a activarla). */
+  oculta?: string;
   registro: DatoRegistro[];
 }
 
@@ -115,6 +117,8 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
   },
   {
     id: 'mission',
+    oculta:
+      'Publica 34,00 % E.A. (2,47 % M.V.) en sus preguntas frecuentes, por encima de la usura de noviembre de 2026 (28,34 %). Oculta el 12 nov 2026 hasta aclararlo.',
     nombre: 'Mission',
     nivel: 2,
     tipo: 'Operadora de libranza',
@@ -194,3 +198,6 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     ],
   },
 ];
+
+/** Las que se muestran en la página. */
+export const ENTIDADES_VISIBLES = ENTIDADES_REPORTADOS.filter((e) => !e.oculta);
