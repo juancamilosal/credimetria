@@ -3,11 +3,7 @@
     <div class="hero-texto">
       <span class="sello">Con datos de la Superintendencia Financiera</span>
       <h1>Compara con datos, <span class="verde">no con promesas</span></h1>
-      <p>
-        Reunimos las tasas que publican las entidades y las que reportan a la
-        Superintendencia Financiera, para que compares bancos, cooperativas y
-        financieras en un solo lugar y elijas tu crédito con información clara.
-      </p>
+      <p>Mira lo que anuncian los bancos y lo que de verdad cobran.</p>
       <div class="acciones">
         <a class="btn btn-principal" routerLink="/ranking"
           >Ver ranking de tasas</a
@@ -152,12 +148,11 @@
 
     <div class="top-pie">
       <p class="nota">
-        Tasa efectiva anual que cobran en promedio, según la
+        Promedio de la
         <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
           >{{ fuente.texto }} ↗</a
         >
-        (ponderado por monto, últimas 4 semanas), corte
-        {{ corte().fecha | date: "d MMM y" : "UTC" }}
+        · corte {{ corte().fecha | date: "d MMM y" : "UTC" }}
       </p>
       <p class="nota contacta">"Quiero esta": {{ contacta }}</p>
       <a routerLink="/ranking" [queryParams]="{ producto: producto() }">
@@ -175,18 +170,15 @@
   <section class="seccion">
     <div class="oferta">
       <div>
-        <h2>¿Te ofrecieron un crédito? Compáralo aquí</h2>
-        <p class="muted">
-          Escribe lo que te dijo el asesor, aunque sea solo la cuota, y mira la
-          tasa que de verdad pagarías y si hay costos escondidos.
-        </p>
+        <h2>¿Te ofrecieron un crédito?</h2>
+        <p class="muted">Mira si es buena tasa y si tiene costos escondidos.</p>
       </div>
       <a
         class="btn btn-principal"
         routerLink="/simulador"
         [queryParams]="{ modo: 'oferta' }"
       >
-        Comparar mi oferta
+        Revisar mi oferta
       </a>
     </div>
   </section>
@@ -273,10 +265,7 @@
       />
       <div class="oscuro-texto">
         <h2>Recibe asesoría gratis para conseguir la mejor tasa</h2>
-        <p>
-          Un asesor aliado revisa tu caso y te busca la mejor opción entre los
-          bancos con los que trabaja.
-        </p>
+        <p>Un asesor aliado te busca la mejor tasa. Gratis.</p>
         <span class="leyenda" id="lbUrgInicio"
           >¿Cuándo necesitas el crédito?</span
         >

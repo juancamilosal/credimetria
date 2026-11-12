@@ -27,7 +27,7 @@ describe('Pie', () => {
     expect(texto).not.toContain('versión de prueba');
     // Aviso de independencia en todas las páginas.
     expect(texto.replace(/\s+/g, ' ')).toContain(
-      'Las marcas y logos pertenecen a sus dueños. Credimetría es independiente y no tiene relación comercial con estas entidades.',
+      'Las marcas pertenecen a sus dueños: Credimetría es independiente y no tiene relación comercial con ellas.',
     );
   });
 });

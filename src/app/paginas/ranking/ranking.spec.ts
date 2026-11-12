@@ -144,7 +144,7 @@ describe('Ranking', () => {
     fixture.detectChanges();
     expect(cuotaAvVillas()).toBe('$369.685');
     expect(html.querySelector('.ayuda')?.textContent).toContain(
-      'Cuota estimada con $10.000.000 a 36 meses',
+      'Cuota con $10.000.000 a 36 meses',
     );
   });
 

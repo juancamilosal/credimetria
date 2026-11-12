@@ -2,10 +2,8 @@
   <div class="wrap cabecera-texto">
     <h1>¿Estás reportado? Aún tienes opciones de crédito</h1>
     <p>
-      Entidades que prestan a personas reportadas, con su registro oficial
-      verificado. Aquí solo aparecen entidades vigiladas por la Superintendencia
-      Financiera u operadoras de libranza inscritas en el registro oficial
-      (RUNEOL).
+      Entidades con registro oficial verificado. Un asesor aliado de Credimetría
+      gestiona tu solicitud, gratis.
     </p>
     <div class="alerta" role="note">
       <svg
@@ -25,57 +23,21 @@
         />
       </svg>
       <div>
-        <b
-          >Ninguna entidad legal te cobra por adelantado para aprobarte un
-          crédito.</b
-        >
-        <span
-          >Si te piden plata por "estudio", "aprobación" o "seguro" antes del
-          desembolso, o te prometen crédito sin revisar tu caso, es
-          estafa.</span
-        >
+        <b>Nadie legal te cobra por adelantado.</b>
+        <span>Si te piden plata antes del desembolso, es estafa.</span>
       </div>
     </div>
   </div>
 </section>
 
 <div class="wrap contenido">
-  <section aria-labelledby="t-verificamos">
-    <h2 id="t-verificamos">Cómo verificamos cada entidad</h2>
-    <p class="sub muted">
-      Revisamos el registro oficial de cada una y guardamos la fecha de la
-      consulta. Tú también puedes verificarlo con el enlace de cada ficha.
-    </p>
-    <ol class="verificacion">
-      <li class="tarjeta">
-        <span class="pos">1</span>
-        <b>Registro oficial</b>
-        <span class="muted"
-          >Vigilada por la Superintendencia Financiera, o inscrita como
-          operadora de libranza en el RUNEOL de las Cámaras de Comercio.</span
-        >
-      </li>
-      <li class="tarjeta">
-        <span class="pos">2</span>
-        <b>Renovación al día</b>
-        <span class="muted"
-          >Las operadoras deben renovar cada año, entre enero y marzo. Solo
-          mostramos las que renovaron 2026.</span
-        >
-      </li>
-      <li class="tarjeta">
-        <span class="pos">3</span>
-        <b>Sin sanciones</b>
-        <span class="muted"
-          >Revisamos que el registro no tenga sanciones. Si una entidad cobra
-          por adelantado o incumple, sale de la lista.</span
-        >
-      </li>
-    </ol>
-  </section>
-
   <section aria-labelledby="t-entidades" class="filtros-sec">
     <h2 id="t-entidades">Entidades que prestan a personas reportadas</h2>
+    <ul class="checks" aria-label="Cómo verificamos cada entidad">
+      <li>✓ Registro oficial</li>
+      <li>✓ Renovado en 2026</li>
+      <li>✓ Sin sanciones</li>
+    </ul>
     <div class="filtros">
       <div class="grupo">
         <span class="leyenda" id="l-tipo">Tipo</span>
@@ -106,10 +68,6 @@
         </h2>
         <span class="sello sello-1">Mayor supervisión</span>
       </div>
-      <p class="muted">
-        Entidades financieras autorizadas y supervisadas por la Superintendencia
-        Financiera de Colombia.
-      </p>
       <ul class="lista">
         @for (entidad of vigiladas(); track entidad.id) {
           <ng-container
@@ -129,8 +87,8 @@
         <span class="sello sello-2">Supervisadas por la Supersociedades</span>
       </div>
       <p class="muted">
-        No son entidades financieras: prestan por libranza, es decir, la cuota
-        se descuenta directamente de tu nómina o pensión.
+        No son entidades financieras. La cuota se descuenta de tu nómina o
+        pensión.
       </p>
       <ul class="lista">
         @for (entidad of operadoras(); track entidad.id) {
@@ -180,21 +138,11 @@
           ✓ Inscrita en el RUNEOL · renovó 2026
         }
       </span>
-      <div class="presta">
-        <b>Presta a personas reportadas</b>
-        <span
-          >Nuestros asesores aliados pueden gestionar tu solicitud con esta
-          entidad.</span
-        >
-      </div>
       <ul class="especialidades" aria-label="Especialidades">
         @for (texto of entidad.especialidades; track texto) {
           <li>{{ texto }}</li>
         }
       </ul>
-      @if (entidad.nota) {
-        <p class="muted nota-entidad">{{ entidad.nota }}</p>
-      }
       @if (entidad.porConfirmar) {
         <p class="por-confirmar">
           <b>Por confirmar:</b> {{ entidad.porConfirmar }}
@@ -203,6 +151,10 @@
       <details>
         <summary>Ficha del registro</summary>
         <dl class="ficha">
+          @if (entidad.nota) {
+            <dt>Fuente</dt>
+            <dd class="fuente">{{ entidad.nota }}</dd>
+          }
           @for (dato of entidad.registro; track dato.etiqueta) {
             <dt>{{ dato.etiqueta }}</dt>
             <dd>{{ dato.valor }}</dd>
@@ -224,9 +176,6 @@
           >Verificar registro ↗</a
         >
       </div>
-      <span class="nota"
-        >Te contacta un asesor aliado de Credimetría, no la entidad.</span
-      >
     </li>
   </ng-template>
 
@@ -236,9 +185,8 @@
         Nuestros asesores te ayudan aunque estés reportado
       </h2>
       <p class="muted">
-        Un asesor aliado de Credimetría revisa tu caso y gestiona tu solicitud
-        con las entidades que prestan a personas reportadas. Es gratis y nunca
-        te cobra por adelantado.
+        Revisa tu caso y gestiona tu solicitud. Gratis. Te contacta el asesor,
+        no la entidad.
       </p>
     </div>
     <a
@@ -252,57 +200,50 @@
   <section class="compara" aria-labelledby="t-compara">
     <div>
       <h2 id="t-compara">¿Ya te ofrecieron una libranza?</h2>
-      <p>
-        Escribe la tasa o la cuota que te dieron y te mostramos lo que de verdad
-        pagarías, con los costos que se esconden en la cuota.
-      </p>
+      <p>Mira si es buena tasa y si tiene costos escondidos.</p>
     </div>
     <a
       class="btn btn-claro"
       routerLink="/simulador"
       [queryParams]="{ modo: 'oferta' }"
-      >Comparar mi oferta</a
+      >Revisar mi oferta</a
     >
   </section>
 
   <section aria-labelledby="t-saber">
     <h2 id="t-saber">Lo que debes saber si estás reportado</h2>
-    <ul class="educacion">
-      <li class="tarjeta">
-        <h3>¿Cómo sé si estoy reportado?</h3>
+    <div class="educacion">
+      <details>
+        <summary>¿Cómo sé si estoy reportado?</summary>
         <p class="muted">
-          Puedes consultar tu historial gratis en las centrales de riesgo
-          (DataCrédito Experian y TransUnion). La consulta no te baja el
+          Consulta gratis en DataCrédito Experian o TransUnion. No baja tu
           puntaje.
         </p>
-      </li>
-      <li class="tarjeta">
-        <h3>¿Cuánto dura un reporte negativo?</h3>
+      </details>
+      <details>
+        <summary>¿Cuánto dura un reporte negativo?</summary>
         <p class="muted">
-          Cuando pagas, el reporte dura el doble del tiempo que estuviste en
-          mora, con un máximo de 4 años (Ley 1266 de 2008, modificada por la Ley
-          2157 de 2021).
+          El doble del tiempo en mora, máximo 4 años desde que pagas (Ley 2157
+          de 2021).
         </p>
-      </li>
-      <li class="tarjeta">
-        <h3>¿Y si el reporte es injusto?</h3>
+      </details>
+      <details>
+        <summary>¿Y si el reporte es injusto?</summary>
         <p class="muted">
-          Reclama primero a la entidad que te reportó, por escrito. Si no
-          responde, acude a la Superintendencia de Industria y Comercio. Si fue
-          suplantación, denúncialo.
+          Reclama por escrito a la entidad. Si no responde, ve a la
+          Superintendencia de Industria y Comercio.
         </p>
-      </li>
-      <li class="tarjeta">
-        <h3>¿Conviene endeudarme más?</h3>
+      </details>
+      <details>
+        <summary>¿Conviene endeudarme más?</summary>
         <p class="muted">
-          Solo si la cuota cabe en tus ingresos. Muchas veces conviene más
-          unificar deudas (compra de cartera) que sumar un crédito nuevo.
+          Solo si la cuota cabe en tus ingresos. A veces conviene más unificar
+          deudas.
         </p>
-      </li>
-    </ul>
+      </details>
+    </div>
     <p class="nota">
-      Información general, no asesoría financiera. Registros consultados el
-      {{ fecha }} en el RUNEOL y en los datos de la Superintendencia Financiera.
+      Información general, no asesoría. Registros consultados el {{ fecha }}.
     </p>
   </section>
 </div>

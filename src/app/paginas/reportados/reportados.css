@@ -52,7 +52,6 @@ ol {
   padding: 0;
 }
 
-.verificacion,
 .educacion {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -333,4 +332,38 @@ details[open] summary::after {
   color: var(--cm-bloque-sub);
   max-width: 58ch;
   margin-top: 6px;
+}
+
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 10px;
+  color: var(--cm-ahorro-700);
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.educacion {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 640px) {
+  .educacion {
+    grid-template-columns: 1fr;
+  }
+}
+
+.educacion details {
+  background: var(--cm-blanco);
+}
+
+.educacion details p {
+  padding: 0 14px 12px;
+  font-size: 14.5px;
+}
+
+.ficha .fuente {
+  font-family: var(--cm-f-texto);
+  font-size: 13.5px;
 }

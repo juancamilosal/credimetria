@@ -32,8 +32,8 @@ describe('Reportados', () => {
       'Vigilada por la Superintendencia Financiera',
     );
     expect(html.textContent).not.toMatch(/E\.A\.|%/);
-    expect(html.querySelectorAll('.presta').length).toBe(
-      ENTIDADES_VISIBLES.length,
+    expect(html.querySelector('.cabecera-texto p')?.textContent).toContain(
+      'Un asesor aliado de Credimetría',
     );
   });
 

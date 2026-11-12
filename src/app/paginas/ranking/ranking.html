@@ -1,10 +1,7 @@
 <section class="cabecera">
   <div class="wrap cabecera-texto">
     <h1>Ranking de tasas por lo que de verdad cobran</h1>
-    <p>
-      Bancos, cooperativas y financieras ordenados por la tasa promedio que
-      reportan a la Superintendencia Financiera.
-    </p>
+    <p>Según lo que reportan a la Superintendencia Financiera.</p>
   </div>
 </section>
 
@@ -124,24 +121,20 @@
         </button>
       </div>
       <p class="nota">
-        VIS es vivienda de interés social (hasta 150 salarios mínimos); No VIS,
-        la de mayor valor. En el leasing el banco compra la vivienda y tú la
-        pagas como un arriendo con opción de compra.
+        VIS: vivienda de interés social (hasta 150 salarios mínimos). Leasing:
+        la pagas como un arriendo con opción de compra.
       </p>
     </div>
   }
 
   <p class="nota ayuda">
-    <span class="solo-escritorio"
-      >Toca los títulos de la tabla para ordenar; el embudo de "Tipo" filtra.
-    </span>
-    Cuota estimada con {{ monto() | pesos }} a {{ textoPlazo(plazo()) }}, solo
-    capital e intereses: no incluye seguros ni otros gastos · Promedio de la
+    Cuota con {{ monto() | pesos }} a {{ textoPlazo(plazo()) }}, sin seguros ·
+    Promedio de la
     <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
       >{{ fuente.texto }} ↗</a
     >
-    (ponderado por monto, últimas 4 semanas), corte
-    {{ corte().fecha | date: "d MMM y" : "UTC" }}. "Quiero esta": {{ contacta }}
+    · corte {{ corte().fecha | date: "d MMM y" : "UTC" }} · "Quiero esta":
+    {{ contacta }}
     @if (corte().ejemplo) {
       <span class="etq etq-aviso">Datos de ejemplo</span>
     }
@@ -163,7 +156,7 @@
   />
   @if (hayUsura()) {
     <p class="nota pie-tabla">
-      * Tope de usura del mes: la entidad no publica una tasa máxima en su PDF.
+      * Tope de usura: la entidad no publica una máxima.
     </p>
   }
   @if (!filas().length && !sinConexion() && !cargando()) {
@@ -176,19 +169,14 @@
     <div class="tarjeta">
       <b>Anuncia</b>
       <span class="muted">
-        El rango que la entidad publica en su PDF oficial de tasas (o en su
-        página, si no publica PDF): la más baja (según tu perfil) y la más alta.
-        Toca "PDF" o "Página" para verlo.
+        La más baja y la más alta que publica la entidad.
       </span>
     </div>
     <div class="tarjeta">
       <b>Cobra en promedio</b>
       <span class="muted">
-        El promedio de los créditos que la entidad desembolsó en las últimas 4
-        semanas, según el reporte que envía a la Superfinanciera, ponderado por
-        monto (un crédito grande pesa más que uno pequeño). Es lo que en
-        promedio cobró, no la tasa que te darán a ti. Con esta tasa calculamos
-        la cuota.
+        Lo que cobró en el último mes, según la Superfinanciera. Tu tasa depende
+        de tu perfil.
         <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
           >Ver los datos ↗</a
         >
@@ -197,18 +185,12 @@
     <div class="tarjeta">
       <b>Pago total</b>
       <span class="muted">
-        Todo lo que le pagarías a la entidad al terminar: la cuota por el número
-        de meses. Lo que pasa del monto prestado son los intereses. No incluye
-        seguros (de vida, y en vivienda también de incendio y terremoto),
-        comisiones ni otros gastos, que suben lo que pagas.
+        La cuota por los meses, sin seguros ni comisiones.
       </span>
     </div>
     <div class="tarjeta destacada">
       <b>El orden no se vende</b>
-      <span>
-        La tabla arranca por tasa real y el # siempre muestra ese puesto, aunque
-        la ordenes por otra columna. Ninguna entidad puede pagar para subir.
-      </span>
+      <span> Ninguna entidad puede pagar para subir en el ranking. </span>
     </div>
   </div>
 </div>

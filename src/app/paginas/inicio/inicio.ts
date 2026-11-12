@@ -208,17 +208,15 @@ export class Inicio {
   protected readonly pasos = [
     {
       titulo: 'Compara',
-      texto:
-        'Mira la tasa que anuncia cada entidad al lado de la que cobra en promedio.',
+      texto: 'Lo que anuncia cada entidad y lo que de verdad cobra.',
     },
     {
       titulo: 'Cuéntanos qué necesitas',
-      texto: 'Producto, monto y cuándo lo necesitas. Toma menos de un minuto.',
+      texto: 'Producto, monto y cuándo. Menos de un minuto.',
     },
     {
       titulo: 'Un asesor aliado te contacta',
-      texto:
-        'Máximo 2 asesores verificados. Nunca te cobran nada por adelantado.',
+      texto: 'Máximo 2, verificados. Nunca cobran por adelantado.',
     },
   ];
 }
