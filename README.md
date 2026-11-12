@@ -465,6 +465,16 @@ pie. `public/favicon.svg` y `favicon.ico` son el ícono solo. Las versiones para
 otros usos (horizontal, dos colores, con lema, vertical, analítica, fondo
 oscuro e ícono en PNG transparente y SVG) están en `src/assets/marca/`.
 
+**Google y buscadores** (12 nov 2026): `public/icono-48.png`,
+`icono-192.png`, `icono-512.png` y `apple-touch-icon.png` (180 px) son el
+ícono sobre fondo blanco, en tamaños múltiplos de 48 como pide Google para el
+ícono de los resultados; `site.webmanifest` los declara. `src/index.html`
+trae las etiquetas `og:` (al compartir el enlace) y un JSON-LD con
+`WebSite` (nombre "Credimetría") y `Organization` (logo `icono-512.png`).
+`public/robots.txt` deja rastrear todo menos `/admin` y `/api/`, y apunta a
+`public/sitemap.xml` (las 7 páginas públicas). Si se agrega una página,
+agregarla al sitemap.
+
 ## Fotos
 
 Las fotos de la marca (generadas con Gemini) tienen los originales en
