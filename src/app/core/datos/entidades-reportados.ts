@@ -110,6 +110,7 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     nivel: 2,
     tipo: 'Operadora de libranza',
     iniciales: 'MI',
+    logo: '/logos-entidades/mission.webp',
     especialidades: ['Libranza'],
     filtros: [],
     registro: [
