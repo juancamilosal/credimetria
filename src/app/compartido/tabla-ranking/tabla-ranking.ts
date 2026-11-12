@@ -1,3 +1,4 @@
+import { QUIERO_ESTA_CONTACTA } from '../../core/datos/avisos';
 import {
   Component,
   computed,
@@ -99,6 +100,7 @@ export class TablaRanking {
   protected readonly menuTipo = signal(false);
   protected readonly todas = TODAS;
   protected readonly ayudaDiferencia = AYUDA_DIFERENCIA;
+  protected readonly contacta = QUIERO_ESTA_CONTACTA;
 
   protected readonly vista = computed<FilaVista[]>(() => {
     const filas = this.filas().map((t, i) => {

@@ -1,3 +1,7 @@
+import {
+  AVISO_INDEPENDENCIA,
+  QUIERO_ESTA_CONTACTA,
+} from '../../core/datos/avisos';
 import { DatePipe } from '@angular/common';
 import {
   afterNextRender,
@@ -105,6 +109,8 @@ export class Inicio {
   protected readonly entidades = this.tasas.entidadesConLogo;
   protected readonly fotos = FOTOS;
   protected readonly fuente = FUENTE_PROMEDIO;
+  protected readonly contacta = QUIERO_ESTA_CONTACTA;
+  protected readonly independencia = AVISO_INDEPENDENCIA;
 
   /** Tarjetas con foto por tipo de crédito; cada una lleva a su ranking. */
   protected readonly productos = computed(() =>

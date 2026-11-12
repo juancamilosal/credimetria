@@ -138,4 +138,20 @@ describe('Inicio', () => {
   it('no muestra el simulador', () => {
     expect(crear().querySelector('app-simulador')).toBeNull();
   });
+
+  it('debajo del muro de logos dice que Credimetría es independiente', () => {
+    const html = crear();
+    expect(
+      html.querySelector('.entidades + .independiente')?.textContent,
+    ).toContain(
+      'Las marcas y logos pertenecen a sus dueños. Credimetría es independiente y no tiene relación comercial con estas entidades.',
+    );
+  });
+
+  it('aclara que "Quiero esta" contacta a un asesor aliado y no a la entidad', () => {
+    const html = crear();
+    const texto = 'Te contacta un asesor aliado de Credimetría, no la entidad.';
+    expect(html.querySelector('.contacta')?.textContent).toContain(texto);
+    expect(html.querySelector('.quiero')?.getAttribute('title')).toBe(texto);
+  });
 });

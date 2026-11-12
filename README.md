@@ -207,7 +207,8 @@ morada y oro del diseño (ver abajo).
   y No VIS) cada 7 segundos (`ROTAR_CADA_MS`), como un carrusel: sin lista
   de productos, barra ni pausa, solo dos flechas, ‹ a la izquierda de la
   primera tarjeta y › a la derecha de la última (dan la vuelta; en el
-  celular quedan a la altura de la primera). Las tarjetas entran
+  celular, donde las tarjetas van una debajo de otra, no se muestran y el
+  producto solo cambia cada 7 s). Las tarjetas entran
   deslizándose desde el lado de la flecha (al pasar solas, desde la
   derecha) y el nombre del producto con un fundido. El título va centrado y más
   grande; debajo de las tarjetas, centrados, de dónde sale el promedio
@@ -474,6 +475,25 @@ trae las etiquetas `og:` (al compartir el enlace) y un JSON-LD con
 `public/robots.txt` deja rastrear todo menos `/admin` y `/api/`, y apunta a
 `public/sitemap.xml` (las 7 páginas públicas). Si se agrega una página,
 agregarla al sitemap.
+
+**Cada página para Google y redes** (`core/servicios/seo.service.ts`): cada
+ruta de `app.routes.ts` trae su `data.descripcion`; en cada navegación (también
+al armar la página en el servidor) se pone su `meta description`, el
+`link rel="canonical"` a `https://credimetria.com/<ruta>` (sin parámetros),
+`og:title`, `og:description`, `og:url`, `og:image` y los de Twitter
+(`summary_large_image`). La imagen para compartir es `public/compartir.png`
+(1200 × 630: logo, "Compara con datos, no con promesas" y la franja azul y
+verde). Las direcciones que no existen (por ejemplo `/glosario`) muestran
+"Página no encontrada" (`paginas/no-encontrada/`) con estado 404,
+`noindex` y enlaces al inicio y al ranking; antes redirigían a la portada.
+
+**Aviso de independencia** (`core/datos/avisos.ts`): debajo del muro
+"Comparamos tasas de" y en el pie de todas las páginas, "Las marcas y logos
+pertenecen a sus dueños. Credimetría es independiente y no tiene relación
+comercial con estas entidades." Los "Quiero esta" del inicio y del ranking
+aclaran "Te contacta un asesor aliado de Credimetría, no la entidad." (nota
+junto a la fuente, `title` del enlace y texto bajo el botón de cada tarjeta
+del celular).
 
 ## Fotos
 

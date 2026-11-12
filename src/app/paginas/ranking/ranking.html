@@ -141,7 +141,7 @@
       >{{ fuente.texto }} ↗</a
     >
     (ponderado por monto, últimas 4 semanas), corte
-    {{ corte().fecha | date: "d MMM y" : "UTC" }}
+    {{ corte().fecha | date: "d MMM y" : "UTC" }}. "Quiero esta": {{ contacta }}
     @if (corte().ejemplo) {
       <span class="etq etq-aviso">Datos de ejemplo</span>
     }

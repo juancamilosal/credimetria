@@ -188,15 +188,20 @@
    la altura de la primera, más pequeñas */
 @media (max-width: 720px) {
   .carrusel {
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Las tarjetas van una debajo de otra: las flechas no se muestran (el
+     producto sigue cambiando solo cada 7 segundos) */
   .flecha {
-    align-self: start;
-    margin-top: 150px;
-    width: 34px;
-    height: 34px;
+    display: none;
   }
+}
+
+.independiente {
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 13px;
 }
 
 .bancos {

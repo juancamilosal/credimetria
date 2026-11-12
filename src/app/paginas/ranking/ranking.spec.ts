@@ -242,6 +242,27 @@ describe('Ranking', () => {
     expect(TestBed.inject(TasasService).mejor('leasing-no-vis')?.entidad).toBe(
       'Banco de Occidente',
     );
+    // En la tarjeta del celular: al final, sin "Mejor tasa", sin el promedio
+    // como "Cobra en promedio" ni la diferencia con lo que anuncia.
+    const tarjeta = [...html.querySelectorAll('.tarjetas .tarjeta')].at(-1)!;
+    expect(tarjeta.textContent).toContain('Bancolombia');
+    expect(tarjeta.classList).not.toContain('primera');
+    expect(tarjeta.querySelector('.principal dd')?.textContent).toContain(
+      'Sin reporte',
+    );
+    expect(tarjeta.querySelector('.principal .real')).toBeNull();
+    expect(tarjeta.querySelector('.dif')).toBeNull();
+  });
+
+  it('aclara que "Quiero esta" contacta a un asesor aliado y no a la entidad', () => {
+    const texto = 'Te contacta un asesor aliado de Credimetría, no la entidad.';
+    expect(html.querySelector('.ayuda')?.textContent).toContain(texto);
+    expect(html.querySelector('tbody .quiero')?.getAttribute('title')).toBe(
+      texto,
+    );
+    expect(html.querySelector('.tarjetas .contacta')?.textContent).toContain(
+      texto,
+    );
   });
 
   it('en vivienda la cuota se calcula con $150.000.000 a 240 meses', () => {

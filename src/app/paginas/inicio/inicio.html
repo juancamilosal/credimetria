@@ -120,6 +120,7 @@
                     monto: monto(),
                     origen: 'inicio',
                   }"
+                  [attr.title]="contacta"
                   >Quiero esta →</a
                 >
               </div>
@@ -158,6 +159,7 @@
         (ponderado por monto, últimas 4 semanas), corte
         {{ corte().fecha | date: "d MMM y" : "UTC" }}
       </p>
+      <p class="nota contacta">"Quiero esta": {{ contacta }}</p>
       <a routerLink="/ranking" [queryParams]="{ producto: producto() }">
         Ver ranking completo
       </a>
@@ -255,6 +257,7 @@
         </li>
       }
     </ul>
+    <p class="nota independiente">{{ independencia }}</p>
   </section>
 
   <section class="seccion">

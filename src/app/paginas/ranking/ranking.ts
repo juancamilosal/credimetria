@@ -1,3 +1,4 @@
+import { QUIERO_ESTA_CONTACTA } from '../../core/datos/avisos';
 import { DatePipe, isPlatformBrowser, Location } from '@angular/common';
 import {
   Component,
@@ -96,6 +97,7 @@ export class Ranking {
   protected readonly textoPlazo = textoPlazo;
   protected readonly ordenes = ORDENES;
   protected readonly fuente = FUENTE_PROMEDIO;
+  protected readonly contacta = QUIERO_ESTA_CONTACTA;
 
   protected readonly producto = signal<Producto>('libre-inversion');
   protected readonly tipo = signal<string>(TODAS);

@@ -5,18 +5,30 @@ export const routes: Routes = [
   {
     path: '',
     title: 'Credimetría · Compara con datos, no con promesas',
+    data: {
+      descripcion:
+        'Compara con datos, no con promesas: mira la tasa que anuncian y la que de verdad cobran bancos, cooperativas y financieras en Colombia, y recibe asesoría gratis.',
+    },
     loadComponent: () =>
       import('./paginas/inicio/inicio').then((m) => m.Inicio),
   },
   {
     path: 'ranking',
     title: 'Ranking de tasas · Credimetría',
+    data: {
+      descripcion:
+        'Ranking de tasas de crédito en Colombia: libre inversión, libranza, vehículo y vivienda. La tasa que anuncia cada banco frente a la que de verdad cobra según la Superfinanciera.',
+    },
     loadComponent: () =>
       import('./paginas/ranking/ranking').then((m) => m.Ranking),
   },
   {
     path: 'simulador',
     title: 'Simulador de crédito · Credimetría',
+    data: {
+      descripcion:
+        'Simula tu crédito: calcula la cuota mensual, el pago total y los intereses con la tasa real que cobra cada banco en Colombia.',
+    },
     loadComponent: () =>
       import('./paginas/simulador/simulador-pagina').then(
         (m) => m.SimuladorPagina,
@@ -25,6 +37,10 @@ export const routes: Routes = [
   {
     path: 'compara-tu-oferta',
     title: 'Compara tu oferta · Credimetría',
+    data: {
+      descripcion:
+        '¿Te ofrecieron un crédito? Escribe la tasa y mira si es buena frente a lo que de verdad cobran los bancos en Colombia.',
+    },
     loadComponent: () =>
       import('./paginas/compara-oferta/compara-oferta').then(
         (m) => m.ComparaOferta,
@@ -33,18 +49,30 @@ export const routes: Routes = [
   {
     path: 'asesoria',
     title: 'Asesoría gratis · Credimetría',
+    data: {
+      descripcion:
+        'Pide asesoría gratis: un asesor de crédito aliado y verificado te ayuda a conseguir la mejor tasa. Sin cobros por adelantado.',
+    },
     loadComponent: () =>
       import('./paginas/asesoria/asesoria').then((m) => m.Asesoria),
   },
   {
     path: 'aliados',
     title: 'Asesores aliados · Credimetría',
+    data: {
+      descripcion:
+        'Conoce a los asesores de crédito aliados de Credimetría: verificados, con las entidades, productos y ciudades en que trabajan, y sus reglas.',
+    },
     loadComponent: () =>
       import('./paginas/aliados/aliados').then((m) => m.Aliados),
   },
   {
     path: 'politica-de-datos',
     title: 'Política de tratamiento de datos · Credimetría',
+    data: {
+      descripcion:
+        'Política de tratamiento de datos personales de Credimetría según la Ley 1581 de 2012: qué datos recogemos, para qué, con quién los compartimos y tus derechos.',
+    },
     loadComponent: () =>
       import('./paginas/politica-datos/politica-datos').then(
         (m) => m.PoliticaDatos,
@@ -53,17 +81,28 @@ export const routes: Routes = [
   {
     path: 'admin/entrar',
     title: 'Administración · Credimetría',
+    data: { noIndexar: true },
     loadComponent: () =>
       import('./paginas/admin/entrar/entrar').then((m) => m.Entrar),
   },
   {
     path: 'admin/tasas',
     title: 'Configuración de tasas · Credimetría',
+    data: { noIndexar: true },
     canActivate: [soloAdmin],
     loadComponent: () =>
       import('./paginas/admin/tasas/tasas-admin').then((m) => m.TasasAdmin),
   },
   { path: 'admin/pdf', redirectTo: 'admin/tasas' },
   { path: 'admin', redirectTo: 'admin/tasas' },
-  { path: '**', redirectTo: '' },
+  {
+    // Cualquier otra dirección: "Página no encontrada" con estado 404.
+    path: '**',
+    title: 'Página no encontrada · Credimetría',
+    data: { noIndexar: true },
+    loadComponent: () =>
+      import('./paginas/no-encontrada/no-encontrada').then(
+        (m) => m.NoEncontrada,
+      ),
+  },
 ];

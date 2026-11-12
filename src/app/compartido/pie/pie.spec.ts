@@ -25,5 +25,9 @@ describe('Pie', () => {
     const texto = (fixture.nativeElement as HTMLElement).textContent!;
     expect(texto).toContain('Credimetría no es una entidad financiera');
     expect(texto).not.toContain('versión de prueba');
+    // Aviso de independencia en todas las páginas.
+    expect(texto.replace(/\s+/g, ' ')).toContain(
+      'Las marcas y logos pertenecen a sus dueños. Credimetría es independiente y no tiene relación comercial con estas entidades.',
+    );
   });
 });
