@@ -16,6 +16,10 @@ describe('Encabezado', () => {
     expect(enlaces).toContain('Compara tu oferta');
     expect(enlaces).toContain('Aliados');
     expect(enlaces).toContain('Si tienes reportes');
+    const reportes = [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll('nav a'),
+    ].find((a) => a.textContent?.trim() === 'Si tienes reportes');
+    expect(reportes?.classList).toContain('enlace-reportes');
     expect(enlaces).toContain('Asesoría gratis');
     // "Cómo funciona" solo llevaba a una parte del inicio (10 nov 2026).
     expect(enlaces).not.toContain('Cómo funciona');

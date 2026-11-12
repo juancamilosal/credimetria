@@ -37,6 +37,29 @@ nav a.activo {
   color: var(--cm-marca-700);
 }
 
+/* "Si tienes reportes" resalta entre los enlaces: píldora azul suave */
+nav a.enlace-reportes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cm-enlace);
+  background: var(--cm-marca-100);
+  border: 1px solid var(--cm-marca-100);
+  border-radius: 999px;
+  font-weight: 700;
+  padding: 7px 14px;
+}
+
+nav a.enlace-reportes:hover {
+  color: var(--cm-enlace);
+  background: var(--cm-marca-100);
+  border-color: var(--cm-enlace);
+}
+
+nav a.enlace-reportes.activo {
+  border-color: var(--cm-enlace);
+}
+
 .asesoria {
   margin-left: 10px;
 }
@@ -122,6 +145,11 @@ nav {
 
   nav a:not(.btn) {
     padding: 12px;
+  }
+
+  nav a.enlace-reportes {
+    padding: 12px;
+    border-radius: var(--cm-r-campo);
   }
 
   .asesoria {
