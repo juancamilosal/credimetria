@@ -39,4 +39,15 @@ describe('PoliticaDatos', () => {
       RESPONSABLE.telefono;
     expect(!!html.querySelector('.pendiente')).toBe(!completo);
   });
+
+  it('el índice lleva a cada sección de esta misma página, no a la portada', () => {
+    const enlaces = [
+      ...crear().querySelectorAll<HTMLAnchorElement>('.indice a'),
+    ].map((a) => a.getAttribute('href'));
+    expect(enlaces.length).toBe(13);
+    expect(enlaces[0]).toBe('/politica-de-datos#responsable');
+    expect(
+      enlaces.every((h) => h!.startsWith('/politica-de-datos#')),
+    ).toBeTrue();
+  });
 });

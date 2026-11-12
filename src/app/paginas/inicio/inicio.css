@@ -19,6 +19,11 @@
   max-width: 16ch;
 }
 
+/* "no con promesas" en el verde del logo (en modo oscuro, el verde claro) */
+.hero h1 .verde {
+  color: var(--cm-logo-verde);
+}
+
 .hero p {
   font-size: clamp(16px, 2vw, 19px);
   color: var(--cm-gris);

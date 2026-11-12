@@ -7,3 +7,8 @@
 main {
   flex: 1;
 }
+
+/* "Ir al contenido" le pasa el foco al contenido: sin marco alrededor */
+main:focus {
+  outline: none;
+}

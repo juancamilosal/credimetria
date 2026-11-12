@@ -20,6 +20,17 @@ export class Encabezado {
   protected readonly menuAbierto = signal(false);
   protected readonly temas = inject(TemaService);
 
+  /**
+   * "Ir al contenido": con `<base href="/">` el enlace "#contenido" llevaría
+   * a la portada; se pasa el foco al contenido de la página actual.
+   */
+  protected saltar(evento: Event): void {
+    evento.preventDefault();
+    const main = document.getElementById('contenido');
+    main?.focus();
+    main?.scrollIntoView();
+  }
+
   constructor() {
     // El menú del celular se cierra al cambiar de página.
     inject(Router)
