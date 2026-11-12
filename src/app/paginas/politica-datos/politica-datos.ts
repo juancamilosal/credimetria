@@ -3,15 +3,17 @@ import { RouterLink } from '@angular/router';
 import { VERSION_POLITICA } from '../../core/servicios/prospectos.service';
 
 /**
- * Quién responde por los datos (Ley 1581 de 2012, art. 17 y Decreto 1074 de
- * 2015, art. 2.2.2.25.3.1): nombre o razón social, identificación, domicilio
- * y canales. Mientras falte alguno, la página lo dice.
+ * Quién responde por los datos (Decreto 1074 de 2015, art. 2.2.2.25.3.1,
+ * antes art. 13 del Decreto 1377 de 2013): nombre o razón social, domicilio,
+ * dirección, correo y teléfono. Mientras falte alguno, la página lo dice.
  */
 export const RESPONSABLE = {
-  nombre: '',
-  identificacion: '',
+  nombre: 'Juan Camilo Salazar Rojas',
+  /** Ciudad. */
   domicilio: '',
-  correo: 'soporte@credimetria.com',
+  direccion: '',
+  telefono: '',
+  correo: 'gerencia@credimetria.com',
   sitio: 'credimetria.com',
 };
 
@@ -36,6 +38,7 @@ export class PoliticaDatos {
   /** Faltan datos del responsable: la política no está completa. */
   protected readonly pendiente =
     !RESPONSABLE.nombre ||
-    !RESPONSABLE.identificacion ||
-    !RESPONSABLE.domicilio;
+    !RESPONSABLE.domicilio ||
+    !RESPONSABLE.direccion ||
+    !RESPONSABLE.telefono;
 }

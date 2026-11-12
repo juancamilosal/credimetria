@@ -33,7 +33,10 @@ describe('PoliticaDatos', () => {
   it('avisa que es borrador mientras falten datos del responsable', () => {
     const html = crear();
     const completo =
-      RESPONSABLE.nombre && RESPONSABLE.identificacion && RESPONSABLE.domicilio;
+      RESPONSABLE.nombre &&
+      RESPONSABLE.domicilio &&
+      RESPONSABLE.direccion &&
+      RESPONSABLE.telefono;
     expect(!!html.querySelector('.pendiente')).toBe(!completo);
   });
 });
