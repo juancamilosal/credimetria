@@ -304,7 +304,7 @@ captcha y no la traen): `solo_promedio`. Con Bancien quedan todos los bancos que
    `directus_files`; actualizar en `fuentes` (`url`, `ultimo_hash`,
    `ultima_revision`) y en `documentos` (`archivo_resaltado`, para
    `resaltar.mjs`); crear y actualizar `tasas_promedio`. Generar su token.
-2. **Recurso nuevo en Coolify** desde este repo, rama `develop`, con
+2. **Recurso nuevo en Coolify** desde este repo, rama `main` (producción), con
    Dockerfile `robots/Dockerfile` y contexto en la raíz. No expone puertos.
 3. **Variables:** `DIRECTUS_TOKEN` (del Robot), `DIRECTUS_URL`
    (opcional), `SMTP_HOST`, `SMTP_PUERTO`, `SMTP_USUARIO`, `SMTP_CLAVE`,

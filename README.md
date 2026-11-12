@@ -10,8 +10,10 @@ Directus del momento).
 
 ## Ramas
 
-- `develop`: aquí se trabaja.
-- `main`: solo producción.
+- `develop`: aquí se trabaja (los PR van a `develop`).
+- `main`: solo producción. Coolify despliega `credimetria-web` y
+  `credimetria-robots` desde `main` (desde el 12 nov 2026; antes desde
+  `develop`). Para publicar, se lleva `develop` a `main`.
 
 ## Pantallas
 
