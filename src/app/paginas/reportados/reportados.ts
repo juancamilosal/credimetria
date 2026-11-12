@@ -12,7 +12,7 @@ import {
 } from '../../core/datos/entidades-reportados';
 
 /**
- * Créditos si tienes reportes: entidades que prestan a personas reportadas,
+ * Créditos para reportados: entidades que prestan a personas reportadas,
  * en dos niveles (vigiladas por la Superfinanciera y operadoras de libranza
  * inscritas en el RUNEOL), sin tasas, con su registro y la asesoría de los
  * aliados.

@@ -276,10 +276,10 @@ describe('Asesoria', () => {
     );
   });
 
-  it('llega desde Créditos si tienes reportes con la entidad', () => {
+  it('llega desde Créditos para reportados con la entidad', () => {
     crear({ origen: 'reportados', entidad: 'Vantage' });
     expect(html.textContent).toContain(
-      'Desde Créditos si tienes reportes: Vantage.',
+      'Desde Créditos para reportados: Vantage.',
     );
   });
 

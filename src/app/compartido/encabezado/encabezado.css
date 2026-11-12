@@ -37,7 +37,7 @@ nav a.activo {
   color: var(--cm-marca-700);
 }
 
-/* "Si tienes reportes" resalta entre los enlaces: píldora azul suave */
+/* "Créditos para reportados" resalta entre los enlaces: píldora azul suave */
 nav a.enlace-reportes {
   display: inline-flex;
   align-items: center;

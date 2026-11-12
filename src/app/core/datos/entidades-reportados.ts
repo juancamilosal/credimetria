@@ -1,6 +1,6 @@
 /**
  * Entidades que prestan a personas reportadas en centrales de riesgo, para la
- * página /si-tienes-reportes. No se muestran tasas (decisión del 12 nov 2026):
+ * página /creditos-para-reportados. No se muestran tasas (decisión del 12 nov 2026):
  * solo el registro oficial, la especialidad y que los asesores aliados pueden
  * gestionar la solicitud.
  *

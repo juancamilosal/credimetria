@@ -405,8 +405,8 @@ export class Asesoria implements OnDestroy {
     } else if (origen === 'reportados') {
       this.vieneDe.set(
         this.entidad
-          ? `Desde Créditos si tienes reportes: ${this.entidad}.`
-          : 'Desde Créditos si tienes reportes.',
+          ? `Desde Créditos para reportados: ${this.entidad}.`
+          : 'Desde Créditos para reportados.',
       );
     }
   }
