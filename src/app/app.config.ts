@@ -14,10 +14,15 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import {
+  provideRouter,
+  withInMemoryScrolling,
+  withNavigationErrorHandler,
+} from '@angular/router';
 
 import { routes } from './app.routes';
 import { TasasService } from './core/servicios/tasas.service';
+import { recargarSiVersionVieja } from './core/utilidades/version-nueva';
 
 // Pesos y porcentajes con formato colombiano: $20.000.000 y 21,48 %.
 registerLocaleData(localeEsCo);
@@ -31,6 +36,12 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({
         anchorScrolling: 'enabled',
         scrollPositionRestoration: 'enabled',
+      }),
+      // Después de publicar una versión nueva, una pestaña abierta pide
+      // archivos que ya no existen: se recarga sola en vez de quedarse sin
+      // responder.
+      withNavigationErrorHandler((error) => {
+        recargarSiVersionVieja(error);
       }),
     ),
     provideHttpClient(withFetch()),

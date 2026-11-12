@@ -519,6 +519,13 @@ verde). Las direcciones que no existen (por ejemplo `/glosario`) muestran
 promesas" va en el verde del logo (`--cm-logo-verde`). El enlace oculto "Ir
 al contenido" pasa el foco a `<main>` sin cambiar de página.
 
+**Después de publicar una versión nueva** (`core/utilidades/version-nueva.ts`):
+los archivos de cada página cambian de nombre, y una pestaña que ya estaba
+abierta pide los viejos (404, "Failed to fetch dynamically imported
+module") y no navegaba hasta refrescar. Ahora el router
+(`withNavigationErrorHandler`) recarga la página en la dirección a la que
+iba, máximo una vez por minuto para no quedar en bucle si el error es otro.
+
 **Aviso de independencia** (`core/datos/avisos.ts`): debajo del muro
 "Comparamos tasas de" y en el pie de todas las páginas, "Las marcas y logos
 pertenecen a sus dueños. Credimetría es independiente y no tiene relación
