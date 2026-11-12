@@ -180,6 +180,7 @@
                 <input
                   id="asNombres"
                   formControlName="nombres"
+                  class="mayusculas"
                   placeholder="Ej. Ana María"
                   autocomplete="given-name"
                   [attr.aria-invalid]="mostrarError('nombres')"
@@ -196,6 +197,7 @@
                 <input
                   id="asApellidos"
                   formControlName="apellidos"
+                  class="mayusculas"
                   placeholder="Ej. Gómez Rojas"
                   autocomplete="family-name"
                   [attr.aria-invalid]="mostrarError('apellidos')"
@@ -215,8 +217,10 @@
                   id="asCel"
                   formControlName="celular"
                   type="tel"
-                  inputmode="tel"
-                  placeholder="300 000 0000"
+                  inputmode="numeric"
+                  maxlength="10"
+                  placeholder="3001234567"
+                  (input)="soloDigitos($event)"
                   autocomplete="tel-national"
                   [attr.aria-invalid]="mostrarError('celular')"
                   aria-describedby="errCel"

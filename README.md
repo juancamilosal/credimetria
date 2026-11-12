@@ -79,8 +79,10 @@ morada y oro del diseño (ver abajo).
   simulador con un producto de vivienda exacto, se guarda ese), monto (opcional, un solo campo con "$"
   y puntos de miles), ciudad (un solo campo con sugerencias de las
   principales ciudades, `datalist`), el bloque "Tus datos de
-  contacto" (nombres, apellidos, celular, correo y canal) y la
-  autorización. Ingresos, reportes y demás los pregunta el asesor. La
+  contacto" (nombres y apellidos en mayúsculas, que así se ven y se
+  guardan también en el servidor; celular de solo números, máximo 10;
+  correo y canal) y la autorización. El saludo del correo usa el primer
+  nombre normal ("Hola, Ana"). Ingresos, reportes y demás los pregunta el asesor. La
   urgencia solo se guarda si llega en el enlace (inicio o Compara tu oferta).
   El correo es obligatorio: allí llega la confirmación. El formulario se va
   mostrando por partes (10 nov 2026): arranca con "¿Qué crédito te

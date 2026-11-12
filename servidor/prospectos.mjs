@@ -56,6 +56,16 @@ export const REGLAS = [
   ["Borrar tus datos si lo pides.", "Te avisamos cuando esté hecho."],
 ];
 
+/** Nombres y apellidos se guardan en mayúsculas (con tildes y ñ). */
+const mayusculas = (v) =>
+  v ? v.replace(/\s+/g, " ").toLocaleUpperCase("es-CO") : null;
+
+/** "ANA MARÍA" → "Ana" (para el saludo del correo). */
+const primerNombre = (nombres) => {
+  const n = nombres.split(/\s+/)[0].toLocaleLowerCase("es-CO");
+  return n.charAt(0).toLocaleUpperCase("es-CO") + n.slice(1);
+};
+
 const texto = (v, max) =>
   typeof v === "string" && v.trim() && v.trim().length <= max ? v.trim() : null;
 
@@ -75,9 +85,9 @@ export function validarProspecto(cuerpo, ip = null) {
     return { error: "monto" };
   const ciudad = texto(c.ciudad, 80);
   if (!ciudad) return { error: "ciudad" };
-  const nombres = texto(c.nombres, 80);
+  const nombres = mayusculas(texto(c.nombres, 80));
   if (!nombres) return { error: "nombres" };
-  const apellidos = texto(c.apellidos, 80);
+  const apellidos = mayusculas(texto(c.apellidos, 80));
   if (!apellidos) return { error: "apellidos" };
   const celular = typeof c.celular === "string" ? c.celular : "";
   if (!/^3\d{9}$/.test(celular)) return { error: "celular" };
@@ -186,7 +196,7 @@ export function logoCorreo() {
  */
 export function correoCliente(p, logo = logoCorreo()) {
   const srcLogo = logo ? `cid:${CID_LOGO}` : `${SITIO}/correo/credimetria.png`;
-  const nombre = p.nombres.split(/\s+/)[0];
+  const nombre = primerNombre(p.nombres);
   const producto = PRODUCTOS[p.producto];
   const canales = canalesTexto(p.canales);
   const resumen = [

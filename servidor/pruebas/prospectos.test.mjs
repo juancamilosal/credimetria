@@ -65,7 +65,8 @@ test("acepta una solicitud completa y le pone la IP y el estado", () => {
   assert.equal(error, undefined);
   assert.equal(prospecto.autorizacion.ip, "1.2.3.4");
   assert.equal(prospecto.estado, "nuevo");
-  assert.equal(prospecto.nombres, "Ana María");
+  assert.equal(prospecto.nombres, "ANA MARÍA");
+  assert.equal(prospecto.apellidos, "GÓMEZ ROJAS");
 });
 
 test("rechaza lo que no sirve", () => {

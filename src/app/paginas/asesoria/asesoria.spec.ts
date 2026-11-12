@@ -322,8 +322,8 @@ describe('Asesoria', () => {
     expect(prospecto.producto).toBe('libre-inversion');
     expect(prospecto.ciudad).toBe('Medellín');
     expect(prospecto.monto).toBeNull();
-    expect(prospecto.nombres).toBe('Ana María');
-    expect(prospecto.apellidos).toBe('Gómez Rojas');
+    expect(prospecto.nombres).toBe('ANA MARÍA');
+    expect(prospecto.apellidos).toBe('GÓMEZ ROJAS');
     expect(prospecto.celular).toBe('3001234567');
     expect(prospecto.correo).toBe('ana@ejemplo.com');
     expect(prospecto.autorizacion.texto).toContain('Autorizo a Credimetría');
@@ -482,5 +482,25 @@ describe('Asesoria', () => {
     await fixture.whenStable();
     fixture.destroy();
     expect(turnstile.quitados).toEqual(['widget-1']);
+  });
+
+  it('el celular acepta solo números y máximo 10', () => {
+    crear();
+    elegirTipo('Libranza');
+    escribir('#asCiudad', 'Cali');
+    const cel = html.querySelector<HTMLInputElement>('#asCel')!;
+    expect(cel.maxLength).toBe(10);
+    escribir('#asCel', '300-123 45678999');
+    expect(cel.value).toBe('3001234567');
+  });
+
+  it('nombres y apellidos se ven en mayúsculas', () => {
+    crear();
+    elegirTipo('Libranza');
+    escribir('#asCiudad', 'Cali');
+    for (const id of ['#asNombres', '#asApellidos']) {
+      const input = html.querySelector<HTMLInputElement>(id)!;
+      expect(getComputedStyle(input).textTransform).toBe('uppercase');
+    }
   });
 });

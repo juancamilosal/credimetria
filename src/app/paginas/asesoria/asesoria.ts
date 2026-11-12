@@ -117,6 +117,10 @@ function canalesValidos(grupo: AbstractControl): ValidationErrors | null {
   return whatsapp || llamada || correo ? null : { sinCanal: true };
 }
 
+/** Nombres y apellidos se guardan en mayúsculas (con tildes y ñ). */
+export const mayusculas = (texto: string) =>
+  texto.trim().replace(/\s+/g, ' ').toLocaleUpperCase('es-CO');
+
 /** El correo siempre: allí le llega la confirmación de la solicitud. */
 function correoValido(
   control: AbstractControl<string>,
@@ -285,6 +289,16 @@ export class Asesoria implements OnDestroy {
     return control.invalid && (control.touched || this.intentoEnviar());
   }
 
+  /** El celular: solo números y máximo 10. */
+  protected soloDigitos(evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    const limpio = input.value.replace(/\D/g, '').slice(0, 10);
+    if (limpio !== input.value) {
+      input.value = limpio;
+      this.form.controls.celular.setValue(limpio);
+    }
+  }
+
   protected errorCanales(): boolean {
     return (
       this.form.hasError('sinCanal') &&
@@ -321,8 +335,8 @@ export class Asesoria implements OnDestroy {
         monto: monto > 0 ? monto : null,
         ciudad: v.ciudad.trim(),
         urgencia: this.urgencia,
-        nombres: v.nombres.trim(),
-        apellidos: v.apellidos.trim(),
+        nombres: mayusculas(v.nombres),
+        apellidos: mayusculas(v.apellidos),
         celular: v.celular.replace(/\D/g, ''),
         canales: v.canales,
         correo: v.correo.trim(),

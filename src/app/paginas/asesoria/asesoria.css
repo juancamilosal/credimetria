@@ -224,6 +224,15 @@ fieldset .error {
   background: var(--cm-blanco);
 }
 
+/* Nombres y apellidos se ven y se guardan en mayúsculas. */
+.mayusculas {
+  text-transform: uppercase;
+}
+
+.mayusculas::placeholder {
+  text-transform: none;
+}
+
 .opcional {
   font-weight: 400;
   color: var(--cm-gris);
