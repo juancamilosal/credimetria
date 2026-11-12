@@ -217,8 +217,10 @@ morada y oro del diseño (ver abajo).
   Primera aliada (11 nov 2026): Alexandra Rojas García, fuerza de ventas,
   verificada: Banco Popular, GNB Sudameris, BBVA, AV Villas, Banco de
   Bogotá y Banco Pichincha; libranza, consumo, tarjeta de crédito,
-  hipotecario y préstamos con reportes; Bogotá, Medellín, Cali,
-  Barranquilla, Cartagena y Pasto.
+  hipotecario y préstamos con reportes; 23 ciudades (12 nov 2026): Bogotá,
+  Medellín, Cali, Armenia, Pereira, Montería, Cúcuta, Villavicencio, Ibagué,
+  Bucaramanga, Cartagena, Santa Marta, Barranquilla, Sincelejo, Riohacha,
+  Yopal, Pasto, Manizales, Girardot, Sogamoso, Neiva, Valledupar y Tunja.
 - Menú de arriba: Ranking de tasas, Simulador, Compara tu oferta, Aliados y
   Asesoría gratis (10 nov 2026: se quitó "Cómo funciona", que solo bajaba a
   esa sección del inicio; la sección sigue en el inicio).
