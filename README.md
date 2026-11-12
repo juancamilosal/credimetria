@@ -102,7 +102,7 @@ morada y oro del diseño (ver abajo).
   luego `contactado` o `descartado`, y notas internas) y responde 201.
   Después manda dos correos: a la persona, con la marca, "un asesor de
   crédito aliado se contactará contigo", lo que pidió, las 5 reglas de
-  `/aliados` y el aviso de estafa (logo en `public/correo/credimetria.png`);
+  `/aliados` y el aviso de estafa (logo `public/correo/credimetria.png` adjunto dentro del correo con `cid:`, así Gmail y Outlook lo muestran aunque no descarguen imágenes externas de un remitente nuevo; si el servidor no encuentra el archivo, lo enlaza desde la página);
   y al administrador (`AVISO_PARA`), con todos los datos y respuesta directa
   a la persona. Máximo 5 solicitudes por IP cada 10 minutos (cuentan
   también las que no pasan Turnstile). Si Directus falla
