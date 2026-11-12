@@ -82,6 +82,7 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     nivel: 2,
     tipo: 'Operadora de libranza',
     iniciales: 'VA',
+    logo: '/logos-entidades/vantage.webp',
     especialidades: [
       'Libranza por convenio con tu empresa',
       'Atiende reportados',
