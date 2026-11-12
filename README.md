@@ -513,7 +513,7 @@ oscuro e ícono en PNG transparente y SVG) están en `src/assets/marca/`.
 ícono sobre fondo blanco, en tamaños múltiplos de 48 como pide Google para el
 ícono de los resultados; `site.webmanifest` los declara. `src/index.html`
 trae las etiquetas `og:` (al compartir el enlace) y un JSON-LD con
-`WebSite` (nombre "Credimetría") y `Organization` (logo `icono-512.png`).
+`WebSite` (nombre "Credimetría" y nombre alternativo "Credimetria"; no poner el dominio como alternativo, porque Google lo muestra en vez del nombre) y `Organization` (logo `icono-512.png`).
 `public/robots.txt` deja rastrear todo menos `/admin` y `/api/`, y apunta a
 `public/sitemap.xml` (las 7 páginas públicas). Si se agrega una página,
 agregarla al sitemap.
