@@ -8,5 +8,6 @@ export function rutasProspectos(
   opciones?: {
     guardar?: (prospecto: object) => Promise<void>;
     mandar?: (correo: object) => Promise<void>;
+    verificar?: (token: unknown, ip: string | null) => Promise<boolean>;
   },
 ): void;

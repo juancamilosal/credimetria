@@ -1,4 +1,14 @@
-import { Component, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  afterRenderEffect,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
@@ -18,6 +28,7 @@ import {
 import { Producto } from '../../core/modelos/tasa';
 import { ProspectosService } from '../../core/servicios/prospectos.service';
 import { TasasService } from '../../core/servicios/tasas.service';
+import { TurnstileService } from '../../core/servicios/turnstile.service';
 import { leerNumero } from '../../core/utilidades/credito';
 
 const MONTO_MINIMO = 1_000_000;
@@ -119,7 +130,8 @@ function correoValido(
  * Formulario de prospecto en una sola pantalla corta: qué crédito le
  * interesa, la ciudad y cómo contactarla. Ingresos, reportes y demás los
  * pregunta el asesor. Solo se envía con la autorización de datos marcada
- * (Ley 1581) y guarda la prueba de esa autorización.
+ * (Ley 1581) y guarda la prueba de esa autorización. Cloudflare Turnstile
+ * comprueba que no sea un bot: sin su token el botón no se habilita.
  */
 @Component({
   selector: 'app-asesoria',
@@ -127,10 +139,11 @@ function correoValido(
   templateUrl: './asesoria.html',
   styleUrl: './asesoria.css',
 })
-export class Asesoria {
+export class Asesoria implements OnDestroy {
   private readonly tasas = inject(TasasService);
   private readonly prospectos = inject(ProspectosService);
   private readonly router = inject(Router);
+  private readonly turnstile = inject(TurnstileService);
   private readonly fb = inject(FormBuilder).nonNullable;
   /** Entidad elegida en el ranking, si llegó desde allí. */
   private entidad: string | null = null;
@@ -177,6 +190,22 @@ export class Asesoria {
   protected readonly paso = signal(1);
   /** Todo lleno y la autorización marcada: el botón se habilita. */
   protected readonly completo = signal(false);
+  /** Token de Turnstile; sirve para un solo envío. */
+  protected readonly token = signal<string | null>(null);
+  /** El widget de Turnstile no cargó o falló (se borra con un token nuevo). */
+  private readonly errorWidget = signal(false);
+  /** El servidor rechazó la verificación (se borra al volver a enviar). */
+  private readonly rechazada = signal(false);
+  /** Mensaje de que no se pudo comprobar que no es un robot. */
+  protected readonly falloVerificacion = computed(
+    () => this.errorWidget() || this.rechazada(),
+  );
+  /** Contenedor del widget, justo encima del botón. */
+  private readonly cajaTurnstile =
+    viewChild<ElementRef<HTMLElement>>('turnstile');
+  private cajaActual: HTMLElement | null = null;
+  private widgetId: string | null = null;
+  private destruido = false;
 
   constructor() {
     this.llenarDesdeEnlace(inject(ActivatedRoute).snapshot.queryParamMap);
@@ -184,6 +213,52 @@ export class Asesoria {
     this.form.valueChanges
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.avanzar());
+    // Solo en el navegador (afterRenderEffect no corre en SSR). El
+    // formulario desaparece al enviar y vuelve con "volver": el widget se
+    // quita y se monta otra vez con su contenedor.
+    afterRenderEffect(() => {
+      const caja = this.cajaTurnstile()?.nativeElement ?? null;
+      if (caja === this.cajaActual) return;
+      this.soltarWidget();
+      this.cajaActual = caja;
+      if (caja) void this.montarWidget(caja);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destruido = true;
+    this.soltarWidget();
+  }
+
+  private async montarWidget(caja: HTMLElement): Promise<void> {
+    try {
+      const id = await this.turnstile.mostrar(caja, {
+        token: (token) => {
+          this.token.set(token);
+          this.errorWidget.set(false);
+        },
+        vencido: () => this.token.set(null),
+        error: () => {
+          this.token.set(null);
+          this.errorWidget.set(true);
+        },
+      });
+      // Si el contenedor ya no está (envió o salió de la página), se quita.
+      if (this.destruido || this.cajaActual !== caja) {
+        this.turnstile.quitar(id);
+        return;
+      }
+      this.widgetId = id;
+    } catch {
+      this.errorWidget.set(true);
+    }
+  }
+
+  private soltarWidget(): void {
+    if (this.widgetId) this.turnstile.quitar(this.widgetId);
+    this.widgetId = null;
+    this.cajaActual = null;
+    this.token.set(null);
   }
 
   /** Muestra la parte siguiente cuando lo anterior ya está lleno. */
@@ -235,7 +310,8 @@ export class Asesoria {
 
   protected async enviar(): Promise<void> {
     // El botón solo se habilita con todo lleno (ver `completo`).
-    if (this.enviando() || this.form.invalid) return;
+    const token = this.token();
+    if (this.enviando() || this.form.invalid || !token) return;
     this.intentoEnviar.set(true);
     const v = this.form.getRawValue();
     const monto = leerNumero(v.monto);
@@ -256,13 +332,21 @@ export class Asesoria {
     );
     this.enviando.set(true);
     this.fallo.set(false);
+    this.rechazada.set(false);
     try {
-      await this.prospectos.enviar(prospecto);
-    } catch {
-      this.fallo.set(true);
+      await this.prospectos.enviar(prospecto, token);
+    } catch (e) {
+      const verificacion =
+        e instanceof HttpErrorResponse &&
+        e.status === 400 &&
+        e.error?.error === 'verificacion';
+      (verificacion ? this.rechazada : this.fallo).set(true);
       return;
     } finally {
       this.enviando.set(false);
+      // Cada token sirve una sola vez: se pide otro, salga bien o mal.
+      this.token.set(null);
+      if (this.widgetId) this.turnstile.reiniciar(this.widgetId);
     }
     const urgencia = URGENCIAS.find((u) => u.id === this.urgencia);
     this.enviado.set(urgencia?.cuando ?? 'pronto');
