@@ -3,7 +3,9 @@ import { test } from "node:test";
 import express from "express";
 import {
   correoAdmin,
+  CID_LOGO,
   correoCliente,
+  logoCorreo,
   mandarCorreo,
   ocultarCorreo,
   resumenSmtp,
@@ -441,4 +443,30 @@ test("deja en el log por qué Turnstile rechazó (p. ej. clave secreta equivocad
   });
   assert.match(log, /Turnstile rechazó una solicitud: invalid-input-secret/);
   assert.doesNotMatch(log, /otra/);
+});
+
+test("el logo va adjunto dentro del correo a la persona (cid), no enlazado", () => {
+  const { prospecto } = validarProspecto(valido());
+  const logo = logoCorreo();
+  assert.ok(
+    logo && logo.length > 1000,
+    "encuentra public/correo/credimetria.png",
+  );
+  assert.equal(logo.subarray(1, 4).toString(), "PNG");
+  const c = correoCliente(prospecto);
+  assert.match(c.html, new RegExp(`src="cid:${CID_LOGO}"`));
+  assert.equal(c.attachments.length, 1);
+  assert.equal(c.attachments[0].cid, CID_LOGO);
+  assert.equal(c.attachments[0].contentType, "image/png");
+  assert.equal(c.attachments[0].contentDisposition, "inline");
+});
+
+test("sin el archivo del logo, el correo enlaza el de la página", () => {
+  const { prospecto } = validarProspecto(valido());
+  const c = correoCliente(prospecto, null);
+  assert.match(
+    c.html,
+    /src="https:\/\/credimetria\.com\/correo\/credimetria\.png"/,
+  );
+  assert.equal(c.attachments, undefined);
 });

@@ -15,6 +15,9 @@
 // esa variable, o si Cloudflare no responde, la solicitud se rechaza.
 
 import express from "express";
+import { readFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const DIRECTUS = process.env.DIRECTUS_URL ?? "https://api.credimetria.com";
 const SITIO = (process.env.SITIO_URL ?? "https://credimetria.com").replace(
@@ -143,12 +146,46 @@ const canalesTexto = (canales) =>
     .join(", ")
     .replace(/, ([^,]*)$/, " o $1");
 
+/** Identificador del logo adjunto dentro del correo (`cid:`). */
+export const CID_LOGO = "logo@credimetria";
+
+/**
+ * El logo del correo (public/correo/credimetria.png) como archivo. Va
+ * adjunto dentro del correo (cid) y no como enlace a la página: Gmail y
+ * Outlook no descargan imágenes externas de remitentes nuevos, pero las
+ * adjuntas sí se ven. Se busca junto al build (dist/…/browser/correo) o en
+ * public/correo; si no está, el correo enlaza la imagen de la página.
+ */
+let logoEnCache;
+export function logoCorreo() {
+  if (logoEnCache !== undefined) return logoEnCache;
+  const aqui = dirname(fileURLToPath(import.meta.url));
+  const rutas = [
+    join(aqui, "../browser/correo/credimetria.png"), // build con SSR
+    join(aqui, "../public/correo/credimetria.png"), // servidor/ en local
+    resolve("public/correo/credimetria.png"),
+  ];
+  logoEnCache = null;
+  for (const ruta of rutas) {
+    try {
+      logoEnCache = readFileSync(ruta);
+      break;
+    } catch {
+      // Sigue con la siguiente ruta.
+    }
+  }
+  if (!logoEnCache)
+    console.warn("No encontré el logo del correo; se enlaza el de la página.");
+  return logoEnCache;
+}
+
 /**
  * Correo a la persona: un asesor aliado la contactará, qué pidió y las
  * reglas que todo aliado cumple. HTML con tablas y estilos en línea (así lo
  * leen Gmail y Outlook) y su versión en texto.
  */
-export function correoCliente(p) {
+export function correoCliente(p, logo = logoCorreo()) {
+  const srcLogo = logo ? `cid:${CID_LOGO}` : `${SITIO}/correo/credimetria.png`;
   const nombre = p.nombres.split(/\s+/)[0];
   const producto = PRODUCTOS[p.producto];
   const canales = canalesTexto(p.canales);
@@ -189,7 +226,7 @@ export function correoCliente(p) {
     <tr><td align="center" style="padding:24px 12px">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden">
         <tr><td style="padding:24px 32px;border-bottom:4px solid ${azul}">
-          <a href="${SITIO}"><img src="${SITIO}/correo/credimetria.png" width="190" alt="Credimetría" style="display:block;border:0;width:190px;height:auto"></a>
+          <a href="${SITIO}"><img src="${srcLogo}" width="190" alt="Credimetría" style="display:block;border:0;width:190px;height:auto"></a>
         </td></tr>
         <tr><td style="padding:32px 32px 8px">
           <h1 style="margin:0 0 12px;font:bold 22px/1.3 Arial,sans-serif;color:${tinta}">Hola, ${escapar(nombre)}: recibimos tu solicitud</h1>
@@ -252,6 +289,17 @@ export function correoCliente(p) {
     subject: "Recibimos tu solicitud: un asesor te contactará",
     html,
     text,
+    ...(logo && {
+      attachments: [
+        {
+          filename: "credimetria.png",
+          content: logo,
+          contentType: "image/png",
+          cid: CID_LOGO,
+          contentDisposition: "inline",
+        },
+      ],
+    }),
   };
 }
 
