@@ -4,6 +4,7 @@
   <url><loc>https://credimetria.com/ranking</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://credimetria.com/simulador</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://credimetria.com/compara-tu-oferta</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://credimetria.com/si-tienes-reportes</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://credimetria.com/asesoria</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://credimetria.com/aliados</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://credimetria.com/aliados/quiero-ser-aliado</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>

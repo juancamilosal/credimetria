@@ -276,6 +276,13 @@ describe('Asesoria', () => {
     );
   });
 
+  it('llega desde Créditos si tienes reportes con la entidad', () => {
+    crear({ origen: 'reportados', entidad: 'Vantage' });
+    expect(html.textContent).toContain(
+      'Desde Créditos si tienes reportes: Vantage.',
+    );
+  });
+
   it('desde el ranking de vivienda guarda el producto exacto sin preguntarlo', async () => {
     crear({ producto: 'vivienda-no-vis' });
     expect(html.querySelector('.tipo.elegido .tipo-nombre')?.textContent).toBe(

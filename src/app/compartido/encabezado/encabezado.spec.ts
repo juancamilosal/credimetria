@@ -15,6 +15,7 @@ describe('Encabezado', () => {
     ].map((a) => a.textContent!.trim());
     expect(enlaces).toContain('Compara tu oferta');
     expect(enlaces).toContain('Aliados');
+    expect(enlaces).toContain('Si tienes reportes');
     expect(enlaces).toContain('Asesoría gratis');
     // "Cómo funciona" solo llevaba a una parte del inicio (10 nov 2026).
     expect(enlaces).not.toContain('Cómo funciona');

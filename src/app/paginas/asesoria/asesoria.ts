@@ -402,6 +402,12 @@ export class Asesoria implements OnDestroy {
       this.vieneDe.set(`Desde Compara tu oferta: ${nombre}${conMonto}.`);
     } else if (origen === 'ranking' && this.entidad && nombre) {
       this.vieneDe.set(`Desde el ranking: ${this.entidad}, ${nombre}.`);
+    } else if (origen === 'reportados') {
+      this.vieneDe.set(
+        this.entidad
+          ? `Desde Créditos si tienes reportes: ${this.entidad}.`
+          : 'Desde Créditos si tienes reportes.',
+      );
     }
   }
 }

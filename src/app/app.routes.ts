@@ -47,6 +47,16 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'si-tienes-reportes',
+    title: 'Créditos si tienes reportes · Credimetría',
+    data: {
+      descripcion:
+        'Entidades que prestan a personas reportadas en centrales de riesgo, con su registro oficial verificado: vigiladas por la Superfinanciera y operadoras de libranza inscritas en el RUNEOL.',
+    },
+    loadComponent: () =>
+      import('./paginas/reportados/reportados').then((m) => m.Reportados),
+  },
+  {
     path: 'asesoria',
     title: 'Asesoría gratis · Credimetría',
     data: {
