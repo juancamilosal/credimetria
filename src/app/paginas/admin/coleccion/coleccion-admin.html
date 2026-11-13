@@ -1,0 +1,284 @@
+<app-cabecera-admin [titulo]="config.titulo" [texto]="config.texto" />
+
+<div class="wrap contenido">
+  <div class="barra">
+    <input
+      class="buscar"
+      type="search"
+      placeholder="Buscar…"
+      aria-label="Buscar"
+      [ngModel]="busqueda()"
+      (ngModelChange)="busqueda.set($event)"
+    />
+    @if (config.estado; as e) {
+      <div class="filtros" role="group" aria-label="Filtrar por estado">
+        <button
+          type="button"
+          [class.activo]="filtroEstado() === ''"
+          (click)="filtroEstado.set('')"
+        >
+          Todos <span class="cuenta">{{ registros().length }}</span>
+        </button>
+        @for (o of e.opciones; track o.valor) {
+          <button
+            type="button"
+            [class.activo]="filtroEstado() === o.valor"
+            (click)="filtroEstado.set(o.valor)"
+          >
+            {{ o.texto }}
+            <span class="cuenta">{{ conteo()[o.valor] ?? 0 }}</span>
+          </button>
+        }
+      </div>
+    }
+    @if (config.crear) {
+      <button type="button" class="btn btn-principal nuevo" (click)="nuevo()">
+        Nuevo {{ config.nombre }}
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p class="nota">Cargando…</p>
+  } @else if (!visibles().length) {
+    <p class="nota vacio">No hay nada por aquí.</p>
+  } @else {
+    <div class="tabla-caja">
+      <table>
+        <thead>
+          <tr>
+            @for (c of config.columnas; track c.campo) {
+              <th>{{ c.etiqueta }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of visibles(); track r[config.llave]) {
+            <tr
+              tabindex="0"
+              [class.sel]="abierto() === r"
+              (click)="abrir(r)"
+              (keydown.enter)="abrir(r)"
+            >
+              @for (c of config.columnas; track c.campo) {
+                <td [attr.data-etiqueta]="c.etiqueta">
+                  @switch (c.como) {
+                    @case ("fecha") {
+                      {{ $any(r[c.campo]) | date: "d MMM y, h:mm a" }}
+                    }
+                    @case ("estado") {
+                      <span class="estado" [attr.data-estado]="r[c.campo]">{{
+                        textoEstado(r[c.campo])
+                      }}</span>
+                    }
+                    @case ("foto") {
+                      @if (urlFoto(r[c.campo], 80); as url) {
+                        <img class="miniatura" [src]="url" alt="" />
+                      } @else {
+                        <span class="miniatura vacia"></span>
+                      }
+                    }
+                    @case ("si-no") {
+                      {{ r[c.campo] ? "Sí" : "No" }}
+                    }
+                    @default {
+                      {{ celda(r, c.campo) }}
+                    }
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+@if (abierto(); as r) {
+  <div class="fondo" (click)="cerrar()"></div>
+  <aside
+    class="panel"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="config.titulo"
+  >
+    <header class="panel-top">
+      <h2>
+        {{ esNuevo() ? "Nuevo " + config.nombre : config.tituloRegistro(r) }}
+      </h2>
+      <button
+        type="button"
+        class="cerrar"
+        (click)="cerrar()"
+        aria-label="Cerrar"
+      >
+        ×
+      </button>
+    </header>
+
+    <form class="campos" (ngSubmit)="guardar()">
+      @for (c of camposFormulario(); track c.campo) {
+        <div class="campo" [class.ancho]="c.ancho">
+          <label [for]="'ad-' + c.campo">{{ c.etiqueta }}</label>
+          @if (!editable(c)) {
+            @switch (c.tipo) {
+              @case ("json") {
+                <pre class="json">{{ json(borrador()[c.campo]) }}</pre>
+              }
+              @case ("fecha") {
+                <span class="valor">{{
+                  $any(borrador()[c.campo]) | date: "d MMM y, h:mm a"
+                }}</span>
+              }
+              @case ("booleano") {
+                <span class="valor">{{
+                  borrador()[c.campo] ? "Sí" : "No"
+                }}</span>
+              }
+              @default {
+                <span class="valor texto-largo">{{
+                  celda(borrador(), c.campo)
+                }}</span>
+              }
+            }
+          } @else {
+            @switch (c.tipo) {
+              @case ("area") {
+                <textarea
+                  [id]="'ad-' + c.campo"
+                  [name]="c.campo"
+                  rows="4"
+                  [ngModel]="borrador()[c.campo]"
+                  (ngModelChange)="poner(c.campo, $event)"
+                ></textarea>
+              }
+              @case ("opciones") {
+                <select
+                  [id]="'ad-' + c.campo"
+                  [name]="c.campo"
+                  [ngModel]="borrador()[c.campo] ?? ''"
+                  (ngModelChange)="poner(c.campo, $event || null)"
+                >
+                  <option value="">—</option>
+                  @for (o of c.opciones; track o.valor) {
+                    <option [value]="o.valor">{{ o.texto }}</option>
+                  }
+                </select>
+              }
+              @case ("relacion") {
+                <select
+                  [id]="'ad-' + c.campo"
+                  [name]="c.campo"
+                  [ngModel]="borrador()[c.campo] ?? ''"
+                  (ngModelChange)="poner(c.campo, $event || null)"
+                >
+                  <option value="">—</option>
+                  @for (o of relaciones()[c.campo] ?? []; track o["id"]) {
+                    <option [value]="o['id']">
+                      {{ o[c.relacion!.etiqueta] }}
+                    </option>
+                  }
+                </select>
+              }
+              @case ("booleano") {
+                <label class="interruptor">
+                  <input
+                    type="checkbox"
+                    [id]="'ad-' + c.campo"
+                    [name]="c.campo"
+                    [ngModel]="borrador()[c.campo] === true"
+                    (ngModelChange)="poner(c.campo, $event)"
+                  />
+                  {{ borrador()[c.campo] ? "Sí" : "No" }}
+                </label>
+              }
+              @case ("imagen") {
+                <div class="imagen">
+                  @if (urlFoto(borrador()[c.campo], 160); as url) {
+                    <img [src]="url" alt="" />
+                  } @else {
+                    <span class="miniatura vacia grande"></span>
+                  }
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      [id]="'ad-' + c.campo"
+                      (change)="subirImagen(c, $event)"
+                    />
+                    @if (subiendo() === c.campo) {
+                      <span class="nota">Subiendo…</span>
+                    }
+                    @if (borrador()[c.campo]) {
+                      <button
+                        type="button"
+                        class="enlace"
+                        (click)="poner(c.campo, null)"
+                      >
+                        Quitar foto
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+              @default {
+                <input
+                  [id]="'ad-' + c.campo"
+                  [name]="c.campo"
+                  [type]="
+                    c.tipo === 'correo'
+                      ? 'email'
+                      : c.tipo === 'telefono'
+                        ? 'tel'
+                        : c.tipo === 'fecha'
+                          ? 'date'
+                          : 'text'
+                  "
+                  [attr.inputmode]="c.tipo === 'numero' ? 'numeric' : null"
+                  [placeholder]="c.tipo === 'lista' ? 'Separados por coma' : ''"
+                  [ngModel]="borrador()[c.campo]"
+                  (ngModelChange)="poner(c.campo, $event)"
+                />
+              }
+            }
+          }
+          @if (c.ayuda) {
+            <span class="nota">{{ c.ayuda }}</span>
+          }
+        </div>
+      }
+
+      <div class="acciones">
+        @if (mensaje()) {
+          <p class="mensaje" role="status">{{ mensaje() }}</p>
+        }
+        <button
+          type="submit"
+          class="btn btn-principal"
+          [disabled]="guardando()"
+        >
+          {{ guardando() ? "Guardando…" : "Guardar" }}
+        </button>
+        @if (config.coleccion === "solicitudes_aliados" && !esNuevo()) {
+          <button type="button" class="btn btn-borde" (click)="crearAsesor()">
+            Crear asesor con estos datos
+          </button>
+        }
+        @if (!esNuevo()) {
+          <button
+            type="button"
+            class="btn btn-borde peligro"
+            (click)="borrar()"
+          >
+            Borrar
+          </button>
+        }
+      </div>
+    </form>
+  </aside>
+}

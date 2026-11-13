@@ -1,6 +1,12 @@
 import { soloAdmin } from './core/guardas/solo-admin';
 import { inject } from '@angular/core';
 import { Router, Routes } from '@angular/router';
+import {
+  ASESORES,
+  PROSPECTOS,
+  REPORTES,
+  SOLICITUDES,
+} from './paginas/admin/coleccion/colecciones';
 
 export const routes: Routes = [
   {
@@ -125,6 +131,46 @@ export const routes: Routes = [
     canActivate: [soloAdmin],
     loadComponent: () =>
       import('./paginas/admin/tasas/tasas-admin').then((m) => m.TasasAdmin),
+  },
+  {
+    path: 'admin/prospectos',
+    title: 'Prospectos · Administración · Credimetría',
+    data: { noIndexar: true, coleccion: PROSPECTOS },
+    canActivate: [soloAdmin],
+    loadComponent: () =>
+      import('./paginas/admin/coleccion/coleccion-admin').then(
+        (m) => m.ColeccionAdmin,
+      ),
+  },
+  {
+    path: 'admin/asesores',
+    title: 'Asesores aliados · Administración · Credimetría',
+    data: { noIndexar: true, coleccion: ASESORES },
+    canActivate: [soloAdmin],
+    loadComponent: () =>
+      import('./paginas/admin/coleccion/coleccion-admin').then(
+        (m) => m.ColeccionAdmin,
+      ),
+  },
+  {
+    path: 'admin/solicitudes-aliados',
+    title: 'Solicitudes de aliados · Administración · Credimetría',
+    data: { noIndexar: true, coleccion: SOLICITUDES },
+    canActivate: [soloAdmin],
+    loadComponent: () =>
+      import('./paginas/admin/coleccion/coleccion-admin').then(
+        (m) => m.ColeccionAdmin,
+      ),
+  },
+  {
+    path: 'admin/reportes',
+    title: 'Reportes de asesores · Administración · Credimetría',
+    data: { noIndexar: true, coleccion: REPORTES },
+    canActivate: [soloAdmin],
+    loadComponent: () =>
+      import('./paginas/admin/coleccion/coleccion-admin').then(
+        (m) => m.ColeccionAdmin,
+      ),
   },
   { path: 'admin/pdf', redirectTo: 'admin/tasas' },
   { path: 'admin', redirectTo: 'admin/tasas' },
