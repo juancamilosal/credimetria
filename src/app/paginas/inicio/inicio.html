@@ -65,11 +65,8 @@
           [class.desde-izquierda]="direccion() === 'izquierda'"
         >
           @for (banco of mejores(); track banco.entidad; let i = $index) {
-            <li
-              class="banco"
-              [class.primero]="i === 0 && banco.tasaAnunciada !== null"
-            >
-              @if (i === 0 && banco.tasaAnunciada !== null) {
+            <li class="banco" [class.primero]="i === 0 && !banco.sinReporte">
+              @if (i === 0 && !banco.sinReporte) {
                 <span class="destacado cinta"
                   ><span class="estrella" aria-hidden="true">★</span> Mejor tasa
                   <span class="estrella" aria-hidden="true">★</span></span

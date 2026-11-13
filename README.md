@@ -579,6 +579,13 @@ Igual puedes conseguir crédito", tres puntos (estudio sin costo, solo
 entidades verificadas, nadie cobra por adelantado) y el botón a
 `/creditos-para-reportados`. En celular la foto va arriba.
 
+**"Mejor tasa"** (13 nov 2026): la lleva el #1 del ranking y de "Las 3
+tasas más bajas" siempre que reporte a la Superfinanciera, aunque no
+publique su tasa (lo que cobra es lo que manda el orden). Antes se exigía
+también la tasa publicada, y en vehículo nadie la llevaba porque el #1,
+Bancolombia, no publica la de vehículo (su fuente y la de Caja Social están
+en `solo_promedio`: no publican esa tasa).
+
 **Aviso de independencia** (`core/datos/avisos.ts`): debajo del muro
 "Comparamos tasas de" y en el pie de todas las páginas, "Las marcas y logos
 pertenecen a sus dueños. Credimetría es independiente y no tiene relación

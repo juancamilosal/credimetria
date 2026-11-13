@@ -330,7 +330,7 @@ describe('Ranking', () => {
     );
   });
 
-  it('no destaca como "Mejor tasa" a un banco que no publica su tasa', () => {
+  it('destaca como "Mejor tasa" al #1 aunque no publique su tasa (manda lo que cobra)', () => {
     TestBed.resetTestingModule();
     const [a, b] = TASAS_PRUEBA.filter((t) => t.producto === 'libranza');
     TestBed.configureTestingModule({
@@ -364,7 +364,9 @@ describe('Ranking', () => {
     select.dispatchEvent(new Event('change'));
     f.detectChanges();
     expect(h.querySelector('tbody tr .numero')?.textContent?.trim()).toBe('1');
-    expect(h.querySelectorAll('tbody .destacado').length).toBe(0);
+    const destacados = h.querySelectorAll('tbody .destacado');
+    expect(destacados.length).toBe(1);
+    expect(destacados[0].closest('tr')?.textContent).toContain('Solo promedio');
   });
 
   it('al banco que solo publica la máxima le dice "hasta … solo publica la máxima"', () => {

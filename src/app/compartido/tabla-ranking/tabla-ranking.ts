@@ -135,17 +135,13 @@ export class TablaRanking {
   });
 
   /**
-   * La fila lleva "★ Mejor tasa ★": la primera, si se marca y si el banco
-   * publica su tasa y reporta a la Superfinanciera (uno que solo tiene
-   * promedio, o solo su tasa publicada, no se destaca).
+   * La fila lleva "★ Mejor tasa ★": la primera, si se marca y si la entidad
+   * reporta a la Superfinanciera (lo que cobra es lo que manda el orden).
+   * Aunque no publique su tasa, se destaca; una que solo tiene la tasa
+   * publicada (sin reporte), no.
    */
   protected esMejor(fila: FilaVista): boolean {
-    return (
-      fila.puesto === 1 &&
-      this.marcarMejor() &&
-      fila.tasaAnunciada !== null &&
-      !fila.sinReporte
-    );
+    return fila.puesto === 1 && this.marcarMejor() && !fila.sinReporte;
   }
 
   protected ordenar(columna: ColumnaRanking): void {
