@@ -571,6 +571,14 @@ motivo) y `solicitud_aliado` (con el tipo). En Analytics, las
 "Interacciones con formularios" de la medición mejorada van apagadas. La
 política de datos pasó a la versión `2026-11-13` para contarlo.
 
+**Sección para reportados en el inicio** (13 nov 2026): después de "¿Te
+ofrecieron un crédito?", una tarjeta con la foto
+`hombre-reportado-facturas` (original en `src/assets/`, 640 y 1280 px en
+`public/imagenes/`, `FOTOS.hombreReportado`), el título "¿Estás reportado?
+Igual puedes conseguir crédito", tres puntos (estudio sin costo, solo
+entidades verificadas, nadie cobra por adelantado) y el botón a
+`/creditos-para-reportados`. En celular la foto va arriba.
+
 **Aviso de independencia** (`core/datos/avisos.ts`): debajo del muro
 "Comparamos tasas de" y en el pie de todas las páginas, "Las marcas y logos
 pertenecen a sus dueños. Credimetría es independiente y no tiene relación

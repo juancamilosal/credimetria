@@ -183,6 +183,35 @@
     </div>
   </section>
 
+  <section class="seccion" aria-labelledby="tituloReportados">
+    <div class="reportados">
+      <app-foto
+        class="reportados-foto"
+        [foto]="fotos.hombreReportado"
+        tamanos="(max-width: 860px) 100vw, 560px"
+      />
+      <div class="reportados-texto">
+        <span class="sello">Si tienes reportes</span>
+        <h2 id="tituloReportados">
+          ¿Estás reportado? Igual puedes conseguir crédito
+        </h2>
+        <p class="muted">
+          Estudiamos tu caso aunque tengas reportes en centrales de riesgo y te
+          mostramos las entidades con registro oficial que prestan a reportados.
+          Un asesor aliado te acompaña, gratis.
+        </p>
+        <ul class="reportados-puntos">
+          <li>Estudio de tu caso sin costo</li>
+          <li>Solo entidades verificadas</li>
+          <li>Nadie te cobra por adelantado</li>
+        </ul>
+        <a class="btn btn-principal" routerLink="/creditos-para-reportados">
+          Ver créditos para reportados
+        </a>
+      </div>
+    </div>
+  </section>
+
   <section class="seccion" aria-labelledby="tituloProductos">
     <div class="titulo-sec">
       <h2 id="tituloProductos">Compara el crédito que necesitas</h2>

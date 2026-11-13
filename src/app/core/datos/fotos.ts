@@ -55,4 +55,10 @@ export const FOTOS = {
     ancho: 1280,
     alto: 714,
   },
+  hombreReportado: {
+    nombre: 'hombre-reportado-facturas',
+    alt: 'Hombre un poco angustiado revisando en el celular sus opciones de crédito, con facturas y una calculadora sobre la mesa de la cocina',
+    ancho: 1280,
+    alto: 715,
+  },
 } satisfies Record<string, Foto>;

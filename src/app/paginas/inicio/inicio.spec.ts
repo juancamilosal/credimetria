@@ -154,4 +154,18 @@ describe('Inicio', () => {
     expect(html.querySelector('.contacta')?.textContent).toContain(texto);
     expect(html.querySelector('.quiero')?.getAttribute('title')).toBe(texto);
   });
+
+  it('tiene la sección para reportados con su foto y el enlace a la página', () => {
+    const html = crear();
+    const seccion = html.querySelector('.reportados')!;
+    expect(seccion.querySelector('h2')?.textContent).toContain(
+      '¿Estás reportado? Igual puedes conseguir crédito',
+    );
+    expect(seccion.querySelector('img')?.getAttribute('src')).toBe(
+      '/imagenes/hombre-reportado-facturas-1280.webp',
+    );
+    expect(seccion.querySelector('a.btn')?.getAttribute('href')).toBe(
+      '/creditos-para-reportados',
+    );
+  });
 });
