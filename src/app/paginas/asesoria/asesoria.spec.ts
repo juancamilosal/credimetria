@@ -335,7 +335,7 @@ describe('Asesoria', () => {
     expect(prospecto.correo).toBe('ana@ejemplo.com');
     expect(prospecto.autorizacion.texto).toContain('Autorizo a Credimetría');
     expect(prospecto.autorizacion.texto).toContain('credimetria.com/aliados');
-    expect(prospecto.autorizacion.versionPolitica).toBe('2026-11-13');
+    expect(prospecto.autorizacion.versionPolitica).toBe('2026-11-13.2');
   });
 
   it('sin urgencia en el enlace dice "pronto"', async () => {

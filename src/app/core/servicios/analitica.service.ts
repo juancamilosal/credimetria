@@ -1,29 +1,23 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import {
-  Injectable,
-  InjectionToken,
-  PLATFORM_ID,
-  inject,
-  signal,
-} from '@angular/core';
+import { Injectable, InjectionToken, PLATFORM_ID, inject } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
-/** Lo que la persona eligió en el aviso de cookies. */
-export type Consentimiento = 'aceptadas' | 'rechazadas';
-
-const CLAVE = 'credimetria-cookies';
 /** Solo se mide en el sitio de verdad (no en local ni en pruebas). */
 export const HOSTS_ANALITICA = new InjectionToken<string[]>('HOSTS_ANALITICA', {
   factory: () => ['credimetria.com', 'www.credimetria.com'],
 });
 
+/** Clave del aviso de cookies que ya no existe (se borra si quedó guardada). */
+const CLAVE_VIEJA = 'credimetria-cookies';
+
 type Ventana = Window & { dataLayer?: unknown[] };
 
 /**
- * Google Analytics (por la etiqueta de Google, `environment.etiquetaGoogle`)
- * con el modo de consentimiento: nada se carga ni se guarda hasta que la
- * persona acepta las cookies en el aviso. Si las rechaza, no se mide. Los
- * eventos nunca llevan datos personales (ni nombre, ni correo, ni celular).
+ * Google Analytics (por la etiqueta de Google, `environment.etiquetaGoogle`).
+ * Desde el 13 nov 2026 cuenta todas las visitas sin preguntar (sin aviso de
+ * cookies); la política de datos lo informa. La publicidad queda siempre
+ * negada. Los eventos nunca llevan datos personales (ni nombre, ni correo,
+ * ni celular).
  */
 @Injectable({ providedIn: 'root' })
 export class AnaliticaService {
@@ -32,43 +26,24 @@ export class AnaliticaService {
   private readonly hosts = inject(HOSTS_ANALITICA);
   private cargada = false;
 
-  /** null: todavía no ha elegido (se muestra el aviso). */
-  readonly consentimiento = signal<Consentimiento | null>(null);
-  /** El aviso se ve (solo en el navegador, sin elección guardada). */
-  readonly mostrarAviso = signal(false);
-
   private get ventana(): Ventana | null {
     return this.documento.defaultView as Ventana | null;
   }
 
-  /** Lee la elección guardada; si aceptó antes, carga Analytics. */
+  /** Carga Google Analytics (solo en el navegador y en credimetria.com). */
   iniciar(): void {
     if (!this.navegador) return;
-    const guardado = this.leer();
-    this.consentimiento.set(guardado);
-    this.mostrarAviso.set(guardado === null);
-    if (guardado === 'aceptadas') this.cargar();
-  }
-
-  aceptar(): void {
-    this.elegir('aceptadas');
+    try {
+      this.ventana?.localStorage.removeItem(CLAVE_VIEJA);
+    } catch {
+      // Sin localStorage: no importa.
+    }
     this.cargar();
-    this.gtag('consent', 'update', { analytics_storage: 'granted' });
-  }
-
-  rechazar(): void {
-    this.elegir('rechazadas');
-    this.gtag('consent', 'update', { analytics_storage: 'denied' });
-  }
-
-  /** "Preferencias de cookies" del pie: vuelve a mostrar el aviso. */
-  cambiarPreferencias(): void {
-    if (this.navegador) this.mostrarAviso.set(true);
   }
 
   /**
-   * Evento de Analytics (por ejemplo, una solicitud enviada). Sin
-   * consentimiento no hace nada. Nunca pasar datos personales.
+   * Evento de Analytics (por ejemplo, una solicitud enviada). Si Analytics no
+   * está cargado (local, pruebas), no hace nada. Nunca pasar datos personales.
    */
   evento(nombre: string, datos: Record<string, string | number> = {}): void {
     if (!this.cargada) return;
@@ -83,25 +58,6 @@ export class AnaliticaService {
     this.evento('clic_quiero_esta', { entidad, pagina, producto });
   }
 
-  private elegir(valor: Consentimiento): void {
-    this.consentimiento.set(valor);
-    this.mostrarAviso.set(false);
-    try {
-      this.ventana?.localStorage.setItem(CLAVE, valor);
-    } catch {
-      // Sin localStorage (modo privado estricto): vale solo esta visita.
-    }
-  }
-
-  private leer(): Consentimiento | null {
-    try {
-      const v = this.ventana?.localStorage.getItem(CLAVE);
-      return v === 'aceptadas' || v === 'rechazadas' ? v : null;
-    } catch {
-      return null;
-    }
-  }
-
   private gtag(...args: unknown[]): void {
     const w = this.ventana;
     if (!w) return;
@@ -113,14 +69,14 @@ export class AnaliticaService {
     })(...args);
   }
 
-  /** Carga la etiqueta de Google una sola vez, ya con el consentimiento. */
+  /** Carga la etiqueta de Google una sola vez. */
   private cargar(): void {
     const w = this.ventana;
     const id = environment.etiquetaGoogle;
     if (this.cargada || !w || !id || !this.hosts.includes(w.location.hostname))
       return;
     this.cargada = true;
-    // Sin publicidad: solo medición. Lo demás queda negado.
+    // Solo medición: la publicidad queda negada.
     this.gtag('consent', 'default', {
       ad_storage: 'denied',
       ad_user_data: 'denied',
