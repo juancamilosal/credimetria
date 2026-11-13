@@ -11,6 +11,7 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { Verificacion } from '../../compartido/verificacion/verificacion';
 import { REGLAS_PARA_ASESOR } from '../../core/datos/reglas-aliados';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import {
   PRODUCTOS_ALIADO,
   SolicitudesAliadosService,
@@ -52,6 +53,7 @@ export const separar = (texto: string): string[] =>
 export class QuieroSerAliado {
   private readonly solicitudes = inject(SolicitudesAliadosService);
   private readonly router = inject(Router);
+  private readonly analitica = inject(AnaliticaService);
   private readonly fb = inject(FormBuilder).nonNullable;
 
   protected readonly tipos = TIPOS_ALIADO;
@@ -185,6 +187,7 @@ export class QuieroSerAliado {
       this.enviando.set(false);
       this.verificacion()?.reiniciar();
     }
+    this.analitica.evento('solicitud_aliado', { tipo: v.tipo });
     this.enviado.set(true);
     globalThis.scrollTo?.(0, 0);
   }

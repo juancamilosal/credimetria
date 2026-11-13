@@ -18,6 +18,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import { AliadosService } from '../../core/servicios/aliados.service';
 import {
   MOTIVOS_REPORTE,
@@ -66,6 +67,7 @@ export class ReportarAsesor implements OnDestroy {
   private readonly aliadosServicio = inject(AliadosService);
   private readonly reportes = inject(ReportesService);
   private readonly turnstile = inject(TurnstileService);
+  private readonly analitica = inject(AnaliticaService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder).nonNullable;
 
@@ -226,6 +228,7 @@ export class ReportarAsesor implements OnDestroy {
         ? (this.aliados().find((a) => a.id === v.asesor)?.nombre ?? null)
         : v.asesorNombre.trim(),
     );
+    this.analitica.evento('reporte_asesor', { motivo: v.motivo });
     this.enviado.set(true);
     globalThis.scrollTo?.(0, 0);
   }

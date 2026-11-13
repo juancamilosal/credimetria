@@ -37,3 +37,15 @@ nav {
   font-size: 13px;
   color: var(--cm-gris);
 }
+
+/* "Preferencias de cookies": botón con aspecto de enlace */
+.enlace {
+  font: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}

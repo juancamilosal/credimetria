@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { DatosProspecto, Prospecto } from '../modelos/prospecto';
 
 /** Versión de la política de tratamiento de datos que acepta la persona. */
-export const VERSION_POLITICA = '2026-11-12';
+export const VERSION_POLITICA = '2026-11-13';
 
 /** Texto exacto de la autorización; se guarda tal cual con cada prospecto. */
 export const TEXTO_AUTORIZACION =

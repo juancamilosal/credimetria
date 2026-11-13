@@ -18,7 +18,7 @@ export const RESPONSABLE = {
 };
 
 /** Fecha desde la que rige esta versión de la política. */
-export const VIGENTE_DESDE = '2026-11-12';
+export const VIGENTE_DESDE = '2026-11-13';
 
 /**
  * Política de tratamiento de datos personales de Credimetría según la Ley

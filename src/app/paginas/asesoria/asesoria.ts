@@ -26,6 +26,7 @@ import {
   Urgencia,
 } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import { ProspectosService } from '../../core/servicios/prospectos.service';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { TurnstileService } from '../../core/servicios/turnstile.service';
@@ -148,6 +149,7 @@ export class Asesoria implements OnDestroy {
   private readonly prospectos = inject(ProspectosService);
   private readonly router = inject(Router);
   private readonly turnstile = inject(TurnstileService);
+  private readonly analitica = inject(AnaliticaService);
   private readonly fb = inject(FormBuilder).nonNullable;
   /** Entidad elegida en el ranking, si llegó desde allí. */
   private entidad: string | null = null;
@@ -363,6 +365,11 @@ export class Asesoria implements OnDestroy {
       if (this.widgetId) this.turnstile.reiniciar(this.widgetId);
     }
     const urgencia = URGENCIAS.find((u) => u.id === this.urgencia);
+    // Analytics (solo con cookies aceptadas): el producto, nunca los datos.
+    this.analitica.evento('generate_lead', {
+      formulario: 'asesoria',
+      producto: v.producto,
+    });
     this.enviado.set(urgencia?.cuando ?? 'pronto');
     globalThis.scrollTo?.(0, 0);
   }
