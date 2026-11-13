@@ -88,6 +88,28 @@ export const ENTIDADES_REPORTADOS: EntidadReportados[] = [
     ],
   },
   {
+    id: 'gnb-sudameris',
+    nombre: 'GNB Sudameris',
+    nivel: 1,
+    tipo: 'Banco',
+    iniciales: 'GS',
+    logo: '/logos-entidades/gnb-sudameris.webp',
+    especialidades: ['Libranza', 'Pensionados', 'Docentes y sector público'],
+    filtros: ['pensionados', 'docentes', 'empleados'],
+    nota: 'Según los asesores aliados de Credimetría, estudia solicitudes de libranza de personas con reportes en centrales de riesgo (agregado el 13 nov 2026).',
+    porConfirmar:
+      'Las especialidades (pensionados, docentes y sector público) faltan por confirmar con el banco.',
+    registro: [
+      { etiqueta: 'Razón social', valor: 'BANCO GNB SUDAMERIS S.A.' },
+      { etiqueta: 'NIT', valor: '860050750' },
+      {
+        etiqueta: 'Supervisor',
+        valor: 'Superintendencia Financiera (código de entidad 12)',
+      },
+      { etiqueta: 'Consultado', valor: '13 nov 2026' },
+    ],
+  },
+  {
     id: 'vantage',
     nombre: 'Vantage',
     nivel: 2,

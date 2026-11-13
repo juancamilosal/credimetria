@@ -26,7 +26,7 @@ describe('Reportados', () => {
 
   it('muestra las vigiladas y las operadoras en dos grupos, sin tasas', () => {
     const html = crear().nativeElement as HTMLElement;
-    expect(html.querySelectorAll('.entidad.nivel-1').length).toBe(1);
+    expect(html.querySelectorAll('.entidad.nivel-1').length).toBe(2);
     expect(html.querySelectorAll('.entidad.nivel-2').length).toBe(3);
     expect(html.textContent).toContain('Inscrita en el RUNEOL');
     expect(html.textContent).toContain(
@@ -82,11 +82,26 @@ describe('Reportados', () => {
     ]);
   });
 
-  it('BIV muestra que su registro está por confirmar', () => {
+  it('BIV y GNB Sudameris muestran lo que está por confirmar', () => {
     const html = crear().nativeElement as HTMLElement;
-    expect(html.querySelectorAll('.por-confirmar').length).toBe(1);
-    expect(html.querySelector('.por-confirmar')?.textContent).toContain(
-      'Marsof BIV',
+    const avisos = [...html.querySelectorAll('.por-confirmar')].map(
+      (p) => p.textContent ?? '',
+    );
+    expect(avisos.length).toBe(2);
+    expect(avisos.some((t) => t.includes('Marsof BIV'))).toBeTrue();
+    expect(avisos.some((t) => t.includes('confirmar con el banco'))).toBeTrue();
+  });
+
+  it('GNB Sudameris aparece como banco vigilado, con su código en la Superfinanciera', () => {
+    const html = crear().nativeElement as HTMLElement;
+    const gnb = [...html.querySelectorAll('.entidad.nivel-1')].find((e) =>
+      e.textContent?.includes('GNB Sudameris'),
+    )!;
+    expect(gnb).toBeTruthy();
+    expect(gnb.textContent).toContain('860050750');
+    expect(gnb.textContent).toContain('código de entidad 12');
+    expect(gnb.querySelector('img.logo')?.getAttribute('src')).toBe(
+      '/logos-entidades/gnb-sudameris.webp',
     );
   });
 
