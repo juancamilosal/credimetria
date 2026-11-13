@@ -166,6 +166,7 @@
           class="btn btn-principal"
           routerLink="/asesoria"
           [queryParams]="asesoria(entidad)"
+          (click)="quiero(entidad.nombre)"
           >Quiero asesoría con reportes</a
         >
         <a
@@ -193,6 +194,7 @@
       class="btn btn-principal"
       routerLink="/asesoria"
       [queryParams]="asesoria()"
+      (click)="quiero()"
       >Quiero asesoría con reportes</a
     >
   </section>

@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import {
   ENTIDADES_REPORTADOS,
   ENTIDADES_VISIBLES,
@@ -50,6 +51,35 @@ describe('Reportados', () => {
     expect(vantage.querySelector('a.btn-borde')?.getAttribute('href')).toBe(
       'https://runeol.rues.org.co/',
     );
+  });
+
+  it('"Quiero asesoría con reportes" envía "clic_quiero_esta"', () => {
+    const html = crear().nativeElement as HTMLElement;
+    spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+    const evento = spyOn(TestBed.inject(AnaliticaService), 'evento');
+    const vantage = [...html.querySelectorAll('.entidad')].find((t) =>
+      t.querySelector('h3')?.textContent?.includes('Vantage'),
+    )!;
+    vantage.querySelector<HTMLAnchorElement>('a.btn-principal')!.click();
+    html.querySelector<HTMLAnchorElement>('.asesores a')!.click();
+    expect(evento.calls.allArgs()).toEqual([
+      [
+        'clic_quiero_esta',
+        {
+          entidad: 'Vantage',
+          pagina: '/creditos-para-reportados',
+          producto: '',
+        },
+      ],
+      [
+        'clic_quiero_esta',
+        {
+          entidad: 'general',
+          pagina: '/creditos-para-reportados',
+          producto: '',
+        },
+      ],
+    ]);
   });
 
   it('BIV muestra que su registro está por confirmar', () => {

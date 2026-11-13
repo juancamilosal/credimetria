@@ -8,7 +8,8 @@ import {
   model,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import { AYUDA_DIFERENCIA } from '../../core/datos/tasas';
 import { Producto, TasaEntidad } from '../../core/modelos/tasa';
 import { cuotaMensual } from '../../core/utilidades/credito';
@@ -101,6 +102,16 @@ export class TablaRanking {
   protected readonly todas = TODAS;
   protected readonly ayudaDiferencia = AYUDA_DIFERENCIA;
   protected readonly contacta = QUIERO_ESTA_CONTACTA;
+  private readonly analitica = inject(AnaliticaService);
+  private readonly router = inject(Router);
+
+  protected quiero(entidad: string): void {
+    this.analitica.clicQuieroEsta(
+      entidad,
+      this.router.url.split('?')[0] || '/',
+      this.producto(),
+    );
+  }
 
   protected readonly vista = computed<FilaVista[]>(() => {
     const filas = this.filas().map((t, i) => {

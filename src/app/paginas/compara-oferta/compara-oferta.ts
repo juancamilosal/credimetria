@@ -24,6 +24,7 @@ import {
 import { esVivienda, plazosDe, textoPlazo } from '../../core/datos/tasas';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import { TasasService } from '../../core/servicios/tasas.service';
 import {
   efectivaAnualDeMensual,
@@ -103,6 +104,7 @@ export class ComparaOferta {
   /** Dentro del simulador: sin la introducción de la página. */
   readonly incrustado = input(false);
   private readonly tasas = inject(TasasService);
+  private readonly analitica = inject(AnaliticaService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
   private readonly enNavegador = isPlatformBrowser(inject(PLATFORM_ID));
@@ -328,6 +330,12 @@ export class ComparaOferta {
     );
     this.bot('Listo. Esto es lo que encontré:');
     this.agregar({ tipo: 'resultado', datos: { ...datos }, resultado, usura });
+    // Sin datos personales: solo el producto, qué le dijeron y el veredicto.
+    this.analitica.evento('oferta_revisada', {
+      producto: datos.producto,
+      dato: datos.tipo,
+      veredicto: resultado.veredicto,
+    });
 
     this.bot(
       resultado.veredicto === 'bien'

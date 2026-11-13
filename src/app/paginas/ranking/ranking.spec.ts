@@ -10,6 +10,7 @@ import {
   TASAS_INICIALES,
   TasasService,
 } from '../../core/servicios/tasas.service';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import { Ranking } from './ranking';
 
 /** Tasa real de AV Villas en libre inversión, la primera del ranking. */
@@ -104,6 +105,17 @@ describe('Ranking', () => {
     fixture.detectChanges();
     expect(TestBed.inject(Location).path()).toContain('orden=diferencia-asc');
     expect(navegar).not.toHaveBeenCalled();
+  });
+
+  it('"Quiero esta" envía "clic_quiero_esta" con la entidad y el producto', () => {
+    spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+    const evento = spyOn(TestBed.inject(AnaliticaService), 'evento');
+    html.querySelector<HTMLAnchorElement>('a.quiero')!.click();
+    expect(evento).toHaveBeenCalledOnceWith('clic_quiero_esta', {
+      entidad: jasmine.any(String),
+      pagina: '/',
+      producto: 'libre-inversion',
+    });
   });
 
   it('deja al final las entidades sin tasa anunciada', () => {

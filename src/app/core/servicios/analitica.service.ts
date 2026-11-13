@@ -75,6 +75,14 @@ export class AnaliticaService {
     this.gtag('event', nombre, datos);
   }
 
+  /**
+   * Clic en "Quiero esta" o "Quiero asesoría con reportes": qué entidad y
+   * desde qué página (sin datos personales).
+   */
+  clicQuieroEsta(entidad: string, pagina: string, producto = ''): void {
+    this.evento('clic_quiero_esta', { entidad, pagina, producto });
+  }
+
   private elegir(valor: Consentimiento): void {
     this.consentimiento.set(valor);
     this.mostrarAviso.set(false);

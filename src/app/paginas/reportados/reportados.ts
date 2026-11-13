@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Chips, OpcionChip } from '../../compartido/chips/chips';
 import {
@@ -10,6 +10,7 @@ import {
   FECHA_CONSULTA_REGISTROS,
   NivelEntidad,
 } from '../../core/datos/entidades-reportados';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 
 /**
  * Créditos para reportados: entidades que prestan a personas reportadas,
@@ -24,6 +25,12 @@ import {
   styleUrl: './reportados.css',
 })
 export class Reportados {
+  private readonly analitica = inject(AnaliticaService);
+
+  protected quiero(entidad = 'general'): void {
+    this.analitica.clicQuieroEsta(entidad, '/creditos-para-reportados');
+  }
+
   protected readonly fecha = FECHA_CONSULTA_REGISTROS;
 
   protected readonly tipos: OpcionChip[] = [

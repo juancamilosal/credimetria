@@ -26,6 +26,7 @@ import { esVivienda, FUENTE_PROMEDIO } from '../../core/datos/tasas';
 import { FOTOS } from '../../core/datos/fotos';
 import { URGENCIAS } from '../../core/modelos/prospecto';
 import { Producto } from '../../core/modelos/tasa';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { EsqueletoImagen } from '../../compartido/esqueleto-imagen/esqueleto-imagen';
 
@@ -110,6 +111,11 @@ export class Inicio {
   protected readonly fotos = FOTOS;
   protected readonly fuente = FUENTE_PROMEDIO;
   protected readonly contacta = QUIERO_ESTA_CONTACTA;
+  private readonly analitica = inject(AnaliticaService);
+
+  protected quiero(entidad: string, producto: string): void {
+    this.analitica.clicQuieroEsta(entidad, '/', producto);
+  }
   protected readonly independencia = AVISO_INDEPENDENCIA;
 
   /** Tarjetas con foto por tipo de crédito; cada una lleva a su ranking. */

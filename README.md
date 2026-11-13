@@ -567,7 +567,12 @@ cookies", al pie. Modo de consentimiento: publicidad siempre negada. Las
 vistas de página las cuenta la medición mejorada de Analytics (cambios del
 historial); los formularios mandan eventos sin datos personales:
 `generate_lead` (asesoría, con el producto), `reporte_asesor` (con el
-motivo) y `solicitud_aliado` (con el tipo). En Analytics, las
+motivo) y `solicitud_aliado` (con el tipo). También van
+`oferta_revisada` (al dar el resultado de "Me ofrecieron un crédito": producto,
+`dato` `ea`/`mensual` y veredicto `bien`/`alto`/`usura`) y `clic_quiero_esta`
+(entidad, página y producto; en "Quiero esta" del inicio, el ranking y el
+simulador, y en "Quiero asesoría con reportes", con entidad `general` en el
+botón sin entidad), con `AnaliticaService.clicQuieroEsta`. En Analytics, las
 "Interacciones con formularios" de la medición mejorada van apagadas. La
 política de datos pasó a la versión `2026-11-13` para contarlo.
 

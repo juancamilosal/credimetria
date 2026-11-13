@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import { ComparaOferta } from './compara-oferta';
 import { calcularOferta } from './oferta';
 
@@ -78,6 +79,20 @@ describe('ComparaOferta', () => {
     // 32,22 % supera la usura de prueba (28,59 %).
     expect(resultado).toContain('Supera la tasa de usura');
     expect(resultado).toContain('ilegal en Colombia');
+  });
+
+  it('al dar el resultado envía "oferta_revisada" sin datos personales', () => {
+    const evento = spyOn(TestBed.inject(AnaliticaService), 'evento');
+    empezarHastaQueDijeron();
+    tocar('Una tasa efectiva anual (E.A.)');
+    escribir('26,38');
+    tocar('Sí');
+    escribir('700.000');
+    expect(evento).toHaveBeenCalledOnceWith('oferta_revisada', {
+      producto: 'libre-inversion',
+      dato: 'ea',
+      veredicto: 'usura',
+    });
   });
 
   it('flujo mensual sin cuota: 1,6 % → 20,98 % E.A.', () => {

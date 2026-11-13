@@ -3,7 +3,8 @@ import { registerLocaleData } from '@angular/common';
 import localeEsCo from '@angular/common/locales/es-CO';
 import { LOCALE_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import { AnaliticaService } from '../../core/servicios/analitica.service';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { Inicio } from './inicio';
 
@@ -74,6 +75,18 @@ describe('Inicio', () => {
     expect(
       primera.querySelector<HTMLAnchorElement>('.quiero')?.getAttribute('href'),
     ).toContain('origen=inicio');
+  });
+
+  it('"Quiero esta" envía "clic_quiero_esta" con la entidad', () => {
+    const html = crear();
+    spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+    const evento = spyOn(TestBed.inject(AnaliticaService), 'evento');
+    html.querySelector<HTMLAnchorElement>('.primero .quiero')!.click();
+    expect(evento).toHaveBeenCalledOnceWith('clic_quiero_esta', {
+      entidad: tarjetas(html)[0],
+      pagina: '/',
+      producto: 'libre-inversion',
+    });
   });
 
   it('no muestra la lista de productos: se cambia con las flechas', () => {

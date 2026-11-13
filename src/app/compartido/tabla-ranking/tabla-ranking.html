@@ -276,6 +276,7 @@
                   }"
                   class="quiero"
                   [attr.title]="contacta"
+                  (click)="quiero(fila.entidad)"
                 >
                   Quiero esta
                 </a>
@@ -436,6 +437,7 @@
               origen: 'ranking',
             }"
             class="btn btn-principal quiero"
+            (click)="quiero(fila.entidad)"
           >
             Quiero esta tasa
           </a>
