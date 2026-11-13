@@ -487,6 +487,15 @@
   font-weight: 700;
 }
 
+.paso-enlace {
+  margin-top: auto;
+  font-weight: 700;
+}
+
+.paso div {
+  height: 100%;
+}
+
 /* Bloque oscuro de asesoría, con foto */
 .oscuro {
   background: var(--cm-bloque);

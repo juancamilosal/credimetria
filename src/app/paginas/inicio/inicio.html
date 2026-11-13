@@ -3,7 +3,12 @@
     <div class="hero-texto">
       <span class="sello">Con datos de la Superintendencia Financiera</span>
       <h1>Compara con datos, <span class="verde">no con promesas</span></h1>
-      <p>Mira lo que anuncian los bancos y lo que de verdad cobran.</p>
+      <p>
+        Credimetría compara gratis las tasas de crédito de los bancos y
+        financieras de Colombia: lo que anuncian y lo que de verdad cobran,
+        según la Superintendencia Financiera. Si quieres, un asesor aliado te
+        ayuda a conseguir la mejor.
+      </p>
       <div class="acciones">
         <a class="btn btn-principal" routerLink="/ranking"
           >Ver ranking de tasas</a
@@ -165,6 +170,26 @@
     }
   </section>
 
+  <section id="como-funciona" class="seccion como" aria-labelledby="tituloComo">
+    <div class="titulo-sec">
+      <h2 id="tituloComo">Así funciona Credimetría</h2>
+    </div>
+    <ol class="pasos">
+      @for (paso of pasos; track paso.titulo; let i = $index) {
+        <li class="tarjeta paso">
+          <span class="pos">{{ i + 1 }}</span>
+          <div>
+            <h3>{{ paso.titulo }}</h3>
+            <p class="muted">{{ paso.texto }}</p>
+            <a class="paso-enlace" [routerLink]="paso.ruta"
+              >{{ paso.enlace }} →</a
+            >
+          </div>
+        </li>
+      }
+    </ol>
+  </section>
+
   <section class="seccion">
     <div class="oferta">
       <div>
@@ -243,21 +268,6 @@
         </li>
       }
     </ul>
-  </section>
-
-  <section id="como-funciona" class="seccion" aria-labelledby="tituloComo">
-    <div class="titulo-sec"><h2 id="tituloComo">Cómo funciona</h2></div>
-    <ol class="pasos">
-      @for (paso of pasos; track paso.titulo; let i = $index) {
-        <li class="tarjeta paso">
-          <span class="pos">{{ i + 1 }}</span>
-          <div>
-            <h3>{{ paso.titulo }}</h3>
-            <p class="muted">{{ paso.texto }}</p>
-          </div>
-        </li>
-      }
-    </ol>
   </section>
 
   <section class="seccion" aria-labelledby="tituloEntidades">

@@ -578,6 +578,14 @@ botón sin entidad), con `AnaliticaService.clicQuieroEsta`. En Analytics, las
 "Interacciones con formularios" de la medición mejorada van apagadas. La
 política de datos pasó a la versión `2026-11-13` para contarlo.
 
+**Explicación del inicio** (13 nov 2026, por comentarios de usuarios: "no se
+sabe qué hace"): debajo del título, "Credimetría compara gratis las tasas de
+crédito de los bancos y financieras de Colombia: lo que anuncian y lo que de
+verdad cobran, según la Superintendencia Financiera. Si quieres, un asesor
+aliado te ayuda a conseguir la mejor." Y "Así funciona Credimetría" (3
+pasos: compara las tasas, calcula tu cuota, pide asesoría gratis, cada uno
+con su enlace) pasó de abajo a justo después de "Las 3 tasas más bajas".
+
 **Sección para reportados en el inicio** (13 nov 2026): después de "¿Te
 ofrecieron un crédito?", una tarjeta con la foto
 `hombre-reportado-facturas` (original en `src/assets/`, 640 y 1280 px en

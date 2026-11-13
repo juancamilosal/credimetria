@@ -181,4 +181,19 @@ describe('Inicio', () => {
       '/creditos-para-reportados',
     );
   });
+
+  it('explica arriba qué es Credimetría y muestra "Así funciona" con enlaces', () => {
+    const html = crear();
+    expect(html.querySelector('.hero-texto p')?.textContent).toContain(
+      'Credimetría compara gratis las tasas de crédito',
+    );
+    const pasos = html.querySelectorAll('#como-funciona .paso');
+    expect(pasos.length).toBe(3);
+    const enlaces = [
+      ...html.querySelectorAll('#como-funciona .paso-enlace'),
+    ].map((a) => a.getAttribute('href'));
+    expect(enlaces).toEqual(['/ranking', '/simulador', '/asesoria']);
+    // Va justo después de "Las 3 tasas más bajas".
+    expect(html.querySelector('.top + #como-funciona')).not.toBeNull();
+  });
 });

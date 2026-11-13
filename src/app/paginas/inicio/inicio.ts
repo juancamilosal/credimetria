@@ -213,16 +213,25 @@ export class Inicio {
 
   protected readonly pasos = [
     {
-      titulo: 'Compara',
-      texto: 'Lo que anuncia cada entidad y lo que de verdad cobra.',
+      titulo: 'Compara las tasas',
+      ruta: '/ranking',
+      enlace: 'Ver el ranking',
+      texto:
+        'Mira qué banco cobra menos de verdad, con datos oficiales. Es gratis y no pedimos tus datos.',
     },
     {
-      titulo: 'Cuéntanos qué necesitas',
-      texto: 'Producto, monto y cuándo. Menos de un minuto.',
+      titulo: 'Calcula tu cuota',
+      ruta: '/simulador',
+      enlace: 'Abrir el simulador',
+      texto:
+        'Cuánto pagarías al mes y en total, o si la oferta que te hicieron es buena.',
     },
     {
-      titulo: 'Un asesor aliado te contacta',
-      texto: 'Máximo 2, verificados. Nunca cobran por adelantado.',
+      titulo: 'Pide asesoría gratis',
+      ruta: '/asesoria',
+      enlace: 'Pedir asesoría',
+      texto:
+        'Si quieres, un asesor aliado verificado te ayuda a conseguir el crédito. Nunca cobra por adelantado.',
     },
   ];
 }
