@@ -578,6 +578,13 @@ botón sin entidad), con `AnaliticaService.clicQuieroEsta`. En Analytics, las
 "Interacciones con formularios" de la medición mejorada van apagadas. La
 política de datos pasó a la versión `2026-11-13` para contarlo.
 
+**Menú del celular animado** (13 nov 2026; `compartido/encabezado/`): el
+menú se despliega hacia abajo (alto y opacidad), los enlaces entran uno tras
+otro con un pequeño deslizamiento y las tres rayas del botón se vuelven una X
+(y al revés). Cerrado queda oculto también para el teclado y los lectores
+de pantalla (`visibility: hidden`). Con "reducir movimiento" en el celular,
+abre y cierra sin animación.
+
 **Explicación del inicio** (13 nov 2026, por comentarios de usuarios: "no se
 sabe qué hace"): debajo del título, "Credimetría compara gratis las tasas de
 crédito de los bancos y financieras de Colombia: lo que anuncian y lo que de
