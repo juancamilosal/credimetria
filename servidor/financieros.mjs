@@ -133,7 +133,7 @@ export const NOMBRES_SFC = {
   "32-5": "Confiar",
   "22-5": "ICETEX",
   "22-8": "Fondo Nacional del Ahorro",
-  "22-11": "Caja Promotora de Vivienda Militar y de Policía",
+  "22-11": "Caja Honor",
 };
 
 /**
@@ -168,6 +168,7 @@ export const LOGOS_SFC = {
   "4-127": "/logos-entidades/bold.webp",
   "4-130": "/logos-entidades/nequi.webp",
   "22-5": "/logos-entidades/icetex.webp",
+  "22-11": "/logos-entidades/caja-honor.webp",
   "32-1": "/logos-entidades/cfa.webp",
   "32-2": "/logos-entidades/jfk.webp",
   "32-4": "/logos-entidades/cotrafa.webp",
