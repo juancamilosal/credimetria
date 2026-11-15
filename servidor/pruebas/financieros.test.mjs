@@ -155,6 +155,18 @@ test("salen todos los bancos del CUIF, aunque no estén en Directus", () => {
     ],
   );
   assert.equal(datos.entidades[1].logo, null);
+  // Itaú no está en Directus pero tiene logo en el repositorio.
+  const itau = unir([], [], {
+    corte: "2026-08-31",
+    cifras: armarCifras(
+      [fila("2026-08-31", "590000", -449 * MM, "6")],
+      "2026-08-31T00:00:00.000",
+    ),
+  }).entidades[0];
+  assert.deepEqual(
+    [itau.nombre, itau.logo],
+    ["Itaú", "/logos-entidades/itau.webp"],
+  );
   assert.equal(datos.entidades[1].analisis, null);
 });
 

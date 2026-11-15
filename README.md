@@ -482,7 +482,8 @@ la usura M.V. En la edición, "Usar tope de usura" llena el hasta con la de
   demás entidades de Directus con `codigo_sfc` (p. ej. Koa). Se cruzan por
   `entidades.codigo_sfc`: si el banco está en Directus usa su código, nombre
   y logo; si no, el código es `sfc-<tipo>-<código>` (p. ej. `sfc-1-65`), el
-  nombre sale de `NOMBRES_SFC` y lleva iniciales. Solo las entidades de
+  nombre sale de `NOMBRES_SFC` y el logo de `LOGOS_SFC` (archivos en
+  `public/logos-entidades/`, p. ej. Itaú) o, si no hay, iniciales. Solo las entidades de
   Directus pueden tener análisis escrito y PDF. Rutas `/api/financieros` y
   `/api/estados-financieros/<entidad>/pdf`.
 

@@ -74,10 +74,10 @@ export const NOMBRES_SFC = {
   "1-23": "Banco de Occidente",
   "1-30": "Banco Caja Social",
   "1-39": "Davivienda",
-  "1-42": "Scotiabank Colpatria",
+  "1-42": "Davibank",
   "1-43": "Banco Agrario",
   "1-49": "Banco AV Villas",
-  "1-51": "Bancien",
+  "1-51": "Ban100",
   "1-52": "Bancamía",
   "1-53": "Banco W",
   "1-54": "Bancoomeva",
@@ -94,6 +94,15 @@ export const NOMBRES_SFC = {
   "1-66": "BTG Pactual",
   "1-67": "Banco Unión",
   "1-68": "Banco Contactar",
+};
+
+/**
+ * Logos guardados en el repositorio (public/logos-entidades) para los bancos
+ * que no están en Directus. Si el banco se crea en Directus con logo, manda
+ * el de Directus.
+ */
+export const LOGOS_SFC = {
+  "1-6": "/logos-entidades/itau.webp",
 };
 
 const MINUSCULAS = new Set(["de", "del", "la", "las", "los", "y", "e"]);
@@ -286,7 +295,8 @@ export function unir(entidades, fichas, cuif) {
       codigo: e.codigo,
       nombre: e.nombre,
       tipo: e.tipo ?? null,
-      logo: e.logo ? `/api/logos/${e.codigo}` : null,
+      // El de Directus; si no hay, el del repositorio (LOGOS_SFC).
+      logo: d?.logo ? `/api/logos/${e.codigo}` : (LOGOS_SFC[clave] ?? null),
       anual: cifras.anual,
       actual: cifras.actual,
       analisis: ficha
