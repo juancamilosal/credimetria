@@ -167,6 +167,7 @@ export const LOGOS_SFC = {
   "4-126": "/logos-entidades/mercado-pago.webp",
   "4-127": "/logos-entidades/bold.webp",
   "4-130": "/logos-entidades/nequi.webp",
+  "22-5": "/logos-entidades/icetex.webp",
   "32-1": "/logos-entidades/cfa.webp",
   "32-2": "/logos-entidades/jfk.webp",
   "32-4": "/logos-entidades/cotrafa.webp",
