@@ -158,6 +158,7 @@ export const LOGOS_SFC = {
   "4-46": "/logos-entidades/coltefinanciera.webp",
   "4-117": "/logos-entidades/credifamilia.webp",
   "4-118": "/logos-entidades/crezcamos.webp",
+  "4-120": "/logos-entidades/la-hipotecaria.webp",
   "4-122": "/logos-entidades/rci-colombia.webp",
   "4-124": "/logos-entidades/rappipay.webp",
   "4-126": "/logos-entidades/mercado-pago.webp",
