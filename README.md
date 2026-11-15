@@ -496,6 +496,15 @@ la usura M.V. En la edición, "Usar tope de usura" llena el hasta con la de
   ficha, sus cifras, la gráfica de barras y "Compara con otros bancos": líneas
   por año (utilidad, rentabilidad o cartera) con los 2 que más ganan por
   defecto, hasta 3 más que se agregan o quitan.
+- Análisis de los estados financieros (15 nov 2026): los 29 bancos con PDF
+  (Lulo Bank no publica) están en `servidor/scripts/datos/analisis-2026.json`
+  (periodo, titular, puntos, "para ti", y para revisar las cifras con su
+  página y notas), hechos con el informe periódico trimestral más reciente
+  (sep. 2026; jun. 2026 en GNB, Agrario, Ban100, Bancoomeva, Finandina y
+  J.P. Morgan). Los informes salen del portal de Información Relevante de la
+  Superfinanciera. `DIRECTUS_ADMIN_TOKEN=… node servidor/scripts/cargar-analisis.mjs`
+  (`--sin-guardar`, `--pdfs <carpeta>` con `<código>.pdf`, `--actualizar`)
+  los crea en `estados_financieros` como **borrador**; lo publicado no se pisa.
 - Ficha técnica guardada en `entidades` (15 nov 2026): campos
   `representante_legal`, `cargo_representante`, `ciudad`, `direccion` y
   `ficha_actualizada`, que llena

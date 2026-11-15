@@ -1,0 +1,1012 @@
+{
+  "_nota": "Análisis de estados financieros (separados) para la colección estados_financieros de Directus. Los carga servidor/scripts/cargar-analisis.mjs en borrador. Clave = código SFC. 'cifras' y 'nota' son para revisar; no salen en la página. Hechos el 15 nov 2026.",
+  "analisis": {
+    "1-1": {
+      "banco": "Banco de Bogotá",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $1,0 billones de enero a septiembre de 2026, 1,9 % menos que un año antes, tras sumar la banca de personas de Itaú",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "Sus ingresos netos por intereses crecieron 17,7 % ($3,9 billones) y su cartera subió 12,4 % en el año, a $105,0 billones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Los depósitos de clientes suman $105,5 billones (+10,4 % en el año), con $4,0 billones que llegaron con los clientes de Itaú."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La solvencia bajó de 18,1 % a 13,8 % por un ajuste al reorganizar filiales y por prestar más; el mínimo es 9 % (11,5 % con colchones)."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "El gasto en provisiones subió 9,2 % y la mora a más de 30 días subió en consumo (5,7 %) y vivienda (6,8 %) al sumar la cartera de Itaú."
+        }
+      ],
+      "para_ti": "El banco presta más en consumo y vivienda desde que sumó los clientes de Itaú, y cumple los mínimos de capital exigidos.",
+      "cifras": [],
+      "nota": ""
+    },
+    "1-2": {
+      "banco": "Banco Popular",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $50.200 millones a septiembre de 2026 (vs. $11.000 millones en 2025), con rentabilidad baja (2,7 %)",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "El ingreso neto por intereses subió 19,7 %, a $1,04 billones, por más intereses de cartera y de inversiones en títulos de deuda (+55,8 %)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La mora mayor a 30 días bajó a 2,6 % (2,7 % en diciembre) y la cartera C, D y E a 3,2 %; las provisiones cubren 185 % de la cartera vencida."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "El gasto neto de provisiones subió 21,8 %, a $241.300 millones, y los gastos se llevan el 81 % de los ingresos (indicador de eficiencia)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta creció 1,35 % en el año, a $22,72 billones (68,3 % consumo, sobre todo libranzas), y los depósitos 6,2 %, a $27,40 billones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La solvencia total subió a 13,39 % (12,7 % en junio), por encima del mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Su negocio principal con personas son los créditos de libranza (descuento por nómina o pensión): en 2026 es la entidad con más desembolsos de libranza.",
+      "cifras": [
+        "Utilidad 9 meses $50.177 vs $11.001 millones (p. 13)",
+        "ROE 2,72 %, ROA 0,21 %, eficiencia 81,01 % (p. 7)",
+        "Ingreso neto por intereses $1.038.832 vs $867.699 millones (p. 13)",
+        "Intereses de inversiones en títulos de deuda $350.593 vs $225.051 millones (p. 14)",
+        "Gasto neto de provisiones $241.316 vs $198.138 millones (p. 14)",
+        "Cartera bruta $22.720.572 vs $22.416.978 millones; consumo 68,3 % (p. 9, p. 10)",
+        "Mora >30 días 2,6 %, C-D-E 3,2 %, cobertura 185,3 % (p. 10)",
+        "Depósitos $27.400.756 vs $25.789.300 millones (p. 11)",
+        "Solvencia total 13,39 %, básica 11,64 % (p. 7, p. 13)",
+        "Libranzas: mayor desembolso acumulado en 2026 (p. 3)"
+      ],
+      "nota": "El PDF es el informe trimestral con cifras separadas; en la p. 9 dice que la cartera creció \"$304 millones\", pero la tabla (p. 10) da $303.594 millones."
+    },
+    "1-6": {
+      "banco": "Itaú",
+      "periodo": "Septiembre 2026",
+      "titular": "Pérdida de $442,2 mil millones a septiembre por los costos de ceder su banca de personas a Banco de Bogotá",
+      "puntos": [
+        {
+          "tipo": "alerta",
+          "texto": "Pérdida de $442,2 mil millones en enero-septiembre (2025: utilidad de $44,1 mil millones) por $525,2 mil millones de costos únicos de la cesión."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Sin esos efectos extraordinarios, el banco calcula una utilidad recurrente de $130,3 mil millones en el periodo."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Cartera bruta de $12,91 billones, casi toda de empresas; esa cartera creció 4,1 % en un año. Consumo y vivienda pasaron a Banco de Bogotá."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Mora a 30 días de 3,1 % (4,0 % hace un año) y cobertura de 143,4 %; solvencia total de 16,2 % tras una capitalización de $240 mil millones."
+        }
+      ],
+      "para_ti": "Desde el 1 de agosto de 2026 Itaú atiende solo a empresas: los créditos, cuentas y depósitos de personas pasaron a Banco de Bogotá, que ahora los atiende.",
+      "cifras": [
+        "Utilidad 9M 2026 -$442.235 vs. $44.093 millones; efectos extraordinarios $525.207 millones; recurrente $130.332 millones (p. 14)",
+        "Cartera bruta $12.909.300 vs. $18.777.978 sep. 2025; comercial +4,1 % (p. 7, 9)",
+        "ICV 30+ 3,1 % vs. 4,0 %; cobertura 143,4 % (p. 10)",
+        "Depósitos $13.416.175 vs. $17.403.584 millones; $3,98 billones transferidos (p. 11)",
+        "Patrimonio $2.727.191 millones; capitalización $240.000 millones (p. 11-12)",
+        "Solvencia total individual 16,2 % (p. 12)"
+      ],
+      "nota": "Informe resumido sin notas; los depósitos cayeron 22,9 % en un año, sobre todo por la cesión de la banca minorista."
+    },
+    "1-7": {
+      "banco": "Bancolombia",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $5,93 billones de enero a septiembre de 2026, 23 % más que un año antes, con menos cartera vencida",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera vencida a 30 días bajó a 3,65 % (4,03 % un año antes) y las provisiones cubren 1,56 veces esos créditos vencidos."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Prestó 12 % más en un año ($219,7 billones), sobre todo a empresas; los depósitos de clientes suman $216,1 billones."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "El gasto en provisiones subió 38 % ($2,98 billones): según el banco, por algunas empresas grandes y más reservas en consumo."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La solvencia bajó a 13,71 % (14,14 % un año antes) al prestar más rápido de lo que creció su capital; el mínimo es 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "El banco presta más y tiene menos mora. En el último trimestre apartó más reservas para créditos de consumo, lo que muestra que vigila más el riesgo en ese tipo de crédito.",
+      "cifras": [],
+      "nota": ""
+    },
+    "1-9": {
+      "banco": "Citibank",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $730,7 mil millones a septiembre, 44 % más que un año antes, con menos cartera",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad de enero a septiembre fue $730,7 mil millones, frente a $508,2 mil millones en 2025; el ingreso neto de la operación subió 47 %."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "El gasto neto en deterioro de cartera bajó a $0,1 mil millones, desde $25,4 mil millones; la cartera bruta bajó 11,6 % desde diciembre, a $3,28 billones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Los depósitos subieron 47 % desde diciembre, a $12,06 billones, sobre todo en cuentas corrientes; el patrimonio llegó a $2,75 billones."
+        }
+      ],
+      "para_ti": "Citibank atiende solo a empresas: su cartera es 100 % comercial. No ofrece créditos de consumo ni de vivienda a personas.",
+      "cifras": [
+        "Resultado del período 9M 2026 $730.663.844 miles vs. $508.205.402 miles 9M 2025 (p. 8)",
+        "Ingreso neto por actividades ordinarias $1.083.711.391 miles vs. $736.752.676 miles (p. 8)",
+        "Cartera comercial bruta $3.280.629.006 miles vs. $3.710.463.220 miles dic 2025 (p. 6 y p. 25)",
+        "Deterioro de cartera y cuentas por cobrar neto $111.009 miles vs. $25.402.474 miles (p. 38)",
+        "Depósitos y exigibilidades $12.058.600.098 miles vs. $8.185.465.874 miles dic 2025 (p. 27)",
+        "Total patrimonio $2.754.197.828 miles (p. 7)"
+      ],
+      "nota": "El PDF no trae relación de solvencia ni indicador de mora o calificación de cartera."
+    },
+    "1-12": {
+      "banco": "GNB Sudameris",
+      "periodo": "Junio 2026",
+      "titular": "Utilidad de $769,2 mil millones en el primer semestre, 2,6 veces la de 2025, impulsada por sus filiales",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "Utilidad de $769,2 mil millones en enero-junio (2025: $301,1 mil millones); $652,0 mil millones vienen de sus filiales, como los bancos GNB de Perú y Paraguay."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "Su gasto por intereses ($1,24 billones) superó su ingreso por intereses ($1,00 billones); el resultado se apoya en filiales, inversiones y otros ingresos."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Gasto en provisiones de cartera de $194,5 mil millones, 46 % menos que un año antes; la cartera C, D y E es 3,0 % y la mora reportada, 1,30 %."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Cartera bruta de $12,88 billones, 8,5 % más que en diciembre; depósitos de $25,54 billones, 4,8 % más."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Solvencia total de 15,32 %, por encima del mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Más de la mitad de la cartera de GNB Sudameris son créditos de libranza (con descuento de nómina o pensión); el resto es sobre todo crédito a empresas.",
+      "cifras": [
+        "Utilidad neta 1S 2026 $769.220 vs. $301.079 millones (p. 48)",
+        "Participación en filiales $651.980 vs. $555.611 millones (p. 48)",
+        "Ingresos por intereses $1.001.379 y gasto por intereses $1.243.866 millones (p. 48)",
+        "Deterioro de cartera $194.458 vs. $363.173 millones (p. 48)",
+        "Otros ingresos diversos $311.254 millones por cartera castigada y reintegro de provisiones (p. 85)",
+        "Cartera bruta $12.879.193 vs. $11.869.424 dic. 2025; libranza $6.858.399 (p. 67)",
+        "Cartera C, D y E $393.998 millones = 3,0 % con intereses (p. 70)",
+        "Indicador de calidad 1,30 % (marzo 1,10 %) (p. 27-28)",
+        "Depósitos $25.542.866 vs. $24.375.715 millones (p. 78)",
+        "Solvencia total 15,32 %, básica 14,86 % (p. 89)"
+      ],
+      "nota": "El PDF va a junio de 2026 (el CUIF ya va a agosto); los otros ingresos subieron a $400,9 mil millones (2025: $81,4 mil millones) por recuperaciones."
+    },
+    "1-13": {
+      "banco": "BBVA",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $753.403 millones de enero a septiembre de 2026, más del triple que un año antes, con menos mora",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad subió 219 % por más ingresos por intereses (+15,8 %), comisiones (+89,8 %) e inversiones (+37,5 %)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera en mora bajó de 3,02 % a 2,43 % en 2026, y las provisiones cubren 1,76 veces esos créditos."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Solvencia de 14,31 %, por encima del mínimo de 11,5 % con colchones; los depósitos crecieron 8,6 %, a $89,0 billones."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La cartera con pocos días de atraso subió 30,5 % en el año; el sismo de agosto la presionó en las zonas afectadas."
+        }
+      ],
+      "para_ti": "El banco presta más (su cartera creció 5,8 % en 2026) y tiene menos mora que a finales de 2025. En 2024 tuvo pérdidas; en 2025 y 2026 volvió a ganar.",
+      "cifras": [],
+      "nota": ""
+    },
+    "1-23": {
+      "banco": "Banco de Occidente",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $493.671 millones de enero a septiembre de 2026, 10,6 % más que un año antes",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad creció por los ingresos de inversiones y derivados (+53 %), que compensaron un margen de intereses más bajo (−5,3 %)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La solvencia subió a 13,15 % (12,50 % en diciembre de 2025) tras un crédito subordinado de USD 150 millones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera de mayor riesgo (calificaciones C, D y E) bajó a 5,9 % del total, desde 6,2 % en diciembre de 2025."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "En el tercer trimestre ganó $127.086 millones, 14 % menos que en el mismo trimestre de 2025, y lo que paga en intereses subió 24 %."
+        }
+      ],
+      "para_ti": "El banco presta $54,3 billones, sobre todo a empresas (68 %) y en consumo (24 %). El 91 % de sus créditos está en calificación A, es decir, al día.",
+      "cifras": [],
+      "nota": ""
+    },
+    "1-30": {
+      "banco": "Banco Caja Social",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $239.600 millones a septiembre de 2026, más del triple que un año antes ($74.800 millones)",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "El ingreso neto por intereses subió 11,8 %, a $1,54 billones, por más cartera y tasas; el deterioro neto de cartera bajó 9,2 %, a $271.700 millones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta creció 9,1 % en el año, a $19,99 billones de capital; casi la mitad (49 %) es crédito de vivienda."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La cartera vencida es 4,6 % y la calificada C, D y E llega a 5,6 % del saldo, con $662.500 millones en vivienda; el banco dice que viene mejorando."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Las captaciones del público sumaron $21,35 billones, 11,2 % más que hace un año."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La solvencia total subió a 17,45 % (14,43 % en diciembre) por bonos subordinados de mayo de 2026; el mínimo es 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Atiende sobre todo a personas: vivienda, consumo y microcrédito para pequeños negocios. Su utilidad viene de un margen mayor y de menos gasto en deterioro de cartera.",
+      "cifras": [
+        "Utilidad ene-sep $239.572 vs $74.808 millones (p. 18)",
+        "Resultado neto de intereses $1.540.771 vs $1.377.949 millones (p. 18)",
+        "Deterioro neto de cartera $271.657 millones, -9,23 % (p. 5, p. 18)",
+        "Cartera capital $19.986.051 vs $18.325.332 millones; vivienda $9.845.199 (p. 37)",
+        "Cartera C+D+E $1.137.329 de $20.303.916 millones expuestos (5,6 %, cálculo propio) (p. 38)",
+        "Cartera vencida 4,60 % (p. 5)",
+        "Captaciones del público $21,35 billones, +11,20 % anual (p. 6)",
+        "Solvencia total 17,45 % vs 14,43 % (p. 62)"
+      ],
+      "nota": "Las tablas de cartera (p. 37-38) son imágenes y se leyeron renderizadas; el 5,6 % C-D-E es cálculo propio y difiere del \"indicador de riesgo\" de 6,77 % que da el banco (p. 5)."
+    },
+    "1-39": {
+      "banco": "Davivienda",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $1,75 billones de enero a septiembre de 2026, 43 % más que un año antes",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad subió por más ingresos de cartera (+18,5 %), menos gasto en provisiones (−4,8 %) e ingresos por tasa de cambio."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Solvencia de 18,42 %, por encima del mínimo de 11,5 % que exige la norma con colchones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera con deterioro bajó a 5,92 % (6,02 % en diciembre de 2025) y mejoró en vivienda y consumo."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "En empresas la cartera con deterioro subió a 6,19 %, y en pymes está en 14,30 %."
+        }
+      ],
+      "para_ti": "El banco presta más: su cartera creció 6,7 % en 2026 y el consumo 9,9 %. Desde el 1 de noviembre de 2026 recibe las operaciones de Davibank, así que algunos productos pasan a Davivienda.",
+      "cifras": [],
+      "nota": ""
+    },
+    "1-42": {
+      "banco": "Davibank",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $115.200 millones a septiembre (vs. $22.200 millones en 2025); desde el 1 nov 2026 su negocio pasó a Davivienda",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "El ingreso neto por intereses y valoración subió 19,7 %, a $1,84 billones en nueve meses, lo que explica la mayor utilidad."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La solvencia del banco pasó de 11,54 % a 13,78 % tras emitir $300.000 millones en bonos subordinados (mínimo 9 %, 11,5 % con colchones)."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La cartera bruta bajó 8,2 %, a $27,32 billones: la comercial cayó 25 % por prepagos y venta de cartera; la de consumo creció 1,8 %."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "El gasto en deterioro fue $894.600 millones en nueve meses (+4,3 %) y castigó $726.700 millones. Los depósitos bajaron 6,4 %, a $27,73 billones."
+        }
+      ],
+      "para_ti": "Desde el 1 de noviembre de 2026 los créditos, depósitos y contratos de Davibank en Colombia pasaron a Banco Davivienda; los productos nuevos se tramitan allí.",
+      "cifras": [
+        "Utilidad 9 meses $115.242 vs $22.209 millones (p. 10)",
+        "Ingreso neto por intereses y valoración $1.841.059 vs $1.537.523 millones (p. 10)",
+        "Deterioro de activos financieros $894.646 vs $857.479 millones (p. 10)",
+        "Cartera consumo $19.129.683 y comercial $8.194.906 millones vs $18.788.349 y $10.963.623 (p. 8, p. 35)",
+        "Castigos $726.668 millones (p. 36)",
+        "Depósitos $27.734.797 vs $29.637.357 millones (p. 9)",
+        "Solvencia DAVIbank S.A. 13,78 % vs 11,54 % (p. 31)",
+        "Bonos subordinados $300.000 millones (p. 17)",
+        "Cesión a Davivienda efectiva 1 nov 2026, activos $38,3 billones (p. 59)"
+      ],
+      "nota": "El PDF solo trae estados consolidados (banco y subsidiarias Fiduciaria y Comisionista); no hay cifras separadas, se usaron las consolidadas."
+    },
+    "1-43": {
+      "banco": "Banco Agrario",
+      "periodo": "Junio 2026",
+      "titular": "Ganó $344.100 millones en el primer semestre de 2026, 6,5 % más que un año antes, con solvencia de 17,83 %",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "El ingreso neto por intereses subió 22,8 %, a $940.300 millones, sobre todo por los intereses de microcrédito ($905.500 millones)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta creció 4,2 % en el semestre, a $24,92 billones; el 48,9 % es microcrédito y el 54 % se fondea con redescuento de Finagro."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La provisión neta de cartera subió $28.850 millones, a $236.100 millones; el banco lo atribuye a deterioro por factores climáticos y económicos."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Los depósitos sumaron $24,84 billones (+4,8 % frente a diciembre) y la solvencia total fue 17,83 % (mínimo 9 %, 11,5 % con colchones)."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "Los gastos administrativos subieron 31 % por el impuesto al patrimonio de 2026 ($60.100 millones), registrado como gasto del semestre."
+        }
+      ],
+      "para_ti": "Es un banco del Estado enfocado en el campo: casi la mitad de su cartera es microcrédito y gran parte de sus créditos son agropecuarios con recursos de Finagro.",
+      "cifras": [
+        "Utilidad 6 meses $344.136 vs $323.015 millones (p. 6)",
+        "Ingresos netos por intereses $940.314 vs $765.470 millones (p. 6)",
+        "Intereses de microcrédito $905.539 millones (p. 52)",
+        "Cartera bruta (capital) $24.919.407 vs $23.912.080 millones a dic 2025 (p. 24)",
+        "Microcrédito 48,92 % de la cartera bruta (p. 24)",
+        "Redescuento Finagro $13.471.960 millones (p. 24)",
+        "Provisión neta cargada a gasto $236.076 vs $207.225 millones (p. 25, p. 26)",
+        "Depósitos $24.840.801 vs $23.692.310 millones (p. 5)",
+        "Solvencia total 17,83 % (p. 52)",
+        "Gastos de administración $468.749 vs $357.903 millones; impuesto al patrimonio $60.081 millones (p. 58)"
+      ],
+      "nota": "El PDF va a junio 2026 (el CUIF a agosto). No trae indicador de mora (ICV) ni cartera por calificación C-D-E."
+    },
+    "1-49": {
+      "banco": "AV Villas",
+      "periodo": "Septiembre 2026",
+      "titular": "Vuelve a ganar: utilidad de $19,2 mil millones a septiembre frente a una pérdida de $55,5 mil millones en 2025",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "Utilidad de $19,2 mil millones en enero-septiembre (2025: pérdida de $55,5 mil millones); el banco reporta ganancias cada mes desde octubre de 2025."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Cartera bruta de $17,69 billones, 4,9 % más que en diciembre; la calificada C, D y E bajó de 3,3 % a 3,2 % del total."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Depósitos de clientes de $22,43 billones, 19,1 % más que en diciembre de 2025."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "Solvencia total de 11,84 %, por encima del mínimo de 9 % (11,5 % con colchones) pero con poco margen; el banco emitió bonos subordinados en 2025 y 2026."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "El gasto en provisiones subió 13,1 %, a $260,5 mil millones; el banco dice que el alto costo de los depósitos sigue presionando su margen."
+        }
+      ],
+      "para_ti": "AV Villas presta sobre todo a personas asalariadas (cerca del 70 % de su cartera, en consumo y vivienda). En 2026 volvió a tener utilidades tras pérdidas en 2023, 2024 y 2025.",
+      "cifras": [
+        "Utilidad neta 9M 2026 $19.186 millones vs. (55.524) en 9M 2025 (p. 8)",
+        "Ganancias desde octubre de 2025 y presión del costo del pasivo (p. 13)",
+        "Cartera bruta $17.690.584 vs. $16.857.612 dic. 2025 (p. 23)",
+        "Cartera C, D y E $566.510 millones = 3,2 % (dic. 2025: 3,3 %) (p. 24-25)",
+        "Asalariados 69,62 % de la cartera (p. 25)",
+        "Depósitos de clientes $22.426.804 vs. $18.834.191 (p. 7)",
+        "Deterioro de activos financieros $260.493 vs. $230.337 millones (p. 8)",
+        "Solvencia total 11,84 %, básica 9,29 % (p. 53)",
+        "Bonos subordinados $50 mil millones sep. 2025 y $100 mil millones jun. 2026 (p. 13)"
+      ],
+      "nota": "Las notas comparan la cartera solo con diciembre de 2025, no con septiembre de 2025."
+    },
+    "1-51": {
+      "banco": "Ban100",
+      "periodo": "Junio 2026",
+      "titular": "Duplicó su utilidad del semestre, a $13,5 mil millones, pero subió la mora de su cartera de libranza",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad de enero a junio fue $13,5 mil millones, frente a $6,7 mil millones en 2025, con recuperaciones de cartera castigada por $31,3 mil millones."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La mora de la cartera de consumo pasó de 1,24 % en diciembre a 2,85 % en junio; la cartera vencida de consumo subió de $21,7 a $53,3 mil millones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta creció 5,6 % desde diciembre, a $2,02 billones; 98 % es consumo, sobre todo libranza. Las calificaciones C, D y E son 3,8 % del capital."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Los depósitos subieron 6,5 %, a $2,59 billones, y la solvencia fue 13,40 %, sobre el mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Ban100 presta casi solo a personas, sobre todo con libranza (crédito descontado de la nómina o pensión). Ya no coloca crédito comercial ni microcrédito.",
+      "cifras": [
+        "Utilidad del periodo 1S 2026 $13.509 millones vs. $6.658 millones 1S 2025 (p. 6)",
+        "Cartera bruta comercial $41.900 + microcrédito $5.476 + consumo $1.971.238 millones vs. $1.911.182 millones dic 2025 (p. 5)",
+        "ICV consumo 2,85 % jun 2026 vs. 1,24 % dic 2025; vencida $53.322 vs. $21.653 millones (p. 20)",
+        "Calificación C+D+E capital $73.322 de $1.912.244 millones (p. 37)",
+        "Provisión cargada $55.253 millones; reintegros $48.659; recuperación castigada $31.254 millones (p. 36)",
+        "Depósitos y exigibilidades $2.592.903 vs. $2.434.022 millones (p. 5)",
+        "Relación de solvencia 13,40 % (p. 63)"
+      ],
+      "nota": "El deterioro neto aparece como ingreso ($24.692 millones) porque reintegros y recuperaciones superaron las provisiones."
+    },
+    "1-52": {
+      "banco": "Bancamía",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $96.821 millones a septiembre de 2026, 73 % más que un año antes, tras las pérdidas de 2023 y 2024",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad de enero a septiembre llegó a $96.821 millones (frente a $56.036 millones en 2025), por un margen de intereses 26 % mayor."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta subió 16 % en un año, a $2,46 billones; CDT y cuentas de ahorro suman $2,19 billones (+29 %) y bajó la deuda con bancos."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La cartera en mora creció 15 %, a $128.484 millones (5,2 % de la cartera bruta), y el gasto neto en provisiones subió 20 %, a $110.305 millones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La solvencia total fue 22,15 % (19,12 % en diciembre de 2025), por encima del mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Bancamía presta sobre todo microcrédito a microempresarios, un segmento con mora y tasas naturalmente más altas que la banca tradicional.",
+      "cifras": [
+        "Utilidad 9 meses $96.821 M vs $56.036 M (p. 8)",
+        "Cartera bruta $2.456.372 M vs $2.114.568 M, +16 % (p. 7)",
+        "Cartera en mora $128.484 M (p. 7)",
+        "Ahorro $311.636 M y CDT $1.876.177 M; bancos -73 % (p. 6)",
+        "Gasto neto por deterioro de crédito $110.305 M vs $92.248 M (p. 62)",
+        "Solvencia total 22,15 % vs 19,12 % dic. 2025 (p. 11)",
+        "Margen de intereses +26 % (p. 8)"
+      ],
+      "nota": "El PDF va a septiembre de 2026 (CUIF a agosto). El 5,2 % de mora se calcula con la cartera en mora y la cartera bruta de la metodología de gestión del banco."
+    },
+    "1-53": {
+      "banco": "Banco W",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $20.450 millones a septiembre de 2026, 25 % más que un año antes, pese a más gasto en provisiones",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad de enero a septiembre fue $20.450 millones (frente a $16.373 millones en 2025), con ingresos por intereses 13 % mayores."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "El gasto neto en provisiones subió 61 %, a $117.693 millones, y la mora a más de 30 días pasó de 4,03 % a 4,74 % en un año."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "En la cartera de vehículos la mora llegó a 12,18 % en septiembre; el banco dejó de colocar créditos de vehículos y de libranza."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta subió 4,8 % en un año, a $2,06 billones; los depósitos suman $1,56 billones y la solvencia total fue 19,11 %."
+        }
+      ],
+      "para_ti": "Banco W presta sobre todo microcrédito (82 % de su cartera) a microempresarios, un segmento con mora y tasas naturalmente más altas.",
+      "cifras": [
+        "Utilidad 9 meses $20.450 M vs $16.373 M (p. 6)",
+        "Deterioro neto $117.693 M, +61 % (p. 7)",
+        "Mora >30 días total 4,74 % vs 4,03 % (p. 7)",
+        "Mora vehículos 12,18 % (p. 9)",
+        "Cartera bruta $2.055.925 M; +4,81 % anual (p. 5, p. 24)",
+        "Depósitos de clientes $1.557.197 M (p. 25)",
+        "Solvencia total 19,11 % (p. 30)",
+        "Comisiones netas -17 % por menos remesas (p. 7)"
+      ],
+      "nota": "El PDF va a septiembre de 2026 (CUIF a agosto). La rentabilidad es baja frente a los otros bancos de microcrédito porque la utilidad es pequeña frente a su patrimonio."
+    },
+    "1-54": {
+      "banco": "Bancoomeva",
+      "periodo": "Junio 2026",
+      "titular": "Pérdida de $20,1 mil millones en el primer semestre, menor que los $56,4 mil millones de 2025",
+      "puntos": [
+        {
+          "tipo": "alerta",
+          "texto": "Perdió $20,1 mil millones entre enero y junio de 2026; en el mismo semestre de 2025 la pérdida fue de $56,4 mil millones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "El gasto neto en provisiones bajó a $37,8 mil millones desde $117,4 mil millones del primer semestre de 2025."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "Vendió cartera vencida con pérdida de $64,3 mil millones, compensada en buena parte con provisiones que ya tenía; la cartera en incumplimiento subió."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Solvencia total de 16,92 % (mínimo 9 %, 11,5 % con colchones); recibió $30 mil millones de capital en abril y espera $60 mil millones más."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Cartera bruta de $4,42 billones (+1,7 % desde diciembre) y depósitos de $5,17 billones (+8,5 %)."
+        }
+      ],
+      "para_ti": "Banco del grupo Coomeva: presta en consumo, vivienda y a empresas. La cartera de consumo y la de vivienda bajaron en el semestre; creció la de empresas.",
+      "cifras": [
+        "Pérdida 1S 2026 -$20.058 millones vs -$56.413 millones 1S 2025 (p. 7)",
+        "Deterioro neto 1S $37.811 millones vs $117.408 millones (p. 7)",
+        "Pérdida en venta de cartera $64.264 millones; devolución de provisiones $62.844 millones (p. 71-72)",
+        "Cartera bruta capital $4.422.894 millones vs $4.350.276 millones dic-25 (p. 73)",
+        "Incumplimiento + vivienda C/D/E $183.127 millones (4,1 %) vs $152.607 millones (3,5 %) dic-25 (p. 75 y 77)",
+        "Depósitos $5.169.998 millones vs $4.764.808 millones dic-25 (p. 6)",
+        "Solvencia total 16,92 %, básica 9,53 % (p. 158)",
+        "Capitalización $30.000 millones abril 2026 (p. 13)"
+      ],
+      "nota": "El PDF es de junio 2026; el estado de resultados y el balance son imágenes (p. 6 y 7)."
+    },
+    "1-55": {
+      "banco": "Banco Finandina",
+      "periodo": "Junio 2026",
+      "titular": "Utilidad de $22,1 mil millones en el primer semestre, tres veces la de 2025, por menos provisiones",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "Ganó $22,1 mil millones entre enero y junio de 2026, frente a $6,9 mil millones en el mismo semestre de 2025."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "El gasto neto en provisiones bajó a la mitad: $42,3 mil millones frente a $83,0 mil millones un año antes."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La cartera vencida por calificación es 9,0 % (10,0 % en diciembre) y la mora es 5,2 % (5,5 %): bajan, pero siguen altas para un banco."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Los depósitos crecieron a $2,84 billones (+11,2 % desde diciembre), mientras la cartera bruta quedó en $3,65 billones (-0,7 %)."
+        }
+      ],
+      "para_ti": "Su línea principal es crédito y leasing ($2,65 billones); también da libranza, libre inversión y tarjeta. Las garantías equivalen al 84 % de su cartera neta.",
+      "cifras": [
+        "Utilidad 1S 2026 $22.074 millones vs $6.890 millones 1S 2025 (p. 3)",
+        "Deterioro neto 1S $42.264 millones vs $82.956 millones (p. 3)",
+        "Cartera bruta $3.645.158 millones vs $3.669.360 millones dic-25 (p. 2 y 24)",
+        "ICV por calificación 9,02 % vs 10,01 %; por mora 5,23 % vs 5,46 %; garantía idónea/cartera neta 83,6 %; crédito y leasing $2.653.955 millones (p. 24)",
+        "Depósitos $2.836.123 millones vs $2.550.279 millones dic-25 (p. 2)"
+      ],
+      "nota": "El PDF no trae la relación de solvencia; solo el patrimonio técnico de $434.818 millones (p. 23)."
+    },
+    "1-56": {
+      "banco": "Banco Falabella",
+      "periodo": "Septiembre 2026",
+      "titular": "Utilidad de $152,7 mil millones a septiembre, el doble que en 2025, con menos gasto en provisiones",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "Ganó $152,7 mil millones en nueve meses de 2026, frente a $76,4 mil millones en el mismo periodo de 2025 (+100 %)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta de consumo llegó a $5,85 billones (+13,3 % en un año), impulsada por tarjetas de crédito y libre inversión."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Mora de más de 30 días en 4,6 % y de más de 90 días en 2,4 %; el gasto en provisiones bajó de $326,7 a $261,2 mil millones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Solvencia de 17,32 %, por encima del mínimo de 9 % (11,5 % con colchones); depósitos de $5,16 billones."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "Los créditos calificados C, D y E suman $225,6 mil millones (3,9 % de la cartera), algo menos que el 4,3 % de un año antes."
+        }
+      ],
+      "para_ti": "Banco centrado en tarjetas de crédito y crédito de libre inversión para personas; todo su crédito es de consumo.",
+      "cifras": [
+        "Utilidad 9M 2026 $152.746 millones vs $76.441 millones 9M 2025 (p. 22)",
+        "Cartera bruta sep-26 $5.851.679 millones vs $5.163.741 sep-25; C+D+E $225.582 millones (p. 12)",
+        "Mora 30+ 4,6 %, 90+ 2,4 %; crecimiento de cartera 13,3 % (p. 6)",
+        "Deterioro de cartera 9M $261.158 millones vs $326.703 millones (p. 51)",
+        "Solvencia 17,32 % sep-26 vs 16,49 % sep-25 (p. 16)",
+        "Depósitos $5.157.203 millones sep-26 vs $4.940.475 millones dic-25 (p. 21)"
+      ],
+      "nota": ""
+    },
+    "1-57": {
+      "banco": "Banco Pichincha",
+      "periodo": "Septiembre 2026",
+      "titular": "Pérdida de $104,8 mil millones a septiembre, menor que en 2025, con la cartera creciendo 48 % en el año",
+      "puntos": [
+        {
+          "tipo": "alerta",
+          "texto": "Perdió $104,8 mil millones en nueve meses de 2026, frente a $120,2 mil millones en el mismo periodo de 2025; lleva varios años con pérdidas."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta pasó de $3,24 a $4,79 billones desde diciembre (+48 %), sobre todo por libranza oficial y crédito empresarial."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "El gasto neto en provisiones fue $86,7 mil millones; el banco reporta casos de insolvencia de clientes en la libranza oficial."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "El accionista de Ecuador aportó $162,5 mil millones de capital en 2026; la solvencia quedó en 12,81 % (mínimo 9 %, 11,5 % con colchones)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera con más de 30 días de mora es baja: 1,2 % del total. Los depósitos subieron a $4,27 billones (+27 % desde diciembre)."
+        }
+      ],
+      "para_ti": "Su crédito a personas es sobre todo libranza (descuento por nómina) y también presta a empresas. Sus pérdidas se han cubierto con aportes de capital del accionista.",
+      "cifras": [
+        "Resultado 9M 2026 -$104.752 millones vs -$120.194 millones 9M 2025 (p. 5)",
+        "Deterioro neto de recuperaciones 9M -$86.677 millones vs +$12.442 millones 9M 2025 (p. 5)",
+        "Cartera bruta $4.789.367 millones sep-26 vs $3.244.156 millones dic-25 (p. 4 y 20)",
+        "Mora >30 días $57.163 millones, 1,2 % (cálculo propio, p. 22)",
+        "Depósitos $4.268.200 millones vs $3.359.028 millones dic-25 (p. 4)",
+        "Capitalizaciones $162.499 millones; solvencia 12,81 % (p. 9, 12 y 13)",
+        "Insolvencias en libranza oficial (p. 10)"
+      ],
+      "nota": "El banco cita también una cartera bruta de gestión de $4.812.679 millones con +72 % anual (p. 11); se usó la del balance."
+    },
+    "1-58": {
+      "banco": "Banco Coopcentral",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $10,1 mil millones a septiembre, 43,5 % más que en 2025, con mora de 1,3 % y depósitos a la baja",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "Excedentes de enero a septiembre de $10,1 mil millones (+43,5 %), por más ingresos de cartera, depósitos más baratos y un recobro puntual de $3,5 mil millones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Mora de 1,3 % (1,7 % en diciembre de 2025) y provisiones que cubren 296,6 % de la cartera vencida."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "Los depósitos bajaron 15,3 % desde diciembre de 2025, a $918,8 mil millones, y la liquidez de corto plazo bajó de 248,3 % a 185,5 %."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Cartera bruta de $755,2 mil millones, 16,8 % más que hace un año según el banco; 95,6 % es crédito a empresas y cooperativas."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Solvencia de 21,5 %, por encima del mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Es un banco cooperativo que presta y da liquidez sobre todo a cooperativas y entidades del sector solidario; el crédito de consumo es solo el 4,3 % de su cartera.",
+      "cifras": [
+        "Excedentes ene-sep 2026 $10.062.751 miles vs $7.014.180 miles (p. 25, p. 6-7)",
+        "Recuperación cartera castigada Cooperan $3.490.000 miles (p. 6)",
+        "Cartera bruta comercial 721.858.189 + consumo 32.179.519 + micro 1.190.969 miles = $755,2 mil millones (p. 24)",
+        "Crecimiento cartera sep26-sep25 16,8 %; calidad 1,3 %; cobertura 296,6 % (p. 4-5)",
+        "Cartera B, C, D y E 3,78 % vs 6,6 % dic 2025 (p. 5)",
+        "Depósitos $918.801.568 miles, -15,3 % vs dic 2025 (p. 6)",
+        "IRL 248,30 % a 185,50 % (p. 7)",
+        "Solvencia 21,5 % (p. 4, p. 7)"
+      ],
+      "nota": "El crecimiento de 16,8 % anual es el que reporta el banco; frente a diciembre de 2025 la cartera bruta bajó 0,9 %."
+    },
+    "1-59": {
+      "banco": "Banco Santander",
+      "periodo": "Septiembre 2026",
+      "titular": "Utilidad de $91,4 mil millones a septiembre, 166 % más que en 2025, con más crédito de consumo para vehículos",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "Utilidad de $91,4 mil millones en enero-septiembre (2025: $34,4 mil millones); el ingreso neto por intereses subió 87 % y las comisiones, 120 %."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Cartera bruta de $8,27 billones, 9,9 % más que en diciembre; la de consumo (sobre todo vehículos) creció 35 % y ya es 47 % del total."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "Provisiones de $203,1 mil millones, 19 % más que un año antes. La mora (ICV) es 2,8 % en total y 7,6 % en microcrédito, que bajó desde 8,2 %."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Depósitos de $8,24 billones, 11 % más que en diciembre, y solvencia total de 14,04 %, sobre el mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Santander presta a empresas y, a personas, sobre todo para comprar vehículo; también da microcrédito. Su cartera de consumo es la que más ha crecido en 2026.",
+      "cifras": [
+        "Resultado 9M 2026 $91.436 vs. $34.440 millones (p. 33)",
+        "Ingreso neto por intereses $302.994 vs. $162.139 millones (p. 33)",
+        "Provisiones $203.055 vs. $170.087 millones (p. 33)",
+        "Cartera bruta $8.268.318 vs. $7.523.192; consumo $3.913.360 vs. $2.896.673 (p. 32, 54)",
+        "ICV total 2,8 %, microcrédito 7,6 % (p. 24)",
+        "Depósitos (corriente, CDT y ahorro) $8.242.505 vs. $7.428.058 millones (p. 9, 32)",
+        "Solvencia total 14,04 %, básica 12,39 % (p. 84)"
+      ],
+      "nota": "El resumen de p. 9 da un margen de intereses 2025 de $132.139 millones; el estado de resultados (p. 33) dice $162.139 millones. Se usó el estado."
+    },
+    "1-60": {
+      "banco": "Banco Mundo Mujer",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $94.906 millones a septiembre de 2026, 3 % más que un año antes; el tercer trimestre bajó",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad de enero a septiembre fue $94.906 millones (frente a $92.351 millones en 2025), con intereses de cartera 11 % mayores."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "En el tercer trimestre ganó $26.944 millones, 25 % menos que un año antes, por más provisiones e impuestos."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta creció 7,9 % en el año, a $3,17 billones, y los depósitos subieron 11,6 %, a $2,82 billones."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La cartera calificada C, D y E es 7,0 % del total (6,8 % en diciembre de 2025); el gasto neto en provisiones subió 12 %, a $127.090 millones."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La relación de solvencia fue 16,1 %, por encima del mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Mundo Mujer presta sobre todo microcrédito (74 % de su cartera) a microempresarios, un segmento con mora y tasas naturalmente más altas.",
+      "cifras": [
+        "Utilidad 9 meses $94.905.813 miles vs $92.350.930 miles (p. 6)",
+        "Utilidad 3T $26.944.462 miles vs $35.787.627 miles (p. 6)",
+        "Cartera bruta (capital) $3.172.586 M vs $2.940.206 M dic. 2025 (p. 5, p. 18)",
+        "Depósitos $2.818.893 M vs $2.524.978 M dic. 2025 (p. 5)",
+        "Calificaciones C-D-E $222.303 M, 7,0 % (p. 18)",
+        "Provisiones netas $127.090 M vs $113.554 M (p. 6)",
+        "Solvencia (covenant BID) 16,1 %; vencida+reestructurada 5,2 % (p. 26)"
+      ],
+      "nota": "El PDF va a septiembre de 2026 (CUIF a agosto) y está en miles de pesos; el balance solo compara con diciembre de 2025, no con septiembre de 2025."
+    },
+    "1-62": {
+      "banco": "Mibanco",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $88.688 millones a septiembre de 2026, más del doble que un año antes, con cartera creciendo rápido",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad de enero a septiembre fue $88.688 millones (frente a $40.125 millones en 2025), con un ingreso neto por intereses 34 % mayor."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta creció 24 % en el año, a $3,16 billones; desde julio de 2026 es el primero en cartera de microcrédito vigente."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La mora a más de 30 días subió a 4,70 % en septiembre (unos 35 pb más que en junio); el banco lo atribuye al terremoto y al Fenómeno de El Niño."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Los depósitos subieron 29 % en un año, a $2,85 billones, y la solvencia total fue 20,94 %, sobre el mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Mibanco presta sobre todo microcrédito (85 % de su cartera) a microempresarios, un segmento con mora y tasas naturalmente más altas.",
+      "cifras": [
+        "Utilidad 9 meses $88.688 M vs $40.125 M (p. 17)",
+        "Ingreso neto por intereses $463.446 M vs $346.129 M (p. 17)",
+        "Deterioro de cartera neto $72.744 M vs $66.053 M (p. 17)",
+        "Cartera bruta $3.156.614 M, +23,94 % vs dic. 2025 (p. 23)",
+        "Mora >30 días 4,70 %; cobertura 155,16 % (p. 6, p. 23)",
+        "Depósitos $2.847.157 M, +29,2 % anual (p. 5, p. 16)",
+        "Solvencia total 20,94 % (p. 24)"
+      ],
+      "nota": "El PDF va a septiembre de 2026 (CUIF a agosto). El informe de gestión cita $121.995 M de provisiones netas, distinto del deterioro neto de $72.744 M del estado de resultados; se usó este último."
+    },
+    "1-63": {
+      "banco": "Banco Serfinanza",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $14,2 mil millones a septiembre, más del triple que en 2025, con menos mora y menos gasto en provisiones",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "Utilidad de enero a septiembre de $14,2 mil millones, frente a $4,3 mil millones en 2025, sobre todo porque el gasto en provisiones bajó 6,4 %."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Mora de 5,15 %, menor que el 6,51 % de hace un año; las provisiones cubren 155,65 % de la cartera vencida."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Cartera bruta de $2,46 billones (+5,6 %): consumo $1,62 billones (+3,3 %), con la libranza creciendo 63,4 %, y empresas $839.473 millones (+10 %)."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "El gasto en provisiones ($197,7 mil millones) equivale al 89 % de la utilidad antes de provisiones ($222,1 mil millones)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Depósitos: CDT por $2,07 billones (91,9 % de personas) y ahorros por $267.010 millones. Solvencia de 15,02 % (mínimo 9 %; 11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Atiende sobre todo a personas con crédito de consumo, libranza y la tarjeta de crédito Olímpica; también presta a empresas medianas y grandes.",
+      "cifras": [
+        "Utilidad ene-sep 2026 $14.201 millones vs $4.342 millones (p. 10, p. 29)",
+        "Provisiones $197.722 millones vs $211.280 millones, -6,4 %; utilidad antes de provisiones $222.085 millones (p. 10-11)",
+        "Cartera bruta $2,46 billones, +5,6 % anual (p. 6)",
+        "Consumo $1,62 billones +3,3 %; libranza $374.244 millones +63,4 %; comercial $839.473 millones +10 % (p. 7)",
+        "ICV 5,15 % vs 6,51 %; cobertura 155,65 % vs 124,78 % (p. 7-8)",
+        "CDT $2.071.577 millones, 91,9 % personas naturales; ahorro $267.010 millones (p. 6, p. 9)",
+        "Solvencia total 15,02 % (p. 10)",
+        "ROE 5,17 % vs 1,64 % (p. 11)"
+      ],
+      "nota": "El banco compara su solvencia con un mínimo de 10,5 % que incluye el colchón de conservación; se usa el mínimo estándar de la página."
+    },
+    "1-64": {
+      "banco": "J.P. Morgan",
+      "periodo": "Junio 2026",
+      "titular": "Triplicó su utilidad del semestre, a $89,1 mil millones, por ganancias en títulos de deuda pública",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "La utilidad de enero a junio fue $89,1 mil millones, frente a $28,9 mil millones en 2025, por valoración y venta de títulos de deuda pública."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Toda la cartera está en categoría A (riesgo normal) y no hay créditos reestructurados; la solvencia total fue 38,44 %."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta casi se triplicó desde diciembre, a $502,3 mil millones, repartida en 28 créditos a 7 clientes."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Las cuentas corrientes subieron 73 % desde diciembre, a $2,26 billones; el patrimonio llegó a $1,34 billones."
+        }
+      ],
+      "para_ti": "J.P. Morgan atiende solo a empresas y entidades: su cartera es comercial (28 créditos). No ofrece créditos a personas.",
+      "cifras": [
+        "Resultado neto 1S 2026 $89.063.255 miles vs. $28.864.810 miles 1S 2025 (p. 7)",
+        "Gastos provisiones cartera $4.475.030 miles vs. $2.111.946 miles (p. 7)",
+        "Cartera comercial bruta $502.309.079 miles vs. $177.126.823 miles dic 2025; 28 créditos en categoría A (p. 39)",
+        "Cuentas corrientes $2.262.128.633 miles vs. $1.308.249.686 miles dic 2025 (p. 4)",
+        "Índice de solvencia total 38,44 % a junio 2026 (p. 11)",
+        "Total patrimonio $1.343.799.940 miles (p. 5)",
+        "Utilidad en valoración y venta de deuda pública local (p. 51)"
+      ],
+      "nota": ""
+    },
+    "1-66": {
+      "banco": "BTG Pactual",
+      "periodo": "Septiembre 2026",
+      "titular": "Creció su cartera 49 % en el año, pero su utilidad a septiembre bajó 3 %, a $86,8 mil millones",
+      "puntos": [
+        {
+          "tipo": "alerta",
+          "texto": "La utilidad de enero a septiembre fue $86,8 mil millones, frente a $89,9 mil millones en 2025, por mayor costo de fondeo, gastos e impuestos."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "La cartera bruta subió 49 % desde diciembre, a $2,32 billones; la cartera en categoría C bajó a 1,7 % del capital, sin créditos en D ni E."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "El gasto neto en provisiones de cartera subió 78 % frente a 2025, a $21,1 mil millones, al crecer la cartera."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Los depósitos subieron 64 % desde diciembre, a $2,66 billones, y la solvencia fue 24,4 %, sobre el mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "BTG Pactual atiende solo a empresas: su cartera es comercial (corporativo, empresarial, pymes y microempresa). No ofrece créditos a personas.",
+      "cifras": [
+        "Resultado neto 9M 2026 $86.761.809 miles vs. $89.908.725 miles 9M 2025 (p. 29)",
+        "Provisión por deterioro de cartera neta $21.061.943 miles vs. $11.804.047 miles (p. 29)",
+        "Cartera comercial bruta $2.317.100.022 miles vs. $1.552.995.268 miles dic 2025 (p. 61)",
+        "Cartera C capital $38.435.010 miles de $2.285.081.728 miles; sin D ni E (p. 62)",
+        "Depósitos clientes $2.658.178.334 miles vs. $1.622.676.904 miles dic 2025 (p. 28)",
+        "Solvencia total 24,4 % sept 2026; 27,1 % ago 2026 (p. 9)",
+        "Causas: costo de fondeo, gastos e impuesto al patrimonio (p. 6 y p. 8)"
+      ],
+      "nota": "El CUIF ene-ago muestra +3 % en utilidad; el PDF a septiembre muestra -3 % frente a 9M 2025."
+    },
+    "1-67": {
+      "banco": "Banco Unión",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $3,0 mil millones a septiembre, 58 % menos que en 2025, por menos remesas y más provisiones",
+      "puntos": [
+        {
+          "tipo": "alerta",
+          "texto": "Utilidad de enero a septiembre de $3,0 mil millones, frente a $7,1 mil millones en 2025; solo el tercer trimestre dejó una pérdida de $150 millones."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "Causas que da el banco: menos comisiones por remesas y cambio de divisas, depósitos más caros y un deterioro neto de cartera de $37,0 mil millones (+36 %)."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "Mora de 5,84 % de la cartera, con provisiones que cubren 114,9 % de lo vencido."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Cartera bruta de $1,08 billones (+6,1 % anual), 77,8 % de consumo; depósitos de $1,20 billones (+8,8 % anual)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Solvencia de 15,02 %, por encima del mínimo de 9 % (11,5 % con colchones), y un crédito subordinado de BID Invest por $20.000 millones."
+        }
+      ],
+      "para_ti": "Atiende sobre todo a personas: créditos de consumo y libranza (incluidos pensionados), vivienda y pago de remesas. Las libranzas se volvieron más estrictas por insolvencias y embargos.",
+      "cifras": [
+        "Utilidad ene-sep 2026 $3.022.776 miles vs $7.121.981 miles; jul-sep -$149.511 miles (p. 25, p. 8, p. 11)",
+        "Deterioro neto ene-sep $36.960.719 miles vs $27.155.832 miles (p. 25)",
+        "Comisiones ene-sep $75.804.113 miles vs $93.793.043 miles (p. 25)",
+        "Cartera bruta $1.080.959.189 miles; consumo 77,80 % (p. 45); +6,1 % anual (p. 8)",
+        "Mora 5,84 %; cobertura 114,9 % (p. 8)",
+        "Depósitos de clientes $1.198.308.020 miles (p. 24); +8,76 % anual (p. 9)",
+        "Solvencia 15,02 %; crédito subordinado BID Invest $20.000 millones (p. 8-9)"
+      ],
+      "nota": "El banco compara su solvencia con un mínimo de 10,5 %; la solvencia aún no incluye un segundo crédito subordinado de $20.000 millones en trámite."
+    },
+    "1-68": {
+      "banco": "Banco Contactar",
+      "periodo": "Septiembre 2026",
+      "titular": "Ganó $21,0 mil millones a septiembre (frente a $3,7 mil millones en 2025) y su cartera creció 38,8 %",
+      "puntos": [
+        {
+          "tipo": "fortaleza",
+          "texto": "Utilidad de enero a septiembre de $21,0 mil millones, frente a $3,7 mil millones en 2025, por más cartera y un mayor margen de intereses."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Cartera bruta de $1,07 billones, 38,8 % más que hace un año; el microcrédito suma $1,0 billones y es casi toda la cartera."
+        },
+        {
+          "tipo": "alerta",
+          "texto": "La mora de más de 30 días subió de 3,54 % a 4,53 % en un año y el gasto en provisiones llegó a $45,9 mil millones (+167 %)."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Depósitos de clientes (CDT y ahorros) de $629,7 mil millones, frente a $353,3 mil millones en diciembre de 2025."
+        },
+        {
+          "tipo": "fortaleza",
+          "texto": "Solvencia total de 19,61 %, por encima del mínimo de 9 % (11,5 % con colchones)."
+        }
+      ],
+      "para_ti": "Es un banco de microcrédito para pequeños negocios y emprendedores; por eso su mora y sus tasas son naturalmente más altas que las de un banco tradicional.",
+      "cifras": [
+        "Utilidad ene-sep 2026 $20.996 millones vs $3.656 millones (p. 6, p. 18)",
+        "Provisiones netas $45.855 millones vs $17.147 millones, +167,4 % (p. 6)",
+        "Cartera bruta $1.065.249 millones, +38,8 %; microcrédito $1.000.369 millones (p. 8)",
+        "ICV >30 días 3,54 % a 4,53 %; cobertura 77,5 % a 76,0 % (p. 8)",
+        "Depósitos CDT + ahorro $629.672.585 miles vs $353.298.186 miles dic 2025 (p. 61)",
+        "Solvencia total 19,61 %; básica 11,14 % (p. 36)",
+        "Patrimonio $168.957 millones (p. 6)"
+      ],
+      "nota": ""
+    }
+  }
+}
