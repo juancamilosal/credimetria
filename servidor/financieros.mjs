@@ -103,6 +103,7 @@ export const NOMBRES_SFC = {
  */
 export const LOGOS_SFC = {
   "1-6": "/logos-entidades/itau.webp",
+  "1-9": "/logos-entidades/citibank.webp",
   "1-52": "/logos-entidades/bancamia.webp",
   "1-53": "/logos-entidades/banco-w.webp",
   "1-59": "/logos-entidades/santander.webp",
