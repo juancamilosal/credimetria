@@ -562,10 +562,13 @@ async function leerDirectus() {
   // La colección puede no existir todavía: la página sale igual, sin análisis.
   let fichas = [];
   try {
+    // Sin filtro por `estado`: el "Lector web" no puede leer ese campo
+    // (Directus rechazaría la consulta) y su permiso ya deja ver solo las
+    // publicadas.
     fichas = (
       await (
         await pedirDirectus(
-          "/items/estados_financieros?filter[estado][_eq]=publicado&limit=-1" +
+          "/items/estados_financieros?limit=-1" +
             "&fields=entidad,periodo,pdf,titular,puntos,para_ti,date_updated",
         )
       ).json()
