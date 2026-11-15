@@ -326,3 +326,14 @@ test("ficha: razón social sin frases legales, ciudad con tilde y sitio corregid
     "https://banco.itau.co",
   );
 });
+
+test("BBVA: la Superfinanciera lo tiene Pendiente; sale la presidenta comprobada", () => {
+  const f = fichaTecnica({
+    tipo_entidad: "1",
+    cod_entidad: "13",
+    nombrepublicocargo: "Pendiente",
+    representante_legal: "Pendiente Pendiente",
+  });
+  assert.equal(f.representante, "Gloria Couceiro");
+  assert.equal(f.cargo, "Presidenta Ejecutiva");
+});

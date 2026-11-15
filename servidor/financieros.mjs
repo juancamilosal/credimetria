@@ -354,6 +354,16 @@ const titulo = (texto) =>
 
 const pendiente = (v) => !v || /^pendiente/i.test(v.trim());
 
+/**
+ * Representante legal cuando la Superfinanciera todavía no lo tiene
+ * ("Pendiente"), comprobado en prensa y en el sitio de la entidad. Lo de
+ * Directus manda sobre esto.
+ */
+export const REPRESENTANTES_SFC = {
+  // Desde el 1 sep 2026 (Portafolio, La República y bbva.com, 29 jul 2026).
+  "1-13": { representante: "Gloria Couceiro", cargo: "Presidenta Ejecutiva" },
+};
+
 /** La Superfinanciera escribe algunas ciudades sin tilde. */
 const TILDES = {
   Medellin: "Medellín",
@@ -438,9 +448,11 @@ export function fichaTecnica(fila) {
     razonSocial: razon || null,
     nit: formatoNit(fila.numeroidentificacion),
     representante: pendiente(fila.representante_legal)
-      ? null
+      ? (REPRESENTANTES_SFC[clave]?.representante ?? null)
       : titulo(fila.representante_legal.trim()),
-    cargo: pendiente(cargo) ? null : cargo,
+    cargo: pendiente(cargo)
+      ? (REPRESENTANTES_SFC[clave]?.cargo ?? null)
+      : cargo,
     // La Superfinanciera anota cuando el representante renunció.
     cambioEnCurso: /renuncia/i.test(cargoTexto),
     ciudad: pendiente(fila.ciudad)
