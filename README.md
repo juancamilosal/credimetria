@@ -472,7 +472,8 @@ la usura M.V. En la edición, "Usar tope de usura" llena el hasta con la de
   publicado, archivado) y el grupo "Análisis": `titular` (máx. 120),
   `puntos` (lista de fortaleza o alerta + texto, máx. 160) y `para_ti` (máx.
   200). Cuando sale uno nuevo se reemplaza, no se acumulan. El "Lector web"
-  solo lee las publicadas. Se crea con
+  solo lee las publicadas. El mismo script le da al "Lector web" lectura de
+  `entidades.codigo_sfc`, que la página necesita para cruzar con el CUIF. Se crea con
   `DIRECTUS_ADMIN_TOKEN=… node servidor/scripts/crear-estados-financieros.mjs`.
   Las cifras no van aquí: `servidor/financieros.mjs` las lee del CUIF de la
   Superfinanciera (datos.gov.co `mxk5-ce6w`, cuentas 590000 utilidad, 300000

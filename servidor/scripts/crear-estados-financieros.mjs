@@ -273,4 +273,33 @@ if (!ya.length) {
   });
   console.log("Lector web: read en estados_financieros (solo publicadas)");
 }
+
+// La página cruza cada entidad con el CUIF por `codigo_sfc` (tipo-código,
+// p. ej. BBVA 1-13): el "Lector web" tiene que poder leerlo. Solo se agrega
+// ese campo a su permiso de lectura de `entidades`; lo demás no se toca.
+const [lecturaEntidades] = await api(
+  "GET",
+  `/permissions?limit=-1&filter=${encodeURIComponent(
+    JSON.stringify({
+      policy: { _eq: LECTOR_WEB },
+      collection: { _eq: "entidades" },
+      action: { _eq: "read" },
+    }),
+  )}`,
+);
+if (!lecturaEntidades) {
+  console.log(
+    'Ojo: el "Lector web" no tiene permiso de lectura en entidades; no se cambió nada.',
+  );
+} else {
+  const campos = lecturaEntidades.fields ?? [];
+  if (campos.includes("*") || campos.includes("codigo_sfc")) {
+    console.log("Lector web ya lee entidades.codigo_sfc");
+  } else {
+    await api("PATCH", `/permissions/${lecturaEntidades.id}`, {
+      fields: [...campos, "codigo_sfc"],
+    });
+    console.log("Lector web: ahora lee entidades.codigo_sfc");
+  }
+}
 console.log("Listo.");
