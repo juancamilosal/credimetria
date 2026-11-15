@@ -25,32 +25,34 @@
               [attr.aria-pressed]="e.codigo === entidad()?.codigo"
               (click)="elegir(e.codigo)"
             >
-              @if (e.logo) {
-                <img
-                  class="logo"
-                  [src]="e.logo"
-                  [alt]="'Logo de ' + e.nombre"
-                  width="96"
-                  height="32"
-                />
-              } @else {
-                <span class="iniciales" aria-hidden="true">{{
-                  iniciales_(e.nombre)
-                }}</span>
-              }
-              <span class="opcion-texto">
-                <b>{{ e.nombre }}</b>
-                <span class="cifra">{{ pesosCortos(e.actual.utilidad) }}</span>
+              <span class="marca">
+                @if (e.logo) {
+                  <img
+                    class="logo"
+                    [src]="e.logo"
+                    alt=""
+                    width="160"
+                    height="44"
+                  />
+                } @else {
+                  <span class="iniciales" aria-hidden="true">{{
+                    iniciales_(e.nombre)
+                  }}</span>
+                }
               </span>
-              @if (e.actual.variacionUtilidad !== null) {
-                <span
-                  class="cambio"
-                  [class.sube]="e.actual.variacionUtilidad >= 0"
-                  [class.baja]="e.actual.variacionUtilidad < 0"
-                  >{{ e.actual.variacionUtilidad >= 0 ? "▲" : "▼" }}
-                  {{ cambio(e.actual.variacionUtilidad, true) }}</span
-                >
-              }
+              <b class="opcion-nombre">{{ e.nombre }}</b>
+              <span class="opcion-pie">
+                <span class="cifra">{{ pesosCortos(e.actual.utilidad) }}</span>
+                @if (e.actual.variacionUtilidad !== null) {
+                  <span
+                    class="cambio"
+                    [class.sube]="e.actual.variacionUtilidad >= 0"
+                    [class.baja]="e.actual.variacionUtilidad < 0"
+                    >{{ e.actual.variacionUtilidad >= 0 ? "▲" : "▼" }}
+                    {{ cambio(e.actual.variacionUtilidad, true) }}</span
+                  >
+                }
+              </span>
             </button>
           </li>
         }

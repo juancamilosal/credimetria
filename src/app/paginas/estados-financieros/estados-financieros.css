@@ -27,19 +27,27 @@ ol {
 }
 
 /* Lista de entidades */
+/* Todas las tarjetas del mismo tamaño: filas iguales y la tarjeta llena la celda. */
 .lista {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  grid-auto-rows: 1fr;
+  gap: 12px;
   margin-top: 10px;
+}
+
+.lista li {
+  display: flex;
 }
 
 .opcion {
   width: 100%;
+  height: 100%;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px;
   background: var(--cm-blanco);
   border: 1px solid var(--cm-linea);
   border-radius: var(--cm-r-tarjeta);
@@ -58,25 +66,42 @@ ol {
   box-shadow: 0 0 0 2px var(--cm-marca-100);
 }
 
-.opcion-texto {
+/* Mismo espacio para el logo (o las iniciales) en todas las tarjetas. */
+.marca {
+  height: 56px;
   display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid var(--cm-linea-suave);
+  border-radius: 10px;
+  padding: 6px 10px;
 }
 
-.opcion-texto b {
-  font-size: 14px;
+.opcion-nombre {
+  flex: 1;
+  font-size: 15px;
   line-height: 1.25;
+}
+
+.opcion-pie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .cifra {
   font-family: var(--cm-f-cifra);
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--cm-gris);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.opcion-pie .cambio {
+  font-size: 12px;
+  padding: 2px 7px;
+  white-space: nowrap;
 }
 
 /* En celular la lista es una fila que se desliza, para no ocupar la página. */
@@ -89,19 +114,24 @@ ol {
   }
 
   .lista li {
-    flex: 0 0 78%;
+    flex: 0 0 62%;
     scroll-snap-align: start;
   }
 }
 
+.marca .logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 150px;
+  object-fit: contain;
+}
+
 .logo {
   flex: none;
-  width: 64px;
-  height: 32px;
   object-fit: contain;
   background: #ffffff;
   border-radius: 8px;
-  padding: 3px 5px;
 }
 
 .logo.grande {
@@ -113,17 +143,17 @@ ol {
 }
 
 .iniciales {
-  flex: none;
-  width: 64px;
-  height: 32px;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: 6px;
   background: var(--cm-marca-100);
   color: var(--cm-enlace);
   font-weight: 800;
-  font-size: 14px;
+  font-size: 18px;
+  letter-spacing: 0.04em;
 }
 
 .cambio {
