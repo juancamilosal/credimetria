@@ -125,45 +125,41 @@ describe('EstadosFinancieros', () => {
     expect(html.querySelectorAll('.opcion').length).toBe(2);
   });
 
-  it('compara con líneas: por defecto con los que más ganan, se cambia la métrica y se marcan casillas', async () => {
-    const { harness, html } = await abrir('/estados-financieros?entidad=bbva');
-    // BBVA se compara con Davivienda (la otra de la lista).
-    expect(html.querySelectorAll('svg.lineas .serie').length).toBe(2);
+  it('compara con líneas: por defecto ninguno marcado; se marcan casillas y se cambia la métrica', async () => {
+    const { harness, html } = await abrir(
+      '/estados-financieros?entidad=davivienda',
+    );
+    const series = () => html.querySelectorAll('svg.lineas .serie').length;
+    const casilla = () =>
+      html.querySelector<HTMLInputElement>('.casillas input')!;
+    // Solo la línea de Davivienda.
+    expect(series()).toBe(1);
+    expect(casilla().checked).toBeFalse();
     expect(
       [...html.querySelectorAll('.leyenda-lineas b')].map((b) => b.textContent),
-    ).toEqual(['BBVA Colombia', 'Davivienda']);
+    ).toEqual(['Davivienda']);
+    // Al marcar BBVA aparece su línea.
+    casilla().click();
+    harness.detectChanges();
+    expect(casilla().checked).toBeTrue();
+    expect(series()).toBe(2);
+    // Abre en rentabilidad; BBVA no tiene patrimonio en los datos de prueba.
     const rent = [
       ...html.querySelectorAll<HTMLButtonElement>('.metricas button'),
     ].find((b) => b.textContent?.includes('Rentabilidad'))!;
-    rent.click();
-    harness.detectChanges();
     expect(rent.getAttribute('aria-pressed')).toBe('true');
     expect(html.querySelector('svg.lineas .eje')?.textContent).toContain('%');
-    // BBVA no tiene patrimonio en los datos de prueba: solo Davivienda.
     expect(html.querySelectorAll('svg.lineas .serie circle').length).toBe(3);
-    html.querySelector<HTMLButtonElement>('.metricas button')!.click();
-    harness.detectChanges();
-    // Casillas: Davivienda viene marcada; al desmarcarla queda solo BBVA.
-    const casilla = () =>
-      html.querySelector<HTMLInputElement>('.casillas input')!;
-    expect(casilla().checked).toBeTrue();
-    casilla().click();
-    harness.detectChanges();
-    expect(casilla().checked).toBeFalse();
-    expect(html.querySelectorAll('svg.lineas .serie').length).toBe(1);
-    // Se vuelve a marcar, y "Ninguno" / "Todos".
-    casilla().click();
-    harness.detectChanges();
-    expect(html.querySelectorAll('svg.lineas .serie').length).toBe(2);
+    // "Ninguno" y "Todos".
     const [todos, ninguno] = html.querySelectorAll<HTMLButtonElement>(
       '.acciones-casillas button',
     );
     ninguno.click();
     harness.detectChanges();
-    expect(html.querySelectorAll('svg.lineas .serie').length).toBe(1);
+    expect(series()).toBe(1);
     todos.click();
     harness.detectChanges();
-    expect(html.querySelectorAll('svg.lineas .serie').length).toBe(2);
+    expect(series()).toBe(2);
   });
 
   it('muestra el análisis escrito y el PDF', async () => {

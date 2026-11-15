@@ -119,9 +119,8 @@ export class EstadosFinancieros {
     if (!e) return [];
     const otras = this.entidades().filter((x) => x.codigo !== e.codigo);
     const codigos =
-      this.comparadosElegidos() ??
-      // Por defecto, las 2 que más ganan (la lista ya viene ordenada).
-      otras.slice(0, 2).map((x) => x.codigo);
+      // Por defecto, ninguna: solo la línea de la entidad elegida.
+      this.comparadosElegidos() ?? [];
     return codigos
       .map((c) => otras.find((x) => x.codigo === c))
       .filter((x): x is EntidadFinanciera => !!x);
