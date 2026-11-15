@@ -374,8 +374,8 @@ export const REPRESENTANTES_SFC = {
  * la entidad. Lo de Directus manda sobre esto.
  */
 export const DIRECCIONES_SFC = {
-  // App Store y platafinance.com (el piso no coincide entre las dos).
-  "4-132": "Carrera 11B No. 99-25",
+  // App Store ("Piso 4") y platafinance.com ("Of. 4-101").
+  "4-132": "Carrera 11B No. 99-25, Piso 4",
 };
 
 /** La Superfinanciera escribe algunas ciudades sin tilde. */
