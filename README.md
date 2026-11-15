@@ -492,7 +492,20 @@ la usura M.V. En la edición, "Usar tope de usura" llena el hasta con la de
   (`?entidad=`) se oculta la lista y sale solo ese banco con "← Volver", su
   ficha, sus cifras, la gráfica de barras y "Compara con otros bancos": líneas
   por año (utilidad, rentabilidad o cartera) con los 2 que más ganan por
-  defecto, hasta 3 más que se agregan o quitan. Rutas `/api/financieros` y
+  defecto, hasta 3 más que se agregan o quitan.
+- Ficha técnica guardada en `entidades` (15 nov 2026): campos
+  `representante_legal`, `cargo_representante`, `ciudad`, `direccion` y
+  `ficha_actualizada`, que llena
+  `DIRECTUS_ADMIN_TOKEN=… node servidor/scripts/sincronizar-fichas.mjs`
+  (`--sin-guardar` para solo verlo; se puede correr cada mes) desde la
+  Superfinanciera. La razón social, el NIT y el sitio web solo se llenan si
+  están vacíos. El script crea **inactivos** los bancos que reportan y no
+  estaban (Itaú, Citibank, Bancamía, Banco W, Coopcentral, Santander, Mundo
+  Mujer, Mibanco, J.P. Morgan, BTG Pactual, Banco Contactar), con su logo:
+  así no salen en el ranking de tasas ni el robot les calcula promedios. La
+  página usa primero la ficha de Directus (se puede corregir a mano) y lo que
+  falte lo toma de la Superfinanciera; lee entidades activas e inactivas con
+  `codigo_sfc`. Rutas `/api/financieros` y
   `/api/estados-financieros/<entidad>/pdf`.
 
 ## Robots

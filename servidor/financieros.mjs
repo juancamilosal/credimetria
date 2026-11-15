@@ -345,14 +345,63 @@ async function leerVigiladas(tipos) {
   );
 }
 
-/** Las entidades activas con código SFC y los análisis publicados. */
+/** Los campos de la ficha guardados en `entidades` de Directus. */
+export const CAMPOS_FICHA = [
+  "representante_legal",
+  "cargo_representante",
+  "ciudad",
+  "direccion",
+];
+
+/**
+ * La ficha a mostrar: primero lo guardado en Directus (se puede corregir a
+ * mano) y lo que falte, de la Superfinanciera.
+ */
+export function unirFicha(directus, superfinanciera) {
+  const guardada = (campo) => {
+    const v = directus?.[campo];
+    return typeof v === "string" && v.trim() ? v.trim() : null;
+  };
+  const representante = guardada("representante_legal");
+  const s = superfinanciera ?? {
+    razonSocial: null,
+    nit: null,
+    representante: null,
+    cargo: null,
+    cambioEnCurso: false,
+    ciudad: null,
+    direccion: null,
+    sitioWeb: null,
+  };
+  const ficha = {
+    ...s,
+    representante: representante ?? s.representante,
+    cargo: guardada("cargo_representante") ?? s.cargo,
+    ciudad: guardada("ciudad") ?? s.ciudad,
+    direccion: guardada("direccion") ?? s.direccion,
+    // Si en Directus se puso otro representante, la nota de renuncia de la
+    // Superfinanciera ya no aplica.
+    cambioEnCurso:
+      s.cambioEnCurso && (!representante || representante === s.representante),
+  };
+  return Object.values(ficha).some((v) => v) ? ficha : null;
+}
+
+/** Las entidades con código SFC y los análisis publicados. */
 async function leerDirectus() {
-  const entidades = await (
-    await pedirDirectus(
-      "/items/entidades?filter[activa][_eq]=true&filter[codigo_sfc][_nnull]=true" +
-        "&limit=-1&fields=codigo,nombre,tipo,logo,codigo_sfc&sort=nombre",
-    )
-  ).json();
+  // Activas e inactivas: los bancos que solo están para los estados
+  // financieros se guardan inactivos (no salen en el ranking de tasas).
+  const base =
+    "/items/entidades?filter[codigo_sfc][_nnull]=true&limit=-1&sort=nombre" +
+    "&fields=codigo,nombre,tipo,logo,codigo_sfc,activa";
+  // La ficha guardada (servidor/scripts/sincronizar-fichas.mjs). Si el
+  // "Lector web" todavía no la puede leer, se sigue sin ella.
+  const entidades = await pedirDirectus(`${base},${CAMPOS_FICHA.join(",")}`)
+    .catch((error) => {
+      console.warn("Entidades sin ficha guardada:", error.message);
+      return pedirDirectus(base);
+    })
+    .then((r) => r.json());
   // La colección puede no existir todavía: la página sale igual, sin análisis.
   let fichas = [];
   try {
@@ -393,10 +442,14 @@ export function unir(entidades, fichas, cuif) {
       codigo: e.codigo,
       nombre: e.nombre,
       tipo: e.tipo ?? null,
-      // El de Directus; si no hay, el del repositorio (LOGOS_SFC).
-      logo: d?.logo ? `/api/logos/${e.codigo}` : (LOGOS_SFC[clave] ?? null),
+      // El de Directus (solo las activas pasan por /api/logos); si no, el
+      // del repositorio (LOGOS_SFC).
+      logo:
+        d?.logo && d.activa !== false
+          ? `/api/logos/${e.codigo}`
+          : (LOGOS_SFC[clave] ?? null),
       codigoSfc: clave,
-      fichaTecnica: cuif.fichas?.get(clave) ?? null,
+      fichaTecnica: unirFicha(d, cuif.fichas?.get(clave) ?? null),
       anual: cifras.anual,
       actual: cifras.actual,
       analisis: ficha

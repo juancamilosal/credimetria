@@ -6,6 +6,7 @@ import {
   formatoNit,
   nombreEntidad,
   partirCodigoSfc,
+  unirFicha,
   unir,
 } from "../financieros.mjs";
 
@@ -232,4 +233,60 @@ test("ficha técnica limpia de la Superfinanciera", () => {
     "Mibanco",
   );
   assert.equal(fichaTecnica(null), null);
+});
+
+test("la ficha guardada en Directus manda; lo que falte sale de la Superfinanciera", () => {
+  const sfc = fichaTecnica({
+    razon_social: "BANCO POPULAR S.A.",
+    numeroidentificacion: "8600077389",
+    nombrepublicocargo: "Presidente -S.p. art. 164, se informa renuncia",
+    representante_legal: "MARÍA FERNANDA SUÁREZ LONDOÑO",
+    ciudad: "BOGOTÁ D.C.",
+  });
+  // Sin nada en Directus: la de la Superfinanciera, con su aviso.
+  assert.equal(
+    unirFicha({}, sfc).representante,
+    "María Fernanda Suárez Londoño",
+  );
+  assert.equal(unirFicha({}, sfc).cambioEnCurso, true);
+  // Corregida a mano en Directus: manda y se quita el aviso.
+  const f = unirFicha(
+    { representante_legal: "Nuevo Presidente", ciudad: " " },
+    sfc,
+  );
+  assert.equal(f.representante, "Nuevo Presidente");
+  assert.equal(f.cambioEnCurso, false);
+  assert.equal(f.ciudad, "Bogotá D.C.");
+  assert.equal(f.nit, "860.007.738-9");
+  // Solo Directus.
+  assert.equal(
+    unirFicha({ representante_legal: "Alguien" }, null).representante,
+    "Alguien",
+  );
+  assert.equal(unirFicha(undefined, null), null);
+});
+
+test("una entidad inactiva de Directus usa el logo del repositorio", () => {
+  const cifras = armarCifras(
+    [fila("2026-08-31", "590000", -449 * MM, "6")],
+    "2026-08-31T00:00:00.000",
+  );
+  const [itau] = unir(
+    [
+      {
+        codigo: "itau",
+        nombre: "Itaú",
+        tipo: "Banco",
+        logo: "abc",
+        activa: false,
+        codigo_sfc: "1-6",
+        representante_legal: "Jorge Villa",
+      },
+    ],
+    [],
+    { corte: "2026-08-31", cifras },
+  ).entidades;
+  assert.equal(itau.codigo, "itau");
+  assert.equal(itau.logo, "/logos-entidades/itau.webp");
+  assert.equal(itau.fichaTecnica.representante, "Jorge Villa");
 });
