@@ -57,7 +57,22 @@ async function pedirCuif(parametros) {
 }
 
 /** Tipo de entidad del CUIF → tipo en Credimetría. */
-export const TIPOS_SFC = { 1: "Banco", 4: "Financiera" };
+export const TIPOS_SFC = {
+  1: "Banco",
+  4: "Financiera",
+  32: "Cooperativa",
+  22: "Fondo",
+};
+
+/**
+ * Lo que sale en la página: todos los bancos (1), compañías de financiamiento
+ * (4) y cooperativas financieras (32) que reportan, más las entidades
+ * oficiales que le prestan a la gente (ICETEX, Fondo Nacional del Ahorro y
+ * Caja Promotora de Vivienda Militar y de Policía) y las demás de Directus
+ * con código SFC.
+ */
+export const TIPOS_INCLUIDOS = ["1", "4", "32"];
+export const OFICIALES_INCLUIDAS = ["22-5", "22-8", "22-11"];
 
 /**
  * Nombre corto de los bancos que no están en Directus (el CUIF los trae en
@@ -94,6 +109,31 @@ export const NOMBRES_SFC = {
   "1-66": "BTG Pactual",
   "1-67": "Banco Unión",
   "1-68": "Banco Contactar",
+  "4-26": "Tuya",
+  "4-31": "GM Financial",
+  "4-46": "Coltefinanciera",
+  "4-108": "Iris",
+  "4-117": "Credifamilia",
+  "4-118": "Crezcamos",
+  "4-120": "La Hipotecaria",
+  "4-121": "Financiera Juriscoop",
+  "4-122": "RCI Colombia",
+  "4-123": "Bancar Tecnología",
+  "4-124": "RappiPay",
+  "4-126": "Mercado Pago",
+  "4-127": "Bold",
+  "4-128": "Nu Colombia",
+  "4-129": "Koa",
+  "4-130": "Nequi",
+  "4-131": "Addi",
+  "4-132": "Plata",
+  "32-1": "Cooperativa Financiera de Antioquia",
+  "32-2": "Coopkennedy",
+  "32-4": "Cotrafa",
+  "32-5": "Confiar",
+  "22-5": "ICETEX",
+  "22-8": "Fondo Nacional del Ahorro",
+  "22-11": "Caja Promotora de Vivienda Militar y de Policía",
 };
 
 /**
@@ -225,10 +265,14 @@ export function armarCifras(filas, ultimoCorte) {
 
 /** Lee del CUIF las cifras de las entidades pedidas ("tipo-código"). */
 export async function leerCuif(codigosSfc) {
-  // Todos los bancos (tipo 1) y, además, las demás entidades de Directus
-  // con código SFC (financieras, cooperativas…).
-  const partes = codigosSfc.map(partirCodigoSfc).filter(Boolean);
-  const tipos = [...new Set(["1", ...partes.map((p) => p.tipo)])];
+  // Bancos, financieras y cooperativas (TIPOS_INCLUIDOS), las oficiales que
+  // prestan a personas y las demás entidades de Directus con código SFC.
+  const partes = [...codigosSfc, ...OFICIALES_INCLUIDAS]
+    .map(partirCodigoSfc)
+    .filter(Boolean);
+  const tipos = [
+    ...new Set([...TIPOS_INCLUIDOS, ...partes.map((p) => p.tipo)]),
+  ];
   const codigos = [...new Set(["0", ...partes.map((p) => p.codigo)])];
   const lista = (xs) => xs.map((x) => `'${x}'`).join(",");
 
@@ -246,17 +290,18 @@ export async function leerCuif(codigosSfc) {
       "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte,cuenta,valor",
     $where:
       `moneda='0' AND cuenta in(${lista(Object.keys(CUENTAS))})` +
-      ` AND (tipo_entidad='1' OR (tipo_entidad in(${lista(tipos)}) AND codigo_entidad in(${lista(codigos)})))` +
+      ` AND (tipo_entidad in(${lista(TIPOS_INCLUIDOS)}) OR (tipo_entidad in(${lista(tipos)}) AND codigo_entidad in(${lista(codigos)})))` +
       ` AND fecha_corte>='${desde}T00:00:00'` +
       ` AND (date_extract_m(fecha_corte)=12 OR fecha_corte='${u.corte}T00:00:00'` +
       ` OR fecha_corte='${finDeMes(u.anio - 1, u.mes)}T00:00:00')`,
     $limit: "20000",
   });
-  // Se piden juntos tipos y códigos: se quedan los bancos y los pares pedidos.
+  // Se piden juntos tipos y códigos: se quedan los tipos incluidos y los
+  // pares pedidos.
   const pedidos = new Set(partes.map((p) => `${p.tipo}-${p.codigo}`));
   const propias = filas.filter(
     (f) =>
-      f.tipo_entidad === "1" ||
+      TIPOS_INCLUIDOS.includes(f.tipo_entidad) ||
       pedidos.has(`${f.tipo_entidad}-${f.codigo_entidad}`),
   );
   // La ficha técnica no es indispensable: si falla, la página sale sin ella.

@@ -67,13 +67,19 @@ describe('EstadosFinancieros', () => {
       '59 %',
     );
     expect(html.querySelector('h1')?.textContent).toContain(
-      '¿Cuánto ganan los bancos?',
+      '¿Cuánto ganan los bancos y financieras?',
     );
     expect(html.querySelector('.cabecera p')?.textContent).toContain(
       'agosto de 2026',
     );
     expect(html.querySelector('.detalle')).toBeNull();
     expect(html.querySelector('.volver')).toBeNull();
+    // Filtros por tipo, con cuántas hay (solo los tipos que existen).
+    expect(
+      [...html.querySelectorAll('.filtros-tipo button')].map((b) =>
+        b.textContent?.replace(/\s+/g, ' ').trim(),
+      ),
+    ).toEqual(['Todas 2', 'Bancos 2']);
   });
 
   it('al elegir un banco oculta la lista y muestra su ficha, con Volver', async () => {
@@ -98,6 +104,9 @@ describe('EstadosFinancieros', () => {
     expect(ficha.textContent).toContain('Javier José Suárez Esparragoza');
     expect(ficha.textContent).toContain('860.034.313-7');
     expect(ficha.textContent).toContain('código 1-39');
+    expect(ficha.textContent).toContain(
+      'Banco vigilado por la Superintendencia',
+    );
     expect(ficha.querySelector('a')?.getAttribute('href')).toBe(
       'https://www.davivienda.com',
     );

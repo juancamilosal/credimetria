@@ -478,7 +478,10 @@ la usura M.V. En la edición, "Usar tope de usura" llena el hasta con la de
   Las cifras no van aquí: `servidor/financieros.mjs` las lee del CUIF de la
   Superfinanciera (datos.gov.co `mxk5-ce6w`, cuentas 590000 utilidad, 300000
   patrimonio, 100000 activos y 140000 cartera; moneda total) y las guarda 12
-  horas. Salen **todos los bancos** que reportan (tipo 1, unos 30) más las
+  horas. Salen **todos los bancos** (tipo 1, 30), **compañías de
+  financiamiento** (tipo 4, 18: Nu, Nequi, Tuya, Addi…) y **cooperativas
+  financieras** (tipo 32, 4) que reportan, las oficiales que prestan a personas
+  (ICETEX, FNA y Caja Promotora de Vivienda Militar: `OFICIALES_INCLUIDAS`) más las
   demás entidades de Directus con `codigo_sfc` (p. ej. Koa). Se cruzan por
   `entidades.codigo_sfc`: si el banco está en Directus usa su código, nombre
   y logo; si no, el código es `sfc-<tipo>-<código>` (p. ej. `sfc-1-65`), el

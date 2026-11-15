@@ -6,7 +6,8 @@
 // - En cada entidad con `codigo_sfc` llena esos 5 campos. La razón social,
 //   el NIT (y su dígito de verificación) y el sitio web solo se llenan si
 //   están vacíos: lo que ya hay no se pisa.
-// - Crea, INACTIVOS, los bancos que reportan a la Superfinanciera y no están
+// - Crea, INACTIVOS, los bancos, financieras, cooperativas y entidades
+//   oficiales de la página (NOMBRES_SFC) que no están
 //   en `entidades` (con su código SFC, su ficha y su logo del repositorio).
 //   Inactivos: no salen en el ranking de tasas ni el robot les calcula
 //   promedios; la página de estados financieros sí los usa.
@@ -18,7 +19,12 @@
 // En Windows (PowerShell): $env:DIRECTUS_ADMIN_TOKEN="…"; node servidor/scripts/sincronizar-fichas.mjs
 
 import { readFileSync } from "node:fs";
-import { fichaTecnica, LOGOS_SFC, NOMBRES_SFC } from "../financieros.mjs";
+import {
+  fichaTecnica,
+  LOGOS_SFC,
+  NOMBRES_SFC,
+  TIPOS_SFC,
+} from "../financieros.mjs";
 
 const D = process.env.DIRECTUS_URL ?? "https://api.credimetria.com";
 const TOKEN = process.env.DIRECTUS_ADMIN_TOKEN;
@@ -197,7 +203,7 @@ for (const e of entidades) {
 }
 console.log(`Fichas actualizadas: ${actualizadas}`);
 
-// 4. Bancos que faltan, inactivos.
+// 4. Entidades que faltan, inactivas.
 const slug = (texto) =>
   texto
     .normalize("NFD")
@@ -218,7 +224,7 @@ for (const [clave, nombre] of Object.entries(NOMBRES_SFC)) {
     codigo,
     nombre,
     codigo_sfc: clave,
-    tipo: "Banco",
+    tipo: TIPOS_SFC[clave.split("-")[0]] ?? "Banco",
     activa: false,
     ...cambios(null, fila),
   };

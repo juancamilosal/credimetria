@@ -663,3 +663,14 @@ ol {
   border-color: var(--cm-marca-600);
   color: var(--cm-enlace);
 }
+
+.filtros-tipo {
+  margin-top: 8px;
+}
+
+.cuenta {
+  font-family: var(--cm-f-cifra);
+  font-size: 12px;
+  opacity: 0.75;
+  margin-left: 2px;
+}

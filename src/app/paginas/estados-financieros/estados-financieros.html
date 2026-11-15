@@ -1,6 +1,6 @@
 <section class="cabecera">
   <div class="wrap cabecera-texto">
-    <h1>¿Cuánto ganan los bancos?</h1>
+    <h1>¿Cuánto ganan los bancos y financieras?</h1>
     <p>{{ subtitulo() }}</p>
   </div>
 </section>
@@ -16,8 +16,23 @@
   } @else if (!entidad()) {
     <section aria-labelledby="t-lista">
       <h2 id="t-lista" class="leyenda">Elige una entidad para ver su ficha</h2>
+      <div
+        class="metricas filtros-tipo"
+        role="group"
+        aria-label="Tipo de entidad"
+      >
+        @for (t of tipos(); track t.valor) {
+          <button
+            type="button"
+            [attr.aria-pressed]="filtro() === t.valor"
+            (click)="filtro.set(t.valor)"
+          >
+            {{ t.texto }} <span class="cuenta">{{ t.cuenta }}</span>
+          </button>
+        }
+      </div>
       <ul class="lista">
-        @for (e of entidades(); track e.codigo) {
+        @for (e of visibles(); track e.codigo) {
           <li>
             <button
               type="button"
@@ -124,8 +139,7 @@
               <div>
                 <dt>Tipo</dt>
                 <dd>
-                  {{ e.tipo ?? "Entidad" }} vigilado por la Superintendencia
-                  Financiera
+                  {{ tipoLargo(e.tipo) }} por la Superintendencia Financiera
                   <span class="muted">(código {{ e.codigoSfc }})</span>
                 </dd>
               </div>

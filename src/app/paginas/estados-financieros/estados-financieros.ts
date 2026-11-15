@@ -28,6 +28,26 @@ import {
   TAMANOS,
 } from '../../core/utilidades/grafica-lineas';
 
+/** Tipos de entidad: el filtro de la lista y el texto de la ficha. */
+const TIPOS = [
+  { valor: 'Banco', texto: 'Bancos', largo: 'Banco vigilado' },
+  {
+    valor: 'Financiera',
+    texto: 'Compañías de financiamiento',
+    largo: 'Compañía de financiamiento vigilada',
+  },
+  {
+    valor: 'Cooperativa',
+    texto: 'Cooperativas financieras',
+    largo: 'Cooperativa financiera vigilada',
+  },
+  {
+    valor: 'Fondo',
+    texto: 'Entidades oficiales',
+    largo: 'Entidad oficial vigilada',
+  },
+];
+
 export interface Barra {
   etiqueta: string;
   texto: string;
@@ -66,6 +86,22 @@ export class EstadosFinancieros {
   protected readonly metricas = METRICAS;
 
   protected readonly entidades = computed(() => this.datos()?.entidades ?? []);
+
+  /** Filtro de la lista por tipo: bancos, financieras, cooperativas… */
+  protected readonly filtro = signal<string>('todas');
+  protected readonly tipos = computed(() => {
+    const cuenta = (tipo: string) =>
+      this.entidades().filter((e) => e.tipo === tipo).length;
+    return [
+      { valor: 'todas', texto: 'Todas', cuenta: this.entidades().length },
+      ...TIPOS.map((t) => ({ ...t, cuenta: cuenta(t.valor) })),
+    ].filter((t) => t.cuenta > 0);
+  });
+  protected readonly visibles = computed(() =>
+    this.filtro() === 'todas'
+      ? this.entidades()
+      : this.entidades().filter((e) => e.tipo === this.filtro()),
+  );
   /** La elegida en la dirección (`?entidad=`); sin ella se ve la lista. */
   protected readonly entidad = computed<EntidadFinanciera | null>(
     () => this.entidades().find((e) => e.codigo === this.elegido()) ?? null,
@@ -139,7 +175,7 @@ export class EstadosFinancieros {
   });
   protected readonly subtitulo = computed(() => {
     const base =
-      'Utilidades de cada entidad según lo que reporta a la Superintendencia Financiera';
+      'Utilidades de cada banco, compañía de financiamiento y cooperativa financiera según lo que reporta a la Superintendencia Financiera';
     const corte = this.datos()?.corte;
     if (!corte) return `${base}.`;
     const mes = periodoDelAnio(corte).replace(/^enero( a)? /, '');
@@ -212,6 +248,11 @@ export class EstadosFinancieros {
   protected volver(): void {
     this.router.navigate([], { queryParams: {} });
     this.arriba();
+  }
+
+  /** "Banco vigilado", "Compañía de financiamiento vigilada"… */
+  protected tipoLargo(tipo: string | null): string {
+    return TIPOS.find((t) => t.valor === tipo)?.largo ?? 'Entidad vigilada';
   }
 
   /** Marca o desmarca un banco en la comparación. */
