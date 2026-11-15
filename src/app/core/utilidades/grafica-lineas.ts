@@ -7,7 +7,7 @@ export type Metrica = 'utilidad' | 'rentabilidad' | 'cartera';
 export const METRICAS: { valor: Metrica; texto: string }[] = [
   { valor: 'utilidad', texto: 'Utilidad' },
   { valor: 'rentabilidad', texto: 'Rentabilidad' },
-  { valor: 'cartera', texto: 'Cartera (lo que presta)' },
+  { valor: 'cartera', texto: 'Cartera neta' },
 ];
 
 /**

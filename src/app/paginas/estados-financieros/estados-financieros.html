@@ -213,7 +213,7 @@
             </dd>
           </div>
           <div>
-            <dt>Lo que presta (cartera)</dt>
+            <dt>Cartera neta (lo que presta, menos provisiones)</dt>
             <dd>
               {{ e.actual.cartera !== null ? pesos(e.actual.cartera) : "—" }}
             </dd>
@@ -460,8 +460,10 @@
       Cifras de cada entidad sola, sin sus filiales del exterior, tomadas del
       <a [href]="datos()!.consulta" target="_blank" rel="noopener"
         >CUIF de la Superintendencia Financiera ↗</a
-      >. La rentabilidad es la utilidad del año llevada a 12 meses sobre el
-      patrimonio. Información general, no es asesoría.
+      >. La cartera es neta (lo prestado menos sus provisiones), por eso es
+      menor que la cartera bruta de los informes de cada banco. La rentabilidad
+      es la utilidad del año llevada a 12 meses sobre el patrimonio. Información
+      general, no es asesoría.
     </p>
   }
 </div>
