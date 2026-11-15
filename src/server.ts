@@ -11,6 +11,7 @@ import {
   rutasSolicitudesAliados,
 } from '../servidor/asesores.mjs';
 import { rutasProspectos } from '../servidor/prospectos.mjs';
+import { rutasFinancieros } from '../servidor/financieros.mjs';
 import { rutasTasas } from '../servidor/tasas.mjs';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
@@ -67,6 +68,12 @@ rutasAsesores(app);
 
 /** /api/solicitudes-aliados: el formulario "Quiero ser aliado". */
 rutasSolicitudesAliados(app);
+
+/**
+ * /api/financieros y /api/estados-financieros/<entidad>/pdf: las cifras del
+ * CUIF de la Superfinanciera y los análisis y PDF de Directus.
+ */
+rutasFinancieros(app);
 
 /**
  * Serve static files from /browser

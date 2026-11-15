@@ -1,0 +1,223 @@
+<section class="cabecera">
+  <div class="wrap cabecera-texto">
+    <h1>¿Cuánto ganan los bancos?</h1>
+    <p>{{ subtitulo() }}</p>
+  </div>
+</section>
+
+<div class="wrap contenido">
+  @if (cargando()) {
+    <p class="vacio" role="status">Cargando las cifras…</p>
+  } @else if (sinConexion() || !entidades().length) {
+    <p class="vacio" role="status">
+      No pudimos leer las cifras de la Superintendencia Financiera. Intenta de
+      nuevo en unos minutos.
+    </p>
+  } @else {
+    <section aria-labelledby="t-lista">
+      <h2 id="t-lista" class="leyenda">Elige una entidad</h2>
+      <ul class="lista">
+        @for (e of entidades(); track e.codigo) {
+          <li>
+            <button
+              type="button"
+              class="opcion"
+              [attr.aria-pressed]="e.codigo === entidad()?.codigo"
+              (click)="elegir(e.codigo)"
+            >
+              @if (e.logo) {
+                <img
+                  class="logo"
+                  [src]="e.logo"
+                  [alt]="'Logo de ' + e.nombre"
+                  width="96"
+                  height="32"
+                />
+              } @else {
+                <span class="iniciales" aria-hidden="true">{{
+                  iniciales_(e.nombre)
+                }}</span>
+              }
+              <span class="opcion-texto">
+                <b>{{ e.nombre }}</b>
+                <span class="cifra">{{ pesosCortos(e.actual.utilidad) }}</span>
+              </span>
+              @if (e.actual.variacionUtilidad !== null) {
+                <span
+                  class="cambio"
+                  [class.sube]="e.actual.variacionUtilidad >= 0"
+                  [class.baja]="e.actual.variacionUtilidad < 0"
+                  >{{ e.actual.variacionUtilidad >= 0 ? "▲" : "▼" }}
+                  {{ cambio(e.actual.variacionUtilidad, true) }}</span
+                >
+              }
+            </button>
+          </li>
+        }
+      </ul>
+    </section>
+
+    @if (entidad(); as e) {
+      <section class="detalle" aria-labelledby="t-entidad" aria-live="polite">
+        <div class="detalle-top">
+          @if (e.logo) {
+            <img
+              class="logo grande"
+              [src]="e.logo"
+              [alt]="'Logo de ' + e.nombre"
+              width="140"
+              height="48"
+            />
+          }
+          <div>
+            <h2 id="t-entidad">{{ e.nombre }}</h2>
+            @if (auto(); as a) {
+              <p class="titular">
+                <span [class]="'tendencia ' + a.tendencia">{{
+                  a.tendencia === "mejora"
+                    ? "Mejora"
+                    : a.tendencia === "empeora"
+                      ? "Empeora"
+                      : "Estable"
+                }}</span>
+                {{ a.titular }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <dl class="cifras">
+          <div>
+            <dt>Utilidad de {{ periodo() }}</dt>
+            <dd [class.negativo]="e.actual.utilidad < 0">
+              {{ pesos(e.actual.utilidad) }}
+            </dd>
+          </div>
+          <div>
+            <dt>Frente al año pasado</dt>
+            <dd>
+              {{
+                e.actual.variacionUtilidad !== null
+                  ? cambio(e.actual.variacionUtilidad)
+                  : "—"
+              }}
+            </dd>
+          </div>
+          <div>
+            <dt>Rentabilidad al año</dt>
+            <dd>
+              {{
+                e.actual.rentabilidad !== null
+                  ? porcentaje(e.actual.rentabilidad)
+                  : "—"
+              }}
+            </dd>
+          </div>
+          <div>
+            <dt>Lo que presta (cartera)</dt>
+            <dd>
+              {{ e.actual.cartera !== null ? pesos(e.actual.cartera) : "—" }}
+            </dd>
+          </div>
+        </dl>
+
+        @if (grafica(); as g) {
+          <figure class="grafica-caja">
+            <figcaption>Utilidad por año</figcaption>
+            <ol class="grafica" aria-label="Utilidad por año">
+              @for (b of g.barras; track b.etiqueta) {
+                <li [class.en-curso]="b.enCurso">
+                  <span class="zona arriba" [style.height.%]="g.arriba">
+                    @if (!b.negativa) {
+                      <span class="valor">{{ b.texto }}</span>
+                      <span class="barra" [style.height.%]="b.alto"></span>
+                    }
+                  </span>
+                  <span class="zona abajo" [style.height.%]="g.abajo">
+                    @if (b.negativa) {
+                      <span
+                        class="barra negativa"
+                        [style.height.%]="b.alto"
+                      ></span>
+                      <span class="valor">{{ b.texto }}</span>
+                    }
+                  </span>
+                  <span class="etiqueta">{{ b.etiqueta }}</span>
+                </li>
+              }
+            </ol>
+          </figure>
+        }
+
+        @if (auto(); as a) {
+          <ul class="puntos" aria-label="Lo que dicen las cifras">
+            @for (p of a.puntos; track p.texto) {
+              <li [class]="p.tipo">
+                <span aria-hidden="true">{{
+                  p.tipo === "fortaleza" ? "✓" : p.tipo === "alerta" ? "⚠" : "•"
+                }}</span>
+                {{ p.texto }}
+              </li>
+            }
+          </ul>
+        }
+
+        @if (e.analisis; as an) {
+          <section class="escrito" aria-labelledby="t-escrito">
+            <h3 id="t-escrito">
+              Análisis de Credimetría
+              @if (an.periodo) {
+                <span class="muted">· {{ an.periodo }}</span>
+              }
+            </h3>
+            @if (an.titular) {
+              <p class="escrito-titular">{{ an.titular }}</p>
+            }
+            @if (an.puntos.length) {
+              <ul class="puntos">
+                @for (p of an.puntos; track p.texto) {
+                  <li [class]="p.tipo">
+                    <span aria-hidden="true">{{
+                      p.tipo === "fortaleza" ? "✓" : "⚠"
+                    }}</span>
+                    {{ p.texto }}
+                  </li>
+                }
+              </ul>
+            }
+            @if (an.paraTi) {
+              <p class="para-ti">
+                <b>Qué significa para ti:</b> {{ an.paraTi }}
+              </p>
+            }
+            @if (an.pdf) {
+              <a
+                class="btn btn-principal"
+                [href]="an.pdf"
+                target="_blank"
+                rel="noopener"
+                >Ver estado financiero
+                @if (an.periodo) {
+                  ({{ an.periodo }})
+                }
+                ↗</a
+              >
+            }
+          </section>
+        } @else {
+          <p class="pronto muted">
+            Pronto: el análisis de Credimetría y el PDF del estado financiero.
+          </p>
+        }
+      </section>
+    }
+
+    <p class="nota">
+      Cifras de cada entidad sola, sin sus filiales del exterior, tomadas del
+      <a [href]="datos()!.consulta" target="_blank" rel="noopener"
+        >CUIF de la Superintendencia Financiera ↗</a
+      >. La rentabilidad es la utilidad del año llevada a 12 meses sobre el
+      patrimonio. Información general, no es asesoría.
+    </p>
+  }
+</div>

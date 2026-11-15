@@ -61,6 +61,20 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./paginas/reportados/reportados').then((m) => m.Reportados),
   },
+  // En desarrollo (15 nov 2026): fuera del menú y del sitemap, sin indexar.
+  {
+    path: 'estados-financieros',
+    title: 'Estados financieros de los bancos · Credimetría',
+    data: {
+      noIndexar: true,
+      descripcion:
+        'Cuánto ganan los bancos en Colombia: utilidades de cada entidad por año y en lo que va del año, según la Superintendencia Financiera.',
+    },
+    loadComponent: () =>
+      import('./paginas/estados-financieros/estados-financieros').then(
+        (m) => m.EstadosFinancieros,
+      ),
+  },
   {
     path: 'asesoria',
     title: 'Asesoría gratis · Credimetría',

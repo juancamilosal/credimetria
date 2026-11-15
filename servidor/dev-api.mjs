@@ -7,6 +7,7 @@ import { cargarEnv } from "./env.mjs";
 const archivo = cargarEnv();
 const { rutasTasas } = await import("./tasas.mjs");
 const { rutasProspectos } = await import("./prospectos.mjs");
+const { rutasFinancieros } = await import("./financieros.mjs");
 const { rutasAsesores, rutasSolicitudesAliados } =
   await import("./asesores.mjs");
 
@@ -15,6 +16,7 @@ rutasTasas(app);
 rutasProspectos(app);
 rutasAsesores(app);
 rutasSolicitudesAliados(app);
+rutasFinancieros(app);
 app.listen(4300, () => {
   if (!archivo) {
     console.warn(
