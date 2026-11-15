@@ -167,6 +167,7 @@ export const LOGOS_SFC = {
   "4-126": "/logos-entidades/mercado-pago.webp",
   "4-127": "/logos-entidades/bold.webp",
   "4-130": "/logos-entidades/nequi.webp",
+  "32-5": "/logos-entidades/confiar.webp",
   "4-131": "/logos-entidades/addi.webp",
   "4-132": "/logos-entidades/plata.webp",
 };
