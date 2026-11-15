@@ -13,9 +13,9 @@
       No pudimos leer las cifras de la Superintendencia Financiera. Intenta de
       nuevo en unos minutos.
     </p>
-  } @else {
+  } @else if (!entidad()) {
     <section aria-labelledby="t-lista">
-      <h2 id="t-lista" class="leyenda">Elige una entidad</h2>
+      <h2 id="t-lista" class="leyenda">Elige una entidad para ver su ficha</h2>
       <ul class="lista">
         @for (e of entidades(); track e.codigo) {
           <li>
@@ -58,9 +58,12 @@
         }
       </ul>
     </section>
-
+  } @else {
     @if (entidad(); as e) {
-      <section class="detalle" aria-labelledby="t-entidad" aria-live="polite">
+      <button type="button" class="volver" (click)="volver()">
+        ← Volver a todos los bancos
+      </button>
+      <section class="detalle" aria-labelledby="t-entidad">
         <div class="detalle-top">
           @if (e.logo) {
             <img
@@ -87,6 +90,86 @@
             }
           </div>
         </div>
+
+        @if (e.fichaTecnica; as f) {
+          <section class="ficha" aria-labelledby="t-ficha">
+            <h3 id="t-ficha">Ficha técnica</h3>
+            <dl>
+              @if (f.representante) {
+                <div>
+                  <dt>{{ f.cargo ?? "Representante legal" }}</dt>
+                  <dd>
+                    {{ f.representante }}
+                    @if (f.cambioEnCurso) {
+                      <span class="cambio-curso"
+                        >La Superfinanciera registra su renuncia: puede haber
+                        cambio</span
+                      >
+                    }
+                  </dd>
+                </div>
+              }
+              @if (f.razonSocial) {
+                <div>
+                  <dt>Razón social</dt>
+                  <dd>{{ f.razonSocial }}</dd>
+                </div>
+              }
+              @if (f.nit) {
+                <div>
+                  <dt>NIT</dt>
+                  <dd class="mono">{{ f.nit }}</dd>
+                </div>
+              }
+              <div>
+                <dt>Tipo</dt>
+                <dd>
+                  {{ e.tipo ?? "Entidad" }} vigilado por la Superintendencia
+                  Financiera
+                  <span class="muted">(código {{ e.codigoSfc }})</span>
+                </dd>
+              </div>
+              @if (f.ciudad || f.direccion) {
+                <div>
+                  <dt>Sede principal</dt>
+                  <dd>
+                    {{ f.direccion }}{{ f.direccion && f.ciudad ? ", " : ""
+                    }}{{ f.ciudad }}
+                  </dd>
+                </div>
+              }
+              @if (f.sitioWeb) {
+                <div>
+                  <dt>Sitio web</dt>
+                  <dd>
+                    <a [href]="f.sitioWeb" target="_blank" rel="noopener"
+                      >{{ f.sitioWeb.replace("https://", "") }} ↗</a
+                    >
+                  </dd>
+                </div>
+              }
+              <div>
+                <dt>Utilidad de {{ periodo() }}</dt>
+                <dd class="mono">{{ pesos(e.actual.utilidad) }}</dd>
+              </div>
+              @if (e.actual.activos !== null) {
+                <div>
+                  <dt>Activos</dt>
+                  <dd class="mono">{{ pesos(e.actual.activos) }}</dd>
+                </div>
+              }
+              @if (e.actual.patrimonio !== null) {
+                <div>
+                  <dt>Patrimonio</dt>
+                  <dd class="mono">{{ pesos(e.actual.patrimonio) }}</dd>
+                </div>
+              }
+            </dl>
+            <p class="nota">
+              Datos de la Superintendencia Financiera (entidades vigiladas).
+            </p>
+          </section>
+        }
 
         <dl class="cifras">
           <div>
@@ -150,6 +233,115 @@
             </ol>
           </figure>
         }
+
+        <section class="comparar" aria-labelledby="t-comparar">
+          <div class="comparar-top">
+            <h3 id="t-comparar">Compara con otros bancos</h3>
+            <div class="metricas" role="group" aria-label="Qué comparar">
+              @for (m of metricas; track m.valor) {
+                <button
+                  type="button"
+                  [attr.aria-pressed]="metrica() === m.valor"
+                  (click)="metrica.set(m.valor)"
+                >
+                  {{ m.texto }}
+                </button>
+              }
+            </div>
+          </div>
+
+          @if (lineas(); as g) {
+            <svg
+              class="lineas"
+              [attr.viewBox]="'0 0 ' + g.ancho + ' ' + g.alto"
+              role="img"
+              [attr.aria-label]="
+                'Gráfica de líneas por año: ' + nombresLineas()
+              "
+            >
+              @for (t of g.marcas; track $index) {
+                <line
+                  class="rejilla"
+                  [attr.x1]="g.izquierda"
+                  [attr.x2]="g.derecha"
+                  [attr.y1]="t.y"
+                  [attr.y2]="t.y"
+                />
+                <text class="eje" [attr.x]="g.izquierda - 8" [attr.y]="t.y + 4">
+                  {{ t.texto }}
+                </text>
+              }
+              @if (g.cero !== null) {
+                <line
+                  class="cero"
+                  [attr.x1]="g.izquierda"
+                  [attr.x2]="g.derecha"
+                  [attr.y1]="g.cero"
+                  [attr.y2]="g.cero"
+                />
+              }
+              @for (a of g.anios; track a.anio) {
+                <text class="eje anio" [attr.x]="a.x" [attr.y]="g.alto - 6">
+                  {{ a.anio }}
+                </text>
+              }
+              @for (l of g.lineas; track l.codigo; let i = $index) {
+                <g [class]="'serie s' + i">
+                  <path [attr.d]="l.d" />
+                  @for (p of l.puntos; track p.anio) {
+                    <circle [attr.cx]="p.x" [attr.cy]="p.y" r="4">
+                      <title>
+                        {{ l.nombre }} · {{ p.anio }}: {{ p.texto }}
+                      </title>
+                    </circle>
+                  }
+                </g>
+              }
+            </svg>
+            <ul class="leyenda-lineas">
+              @for (l of g.lineas; track l.codigo; let i = $index) {
+                <li [class]="'s' + i">
+                  <span class="muestra" aria-hidden="true"></span>
+                  <b>{{ l.nombre }}</b>
+                  @if (l.ultimo) {
+                    <span class="muted"
+                      >{{ l.ultimo.anio }}: {{ l.ultimo.texto }}</span
+                    >
+                  }
+                  @if (i > 0) {
+                    <button
+                      type="button"
+                      class="quitar"
+                      [attr.aria-label]="'Quitar ' + l.nombre"
+                      (click)="quitar(l.codigo)"
+                    >
+                      ×
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          }
+
+          @if (!lineas()) {
+            <p class="vacio">No hay datos de estos años para comparar.</p>
+          }
+          @if (comparados().length < maxComparados) {
+            <label class="agregar">
+              <span>Agregar un banco a la comparación</span>
+              <select #sel (change)="agregar(sel.value); sel.value = ''">
+                <option value="">Elige un banco…</option>
+                @for (o of paraAgregar(); track o.codigo) {
+                  <option [value]="o.codigo">{{ o.nombre }}</option>
+                }
+              </select>
+            </label>
+          }
+          <p class="nota">
+            Años completos (cierre de diciembre). La rentabilidad de cada año es
+            su utilidad sobre el patrimonio.
+          </p>
+        </section>
 
         @if (auto(); as a) {
           <ul class="puntos" aria-label="Lo que dicen las cifras">

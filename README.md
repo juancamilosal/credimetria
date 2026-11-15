@@ -484,7 +484,15 @@ la usura M.V. En la edición, "Usar tope de usura" llena el hasta con la de
   y logo; si no, el código es `sfc-<tipo>-<código>` (p. ej. `sfc-1-65`), el
   nombre sale de `NOMBRES_SFC` y el logo de `LOGOS_SFC` (archivos en
   `public/logos-entidades/`, p. ej. Itaú) o, si no hay, iniciales. Solo las entidades de
-  Directus pueden tener análisis escrito y PDF. Rutas `/api/financieros` y
+  Directus pueden tener análisis escrito y PDF. Cada entidad trae su ficha técnica de
+  "Entidades vigiladas por la Superfinanciera" (datos.gov.co `sr9n-792w`):
+  razón social, NIT, presidente o representante legal (avisa si la
+  Superfinanciera registra su renuncia), sede y sitio web, limpios
+  (`fichaTecnica`). La página muestra la lista; al elegir un banco
+  (`?entidad=`) se oculta la lista y sale solo ese banco con "← Volver", su
+  ficha, sus cifras, la gráfica de barras y "Compara con otros bancos": líneas
+  por año (utilidad, rentabilidad o cartera) con los 2 que más ganan por
+  defecto, hasta 3 más que se agregan o quitan. Rutas `/api/financieros` y
   `/api/estados-financieros/<entidad>/pdf`.
 
 ## Robots

@@ -1,7 +1,25 @@
-/** Utilidad de un año completo (cierre de diciembre), en pesos. */
+/** Cifras de un año completo (cierre de diciembre), en pesos. */
 export interface UtilidadAnual {
   anio: number;
   utilidad: number;
+  patrimonio: number | null;
+  cartera: number | null;
+}
+
+/**
+ * Ficha técnica de "Entidades vigiladas por la Superfinanciera"
+ * (datos.gov.co sr9n-792w), ya limpia.
+ */
+export interface FichaTecnica {
+  razonSocial: string | null;
+  nit: string | null;
+  representante: string | null;
+  cargo: string | null;
+  /** La Superfinanciera anota que el representante renunció. */
+  cambioEnCurso: boolean;
+  ciudad: string | null;
+  direccion: string | null;
+  sitioWeb: string | null;
 }
 
 /**
@@ -44,6 +62,9 @@ export interface EntidadFinanciera {
   nombre: string;
   tipo: string | null;
   logo: string | null;
+  /** Código de la Superfinanciera (tipo-código, p. ej. "1-39"). */
+  codigoSfc: string;
+  fichaTecnica: FichaTecnica | null;
   anual: UtilidadAnual[];
   actual: CifrasActuales;
   analisis: AnalisisEscrito | null;

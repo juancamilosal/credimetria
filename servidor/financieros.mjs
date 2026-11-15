@@ -188,7 +188,12 @@ export function armarCifras(filas, ultimoCorte) {
     for (let anio = ultimo.anio - ANIOS; anio < ultimo.anio; anio++) {
       const dic = e.cortes.get(`${anio}-12-31`);
       if (dic?.utilidad !== undefined)
-        anual.push({ anio, utilidad: dic.utilidad });
+        anual.push({
+          anio,
+          utilidad: dic.utilidad,
+          patrimonio: dic.patrimonio ?? null,
+          cartera: dic.cartera ?? null,
+        });
     }
     const variacion = (nuevo, viejo) =>
       nuevo !== undefined && viejo !== undefined && viejo !== 0
@@ -254,7 +259,90 @@ export async function leerCuif(codigosSfc) {
       f.tipo_entidad === "1" ||
       pedidos.has(`${f.tipo_entidad}-${f.codigo_entidad}`),
   );
-  return { corte: u.corte, cifras: armarCifras(propias, ultimo) };
+  // La ficha técnica no es indispensable: si falla, la página sale sin ella.
+  const fichas = await leerVigiladas(tipos).catch((error) => {
+    console.warn("Sin ficha técnica de la Superfinanciera:", error.message);
+    return new Map();
+  });
+  return { corte: u.corte, cifras: armarCifras(propias, ultimo), fichas };
+}
+
+const VIGILADAS = "https://www.datos.gov.co/resource/sr9n-792w.json";
+
+const titulo = (texto) =>
+  texto
+    .toLowerCase()
+    .split(/\s+/)
+    .map((p, i) =>
+      // Siglas con punto (D.C.) en mayúsculas.
+      /\w\.\w/.test(p)
+        ? p.toUpperCase()
+        : i > 0 && MINUSCULAS.has(p)
+          ? p
+          : p.charAt(0).toUpperCase() + p.slice(1),
+    )
+    .join(" ");
+
+const pendiente = (v) => !v || /^pendiente/i.test(v.trim());
+
+/** "8600029644" → "860.002.964-4" (el último dígito es el de verificación). */
+export function formatoNit(nit) {
+  const n = String(nit ?? "").replace(/\D/g, "");
+  if (n.length < 2) return null;
+  const base = n.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `${base}-${n.slice(-1)}`;
+}
+
+/**
+ * La ficha técnica de una entidad con su fila de "Entidades vigiladas por la
+ * Superfinanciera" (datos.gov.co sr9n-792w), limpia: la razón social sin las
+ * frases legales ("podrá utilizar…"), el cargo sin las notas de radicado y
+ * sin "Pendiente".
+ */
+export function fichaTecnica(fila) {
+  if (!fila) return null;
+  const razon = (fila.razon_social ?? "")
+    .split(
+      /\s*(?:,|\(|\s-\s?[A-Z]|\s(?:y\s)?podr[aá]|\spudiendo|\squien|\scuya|\spero|\sy\/o|\so\s(?=[A-Z])|\ses\suna|\sla\scual)/,
+    )[0]
+    .trim();
+  const cargoTexto = fila.nombrepublicocargo ?? "";
+  const cargo = cargoTexto.split(/\s-|\(/)[0].trim();
+  const web = (fila.uripaginaweb ?? "").split(/\s/)[0].trim();
+  return {
+    razonSocial: razon || null,
+    nit: formatoNit(fila.numeroidentificacion),
+    representante: pendiente(fila.representante_legal)
+      ? null
+      : titulo(fila.representante_legal.trim()),
+    cargo: pendiente(cargo) ? null : cargo,
+    // La Superfinanciera anota cuando el representante renunció.
+    cambioEnCurso: /renuncia/i.test(cargoTexto),
+    ciudad: pendiente(fila.ciudad) ? null : titulo(fila.ciudad.trim()),
+    direccion: pendiente(fila.direccion)
+      ? null
+      : fila.direccion.trim().replace(/\.$/, ""),
+    sitioWeb:
+      !pendiente(web) &&
+      /^(https?:\/\/)?[\w-]+(\.[\w-]+)+/i.test(web) &&
+      !web.includes("@")
+        ? web.replace(/^(?!https?:\/\/)/, "https://")
+        : null,
+  };
+}
+
+/** Fichas técnicas de los tipos de entidad pedidos, por "tipo-código". */
+async function leerVigiladas(tipos) {
+  const lista = tipos.map((t) => `'${t}'`).join(",");
+  const r = await fetch(
+    `${VIGILADAS}?${new URLSearchParams({ $where: `tipo_entidad in(${lista})`, $limit: "2000" })}`,
+    { signal: AbortSignal.timeout(60_000) },
+  );
+  if (!r.ok) throw new Error(`Vigiladas ${r.status}`);
+  const filas = await r.json();
+  return new Map(
+    filas.map((f) => [`${f.tipo_entidad}-${f.cod_entidad}`, fichaTecnica(f)]),
+  );
 }
 
 /** Las entidades activas con código SFC y los análisis publicados. */
@@ -307,6 +395,8 @@ export function unir(entidades, fichas, cuif) {
       tipo: e.tipo ?? null,
       // El de Directus; si no hay, el del repositorio (LOGOS_SFC).
       logo: d?.logo ? `/api/logos/${e.codigo}` : (LOGOS_SFC[clave] ?? null),
+      codigoSfc: clave,
+      fichaTecnica: cuif.fichas?.get(clave) ?? null,
       anual: cifras.anual,
       actual: cifras.actual,
       analisis: ficha

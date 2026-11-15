@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   armarCifras,
+  fichaTecnica,
+  formatoNit,
   nombreEntidad,
   partirCodigoSfc,
   unir,
@@ -48,8 +50,8 @@ test("arma lo que va del año frente al año anterior y la rentabilidad", () => 
   // 1.628,9 × 12/8 / 15.662,1 = 15,6 %
   assert.equal(Math.round(d.actual.rentabilidad * 1000), 156);
   assert.deepEqual(d.anual, [
-    { anio: 2024, utilidad: 852.7 * MM },
-    { anio: 2025, utilidad: 1833.5 * MM },
+    { anio: 2024, utilidad: 852.7 * MM, patrimonio: null, cartera: null },
+    { anio: 2025, utilidad: 1833.5 * MM, patrimonio: null, cartera: null },
   ]);
 });
 
@@ -176,4 +178,58 @@ test("nombres legibles", () => {
     nombreEntidad("4-1", "FINANCIERA DEL NORTE SA"),
     "Financiera del Norte",
   );
+});
+
+test("ficha técnica limpia de la Superfinanciera", () => {
+  assert.equal(formatoNit("8600029644"), "860.002.964-4");
+  assert.deepEqual(
+    fichaTecnica({
+      razon_social: "BANCO DAVIVIENDA S.A. o BANCO DAVIVIENDA",
+      direccion: "Avenida El Dorado No. 68 C - 61.",
+      ciudad: "BOGOTÁ D.C.",
+      numeroidentificacion: "8600343137",
+      nombrepublicocargo: "Presidente",
+      representante_legal: "JAVIER JOSÉ SUÁREZ ESPARRAGOZA",
+      uripaginaweb: "Pendiente",
+    }),
+    {
+      razonSocial: "BANCO DAVIVIENDA S.A.",
+      nit: "860.034.313-7",
+      representante: "Javier José Suárez Esparragoza",
+      cargo: "Presidente",
+      cambioEnCurso: false,
+      ciudad: "Bogotá D.C.",
+      direccion: "Avenida El Dorado No. 68 C - 61",
+      sitioWeb: null,
+    },
+  );
+  const popular = fichaTecnica({
+    razon_social: "BANCO POPULAR S.A.",
+    nombrepublicocargo:
+      "Presidente -S.p. art. 164 C. Co., con radicado No 2026258240 del 04/11/2026, se informa renuncia al cargo",
+    representante_legal: "MARÍA FERNANDA SUÁREZ LONDOÑO",
+    uripaginaweb: "www.bancopopular.com.co",
+  });
+  assert.equal(popular.cargo, "Presidente");
+  assert.equal(popular.cambioEnCurso, true);
+  assert.equal(popular.sitioWeb, "https://www.bancopopular.com.co");
+  assert.equal(
+    fichaTecnica({
+      razon_social:
+        "Itaú Colombia S.A., es una sociedad comercial anónima, de nacionalidad colombiana.",
+    }).razonSocial,
+    "Itaú Colombia S.A.",
+  );
+  assert.equal(
+    fichaTecnica({ razon_social: "BANCIEN S.A. y/o BAN100 S.A." }).razonSocial,
+    "BANCIEN S.A.",
+  );
+  assert.equal(
+    fichaTecnica({
+      razon_social:
+        "Mibanco -Banco de la Microempresa de Colombia S.A., y podrá utilizar la sigla Mibanco S.A.",
+    }).razonSocial,
+    "Mibanco",
+  );
+  assert.equal(fichaTecnica(null), null);
 });

@@ -1,4 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EntidadFinanciera } from '../../core/modelos/financiero';
@@ -12,6 +20,15 @@ import {
   pesosGrandes,
   porcentaje,
 } from '../../core/utilidades/financieros';
+import {
+  armarGrafica,
+  Metrica,
+  METRICAS,
+  TAMANOS,
+} from '../../core/utilidades/grafica-lineas';
+
+/** Cuántas entidades se pueden comparar además de la elegida. */
+const MAX_COMPARADOS = 3;
 
 export interface Barra {
   etiqueta: string;
@@ -48,11 +65,57 @@ export class EstadosFinancieros {
   protected readonly cambio = cambio;
   protected readonly pesosCortos = pesosCortos;
 
+  protected readonly metricas = METRICAS;
+
   protected readonly entidades = computed(() => this.datos()?.entidades ?? []);
-  protected readonly entidad = computed<EntidadFinanciera | null>(() => {
-    const lista = this.entidades();
-    return lista.find((e) => e.codigo === this.elegido()) ?? lista[0] ?? null;
+  /** La elegida en la dirección (`?entidad=`); sin ella se ve la lista. */
+  protected readonly entidad = computed<EntidadFinanciera | null>(
+    () => this.entidades().find((e) => e.codigo === this.elegido()) ?? null,
+  );
+
+  /** Comparación: qué se compara y con cuáles (máximo 3 además de la elegida). */
+  protected readonly metrica = signal<Metrica>('utilidad');
+  /** Pantalla angosta (celular): la gráfica se dibuja con otras medidas. */
+  private readonly angosta = signal(false);
+  private readonly comparadosElegidos = signal<string[] | null>(null);
+  protected readonly comparados = computed<EntidadFinanciera[]>(() => {
+    const e = this.entidad();
+    if (!e) return [];
+    const otras = this.entidades().filter((x) => x.codigo !== e.codigo);
+    const codigos =
+      this.comparadosElegidos() ??
+      // Por defecto, las 2 que más ganan (la lista ya viene ordenada).
+      otras.slice(0, 2).map((x) => x.codigo);
+    return codigos
+      .map((c) => otras.find((x) => x.codigo === c))
+      .filter((x): x is EntidadFinanciera => !!x)
+      .slice(0, MAX_COMPARADOS);
   });
+  /** Las que se pueden agregar a la comparación. */
+  protected readonly paraAgregar = computed(() => {
+    const e = this.entidad();
+    const ya = new Set(this.comparados().map((x) => x.codigo));
+    return this.entidades().filter(
+      (x) => x.codigo !== e?.codigo && !ya.has(x.codigo),
+    );
+  });
+  protected readonly lineas = computed(() => {
+    const e = this.entidad();
+    return e
+      ? armarGrafica(
+          [e, ...this.comparados()],
+          this.metrica(),
+          this.angosta() ? TAMANOS.angosta : TAMANOS.ancha,
+        )
+      : null;
+  });
+  protected readonly maxComparados = MAX_COMPARADOS;
+  protected readonly nombresLineas = computed(
+    () =>
+      this.lineas()
+        ?.lineas.map((l) => l.nombre)
+        .join(', ') ?? '',
+  );
   protected readonly auto = computed(() => {
     const e = this.entidad();
     return e ? analisisAutomatico(e) : null;
@@ -113,13 +176,48 @@ export class EstadosFinancieros {
     // Las cifras se piden desde el navegador: la página no se indexa
     // mientras está en desarrollo y así el servidor no espera al CUIF.
     this.servicio.cargar();
+    if (isPlatformBrowser(inject(PLATFORM_ID))) {
+      const medir = () => this.angosta.set(window.innerWidth < 640);
+      medir();
+      window.addEventListener('resize', medir);
+      inject(DestroyRef).onDestroy(() =>
+        window.removeEventListener('resize', medir),
+      );
+    }
   }
 
+  /**
+   * Abre la ficha de una entidad: la lista se oculta. Se guarda en el
+   * historial, así el botón "atrás" del navegador también vuelve a la lista.
+   */
   protected elegir(codigo: string): void {
-    this.router.navigate([], {
-      queryParams: { entidad: codigo },
-      replaceUrl: true,
-    });
+    this.comparadosElegidos.set(null);
+    this.router.navigate([], { queryParams: { entidad: codigo } });
+    this.arriba();
+  }
+
+  protected volver(): void {
+    this.router.navigate([], { queryParams: {} });
+    this.arriba();
+  }
+
+  protected agregar(codigo: string): void {
+    if (!codigo) return;
+    const actuales = this.comparados().map((x) => x.codigo);
+    this.comparadosElegidos.set([...actuales, codigo].slice(0, MAX_COMPARADOS));
+  }
+
+  protected quitar(codigo: string): void {
+    this.comparadosElegidos.set(
+      this.comparados()
+        .map((x) => x.codigo)
+        .filter((c) => c !== codigo),
+    );
+  }
+
+  private arriba(): void {
+    if (typeof window !== 'undefined')
+      window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   /**

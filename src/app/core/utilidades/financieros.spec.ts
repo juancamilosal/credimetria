@@ -74,9 +74,9 @@ describe('utilidades de estados financieros', () => {
   it('avisa los años con pérdidas', () => {
     const e = entidadDePrueba();
     e.anual = [
-      { anio: 2023, utilidad: -1 },
-      { anio: 2024, utilidad: -2 },
-      { anio: 2025, utilidad: 3 },
+      { anio: 2023, utilidad: -1, patrimonio: null, cartera: null },
+      { anio: 2024, utilidad: -2, patrimonio: null, cartera: null },
+      { anio: 2025, utilidad: 3, patrimonio: null, cartera: null },
     ];
     expect(analisisAutomatico(e).puntos.at(-1)).toEqual({
       tipo: 'alerta',
