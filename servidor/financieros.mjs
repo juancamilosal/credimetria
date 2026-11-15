@@ -369,6 +369,15 @@ export const REPRESENTANTES_SFC = {
   },
 };
 
+/**
+ * Dirección cuando la Superfinanciera no la tiene, comprobada en fuentes de
+ * la entidad. Lo de Directus manda sobre esto.
+ */
+export const DIRECCIONES_SFC = {
+  // App Store y platafinance.com (el piso no coincide entre las dos).
+  "4-132": "Carrera 11B No. 99-25",
+};
+
 /** La Superfinanciera escribe algunas ciudades sin tilde. */
 const TILDES = {
   Medellin: "Medellín",
@@ -416,7 +425,7 @@ export const SITIOS_SFC = {
   "4-129": "https://koa.co",
   "4-130": "https://www.nequi.com.co",
   "4-131": "https://co.addi.com",
-  "4-132": "https://plata.com.co",
+  "4-132": "https://platafinance.com",
   "32-1": "https://www.cfa.com.co",
   "32-2": "https://www.jfk.com.co",
   "32-5": "https://www.confiar.coop",
@@ -464,7 +473,7 @@ export function fichaTecnica(fila) {
       ? null
       : conTilde(titulo(fila.ciudad.trim())),
     direccion: pendiente(fila.direccion)
-      ? null
+      ? (DIRECCIONES_SFC[clave] ?? null)
       : fila.direccion.trim().replace(/\.$/, ""),
     sitioWeb:
       SITIOS_SFC[clave] ??
