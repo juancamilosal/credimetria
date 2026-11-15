@@ -419,6 +419,7 @@ export const SITIOS_SFC = {
   "4-121": "https://www.financierajuriscoop.com.co",
   "4-122":
     "https://mobilize-fs.com/en/subsidiaries/mobilize-financial-services-colombia",
+  "4-120": "https://www.lahipotecaria.com/colombia/",
   "4-123": "https://www.uala.com.co",
   "4-124": "https://www.rappipay.co",
   "4-126": "https://www.mercadopago.com.co",
