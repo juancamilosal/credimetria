@@ -154,6 +154,7 @@ export const LOGOS_SFC = {
   "1-66": "/logos-entidades/btg-pactual.webp",
   "1-68": "/logos-entidades/banco-contactar.webp",
   "4-26": "/logos-entidades/tuya.webp",
+  "4-117": "/logos-entidades/credifamilia.webp",
   "4-124": "/logos-entidades/rappipay.webp",
   "4-126": "/logos-entidades/mercado-pago.webp",
   "4-127": "/logos-entidades/bold.webp",
