@@ -116,7 +116,7 @@ describe('EstadosFinancieros', () => {
     expect(html.querySelectorAll('.opcion').length).toBe(2);
   });
 
-  it('compara con líneas: por defecto con los que más ganan, se cambia la métrica y se quita', async () => {
+  it('compara con líneas: por defecto con los que más ganan, se cambia la métrica y se marcan casillas', async () => {
     const { harness, html } = await abrir('/estados-financieros?entidad=bbva');
     // BBVA se compara con Davivienda (la otra de la lista).
     expect(html.querySelectorAll('svg.lineas .serie').length).toBe(2);
@@ -134,13 +134,25 @@ describe('EstadosFinancieros', () => {
     expect(html.querySelectorAll('svg.lineas .serie circle').length).toBe(3);
     html.querySelector<HTMLButtonElement>('.metricas button')!.click();
     harness.detectChanges();
-    html.querySelector<HTMLButtonElement>('.quitar')!.click();
+    // Casillas: Davivienda viene marcada; al desmarcarla queda solo BBVA.
+    const casilla = () =>
+      html.querySelector<HTMLInputElement>('.casillas input')!;
+    expect(casilla().checked).toBeTrue();
+    casilla().click();
+    harness.detectChanges();
+    expect(casilla().checked).toBeFalse();
+    expect(html.querySelectorAll('svg.lineas .serie').length).toBe(1);
+    // Se vuelve a marcar, y "Ninguno" / "Todos".
+    casilla().click();
+    harness.detectChanges();
+    expect(html.querySelectorAll('svg.lineas .serie').length).toBe(2);
+    const [todos, ninguno] = html.querySelectorAll<HTMLButtonElement>(
+      '.acciones-casillas button',
+    );
+    ninguno.click();
     harness.detectChanges();
     expect(html.querySelectorAll('svg.lineas .serie').length).toBe(1);
-    // Se puede volver a agregar desde la lista.
-    const sel = html.querySelector<HTMLSelectElement>('.agregar select')!;
-    sel.value = 'davivienda';
-    sel.dispatchEvent(new Event('change'));
+    todos.click();
     harness.detectChanges();
     expect(html.querySelectorAll('svg.lineas .serie').length).toBe(2);
   });

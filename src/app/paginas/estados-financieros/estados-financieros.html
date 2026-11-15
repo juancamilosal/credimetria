@@ -286,10 +286,14 @@
                 </text>
               }
               @for (l of g.lineas; track l.codigo; let i = $index) {
-                <g [class]="'serie s' + i">
+                <g
+                  class="serie"
+                  [class.elegida]="i === 0"
+                  [style.--c]="color(l.codigo)"
+                >
                   <path [attr.d]="l.d" />
                   @for (p of l.puntos; track p.anio) {
-                    <circle [attr.cx]="p.x" [attr.cy]="p.y" r="4">
+                    <circle [attr.cx]="p.x" [attr.cy]="p.y" r="2.5">
                       <title>
                         {{ l.nombre }} · {{ p.anio }}: {{ p.texto }}
                       </title>
@@ -299,24 +303,14 @@
               }
             </svg>
             <ul class="leyenda-lineas">
-              @for (l of g.lineas; track l.codigo; let i = $index) {
-                <li [class]="'s' + i">
+              @for (l of g.lineas; track l.codigo) {
+                <li [style.--c]="color(l.codigo)">
                   <span class="muestra" aria-hidden="true"></span>
                   <b>{{ l.nombre }}</b>
                   @if (l.ultimo) {
                     <span class="muted"
                       >{{ l.ultimo.anio }}: {{ l.ultimo.texto }}</span
                     >
-                  }
-                  @if (i > 0) {
-                    <button
-                      type="button"
-                      class="quitar"
-                      [attr.aria-label]="'Quitar ' + l.nombre"
-                      (click)="quitar(l.codigo)"
-                    >
-                      ×
-                    </button>
                   }
                 </li>
               }
@@ -326,17 +320,35 @@
           @if (!lineas()) {
             <p class="vacio">No hay datos de estos años para comparar.</p>
           }
-          @if (comparados().length < maxComparados) {
-            <label class="agregar">
-              <span>Agregar un banco a la comparación</span>
-              <select #sel (change)="agregar(sel.value); sel.value = ''">
-                <option value="">Elige un banco…</option>
-                @for (o of paraAgregar(); track o.codigo) {
-                  <option [value]="o.codigo">{{ o.nombre }}</option>
-                }
-              </select>
-            </label>
-          }
+
+          <fieldset class="casillas">
+            <legend>
+              Marca los bancos que quieres ver en la gráfica
+              <span class="acciones-casillas">
+                <button type="button" (click)="todos(true)">Todos</button>
+                <button type="button" (click)="todos(false)">Ninguno</button>
+              </span>
+            </legend>
+            <ul>
+              @for (c of casillas(); track c.codigo) {
+                <li>
+                  <label [class.marcada]="c.marcada">
+                    <input
+                      type="checkbox"
+                      [checked]="c.marcada"
+                      (change)="alternar(c.codigo)"
+                    />
+                    <span
+                      class="muestra"
+                      aria-hidden="true"
+                      [style.--c]="c.color ?? 'transparent'"
+                    ></span>
+                    {{ c.nombre }}
+                  </label>
+                </li>
+              }
+            </ul>
+          </fieldset>
           <p class="nota">
             Años completos (cierre de diciembre). La rentabilidad de cada año es
             su utilidad sobre el patrimonio.

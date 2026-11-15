@@ -481,16 +481,10 @@ ol {
   gap: 14px;
   /* Colores de las series: la elegida en el azul de la marca. */
   --serie-0: var(--cm-marca-700);
-  --serie-1: #8e6bbf;
-  --serie-2: #2a9d8f;
-  --serie-3: #7a8796;
 }
 
 :host-context([data-theme="dark"]) .comparar {
   --serie-0: #5fa3e6;
-  --serie-1: #b49ae0;
-  --serie-2: #4cc3b4;
-  --serie-3: #a3afbd;
 }
 
 .comparar-top {
@@ -558,39 +552,23 @@ ol {
 
 .serie path {
   fill: none;
-  stroke-width: 2.5;
+  stroke: var(--c);
+  stroke-width: 1.5;
   stroke-linejoin: round;
   stroke-linecap: round;
-}
-
-.serie circle {
-  stroke: var(--cm-blanco);
-  stroke-width: 2;
-}
-
-.serie.s0 path {
-  stroke-width: 3.5;
-}
-
-.s0 {
-  --c: var(--serie-0);
-}
-.s1 {
-  --c: var(--serie-1);
-}
-.s2 {
-  --c: var(--serie-2);
-}
-.s3 {
-  --c: var(--serie-3);
-}
-
-.serie path {
-  stroke: var(--c);
+  opacity: 0.9;
 }
 
 .serie circle {
   fill: var(--c);
+  stroke: var(--cm-blanco);
+  stroke-width: 0.75;
+}
+
+/* La elegida, un poco más gruesa y encima de las demás. */
+.serie.elegida path {
+  stroke-width: 2.25;
+  opacity: 1;
 }
 
 .leyenda-lineas {
@@ -613,32 +591,69 @@ ol {
   background: var(--c);
 }
 
-.quitar {
+/* Casillas para elegir qué bancos se ven en la gráfica */
+.casillas {
   border: 1px solid var(--cm-linea);
-  background: var(--cm-blanco);
-  color: var(--cm-gris);
-  border-radius: 999px;
-  width: 24px;
-  height: 24px;
-  line-height: 1;
-  cursor: pointer;
-  font: inherit;
+  border-radius: var(--cm-r-tarjeta);
+  padding: 12px 14px 14px;
+  margin: 0;
 }
 
-.agregar {
+.casillas legend {
+  font-size: 14px;
+  font-weight: 700;
+  padding: 0 6px;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: 340px;
-  font-size: 13.5px;
-  font-weight: 600;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.agregar select {
+.acciones-casillas {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.acciones-casillas button {
   font: inherit;
-  padding: 8px 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--cm-enlace);
+  background: none;
   border: 1px solid var(--cm-linea);
-  border-radius: var(--cm-r-campo);
-  background: var(--cm-campo);
-  color: var(--cm-tinta);
+  border-radius: 999px;
+  padding: 2px 10px;
+  cursor: pointer;
+}
+
+.casillas ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr));
+  gap: 4px 12px;
+  margin-top: 8px;
+}
+
+.casillas label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  padding: 5px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.casillas label:hover {
+  background: var(--cm-linea-suave);
+}
+
+.casillas label.marcada {
+  font-weight: 700;
+}
+
+.casillas input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--cm-marca-700);
+  flex: none;
 }

@@ -27,9 +27,6 @@ import {
   TAMANOS,
 } from '../../core/utilidades/grafica-lineas';
 
-/** Cuántas entidades se pueden comparar además de la elegida. */
-const MAX_COMPARADOS = 3;
-
 export interface Barra {
   etiqueta: string;
   texto: string;
@@ -73,7 +70,7 @@ export class EstadosFinancieros {
     () => this.entidades().find((e) => e.codigo === this.elegido()) ?? null,
   );
 
-  /** Comparación: qué se compara y con cuáles (máximo 3 además de la elegida). */
+  /** Comparación: qué se compara y con cuáles (todos los que se marquen). */
   protected readonly metrica = signal<Metrica>('utilidad');
   /** Pantalla angosta (celular): la gráfica se dibuja con otras medidas. */
   private readonly angosta = signal(false);
@@ -88,17 +85,30 @@ export class EstadosFinancieros {
       otras.slice(0, 2).map((x) => x.codigo);
     return codigos
       .map((c) => otras.find((x) => x.codigo === c))
-      .filter((x): x is EntidadFinanciera => !!x)
-      .slice(0, MAX_COMPARADOS);
+      .filter((x): x is EntidadFinanciera => !!x);
   });
-  /** Las que se pueden agregar a la comparación. */
-  protected readonly paraAgregar = computed(() => {
+  /** Las casillas: todas las demás entidades, marcadas las que se comparan. */
+  protected readonly casillas = computed(() => {
     const e = this.entidad();
-    const ya = new Set(this.comparados().map((x) => x.codigo));
-    return this.entidades().filter(
-      (x) => x.codigo !== e?.codigo && !ya.has(x.codigo),
-    );
+    const marcadas = new Set(this.comparados().map((x) => x.codigo));
+    return this.entidades()
+      .filter((x) => x.codigo !== e?.codigo)
+      .map((x) => ({
+        codigo: x.codigo,
+        nombre: x.nombre,
+        marcada: marcadas.has(x.codigo),
+        color: marcadas.has(x.codigo) ? this.color(x.codigo) : null,
+      }));
   });
+  /**
+   * Un color para cada línea: la elegida en el azul de la marca y las demás
+   * repartidas en el círculo de color (sirve para cualquier cantidad).
+   */
+  protected color(codigo: string): string {
+    if (codigo === this.entidad()?.codigo) return 'var(--serie-0)';
+    const i = this.comparados().findIndex((x) => x.codigo === codigo);
+    return `hsl(${(28 + i * 137.5) % 360} 62% 48%)`;
+  }
   protected readonly lineas = computed(() => {
     const e = this.entidad();
     return e
@@ -109,7 +119,6 @@ export class EstadosFinancieros {
         )
       : null;
   });
-  protected readonly maxComparados = MAX_COMPARADOS;
   protected readonly nombresLineas = computed(
     () =>
       this.lineas()
@@ -201,17 +210,20 @@ export class EstadosFinancieros {
     this.arriba();
   }
 
-  protected agregar(codigo: string): void {
-    if (!codigo) return;
+  /** Marca o desmarca un banco en la comparación. */
+  protected alternar(codigo: string): void {
     const actuales = this.comparados().map((x) => x.codigo);
-    this.comparadosElegidos.set([...actuales, codigo].slice(0, MAX_COMPARADOS));
+    this.comparadosElegidos.set(
+      actuales.includes(codigo)
+        ? actuales.filter((c) => c !== codigo)
+        : [...actuales, codigo],
+    );
   }
 
-  protected quitar(codigo: string): void {
+  /** Marca todos o ninguno. */
+  protected todos(marcar: boolean): void {
     this.comparadosElegidos.set(
-      this.comparados()
-        .map((x) => x.codigo)
-        .filter((c) => c !== codigo),
+      marcar ? this.casillas().map((c) => c.codigo) : [],
     );
   }
 

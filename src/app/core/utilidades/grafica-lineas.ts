@@ -58,7 +58,7 @@ export const TAMANOS = {
   ancha: { ancho: 640, alto: 260 },
   angosta: { ancho: 340, alto: 240 },
 };
-const MARGEN = { arriba: 14, abajo: 28, izquierda: 78, derecha: 14 };
+const MARGEN = { arriba: 14, abajo: 28, izquierda: 96, derecha: 14 };
 
 /**
  * Arma la gráfica de líneas (años completos, cierre de diciembre) de varias
