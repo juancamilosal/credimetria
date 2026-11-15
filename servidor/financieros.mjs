@@ -106,6 +106,7 @@ export const LOGOS_SFC = {
   "1-9": "/logos-entidades/citibank.webp",
   "1-52": "/logos-entidades/bancamia.webp",
   "1-53": "/logos-entidades/banco-w.webp",
+  "1-58": "/logos-entidades/coopcentral.webp",
   "1-59": "/logos-entidades/santander.webp",
   "1-60": "/logos-entidades/mundo-mujer.webp",
   "1-62": "/logos-entidades/mibanco.webp",
