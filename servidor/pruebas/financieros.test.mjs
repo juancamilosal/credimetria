@@ -290,3 +290,39 @@ test("una entidad inactiva de Directus usa el logo del repositorio", () => {
   assert.equal(itau.logo, "/logos-entidades/itau.webp");
   assert.equal(itau.fichaTecnica.representante, "Jorge Villa");
 });
+
+test("ficha: razón social sin frases legales, ciudad con tilde y sitio corregido", () => {
+  const f = (fila) =>
+    fichaTecnica({ tipo_entidad: "1", cod_entidad: "0", ...fila });
+  assert.equal(
+    f({
+      razon_social:
+        "CITIBANK-COLOMBIA Podrá utilizar solamente la expresión CITIBANK",
+    }).razonSocial,
+    "CITIBANK-COLOMBIA",
+  );
+  assert.equal(
+    f({
+      razon_social:
+        "Plata Compañía de Financiamiento S.A. Podrá utilizar las siglas: PLATA",
+    }).razonSocial,
+    "Plata Compañía de Financiamiento S.A.",
+  );
+  assert.equal(
+    f({
+      razon_social:
+        "FINANCIERA JURISCOOP S.A. COMPAÑÍA DE FINANCIAMIENTO y en sus relaciones comerciales",
+    }).razonSocial,
+    "FINANCIERA JURISCOOP S.A. COMPAÑÍA DE FINANCIAMIENTO",
+  );
+  assert.equal(f({ ciudad: "MEDELLIN" }).ciudad, "Medellín");
+  // Itaú: la Superfinanciera trae un dominio viejo.
+  assert.equal(
+    fichaTecnica({
+      tipo_entidad: "1",
+      cod_entidad: "6",
+      uripaginaweb: "www.bancocorpbanca.com.co",
+    }).sitioWeb,
+    "https://banco.itau.co",
+  );
+});

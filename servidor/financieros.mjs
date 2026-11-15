@@ -354,6 +354,61 @@ const titulo = (texto) =>
 
 const pendiente = (v) => !v || /^pendiente/i.test(v.trim());
 
+/** La Superfinanciera escribe algunas ciudades sin tilde. */
+const TILDES = {
+  Medellin: "Medellín",
+  Popayan: "Popayán",
+  Chia: "Chía",
+  Bogota: "Bogotá",
+  "Bogota D.C.": "Bogotá D.C.",
+};
+const conTilde = (ciudad) => TILDES[ciudad] ?? ciudad;
+
+/**
+ * Sitio web oficial (revisado el 15 nov 2026) cuando la Superfinanciera no lo
+ * trae ("Pendiente") o trae uno viejo o mal escrito.
+ */
+export const SITIOS_SFC = {
+  "1-6": "https://banco.itau.co",
+  "1-9": "https://www.citibank.com/icg/sa/latam/colombia/",
+  "1-23": "https://www.bancodeoccidente.com.co",
+  "1-30": "https://www.bancocajasocial.com",
+  "1-39": "https://www.davivienda.com",
+  "1-42": "https://www.davibank.com",
+  "1-49": "https://www.avvillas.com.co",
+  "1-51": "https://www.ban100.com.co",
+  "1-54": "https://www.bancoomeva.com.co",
+  "1-55": "https://www.bancofinandina.com",
+  "1-56": "https://www.bancofalabella.com.co",
+  "1-58": "https://www.coopcentral.com.co",
+  "1-60": "https://www.bmm.com.co",
+  "1-62": "https://www.mibanco.com.co",
+  "1-63": "https://bancoserfinanza.com",
+  "1-64": "https://www.jpmorgan.com/CO/es/about-us",
+  "1-65": "https://www.lulobank.com",
+  "1-66": "https://www.btgpactual.com.co",
+  "1-67": "https://www.bancounion.com",
+  "1-68": "https://bancocontactar.com",
+  "4-31": "https://www.gmfinancial.com.co",
+  "4-117": "https://credifamilia.com",
+  "4-118": "https://crezcamos.com",
+  "4-121": "https://www.financierajuriscoop.com.co",
+  "4-123": "https://www.uala.com.co",
+  "4-124": "https://www.rappipay.co",
+  "4-126": "https://www.mercadopago.com.co",
+  "4-127": "https://bold.co",
+  "4-128": "https://nu.com.co",
+  "4-129": "https://koa.co",
+  "4-130": "https://www.nequi.com.co",
+  "4-131": "https://co.addi.com",
+  "4-132": "https://plata.com.co",
+  "32-1": "https://www.cfa.com.co",
+  "32-2": "https://www.jfk.com.co",
+  "32-5": "https://www.confiar.coop",
+  "22-8": "https://www.fna.gov.co",
+  "22-11": "https://www.cajahonor.gov.co",
+};
+
 /** "8600029644" → "860.002.964-4" (el último dígito es el de verificación). */
 export function formatoNit(nit) {
   const n = String(nit ?? "").replace(/\D/g, "");
@@ -370,9 +425,10 @@ export function formatoNit(nit) {
  */
 export function fichaTecnica(fila) {
   if (!fila) return null;
+  const clave = `${fila.tipo_entidad}-${fila.cod_entidad}`;
   const razon = (fila.razon_social ?? "")
     .split(
-      /\s*(?:,|\(|\s-\s?[A-Z]|\s(?:y\s)?podr[aá]|\spudiendo|\squien|\scuya|\spero|\sy\/o|\so\s(?=[A-Z])|\ses\suna|\sla\scual)/,
+      /\s*(?:,|\(|\s-\s?[A-Z]|\s(?:y\s)?podr[aá]|\spudiendo|\squien|\scuya|\spero|\sy\/o|\so\s(?=[A-Z])|\ses\suna|\sla\scual|\sy\sen\ssus\srelaciones)/i,
     )[0]
     .trim();
   const cargoTexto = fila.nombrepublicocargo ?? "";
@@ -387,16 +443,19 @@ export function fichaTecnica(fila) {
     cargo: pendiente(cargo) ? null : cargo,
     // La Superfinanciera anota cuando el representante renunció.
     cambioEnCurso: /renuncia/i.test(cargoTexto),
-    ciudad: pendiente(fila.ciudad) ? null : titulo(fila.ciudad.trim()),
+    ciudad: pendiente(fila.ciudad)
+      ? null
+      : conTilde(titulo(fila.ciudad.trim())),
     direccion: pendiente(fila.direccion)
       ? null
       : fila.direccion.trim().replace(/\.$/, ""),
     sitioWeb:
-      !pendiente(web) &&
+      SITIOS_SFC[clave] ??
+      (!pendiente(web) &&
       /^(https?:\/\/)?[\w-]+(\.[\w-]+)+/i.test(web) &&
       !web.includes("@")
         ? web.replace(/^(?!https?:\/\/)/, "https://")
-        : null,
+        : null),
   };
 }
 
