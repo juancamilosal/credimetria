@@ -66,10 +66,8 @@ ol {
 }
 
 .opcion-texto b {
-  font-size: 14.5px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 14px;
+  line-height: 1.25;
 }
 
 .cifra {

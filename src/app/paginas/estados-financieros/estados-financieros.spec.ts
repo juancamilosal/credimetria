@@ -119,6 +119,15 @@ describe('EstadosFinancieros', () => {
     expect(pdf.target).toBe('_blank');
   });
 
+  it('sin logo muestra iniciales que se entienden', async () => {
+    const { html } = await abrir();
+    // "BBVA Colombia" no tiene logo en los datos de prueba: "BC", no "B".
+    expect(
+      html.querySelectorAll('.opcion')[1].querySelector('.iniciales')
+        ?.textContent,
+    ).toBe('BC');
+  });
+
   it('abre directo la entidad de la dirección', async () => {
     const { html } = await abrir('/estados-financieros?entidad=bbva');
     expect(html.querySelector('#t-entidad')?.textContent).toContain('BBVA');

@@ -477,8 +477,13 @@ la usura M.V. En la edición, "Usar tope de usura" llena el hasta con la de
   `DIRECTUS_ADMIN_TOKEN=… node servidor/scripts/crear-estados-financieros.mjs`.
   Las cifras no van aquí: `servidor/financieros.mjs` las lee del CUIF de la
   Superfinanciera (datos.gov.co `mxk5-ce6w`, cuentas 590000 utilidad, 300000
-  patrimonio, 100000 activos y 140000 cartera; moneda total), cruzando por
-  `entidades.codigo_sfc`, y las guarda 12 horas. Rutas `/api/financieros` y
+  patrimonio, 100000 activos y 140000 cartera; moneda total) y las guarda 12
+  horas. Salen **todos los bancos** que reportan (tipo 1, unos 30) más las
+  demás entidades de Directus con `codigo_sfc` (p. ej. Koa). Se cruzan por
+  `entidades.codigo_sfc`: si el banco está en Directus usa su código, nombre
+  y logo; si no, el código es `sfc-<tipo>-<código>` (p. ej. `sfc-1-65`), el
+  nombre sale de `NOMBRES_SFC` y lleva iniciales. Solo las entidades de
+  Directus pueden tener análisis escrito y PDF. Rutas `/api/financieros` y
   `/api/estados-financieros/<entidad>/pdf`.
 
 ## Robots

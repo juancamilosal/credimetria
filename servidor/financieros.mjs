@@ -56,6 +56,62 @@ async function pedirCuif(parametros) {
   return r.json();
 }
 
+/** Tipo de entidad del CUIF → tipo en Credimetría. */
+export const TIPOS_SFC = { 1: "Banco", 4: "Financiera" };
+
+/**
+ * Nombre corto de los bancos que no están en Directus (el CUIF los trae en
+ * mayúsculas, sin tildes y con "S.A.").
+ */
+export const NOMBRES_SFC = {
+  "1-1": "Banco de Bogotá",
+  "1-2": "Banco Popular",
+  "1-6": "Itaú",
+  "1-7": "Bancolombia",
+  "1-9": "Citibank",
+  "1-12": "GNB Sudameris",
+  "1-13": "BBVA",
+  "1-23": "Banco de Occidente",
+  "1-30": "Banco Caja Social",
+  "1-39": "Davivienda",
+  "1-42": "Scotiabank Colpatria",
+  "1-43": "Banco Agrario",
+  "1-49": "Banco AV Villas",
+  "1-51": "Bancien",
+  "1-52": "Bancamía",
+  "1-53": "Banco W",
+  "1-54": "Bancoomeva",
+  "1-55": "Banco Finandina",
+  "1-56": "Banco Falabella",
+  "1-57": "Banco Pichincha",
+  "1-58": "Banco Coopcentral",
+  "1-59": "Banco Santander",
+  "1-60": "Banco Mundo Mujer",
+  "1-62": "Mibanco",
+  "1-63": "Banco Serfinanza",
+  "1-64": "J.P. Morgan",
+  "1-65": "Lulo Bank",
+  "1-66": "BTG Pactual",
+  "1-67": "Banco Unión",
+  "1-68": "Banco Contactar",
+};
+
+const MINUSCULAS = new Set(["de", "del", "la", "las", "los", "y", "e"]);
+
+/** El nombre a mostrar: el de la lista o el del CUIF, más legible. */
+export function nombreEntidad(clave, nombreSfc) {
+  if (NOMBRES_SFC[clave]) return NOMBRES_SFC[clave];
+  return (nombreSfc ?? clave)
+    .replace(/\s+S\.?\s?A\.?(\s|$)/gi, " ")
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((p, i) =>
+      i > 0 && MINUSCULAS.has(p) ? p : p.charAt(0).toUpperCase() + p.slice(1),
+    )
+    .join(" ");
+}
+
 /** "1-13" → { tipo: "1", codigo: "13" }; `null` si no tiene esa forma. */
 export function partirCodigoSfc(codigoSfc) {
   const m = /^\s*(\d+)-(\d+)\s*$/.exec(codigoSfc ?? "");
@@ -145,10 +201,11 @@ export function armarCifras(filas, ultimoCorte) {
 
 /** Lee del CUIF las cifras de las entidades pedidas ("tipo-código"). */
 export async function leerCuif(codigosSfc) {
+  // Todos los bancos (tipo 1) y, además, las demás entidades de Directus
+  // con código SFC (financieras, cooperativas…).
   const partes = codigosSfc.map(partirCodigoSfc).filter(Boolean);
-  if (!partes.length) return { corte: null, cifras: new Map() };
-  const tipos = [...new Set(partes.map((p) => p.tipo))];
-  const codigos = [...new Set(partes.map((p) => p.codigo))];
+  const tipos = [...new Set(["1", ...partes.map((p) => p.tipo)])];
+  const codigos = [...new Set(["0", ...partes.map((p) => p.codigo)])];
   const lista = (xs) => xs.map((x) => `'${x}'`).join(",");
 
   // El último mes publicado (Bancolombia, 1-7, reporta siempre).
@@ -165,16 +222,18 @@ export async function leerCuif(codigosSfc) {
       "tipo_entidad,codigo_entidad,nombre_entidad,fecha_corte,cuenta,valor",
     $where:
       `moneda='0' AND cuenta in(${lista(Object.keys(CUENTAS))})` +
-      ` AND tipo_entidad in(${lista(tipos)}) AND codigo_entidad in(${lista(codigos)})` +
+      ` AND (tipo_entidad='1' OR (tipo_entidad in(${lista(tipos)}) AND codigo_entidad in(${lista(codigos)})))` +
       ` AND fecha_corte>='${desde}T00:00:00'` +
       ` AND (date_extract_m(fecha_corte)=12 OR fecha_corte='${u.corte}T00:00:00'` +
       ` OR fecha_corte='${finDeMes(u.anio - 1, u.mes)}T00:00:00')`,
     $limit: "20000",
   });
-  // Se piden juntos tipos y códigos: se quedan solo los pares pedidos.
+  // Se piden juntos tipos y códigos: se quedan los bancos y los pares pedidos.
   const pedidos = new Set(partes.map((p) => `${p.tipo}-${p.codigo}`));
-  const propias = filas.filter((f) =>
-    pedidos.has(`${f.tipo_entidad}-${f.codigo_entidad}`),
+  const propias = filas.filter(
+    (f) =>
+      f.tipo_entidad === "1" ||
+      pedidos.has(`${f.tipo_entidad}-${f.codigo_entidad}`),
   );
   return { corte: u.corte, cifras: armarCifras(propias, ultimo) };
 }
@@ -207,11 +266,22 @@ async function leerDirectus() {
 /** Une las entidades de Directus, sus cifras del CUIF y su análisis. */
 export function unir(entidades, fichas, cuif) {
   const porEntidad = new Map(fichas.map((f) => [f.entidad, f]));
+  const porCodigoSfc = new Map(
+    entidades
+      .filter((e) => partirCodigoSfc(e.codigo_sfc))
+      .map((e) => [e.codigo_sfc.trim(), e]),
+  );
   const lista = [];
-  for (const e of entidades) {
-    const cifras = cuif.cifras.get(e.codigo_sfc?.trim());
-    if (!cifras) continue; // sin reporte en el CUIF (no vigilada o sin datos)
-    const ficha = porEntidad.get(e.codigo);
+  // Todas las del CUIF: con los datos de Directus si la entidad está allá.
+  for (const [clave, cifras] of cuif.cifras) {
+    const d = porCodigoSfc.get(clave);
+    const e = d ?? {
+      codigo: `sfc-${clave}`,
+      nombre: nombreEntidad(clave, cifras.nombreSfc),
+      tipo: TIPOS_SFC[clave.split("-")[0]] ?? null,
+      logo: null,
+    };
+    const ficha = d ? porEntidad.get(e.codigo) : null;
     lista.push({
       codigo: e.codigo,
       nombre: e.nombre,

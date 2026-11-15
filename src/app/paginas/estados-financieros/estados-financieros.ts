@@ -122,10 +122,17 @@ export class EstadosFinancieros {
     });
   }
 
+  /**
+   * Iniciales cuando no hay logo: sin "Banco" ni "de", "la"…
+   * ("Banco Caja Social" → CS); con una sola palabra, sus 2 primeras letras
+   * ("BBVA" → BB, "Itaú" → IT).
+   */
   protected iniciales_(nombre: string): string {
-    return nombre
-      .split(/\s+/)
-      .filter((p) => /^[A-ZÁÉÍÓÚÑ]/i.test(p))
+    let palabras = nombre.split(/\s+/).filter((p) => /^[A-ZÁÉÍÓÚÑ]/.test(p));
+    if (palabras.length > 1)
+      palabras = palabras.filter((p) => p.toLowerCase() !== 'banco');
+    if (palabras.length === 1) return palabras[0].slice(0, 2).toUpperCase();
+    return palabras
       .slice(0, 2)
       .map((p) => p[0].toUpperCase())
       .join('');

@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { armarCifras, partirCodigoSfc, unir } from "../financieros.mjs";
+import {
+  armarCifras,
+  nombreEntidad,
+  partirCodigoSfc,
+  unir,
+} from "../financieros.mjs";
 
 const fila = (corte, cuenta, valor, codigo = "39") => ({
   tipo_entidad: "1",
@@ -116,4 +121,47 @@ test("une entidades, cifras y solo los análisis publicados que llegan", () => {
     pdf: "/api/estados-financieros/davivienda/pdf",
     actualizado: "2026-11-15",
   });
+});
+
+test("salen todos los bancos del CUIF, aunque no estén en Directus", () => {
+  const filas = [
+    ...FILAS,
+    fila("2026-08-31", "590000", 3 * MM, "65"),
+    {
+      ...fila("2026-08-31", "590000", 1 * MM, "999"),
+      nombre_entidad: "BANCO NUEVO DE LA COSTA S.A.",
+    },
+  ];
+  const cifras = armarCifras(filas, "2026-08-31T00:00:00.000");
+  const datos = unir(
+    [
+      {
+        codigo: "davivienda",
+        nombre: "Davivienda",
+        tipo: "Banco",
+        logo: null,
+        codigo_sfc: "1-39",
+      },
+    ],
+    [{ entidad: "sfc-1-65", titular: "No es de Directus: no se usa" }],
+    { corte: "2026-08-31", cifras },
+  );
+  assert.deepEqual(
+    datos.entidades.map((e) => [e.codigo, e.nombre, e.tipo]),
+    [
+      ["davivienda", "Davivienda", "Banco"],
+      ["sfc-1-65", "Lulo Bank", "Banco"],
+      ["sfc-1-999", "Banco Nuevo de la Costa", "Banco"],
+    ],
+  );
+  assert.equal(datos.entidades[1].logo, null);
+  assert.equal(datos.entidades[1].analisis, null);
+});
+
+test("nombres legibles", () => {
+  assert.equal(nombreEntidad("1-52", "BANCAMIA S.A."), "Bancamía");
+  assert.equal(
+    nombreEntidad("4-1", "FINANCIERA DEL NORTE SA"),
+    "Financiera del Norte",
+  );
 });
