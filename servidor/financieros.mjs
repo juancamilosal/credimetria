@@ -362,6 +362,11 @@ const pendiente = (v) => !v || /^pendiente/i.test(v.trim());
 export const REPRESENTANTES_SFC = {
   // Desde el 1 sep 2026 (Portafolio, La República y bbva.com, 29 jul 2026).
   "1-13": { representante: "Gloria Couceiro", cargo: "Presidenta Ejecutiva" },
+  // Desde el 21 ago 2026 (anuncio en cajahonor.gov.co).
+  "22-11": {
+    representante: "Coronel (RA) Pedro Villaquirán Ramos",
+    cargo: "Gerente General",
+  },
 };
 
 /** La Superfinanciera escribe algunas ciudades sin tilde. */
