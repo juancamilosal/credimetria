@@ -156,6 +156,7 @@ export const LOGOS_SFC = {
   "4-26": "/logos-entidades/tuya.webp",
   "4-31": "/logos-entidades/gm-financial.webp",
   "4-46": "/logos-entidades/coltefinanciera.webp",
+  "4-108": "/logos-entidades/iris.webp",
   "4-117": "/logos-entidades/credifamilia.webp",
   "4-118": "/logos-entidades/crezcamos.webp",
   "4-120": "/logos-entidades/la-hipotecaria.webp",
