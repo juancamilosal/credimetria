@@ -117,7 +117,7 @@ export const NOMBRES_SFC = {
   "4-118": "Crezcamos",
   "4-120": "La Hipotecaria",
   "4-121": "Financiera Juriscoop",
-  "4-122": "RCI Colombia",
+  "4-122": "Mobilize Financial Services (RCI Colombia)",
   "4-123": "Ualá (Bancar Tecnología)",
   "4-124": "RappiPay",
   "4-126": "Mercado Pago",
@@ -348,7 +348,7 @@ const titulo = (texto) =>
         ? p.toUpperCase()
         : i > 0 && MINUSCULAS.has(p)
           ? p
-          : p.charAt(0).toUpperCase() + p.slice(1),
+          : p.replace(/(^|-)(\p{L})/gu, (_, g, l) => g + l.toUpperCase()),
     )
     .join(" ");
 
@@ -417,6 +417,8 @@ export const SITIOS_SFC = {
   "4-117": "https://credifamilia.com",
   "4-118": "https://crezcamos.com",
   "4-121": "https://www.financierajuriscoop.com.co",
+  "4-122":
+    "https://mobilize-fs.com/en/subsidiaries/mobilize-financial-services-colombia",
   "4-123": "https://www.uala.com.co",
   "4-124": "https://www.rappipay.co",
   "4-126": "https://www.mercadopago.com.co",

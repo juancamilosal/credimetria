@@ -337,3 +337,13 @@ test("BBVA: la Superfinanciera lo tiene Pendiente; sale la presidenta comprobada
   assert.equal(f.representante, "Gloria Couceiro");
   assert.equal(f.cargo, "Presidenta Ejecutiva");
 });
+
+test("nombres compuestos con guion: mayúscula en cada parte", () => {
+  const f = fichaTecnica({
+    tipo_entidad: "4",
+    cod_entidad: "122",
+    representante_legal: "JEAN-PHILIPPE JACQUES MAURICE VALLEE",
+  });
+  assert.equal(f.representante, "Jean-Philippe Jacques Maurice Vallee");
+  assert.match(f.sitioWeb, /mobilize-fs\.com/);
+});
