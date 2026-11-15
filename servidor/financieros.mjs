@@ -155,6 +155,7 @@ export const LOGOS_SFC = {
   "1-68": "/logos-entidades/banco-contactar.webp",
   "4-26": "/logos-entidades/tuya.webp",
   "4-130": "/logos-entidades/nequi.webp",
+  "4-131": "/logos-entidades/addi.webp",
 };
 
 const MINUSCULAS = new Set(["de", "del", "la", "las", "los", "y", "e"]);
