@@ -103,6 +103,7 @@ export const NOMBRES_SFC = {
  */
 export const LOGOS_SFC = {
   "1-6": "/logos-entidades/itau.webp",
+  "1-59": "/logos-entidades/santander.webp",
 };
 
 const MINUSCULAS = new Set(["de", "del", "la", "las", "los", "y", "e"]);
