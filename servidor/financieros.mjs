@@ -106,6 +106,7 @@ export const LOGOS_SFC = {
   "1-52": "/logos-entidades/bancamia.webp",
   "1-53": "/logos-entidades/banco-w.webp",
   "1-59": "/logos-entidades/santander.webp",
+  "1-60": "/logos-entidades/mundo-mujer.webp",
 };
 
 const MINUSCULAS = new Set(["de", "del", "la", "las", "los", "y", "e"]);
