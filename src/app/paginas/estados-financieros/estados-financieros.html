@@ -249,6 +249,30 @@
               }
             </div>
           </div>
+          @if (metrica() !== "rentabilidad") {
+            <div class="metricas escala" role="group" aria-label="Cómo verlo">
+              <button
+                type="button"
+                [attr.aria-pressed]="escala() === 'valor'"
+                (click)="escala.set('valor')"
+              >
+                En pesos
+              </button>
+              <button
+                type="button"
+                [attr.aria-pressed]="escala() === 'cambio'"
+                (click)="escala.set('cambio')"
+              >
+                Cuánto cambió (%)
+              </button>
+            </div>
+            @if (escala() === "cambio") {
+              <p class="nota">
+                Cada banco arranca en 0 % en su primer año: la línea muestra
+                cuánto creció o bajó desde ahí, sin importar su tamaño.
+              </p>
+            }
+          }
 
           @if (lineas(); as g) {
             <svg

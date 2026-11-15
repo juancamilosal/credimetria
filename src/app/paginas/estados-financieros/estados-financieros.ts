@@ -22,6 +22,7 @@ import {
 } from '../../core/utilidades/financieros';
 import {
   armarGrafica,
+  Escala,
   Metrica,
   METRICAS,
   TAMANOS,
@@ -71,7 +72,9 @@ export class EstadosFinancieros {
   );
 
   /** Comparación: qué se compara y con cuáles (todos los que se marquen). */
-  protected readonly metrica = signal<Metrica>('utilidad');
+  // Rentabilidad por defecto: compara bancos grandes y pequeños por igual.
+  protected readonly metrica = signal<Metrica>('rentabilidad');
+  protected readonly escala = signal<Escala>('valor');
   /** Pantalla angosta (celular): la gráfica se dibuja con otras medidas. */
   private readonly angosta = signal(false);
   private readonly comparadosElegidos = signal<string[] | null>(null);
@@ -116,6 +119,7 @@ export class EstadosFinancieros {
           [e, ...this.comparados()],
           this.metrica(),
           this.angosta() ? TAMANOS.angosta : TAMANOS.ancha,
+          this.escala(),
         )
       : null;
   });

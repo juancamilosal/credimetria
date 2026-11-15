@@ -41,6 +41,26 @@ describe('gráfica de líneas', () => {
     expect(g.marcas.length).toBe(5);
   });
 
+  it('"Cuánto cambió": cada entidad frente a su primer año', () => {
+    const e = entidadDePrueba();
+    e.anual = [
+      { anio: 2020, utilidad: 321 * MM, patrimonio: null, cartera: null },
+      { anio: 2025, utilidad: 534 * MM, patrimonio: null, cartera: null },
+    ];
+    const g = armarGrafica([e], 'utilidad', undefined, 'cambio')!;
+    expect(g.lineas[0].puntos.map((p) => p.texto)).toEqual(['0 %', '+66 %']);
+    expect(g.cero).not.toBeNull();
+    // La rentabilidad ya es un porcentaje: no cambia de escala.
+    const r = armarGrafica(
+      [entidadDePrueba()],
+      'rentabilidad',
+      undefined,
+      'cambio',
+    )!;
+    expect(r.lineas[0].puntos[0].texto).toContain('%');
+    expect(r.lineas[0].puntos[0].texto).not.toContain('+');
+  });
+
   it('sin años no hay gráfica', () => {
     const e = entidadDePrueba();
     e.anual = [];

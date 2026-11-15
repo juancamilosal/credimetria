@@ -10,6 +10,13 @@ export const METRICAS: { valor: Metrica; texto: string }[] = [
   { valor: 'cartera', texto: 'Cartera (lo que presta)' },
 ];
 
+/**
+ * Cómo se ve: los valores ("En pesos") o cuánto cambió cada entidad frente a
+ * su primer año ("Cuánto cambió"), para ver el movimiento de las pequeñas
+ * junto a las grandes. La rentabilidad ya es un porcentaje: siempre "valor".
+ */
+export type Escala = 'valor' | 'cambio';
+
 /** El valor de un año para la métrica; `null` si no se puede calcular. */
 export function valorAnual(a: UtilidadAnual, m: Metrica): number | null {
   if (m === 'utilidad') return a.utilidad;
@@ -69,14 +76,39 @@ export function armarGrafica(
   entidades: EntidadFinanciera[],
   m: Metrica,
   tamano: { ancho: number; alto: number } = TAMANOS.ancha,
+  escala: Escala = 'valor',
 ): Grafica | null {
   const ANCHO = tamano.ancho;
   const ALTO = tamano.alto;
   const anios = [
     ...new Set(entidades.flatMap((e) => e.anual.map((a) => a.anio))),
   ].sort((a, b) => a - b);
-  const valores = entidades.flatMap((e) =>
-    e.anual.map((a) => valorAnual(a, m)).filter((v): v is number => v !== null),
+  // "Cuánto cambió": cada entidad frente a su primer año (0 % = igual).
+  const enCambio = escala === 'cambio' && m !== 'rentabilidad';
+  const series = new Map(
+    entidades.map((e) => {
+      const crudos = e.anual.map((a) => [a.anio, valorAnual(a, m)] as const);
+      if (!enCambio) return [e.codigo, new Map(crudos)];
+      const base = crudos.find(([, v]) => v !== null)?.[1] ?? null;
+      return [
+        e.codigo,
+        new Map(
+          crudos.map(([anio, v]) => [
+            anio,
+            v === null || base === null || Math.abs(base) < 1e-9
+              ? null
+              : (v - base) / Math.abs(base),
+          ]),
+        ),
+      ];
+    }),
+  );
+  const texto = (v: number) =>
+    enCambio
+      ? `${v > 0.0005 ? '+' : v < -0.0005 ? '−' : ''}${porcentaje(Math.abs(v), 0)}`
+      : textoMetrica(v, m);
+  const valores = [...series.values()].flatMap((s) =>
+    [...s.values()].filter((v): v is number => v !== null),
   );
   if (!anios.length || !valores.length) return null;
 
@@ -94,11 +126,11 @@ export function armarGrafica(
 
   const marcas = Array.from({ length: 5 }, (_, i) => {
     const v = max - ((max - min) * i) / 4;
-    return { y: y(v), texto: textoMetrica(v, m) };
+    return { y: y(v), texto: texto(v) };
   });
 
   const lineas: Linea[] = entidades.map((e) => {
-    const porAnio = new Map(e.anual.map((a) => [a.anio, valorAnual(a, m)]));
+    const porAnio = series.get(e.codigo)!;
     const puntos: PuntoLinea[] = [];
     let d = '';
     let seguido = false;
@@ -113,7 +145,7 @@ export function armarGrafica(
         valor: v,
         x: x(anio),
         y: y(v),
-        texto: textoMetrica(v, m),
+        texto: texto(v),
       };
       puntos.push(p);
       d += `${seguido ? 'L' : 'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)} `;
@@ -135,7 +167,7 @@ export function armarGrafica(
     derecha: ANCHO - MARGEN.derecha,
     anios: anios.map((anio) => ({ anio, x: x(anio) })),
     marcas,
-    cero: min < 0 ? y(0) : null,
+    cero: min < 0 || enCambio ? y(0) : null,
     lineas,
   };
 }

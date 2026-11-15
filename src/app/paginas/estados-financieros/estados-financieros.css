@@ -657,3 +657,9 @@ ol {
   accent-color: var(--cm-marca-700);
   flex: none;
 }
+
+.metricas.escala button[aria-pressed="true"] {
+  background: var(--cm-marca-100);
+  border-color: var(--cm-marca-600);
+  color: var(--cm-enlace);
+}
