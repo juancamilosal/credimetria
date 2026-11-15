@@ -1,19 +1,8 @@
-import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import {
-  Component,
-  computed,
-  inject,
-  InjectionToken,
-  PLATFORM_ID,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  DatosFinancieros,
-  EntidadFinanciera,
-} from '../../core/modelos/financiero';
+import { EntidadFinanciera } from '../../core/modelos/financiero';
+import { FinancierosService } from '../../core/servicios/financieros.service';
 import {
   analisisAutomatico,
   cambio,
@@ -23,11 +12,6 @@ import {
   pesosGrandes,
   porcentaje,
 } from '../../core/utilidades/financieros';
-
-/** Datos fijos en lugar de /api/financieros (para las pruebas). */
-export const FINANCIEROS_INICIALES = new InjectionToken<DatosFinancieros>(
-  'FINANCIEROS_INICIALES',
-);
 
 export interface Barra {
   etiqueta: string;
@@ -51,17 +35,12 @@ export interface Barra {
   styleUrl: './estados-financieros.css',
 })
 export class EstadosFinancieros {
-  private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  private readonly iniciales = inject(FINANCIEROS_INICIALES, {
-    optional: true,
-  });
+  private readonly servicio = inject(FinancierosService);
 
-  protected readonly datos = signal<DatosFinancieros | null>(
-    this.iniciales ?? null,
-  );
-  protected readonly cargando = signal(!this.iniciales);
-  protected readonly sinConexion = signal(false);
+  protected readonly datos = this.servicio.datos;
+  protected readonly cargando = this.servicio.cargando;
+  protected readonly sinConexion = this.servicio.sinConexion;
   private readonly elegido = signal<string | null>(null);
 
   protected readonly pesos = pesosGrandes;
@@ -133,18 +112,7 @@ export class EstadosFinancieros {
       .subscribe((p) => this.elegido.set(p.get('entidad')));
     // Las cifras se piden desde el navegador: la página no se indexa
     // mientras está en desarrollo y así el servidor no espera al CUIF.
-    if (!this.iniciales && isPlatformBrowser(inject(PLATFORM_ID))) {
-      this.http.get<DatosFinancieros>('/api/financieros').subscribe({
-        next: (d) => {
-          this.datos.set(d);
-          this.cargando.set(false);
-        },
-        error: () => {
-          this.sinConexion.set(true);
-          this.cargando.set(false);
-        },
-      });
-    }
+    this.servicio.cargar();
   }
 
   protected elegir(codigo: string): void {

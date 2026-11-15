@@ -29,6 +29,7 @@ import { Producto } from '../../core/modelos/tasa';
 import { AnaliticaService } from '../../core/servicios/analitica.service';
 import { TasasService } from '../../core/servicios/tasas.service';
 import { EsqueletoImagen } from '../../compartido/esqueleto-imagen/esqueleto-imagen';
+import { GananciasBancos } from '../../compartido/ganancias-bancos/ganancias-bancos';
 
 /** Cada cuánto pasa al siguiente producto "Las 3 tasas más bajas". */
 export const ROTAR_CADA_MS = 7_000;
@@ -48,6 +49,7 @@ export const ROTAR_CADA_MS = 7_000;
     PesosPipe,
     TasaPipe,
     EsqueletoImagen,
+    GananciasBancos,
   ],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css',

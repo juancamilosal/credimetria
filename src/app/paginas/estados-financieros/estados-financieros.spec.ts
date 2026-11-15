@@ -4,10 +4,8 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { entidadDePrueba } from '../../core/datos/financieros-prueba';
 import { DatosFinancieros } from '../../core/modelos/financiero';
-import {
-  EstadosFinancieros,
-  FINANCIEROS_INICIALES,
-} from './estados-financieros';
+import { FINANCIEROS_INICIALES } from '../../core/servicios/financieros.service';
+import { EstadosFinancieros } from './estados-financieros';
 
 const MM = 1e9;
 

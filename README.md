@@ -600,6 +600,15 @@ aliado te ayuda a conseguir la mejor." Y "Así funciona Credimetría" (3
 pasos: compara las tasas, calcula tu cuota, pide asesoría gratis, cada uno
 con su enlace) pasó de abajo a justo después de "Las 3 tasas más bajas".
 
+**"¿Cuánto ganan los bancos?" en el inicio** (15 nov 2026, en desarrollo:
+solo en `develop`): después de "Así funciona", los 3 bancos que más ganaron
+en lo que va del año según el CUIF (sin financieras ni cooperativas), con
+logo, nombre, utilidad, cambio frente al año pasado y rentabilidad. Cada
+tarjeta abre `/estados-financieros?entidad=<código>` y "Ver todos los
+bancos" la página. Componente `compartido/ganancias-bancos`; las cifras
+llegan por `FinancierosService` (una sola vez, desde el navegador, la misma
+que usa `/estados-financieros`). Si no llegan, la sección no aparece.
+
 **Sección para reportados en el inicio** (13 nov 2026): después de "¿Te
 ofrecieron un crédito?", una tarjeta con la foto
 `hombre-reportado-facturas` (original en `src/assets/`, 640 y 1280 px en

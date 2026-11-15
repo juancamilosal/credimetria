@@ -1,0 +1,59 @@
+@if (top().length) {
+  <section class="seccion" aria-labelledby="tituloGanancias">
+    <div class="titulo-sec">
+      <div>
+        <h2 id="tituloGanancias">¿Cuánto ganan los bancos?</h2>
+        <p class="muted sub">
+          Los que más ganaron de {{ periodo() }}, según la Superintendencia
+          Financiera.
+        </p>
+      </div>
+      <a routerLink="/estados-financieros">Ver todos los bancos →</a>
+    </div>
+    <ol class="lista">
+      @for (e of top(); track e.codigo; let i = $index) {
+        <li>
+          <a
+            class="tarjeta banco"
+            routerLink="/estados-financieros"
+            [queryParams]="{ entidad: e.codigo }"
+          >
+            <span class="arriba">
+              <span class="pos">#{{ i + 1 }}</span>
+              @if (e.logo) {
+                <img
+                  class="logo"
+                  [src]="e.logo"
+                  alt=""
+                  width="110"
+                  height="36"
+                />
+              }
+            </span>
+            <b class="nombre">{{ e.nombre }}</b>
+            <span class="etiqueta">Ganó</span>
+            <span class="cifra">{{ pesos(e.actual.utilidad) }}</span>
+            <span class="pie">
+              @if (e.actual.variacionUtilidad !== null) {
+                <span
+                  class="cambio"
+                  [class.sube]="e.actual.variacionUtilidad >= 0"
+                  [class.baja]="e.actual.variacionUtilidad < 0"
+                  >{{ e.actual.variacionUtilidad >= 0 ? "▲" : "▼" }}
+                  {{ cambio(e.actual.variacionUtilidad, true) }} vs. el año
+                  pasado</span
+                >
+              }
+              @if (e.actual.rentabilidad !== null) {
+                <span class="muted"
+                  >Rentabilidad {{ porcentaje(e.actual.rentabilidad) }} al
+                  año</span
+                >
+              }
+            </span>
+          </a>
+        </li>
+      }
+    </ol>
+  </section>
+}
