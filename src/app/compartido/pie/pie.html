@@ -7,7 +7,9 @@
     <nav aria-label="Legal">
       <a routerLink="/politica-de-datos">Política de tratamiento de datos</a>
       <a routerLink="/aliados">Asesores aliados</a>
-      <a routerLink="/ranking">Fuente: Superintendencia Financiera</a>
+      <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
+        >Fuente: Superintendencia Financiera ↗</a
+      >
     </nav>
   </div>
   <p class="wrap aviso">

@@ -664,6 +664,10 @@ también la tasa publicada, y en vehículo nadie la llevaba porque el #1,
 Bancolombia, no publica la de vehículo (su fuente y la de Caja Social están
 en `solo_promedio`: no publican esa tasa).
 
+**Pie de página:** "Fuente: Superintendencia Financiera ↗" abre en otra
+pestaña los datos de la Superfinanciera en datos.gov.co (`FUENTE_PROMEDIO`);
+antes llevaba al ranking y, estando en el ranking, solo subía la página.
+
 **Aviso de independencia** (`core/datos/avisos.ts`): debajo del muro
 "Comparamos tasas de" y en el pie de todas las páginas, "Las marcas y logos
 pertenecen a sus dueños. Credimetría es independiente y no tiene relación
