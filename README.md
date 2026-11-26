@@ -590,6 +590,8 @@ trae las etiquetas `og:` (al compartir el enlace) y un JSON-LD con
 `public/sitemap.xml` (las 10 páginas públicas, con `/estados-financieros`). Si se agrega una página,
 agregarla al sitemap.
 
+**Una página por tipo de crédito** (26 nov 2026): `/tasas/<slug>` (`core/datos/paginas-tasas.ts`, página `paginas/tasas-producto`): crédito de libre inversión, libranza, vehículo, hipotecario VIS y No VIS y leasing habitacional VIS y No VIS. Cada una trae la tabla del ranking de ese producto, un resumen del corte (la que menos cobra, el promedio, la diferencia de cuota y la usura en consumo), "Lo que debes saber", preguntas frecuentes (también como JSON-LD `FAQPage`, id `ld-preguntas`) y enlaces a las otras. Están en el sitemap; `/tasas` lleva al ranking, y el ranking enlaza la página del producto elegido.
+
 **Títulos para buscadores** (26 nov 2026): cada `title` de `app.routes.ts`
 lleva lo que la gente busca en Google (p. ej. "Tasas de interés de crédito por
 banco en Colombia", "Créditos para reportados en Colombia: quién presta") y

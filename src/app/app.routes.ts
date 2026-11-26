@@ -1,6 +1,7 @@
 import { soloAdmin } from './core/guardas/solo-admin';
 import { inject } from '@angular/core';
 import { Router, Routes } from '@angular/router';
+import { PAGINAS_TASAS } from './core/datos/paginas-tasas';
 import {
   ASESORES,
   PROSPECTOS,
@@ -42,6 +43,17 @@ export const routes: Routes = [
         (m) => m.SimuladorPagina,
       ),
   },
+  // Una página por tipo de crédito, para Google (26 nov 2026).
+  ...PAGINAS_TASAS.map((p) => ({
+    path: `tasas/${p.slug}`,
+    title: p.titulo,
+    data: { descripcion: p.descripcion, producto: p.producto },
+    loadComponent: () =>
+      import('./paginas/tasas-producto/tasas-producto').then(
+        (m) => m.TasasProducto,
+      ),
+  })),
+  { path: 'tasas', redirectTo: 'ranking' },
   // Compara tu oferta quedó dentro del simulador (12 nov 2026).
   {
     path: 'compara-tu-oferta',

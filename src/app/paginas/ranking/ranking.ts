@@ -1,3 +1,4 @@
+import { paginaDe } from '../../core/datos/paginas-tasas';
 import { QUIERO_ESTA_CONTACTA } from '../../core/datos/avisos';
 import { DatePipe, isPlatformBrowser, Location } from '@angular/common';
 import {
@@ -8,7 +9,7 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { EntradaMoneda } from '../../compartido/entrada-moneda/entrada-moneda';
 import { formatoPesos, PesosPipe } from '../../compartido/pipes/formato';
 import {
@@ -77,7 +78,7 @@ const COLUMNAS: ColumnaRanking[] = [
  */
 @Component({
   selector: 'app-ranking',
-  imports: [DatePipe, EntradaMoneda, PesosPipe, TablaRanking],
+  imports: [DatePipe, EntradaMoneda, PesosPipe, TablaRanking, RouterLink],
   templateUrl: './ranking.html',
   styleUrl: './ranking.css',
 })
@@ -97,6 +98,8 @@ export class Ranking {
   protected readonly textoPlazo = textoPlazo;
   protected readonly ordenes = ORDENES;
   protected readonly fuente = FUENTE_PROMEDIO;
+  /** La página propia del producto elegido (/tasas/<slug>). */
+  protected readonly pagina = computed(() => paginaDe(this.producto()));
   protected readonly contacta = QUIERO_ESTA_CONTACTA;
 
   protected readonly producto = signal<Producto>('libre-inversion');

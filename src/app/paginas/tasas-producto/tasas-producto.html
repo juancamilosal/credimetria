@@ -1,0 +1,127 @@
+<section class="cabecera">
+  <div class="wrap cabecera-texto">
+    <nav class="migas" aria-label="Ruta">
+      <a routerLink="/ranking">Ranking de tasas</a>
+      <span aria-hidden="true">›</span>
+      <span>{{ pagina().nombre }}</span>
+    </nav>
+    <h1>Tasas de {{ pagina().nombre }} en Colombia</h1>
+    <p>{{ pagina().intro }}</p>
+  </div>
+</section>
+
+<div class="wrap contenido">
+  @if (resumen(); as r) {
+    <section class="resumen" aria-label="Resumen del corte">
+      <div class="tarjeta dato primero">
+        <span class="etiqueta">Cobra menos en promedio</span>
+        <b class="cifra">{{ r.mejor.tasaReal | tasa }}</b>
+        <span class="muted">{{ r.mejor.entidad }}</span>
+      </div>
+      <div class="tarjeta dato">
+        <span class="etiqueta">Promedio de {{ r.cantidad }} entidades</span>
+        <b class="cifra">{{ r.promedio | tasa }}</b>
+        <span class="muted"
+          >De {{ r.mejor.tasaReal | tasa }} a {{ r.peor.tasaReal | tasa }}</span
+        >
+      </div>
+      <div class="tarjeta dato">
+        <span class="etiqueta">Diferencia en la cuota</span>
+        <b class="cifra">{{ r.diferenciaMes | pesos }}</b>
+        <span class="muted"
+          >al mes entre la primera y la última, con {{ monto() | pesos }} a
+          {{ plazo() }} meses</span
+        >
+      </div>
+      @if (pagina().consumo) {
+        <div class="tarjeta dato">
+          <span class="etiqueta">Máximo legal (usura)</span>
+          <b class="cifra">{{ usura().tasa | tasa }}</b>
+          <span class="muted">{{ usura().mes }}</span>
+        </div>
+      }
+    </section>
+  }
+
+  <p class="nota ayuda">
+    Cuota con {{ monto() | pesos }} a {{ plazo() }} meses, sin seguros ·
+    Promedio de la
+    <a [href]="fuente.url" target="_blank" rel="noopener noreferrer"
+      >{{ fuente.texto }} ↗</a
+    >
+    · corte {{ corte() }} ·
+    <a routerLink="/ranking" [queryParams]="{ producto: producto() }"
+      >Cambia el monto y el plazo →</a
+    >
+  </p>
+
+  <app-tabla-ranking
+    [filas]="filas()"
+    [producto]="producto()"
+    [completa]="true"
+    [monto]="monto()"
+    [plazo]="plazo()"
+    [cargando]="cargando()"
+  />
+  @if (!filas().length && !sinConexion() && !cargando()) {
+    <p class="nota">
+      Todavía no tenemos tasas de este producto. Pronto las agregamos.
+    </p>
+  }
+
+  <section class="bloque" aria-labelledby="t-saber">
+    <h2 id="t-saber">Lo que debes saber</h2>
+    <ul class="claves">
+      @for (c of pagina().claves; track c) {
+        <li>{{ c }}</li>
+      }
+    </ul>
+  </section>
+
+  <section class="bloque acciones tarjeta">
+    <div>
+      <h2>¿Ya te ofrecieron una tasa?</h2>
+      <p class="muted">
+        Mira si es buena y cuánto pagarías en total, o pide ayuda a un asesor
+        aliado verificado. Es gratis.
+      </p>
+    </div>
+    <div class="botones">
+      <a
+        class="btn btn-principal"
+        routerLink="/simulador"
+        [queryParams]="{ modo: 'oferta' }"
+        >Revisa tu oferta</a
+      >
+      <a class="btn btn-borde" routerLink="/asesoria">Asesoría gratis</a>
+    </div>
+  </section>
+
+  <section class="bloque" aria-labelledby="t-preguntas">
+    <h2 id="t-preguntas">Preguntas frecuentes</h2>
+    @for (q of preguntas(); track q.pregunta) {
+      <details class="pregunta">
+        <summary>{{ q.pregunta }}</summary>
+        <p>{{ q.respuesta }}</p>
+      </details>
+    }
+    @if (producto() === "libranza") {
+      <p class="nota">
+        <a routerLink="/creditos-para-reportados"
+          >Entidades que prestan a reportados →</a
+        >
+      </p>
+    }
+  </section>
+
+  <section class="bloque" aria-labelledby="t-otras">
+    <h2 id="t-otras">Tasas de otros créditos</h2>
+    <ul class="otras">
+      @for (o of otras(); track o.slug) {
+        <li>
+          <a [routerLink]="['/tasas', o.slug]">Tasas de {{ o.nombre }}</a>
+        </li>
+      }
+    </ul>
+  </section>
+</div>

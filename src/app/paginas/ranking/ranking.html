@@ -140,6 +140,14 @@
     }
   </p>
 
+  @if (pagina(); as p) {
+    <p class="nota">
+      <a [routerLink]="['/tasas', p.slug]"
+        >Todo sobre las tasas de {{ p.nombre }} →</a
+      >
+    </p>
+  }
+
   <app-tabla-ranking
     [filas]="filas()"
     [producto]="producto()"

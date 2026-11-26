@@ -1,0 +1,103 @@
+.contenido {
+  padding-top: 32px;
+}
+
+.migas {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  opacity: 0.85;
+}
+
+.migas a {
+  color: inherit;
+}
+
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dato .etiqueta {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cm-gris);
+}
+
+.dato .cifra {
+  font-family: var(--cm-f-cifra);
+  font-size: 26px;
+}
+
+.dato.primero .cifra {
+  color: var(--cm-ahorro-700);
+}
+
+.ayuda {
+  margin-bottom: 12px;
+}
+
+.bloque {
+  margin-top: 40px;
+}
+
+.bloque h2 {
+  margin-bottom: 12px;
+}
+
+.claves {
+  display: grid;
+  gap: 8px;
+  padding-left: 20px;
+  max-width: 760px;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.acciones h2 {
+  margin-bottom: 4px;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pregunta {
+  border-bottom: 1px solid var(--cm-linea);
+  padding: 14px 0;
+  max-width: 760px;
+}
+
+.pregunta summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.pregunta p {
+  margin-top: 8px;
+}
+
+.otras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 0;
+  list-style: none;
+}
