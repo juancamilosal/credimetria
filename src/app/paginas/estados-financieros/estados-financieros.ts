@@ -221,9 +221,8 @@ export class EstadosFinancieros {
     inject(ActivatedRoute)
       .queryParamMap.pipe(takeUntilDestroyed())
       .subscribe((p) => this.elegido.set(p.get('entidad')));
-    // Las cifras se piden desde el navegador: la página no se indexa
-    // mientras está en desarrollo y así el servidor no espera al CUIF.
-    this.servicio.cargar();
+    // Las cifras llegan con la página armada en el servidor, para Google.
+    this.servicio.cargar(true);
     if (isPlatformBrowser(inject(PLATFORM_ID))) {
       const medir = () => this.angosta.set(window.innerWidth < 640);
       medir();
