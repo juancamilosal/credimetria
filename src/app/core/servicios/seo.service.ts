@@ -13,7 +13,7 @@ export const SITIO = 'https://credimetria.com';
 /** Imagen para compartir el enlace (1200 × 630). */
 export const IMAGEN_COMPARTIR = `${SITIO}/compartir.png`;
 const DESCRIPCION_INICIO =
-  'Compara con datos, no con promesas: mira la tasa que anuncian y la que de verdad cobran bancos, cooperativas y financieras en Colombia, y recibe asesoría gratis.';
+  'Compara las tasas de crédito de bancos, cooperativas y financieras en Colombia: la que anuncian y la que de verdad cobran según la Superfinanciera. Asesoría gratis.';
 
 /** Lo que cada ruta declara en `data` para buscadores y redes. */
 export interface DatosSeo {

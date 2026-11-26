@@ -11,27 +11,28 @@ import {
 export const routes: Routes = [
   {
     path: '',
-    title: 'Credimetría · Compara con datos, no con promesas',
+    title: 'Compara tasas de crédito en Colombia · Credimetría',
     data: {
       descripcion:
-        'Compara con datos, no con promesas: mira la tasa que anuncian y la que de verdad cobran bancos, cooperativas y financieras en Colombia, y recibe asesoría gratis.',
+        'Compara las tasas de crédito de bancos, cooperativas y financieras en Colombia: la que anuncian y la que de verdad cobran según la Superfinanciera. Asesoría gratis.',
     },
     loadComponent: () =>
       import('./paginas/inicio/inicio').then((m) => m.Inicio),
   },
   {
     path: 'ranking',
-    title: 'Ranking de tasas · Credimetría',
+    title: 'Tasas de interés de crédito por banco en Colombia · Credimetría',
     data: {
       descripcion:
-        'Ranking de tasas de crédito en Colombia: libre inversión, libranza, vehículo y vivienda. La tasa que anuncia cada banco frente a la que de verdad cobra según la Superfinanciera.',
+        'Tasas de interés de crédito en Colombia, banco por banco: libre inversión, libranza, vehículo, vivienda VIS y no VIS y leasing. Lo que anuncia cada banco y lo que de verdad cobra.',
     },
     loadComponent: () =>
       import('./paginas/ranking/ranking').then((m) => m.Ranking),
   },
   {
     path: 'simulador',
-    title: 'Simulador de crédito · Credimetría',
+    title:
+      'Simulador de crédito: calcula tu cuota y la tasa real · Credimetría',
     data: {
       descripcion:
         '¿Te ofrecieron un crédito? Mira la tasa real y los costos escondidos. O calcula tu cuota, la tabla de pagos y compara entidades con lo que de verdad cobran.',
@@ -53,7 +54,7 @@ export const routes: Routes = [
   { path: 'si-tienes-reportes', redirectTo: 'creditos-para-reportados' },
   {
     path: 'creditos-para-reportados',
-    title: 'Créditos para reportados · Credimetría',
+    title: 'Créditos para reportados en Colombia: quién presta · Credimetría',
     data: {
       descripcion:
         'Créditos para reportados en centrales de riesgo: entidades que prestan a personas reportadas, con su registro oficial verificado: vigiladas por la Superfinanciera y operadoras de libranza inscritas en el RUNEOL.',
@@ -61,12 +62,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./paginas/reportados/reportados').then((m) => m.Reportados),
   },
-  // En desarrollo (15 nov 2026): fuera del menú y del sitemap, sin indexar.
+  // Abierta a Google el 26 nov 2026 (en el sitemap; enlazada desde el inicio).
   {
     path: 'estados-financieros',
-    title: 'Estados financieros de bancos y financieras · Credimetría',
+    title: '¿Cuánto ganan los bancos en Colombia? · Credimetría',
     data: {
-      noIndexar: true,
       descripcion:
         'Cuánto ganan los bancos, financieras y cooperativas en Colombia: utilidades de cada entidad por año y en lo que va del año, según la Superintendencia Financiera.',
     },
@@ -77,7 +77,7 @@ export const routes: Routes = [
   },
   {
     path: 'asesoria',
-    title: 'Asesoría gratis · Credimetría',
+    title: 'Asesoría de crédito gratis en Colombia · Credimetría',
     data: {
       descripcion:
         'Pide asesoría gratis: un asesor de crédito aliado y verificado te ayuda a conseguir la mejor tasa. Sin cobros por adelantado.',
@@ -87,7 +87,7 @@ export const routes: Routes = [
   },
   {
     path: 'aliados',
-    title: 'Asesores aliados · Credimetría',
+    title: 'Asesores de crédito verificados · Credimetría',
     data: {
       descripcion:
         'Conoce a los asesores de crédito aliados de Credimetría: verificados, con las entidades, productos y ciudades en que trabajan, y sus reglas.',
